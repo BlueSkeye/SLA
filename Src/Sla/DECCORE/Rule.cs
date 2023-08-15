@@ -188,9 +188,9 @@ namespace Sla.DECCORE
         /// is returned.
         /// \param op is the given PcodeOp where the Rule may apply
         /// \param data is the function to which to apply
-        public virtual int applyOp(PcodeOp op, Funcdata data)
+        public virtual bool applyOp(PcodeOp op, Funcdata data)
         {
-            return 0;
+            return false;
         }
 
         /// Reset \b this Rule

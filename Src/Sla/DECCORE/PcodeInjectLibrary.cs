@@ -123,7 +123,7 @@ namespace Sla.DECCORE
         /// symbol tables or do anything else it needs to once the InjectPayload object
         /// has been fully initialized.
         /// \param injectid is the id of the InjectPayload to finalize
-        protected abstract void registerInject(int injectid)=0;
+        protected abstract void registerInject(int injectid);
 
         public PcodeInjectLibrary(Architecture g, uint tmpbase)
         {

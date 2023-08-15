@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +16,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleBoolZext(getGroup());
@@ -32,14 +32,14 @@ namespace Sla.DECCORE
         ///   - `(zext(V) * -1) | (zext(W) * -1)  =>  zext(V || W) * -1`
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_INT_ZEXT);
+            oplist.Add(OpCode.CPUI_INT_ZEXT);
         }
 
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* boolVn1,*boolVn2;
-            PcodeOp* multop1,*actionop;
-            PcodeOp* zextop2,*multop2;
+            Varnode boolVn1,boolVn2;
+            PcodeOp multop1, actionop;
+            PcodeOp zextop2, multop2;
             ulong coeff, val;
             OpCode opc;
             int size;
@@ -65,8 +65,8 @@ namespace Sla.DECCORE
                     if (!actionop.getIn(1).isConstant()) return 0;
                     if (actionop.getIn(1).getOffset() == 1)
                     {
-                        Varnode* vn;
-                        PcodeOp* newop = data.newOp(1, op.getAddr());
+                        Varnode vn;
+                        PcodeOp newop = data.newOp(1, op.getAddr());
                         data.opSetOpcode(newop, OpCode.CPUI_BOOL_NEGATE);  // Negate the boolean
                         vn = data.newUniqueOut(1, newop);
                         data.opSetInput(newop, boolVn1, 0);
@@ -129,15 +129,15 @@ namespace Sla.DECCORE
 
             // Do the boolean calculation on unextended boolean values
             // and then extend the result
-            PcodeOp* newop = data.newOp(2, actionop.getAddr());
-            Varnode* newres = data.newUniqueOut(1, newop);
+            PcodeOp newop = data.newOp(2, actionop.getAddr());
+            Varnode newres = data.newUniqueOut(1, newop);
             data.opSetOpcode(newop, opc);
             data.opSetInput(newop, boolVn1, 0);
             data.opSetInput(newop, boolVn2, 1);
             data.opInsertBefore(newop, actionop);
 
-            PcodeOp* newzext = data.newOp(1, actionop.getAddr());
-            Varnode* newzout = data.newUniqueOut(size, newzext);
+            PcodeOp newzext = data.newOp(1, actionop.getAddr());
+            Varnode newzout = data.newUniqueOut(size, newzext);
             data.opSetOpcode(newzext, OpCode.CPUI_INT_ZEXT);
             data.opSetInput(newzext, newres, 0);
             data.opInsertBefore(newzext, actionop);

@@ -16,7 +16,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new Rule2Comp2Mult(getGroup());
@@ -29,7 +29,7 @@ namespace Sla.DECCORE
             oplist.Add(CPUI_INT_2COMP);
         }
 
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
             data.opSetOpcode(op, OpCode.CPUI_INT_MULT);
             int size = op.getIn(0).getSize();

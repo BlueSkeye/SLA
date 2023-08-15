@@ -13,7 +13,7 @@ namespace Sla.EXTRA
         /// \brief Execute a specified range of the test script: `execute test command <#>-<#>
         public override void execute(TextReader s)
         {
-            if (dcp.testCollection == (FunctionTestCollection*)0)
+            if (dcp.testCollection == (FunctionTestCollection)null)
                 throw new IfaceExecutionError("No test file is loaded");
             int first = -1;
             int last = -1;

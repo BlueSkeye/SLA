@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -20,13 +20,12 @@ namespace Sla.DECCORE
         /// \return \b true if the indicated slot holds the preferred pointer
         private static bool verifyPreferredPointer(PcodeOp op, int slot)
         {
-            Varnode* vn = op.getIn(slot);
+            Varnode vn = op.getIn(slot);
             if (!vn.isWritten()) return true;
-            PcodeOp* preOp = vn.getDef();
+            PcodeOp preOp = vn.getDef() ?? throw new BugException();
             if (preOp.code() != OpCode.CPUI_INT_ADD) return true;
             int preslot = 0;
-            if (preOp.getIn(preslot).getTypeReadFacing(preOp).getMetatype() != type_metatype.TYPE_PTR)
-            {
+            if (preOp.getIn(preslot).getTypeReadFacing(preOp).getMetatype() != type_metatype.TYPE_PTR) {
                 preslot = 1;
                 if (preOp.getIn(preslot).getTypeReadFacing(preOp).getMetatype() != type_metatype.TYPE_PTR)
                     return true;
@@ -39,7 +38,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RulePtrArith(getGroup());
@@ -66,18 +65,18 @@ namespace Sla.DECCORE
         /// so we need to convert between space units and bytes.
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_INT_ADD);
+            oplist.Add(OpCode.CPUI_INT_ADD);
         }
 
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
             int slot;
-            Datatype ct = (Datatype)null; // Unnecessary initialization
+            Datatype? ct = (Datatype)null; // Unnecessary initialization
 
             if (!data.hasTypeRecoveryStarted()) return 0;
 
-            for (slot = 0; slot < op.numInput(); ++slot)
-            { // Search for pointer type
+            for (slot = 0; slot < op.numInput(); ++slot) {
+                // Search for pointer type
                 ct = op.getIn(slot).getTypeReadFacing(op);
                 if (ct.getMetatype() == type_metatype.TYPE_PTR) break;
             }
@@ -85,10 +84,9 @@ namespace Sla.DECCORE
             if (evaluatePointerExpression(op, slot) != 2) return 0;
             if (!verifyPreferredPointer(op, slot)) return 0;
 
-            AddTreeState state(data, op, slot);
+            AddTreeState state = new AddTreeState(data, op, slot);
             if (state.apply()) return 1;
-            if (state.initAlternateForm())
-            {
+            if (state.initAlternateForm()) {
                 if (state.apply()) return 1;
             }
             return 0;
@@ -110,42 +108,39 @@ namespace Sla.DECCORE
         {
             int res = 1;       // Assume we are going to push
             int count = 0; // Count descendants
-            Varnode* ptrBase = op.getIn(slot);
+            Varnode ptrBase = op.getIn(slot);
             if (ptrBase.isFree() && !ptrBase.isConstant())
                 return 0;
             if (op.getIn(1 - slot).getTypeReadFacing(op).getMetatype() == type_metatype.TYPE_PTR)
                 res = 2;
-            Varnode* outVn = op.getOut();
-            list<PcodeOp*>::const_iterator iter;
-            for (iter = outVn.beginDescend(); iter != outVn.endDescend(); ++iter)
-            {
-                PcodeOp* decOp = *iter;
+            Varnode outVn = op.getOut();
+            IEnumerator<PcodeOp> iter = outVn.beginDescend();
+            while (iter.MoveNext()) {
+                PcodeOp decOp = iter.Current;
                 count += 1;
                 OpCode opc = decOp.code();
-                if (opc == OpCode.CPUI_INT_ADD)
-                {
-                    Varnode* otherVn = decOp.getIn(1 - decOp.getSlot(outVn));
+                if (opc == OpCode.CPUI_INT_ADD) {
+                    Varnode otherVn = decOp.getIn(1 - decOp.getSlot(outVn));
                     if (otherVn.isFree() && !otherVn.isConstant())
                         return 0;   // No action if the data-flow isn't fully linked
                     if (otherVn.getTypeReadFacing(decOp).getMetatype() == type_metatype.TYPE_PTR)
                         res = 2;    // Do not push in the presence of other pointers
                 }
-                else if ((opc == OpCode.CPUI_LOAD || opc == OpCode.CPUI_STORE) && decOp.getIn(1) == outVn)
-                {   // If use is as pointer for LOAD or STORE
+                else if ((opc == OpCode.CPUI_LOAD || opc == OpCode.CPUI_STORE) && decOp.getIn(1) == outVn) {
+                    // If use is as pointer for LOAD or STORE
                     if (ptrBase.isSpacebase() && (ptrBase.isInput() || (ptrBase.isConstant())) &&
                         (op.getIn(1 - slot).isConstant()))
                         return 0;
                     res = 2;
                 }
-                else
-                {   // Any other op besides ADD, do not push
+                else {
+                    // Any other op besides ADD, do not push
                     res = 2;
                 }
             }
             if (count == 0)
                 return 0;
-            if (count > 1)
-            {
+            if (count > 1) {
                 if (outVn.isSpacebase())
                     return 0;       // For the RESULT to be a spacebase pointer it must have only 1 descendent
                                     //    res = 2;		// Uncommenting this line will not let pointers get pushed to multiple descendants

@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +16,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleLessEqual2Zero(getGroup());
@@ -32,39 +32,33 @@ namespace Sla.DECCORE
         ///  - `V <= ffff` =>  true`
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_INT_LESSEQUAL);
+            oplist.Add(OpCode.CPUI_INT_LESSEQUAL);
         }
 
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* lvn,*rvn;
+            Varnode lvn, rvn;
             lvn = op.getIn(0);
             rvn = op.getIn(1);
 
-            if (lvn.isConstant())
-            {
-                if (lvn.getOffset() == 0)
-                {
+            if (lvn.isConstant()) {
+                if (lvn.getOffset() == 0) {
                     data.opSetOpcode(op, OpCode.CPUI_COPY); // All values => true
                     data.opRemoveInput(op, 1);
                     data.opSetInput(op, data.newConstant(1, 1), 0);
                     return 1;
                 }
-                else if (lvn.getOffset() == Globals.calc_mask(lvn.getSize()))
-                {
+                else if (lvn.getOffset() == Globals.calc_mask((uint)lvn.getSize())) {
                     data.opSetOpcode(op, OpCode.CPUI_INT_EQUAL); // No value is true except -1
                     return 1;
                 }
             }
-            else if (rvn.isConstant())
-            {
-                if (rvn.getOffset() == 0)
-                {
+            else if (rvn.isConstant()) {
+                if (rvn.getOffset() == 0) {
                     data.opSetOpcode(op, OpCode.CPUI_INT_EQUAL); // No value is true except 0
                     return 1;
                 }
-                else if (rvn.getOffset() == Globals.calc_mask(rvn.getSize()))
-                {
+                else if (rvn.getOffset() == Globals.calc_mask((uint)rvn.getSize())) {
                     data.opSetOpcode(op, OpCode.CPUI_COPY); // All values => true
                     data.opRemoveInput(op, 1);
                     data.opSetInput(op, data.newConstant(1, 1), 0);

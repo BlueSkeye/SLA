@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,35 +24,38 @@ namespace Sla.DECCORE
         }
         public virtual void getOpList(List<uint> oplist)
         {
-            oplist.Add(CPUI_PIECE);
+            oplist.Add(OpCode.CPUI_PIECE);
         }
 
-        public virtual int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
-            PcodeOp* loadlo,*loadhi;    // Load from lowest address, highest (NOT significance)
-            AddrSpace* spc;
+            // Load from lowest address, highest (NOT significance)
+            PcodeOp? loadlo;
+            PcodeOp? loadhi;
+            AddrSpace spc;
             int size;
 
-            Varnode* piece0 = op.getIn(0);
-            Varnode* piece1 = op.getIn(1);
+            Varnode piece0 = op.getIn(0);
+            Varnode piece1 = op.getIn(1);
             if (!piece0.isWritten()) return 0;
             if (!piece1.isWritten()) return 0;
-            if (piece0.getDef().code() != OpCode.CPUI_LOAD) return false;
-            if (piece1.getDef().code() != OpCode.CPUI_LOAD) return false;
-            if (!SplitVarnode::testContiguousPointers(piece0.getDef(), piece1.getDef(), loadlo, loadhi, spc))
+            if (piece0.getDef().code() != OpCode.CPUI_LOAD) return 0;
+            if (piece1.getDef().code() != OpCode.CPUI_LOAD) return 0;
+            if (!SplitVarnode.testContiguousPointers(piece0.getDef(), piece1.getDef(),
+                out loadlo, out loadhi, out spc))
                 return 0;
 
             size = piece0.getSize() + piece1.getSize();
-            PcodeOp* latest = noWriteConflict(loadlo, loadhi, spc, (List<PcodeOp*>*)0);
+            PcodeOp latest = noWriteConflict(loadlo, loadhi, spc, (List<PcodeOp>)null);
             if (latest == (PcodeOp)null) return 0; // There was a conflict
 
             // Create new load op that combines the two smaller loads
-            PcodeOp* newload = data.newOp(2, latest.getAddr());
-            Varnode* vnout = data.newUniqueOut(size, newload);
-            Varnode* spcvn = data.newVarnodeSpace(spc);
+            PcodeOp newload = data.newOp(2, latest.getAddr());
+            Varnode vnout = data.newUniqueOut(size, newload);
+            Varnode spcvn = data.newVarnodeSpace(spc);
             data.opSetOpcode(newload, OpCode.CPUI_LOAD);
             data.opSetInput(newload, spcvn, 0);
-            Varnode* addrvn = loadlo.getIn(1);
+            Varnode addrvn = loadlo.getIn(1);
             if (addrvn.isConstant())
                 addrvn = data.newConstant(addrvn.getSize(), addrvn.getOffset());
             data.opSetInput(newload, addrvn, 1);
@@ -81,55 +84,49 @@ namespace Sla.DECCORE
         /// \param op2 is the other given LOAD or STORE
         /// \param spc is the address space referred to by the LOAD/STOREs
         /// \param indirects if non-null is used to collect INDIRECTs caused by STOREs
-        public static PcodeOp noWriteConflict(PcodeOp op1, PcodeOp op2, AddrSpace spc,
+        public static PcodeOp? noWriteConflict(PcodeOp op1, PcodeOp op2, AddrSpace spc,
             List<PcodeOp> indirects)
         {
             BlockBasic bb = op1.getParent();
 
             // Force the two ops to be in the same basic block
             if (bb != op2.getParent()) return (PcodeOp)null;
-            if (op2.getSeqNum().getOrder() < op1.getSeqNum().getOrder())
-            {
-                PcodeOp* tmp = op2;
+            if (op2.getSeqNum().getOrder() < op1.getSeqNum().getOrder()) {
+                PcodeOp tmp = op2;
                 op2 = op1;
                 op1 = tmp;
             }
-            PcodeOp* startop = op1;
-            if (op1.code() == OpCode.CPUI_STORE)
-            {
+            PcodeOp startop = op1;
+            if (op1.code() == OpCode.CPUI_STORE) {
                 // Extend the range of PcodeOps to include any CPUI_INDIRECTs associated with the initial STORE
-                PcodeOp* tmpOp = startop.previousOp();
+                PcodeOp? tmpOp = startop.previousOp();
                 while (tmpOp != (PcodeOp)null && tmpOp.code() == OpCode.CPUI_INDIRECT)
                 {
                     startop = tmpOp;
                     tmpOp = tmpOp.previousOp();
                 }
             }
-            list<PcodeOp*>::iterator iter = startop.getBasicIter();
-            list<PcodeOp*>::iterator enditer = op2.getBasicIter();
+            IEnumerator<PcodeOp> iter = startop.getBasicIter();
+            IEnumerator<PcodeOp> enditer = op2.getBasicIter();
 
-            while (iter != enditer)
-            {
-                PcodeOp* curop = *iter;
-                Varnode* outvn;
-                PcodeOp* affector;
+            while (iter != enditer) {
+                PcodeOp curop = *iter;
+                Varnode outvn;
+                PcodeOp affector;
                 ++iter;
                 if (curop == op1) continue;
-                switch (curop.code())
-                {
+                switch (curop.code()) {
                     case OpCode.CPUI_STORE:
                         if (curop.getIn(0).getSpaceFromConst() == spc)
                             return (PcodeOp)null; // Don't go any further trying to resolve alias
                         break;
                     case OpCode.CPUI_INDIRECT:
                         affector = PcodeOp.getOpFromConst(curop.getIn(1).getAddr());
-                        if (affector == op1 || affector == op2)
-                        {
-                            if (indirects != (List<PcodeOp*>*)0)
+                        if (affector == op1 || affector == op2) {
+                            if (indirects != (List<PcodeOp>)null)
                                 indirects.Add(curop);
                         }
-                        else
-                        {
+                        else {
                             if (curop.getOut().getSpace() == spc)
                                 return (PcodeOp)null;
                         }

@@ -17,7 +17,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleDumptyHump(getGroup());
@@ -35,7 +35,7 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_SUBPIECE);
         }
 
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {               // If we append something to a varnode
                         // And then take a subpiece that cuts off what
                         // we just appended, treat whole thing as COPY

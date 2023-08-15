@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,7 +28,7 @@ namespace Sla.DECCORE
         /// \param subpieceOp is the SUBPIECE PcodeOp producing the Varnode
         private int attemptMarking(Funcdata data, Varnode vn, PcodeOp subpieceOp)
         {
-            Varnode* whole = subpieceOp.getIn(0);
+            Varnode whole = subpieceOp.getIn(0);
             int offset = (int)subpieceOp.getIn(1).getOffset();
             if (offset != vn.getSize()) return 0;
             if (offset * 2 != whole.getSize()) return 0;       // Truncate exactly half
@@ -43,8 +43,7 @@ namespace Sla.DECCORE
             else
             {
                 // Categorize opcodes as "producing a logical whole"
-                switch (whole.getDef().code())
-                {
+                switch (whole.getDef().code()) {
                     case OpCode.CPUI_INT_ADD:
                     // Its hard to tell if the bit operators are really being used to act on the "logical whole"
                     //      case OpCode.CPUI_INT_AND:
@@ -75,15 +74,13 @@ namespace Sla.DECCORE
                         return 0;
                 }
             }
-            Varnode* vnLo = (Varnode)null;
-            list<PcodeOp*>::const_iterator iter;
-            for (iter = whole.beginDescend(); iter != whole.endDescend(); ++iter)
-            {
-                PcodeOp* op = *iter;
+            Varnode? vnLo = (Varnode)null;
+            IEnumerator<PcodeOp> iter = whole.beginDescend();
+            while (iter.MoveNext()) {
+                PcodeOp op = iter.Current;
                 if (op.code() != OpCode.CPUI_SUBPIECE) continue;
                 if (op.getIn(1).getOffset() != 0) continue;
-                if (op.getOut().getSize() == vn.getSize())
-                {
+                if (op.getOut().getSize() == vn.getSize()) {
                     vnLo = op.getOut();
                     break;
                 }
@@ -99,7 +96,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             return (!grouplist.contains(getGroup())) ? null : new RuleDoubleIn(getGroup());
         }
@@ -111,26 +108,25 @@ namespace Sla.DECCORE
 
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_SUBPIECE);
+            oplist.Add(OpCode.CPUI_SUBPIECE);
         }
 
-        public override int applyOp(PcodeOp op, Funcdata data)
-        { // Try to push double precision object "down" one level from input
-            Varnode* outvn = op.getOut();
-            if (!outvn.isPrecisLo())
-            {
+        public override bool applyOp(PcodeOp op, Funcdata data)
+        {
+            // Try to push double precision object "down" one level from input
+            Varnode outvn = op.getOut();
+            if (!outvn.isPrecisLo()) {
                 if (outvn.isPrecisHi()) return 0;
                 return attemptMarking(data, outvn, op);
             }
             if (data.hasUnreachableBlocks()) return 0;
 
-            List<SplitVarnode> splitvec;
-            SplitVarnode::wholeList(op.getIn(0), splitvec);
+            List<SplitVarnode> splitvec = new List<SplitVarnode>();
+            SplitVarnode.wholeList(op.getIn(0), splitvec);
             if (splitvec.empty()) return 0;
-            for (int i = 0; i < splitvec.size(); ++i)
-            {
-                SplitVarnode @in(splitvec[i]);
-                int res = SplitVarnode::applyRuleIn(@in, data);
+            for (int i = 0; i < splitvec.size(); ++i) {
+                SplitVarnode @in = splitvec[i];
+                int res = SplitVarnode.applyRuleIn(@in, data);
                 if (res != 0)
                     return res;
             }

@@ -187,7 +187,7 @@ namespace Sla.EXTRA
             bool sawScript = false;
             bool sawTests = false;
             bool sawProgram = false;
-            foreach(Element subel in ) {
+            foreach(Element subel in el.getChildren()) {
                 if (subel.getName() == "script") {
                     sawScript = true;
                     restoreXmlCommands(subel);
@@ -293,7 +293,7 @@ namespace Sla.EXTRA
 
             s.WriteLine();
             s.WriteLine($"Total tests applied = {totalTestsApplied}");
-            s.WriteLine($"Total passing tests = { totalTestsSucceeded})";
+            s.WriteLine($"Total passing tests = { totalTestsSucceeded})");
             s.WriteLine();
             if (!failures.empty()) {
                 s.WriteLine("Failures: ");

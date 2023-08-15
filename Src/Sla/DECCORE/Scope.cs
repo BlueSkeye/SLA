@@ -645,7 +645,7 @@ namespace Sla.DECCORE
         /// \param cat is the Symbol \e category
         /// \param ind is the index (within the category) of the Symbol
         /// \return the indicated Symbol or NULL if no Symbol with that index exists
-        public abstract Symbol getCategorySymbol(Symbol.SymbolCategory cat, int ind);
+        public abstract Symbol? getCategorySymbol(Symbol.SymbolCategory cat, int ind);
 
         /// \brief Set the \e category and index for the given Symbol
         /// \param sym is the given Symbol

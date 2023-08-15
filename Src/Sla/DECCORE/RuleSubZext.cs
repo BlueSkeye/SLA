@@ -20,7 +20,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleSubZext(getGroup());
@@ -38,7 +38,7 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_INT_ZEXT);
         }
 
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
             Varnode subvn;
             Varnode basevn;

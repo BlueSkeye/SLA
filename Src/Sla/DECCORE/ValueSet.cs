@@ -162,7 +162,7 @@ namespace Sla.DECCORE
             if (insertionIndex >= equationsCount)
                 equations.Add(newEquation);
             else
-                equations.Insert(insertionIndex, newEquation;
+                equations.Insert(insertionIndex, newEquation);
         }
 
         /// Add a widening landmark

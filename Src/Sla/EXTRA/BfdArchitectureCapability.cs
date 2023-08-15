@@ -1,10 +1,5 @@
-﻿using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
+using Sla.DECCORE;
 
 namespace Sla.EXTRA
 {
@@ -20,9 +15,11 @@ namespace Sla.EXTRA
             name = "bfd";
         }
 
-        // private BfdArchitectureCapability(BfdArchitectureCapability op2);   ///< Not implemented
+        /// Not implemented
+        // private BfdArchitectureCapability(BfdArchitectureCapability op2);
 
-        // private static BfdArchitectureCapability operator=(BfdArchitectureCapability op2);	///< Not implemented
+        /// Not implemented
+        // private static BfdArchitectureCapability operator=(BfdArchitectureCapability op2);
 
         ~BfdArchitectureCapability()
         {
@@ -37,15 +34,16 @@ namespace Sla.EXTRA
 
         public override bool isFileMatch(string filename)
         {
-            ifstream s(filename.c_str());
-            if (!s)
-                return false;
+            StreamReader s;
+
+            try { s = new StreamReader(File.OpenRead(filename)); }
+            catch { return false; }
             int val1, val2, val3;
             s >> ws;
             val1 = s.get();
             val2 = s.get();
             val3 = s.get();
-            s.close();
+            s.Close();
             if ((val1 == '<') && (val2 == 'b') && (val3 == 'i'))
                 return false;       // Probably XML, not BFD
             return true;

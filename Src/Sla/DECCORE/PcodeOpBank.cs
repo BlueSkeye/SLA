@@ -314,21 +314,21 @@ namespace Sla.DECCORE
                 IEnumerator<PcodeOp> iter = op.insertiter;
                 ++iter;
                 if (iter != deadlist.end()) {
-                    retop iter.Current;
+                    retop = iter.Current;
                     if (!retop.isInstructionStart()) // If the next in dead list is not marked
                         return retop;       // It is in the same instruction, and is the fallthru
                 }
                 --iter;
                 SeqNum max = op.getSeqNum();
-                while (!(*iter).isInstructionStart()) // Find start of instruction
+                while (!iter.Current.isInstructionStart()) // Find start of instruction
                     --iter;
                 // Find biggest sequence number in this instruction
                 // This is probably -op- itself because it is the
                 // last op in the instruction, but it might not be
                 // because of delay slot reordering
-                while ((iter != deadlist.end()) && (*iter != op)) {
-                    if (max < (*iter).getSeqNum())
-                        max = (*iter).getSeqNum();
+                while ((iter != deadlist.end()) && (iter.Current != op)) {
+                    if (max < iter.Current.getSeqNum())
+                        max = iter.Current.getSeqNum();
                     ++iter;
                 }
                 PcodeOpTree::const_iterator nextiter = optree.upper_bound(max);

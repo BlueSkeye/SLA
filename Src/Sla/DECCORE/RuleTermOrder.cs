@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +16,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleTermOrder(getGroup());
@@ -31,25 +31,24 @@ namespace Sla.DECCORE
         {
             // FIXME:  All the commutative ops
             // Use the TypeOp::commutative function
-            uint list[] ={ OpCode.CPUI_INT_EQUAL, OpCode.CPUI_INT_NOTEQUAL, OpCode.CPUI_INT_ADD, OpCode.CPUI_INT_CARRY,
-         OpCode.CPUI_INT_SCARRY, OpCode.CPUI_INT_XOR, OpCode.CPUI_INT_AND, OpCode.CPUI_INT_OR,
-         OpCode.CPUI_INT_MULT, OpCode.CPUI_BOOL_XOR, OpCode.CPUI_BOOL_AND, OpCode.CPUI_BOOL_OR,
-         OpCode.CPUI_FLOAT_EQUAL, OpCode.CPUI_FLOAT_NOTEQUAL, OpCode.CPUI_FLOAT_ADD,
-         OpCode.CPUI_FLOAT_MULT };
-            oplist.insert(oplist.end(), list, list + 16);
+            OpCode[] list ={ OpCode.CPUI_INT_EQUAL, OpCode.CPUI_INT_NOTEQUAL, OpCode.CPUI_INT_ADD, OpCode.CPUI_INT_CARRY,
+                OpCode.CPUI_INT_SCARRY, OpCode.CPUI_INT_XOR, OpCode.CPUI_INT_AND, OpCode.CPUI_INT_OR,
+                OpCode.CPUI_INT_MULT, OpCode.CPUI_BOOL_XOR, OpCode.CPUI_BOOL_AND, OpCode.CPUI_BOOL_OR,
+                OpCode.CPUI_FLOAT_EQUAL, OpCode.CPUI_FLOAT_NOTEQUAL, OpCode.CPUI_FLOAT_ADD,
+                OpCode.CPUI_FLOAT_MULT };
+            oplist.AddRange(list);
         }
 
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* vn1 = op.getIn(0);
-            Varnode* vn2 = op.getIn(1);
+            Varnode vn1 = op.getIn(0);
+            Varnode vn2 = op.getIn(1);
 
-            if (vn1.isConstant() && (!vn2.isConstant()))
-            {
+            if (vn1.isConstant() && (!vn2.isConstant())) {
                 data.opSwapInput(op, 0, 1); // Reverse the order of the terms
-                return 1;
+                return true;
             }
-            return 0;
+            return false;
         }
     }
 }

@@ -156,10 +156,10 @@ namespace Sla.DECCORE
 
         ~MemoryPageOverlay()
         {
-            Dictionary<ulong, byte*>::iterator iter;
+            //Dictionary<ulong, byte*>::iterator iter;
 
-            for (iter = page.begin(); iter != page.end(); ++iter)
-                delete[](*iter).second;
+            //for (iter = page.begin(); iter != page.end(); ++iter)
+            //    delete[](*iter).second;
         }
     }
 }

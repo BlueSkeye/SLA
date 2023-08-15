@@ -17,7 +17,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleTransformCpool(getGroup());
@@ -33,7 +33,7 @@ namespace Sla.DECCORE
             oplist.Add(CPUI_CPOOLREF);
         }
 
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
             if (op.isCpoolTransformed()) return 0;     // Already visited
             data.opMarkCpoolTransformed(op);    // Mark our visit

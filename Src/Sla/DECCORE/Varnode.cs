@@ -1432,8 +1432,7 @@ namespace Sla.DECCORE
             EquateSymbol? sym = mapEntry.getSymbol() as EquateSymbol;
             if (sym == (EquateSymbol)null)
                 return;
-            if (sym.isValueClose(loc.getOffset(), size))
-            {
+            if (sym.isValueClose(loc.getOffset(), size)) {
                 copySymbol(vn); // Propagate the markup into our new constant
             }
         }

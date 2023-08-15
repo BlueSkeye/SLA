@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +16,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleSub2Add(getGroup());
@@ -26,24 +26,21 @@ namespace Sla.DECCORE
         /// \brief Eliminate INT_SUB:  `V - W  =>  V + W * -1`
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_INT_SUB);
+            oplist.Add(OpCode.CPUI_INT_SUB);
         }
 
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
-            PcodeOp* newop;
-            Varnode* vn,*newvn;
-
-            vn = op.getIn(1);      // Parameter being subtracted
-            newop = data.newOp(2, op.getAddr());
+            Varnode vn = op.getIn(1);      // Parameter being subtracted
+            PcodeOp newop = data.newOp(2, op.getAddr());
             data.opSetOpcode(newop, OpCode.CPUI_INT_MULT);
-            newvn = data.newUniqueOut(vn.getSize(), newop);
+            Varnode newvn = data.newUniqueOut(vn.getSize(), newop);
             data.opSetInput(op, newvn, 1); // Replace vn's reference first
             data.opSetInput(newop, vn, 0);
-            data.opSetInput(newop, data.newConstant(vn.getSize(), Globals.calc_mask(vn.getSize())), 1);
+            data.opSetInput(newop, data.newConstant(vn.getSize(), Globals.calc_mask((uint)vn.getSize())), 1);
             data.opSetOpcode(op, OpCode.CPUI_INT_ADD);
             data.opInsertBefore(newop, op);
-            return 1;
+            return false;
         }
     }
 }

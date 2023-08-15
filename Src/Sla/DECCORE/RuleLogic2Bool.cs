@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +16,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleLogic2Bool(getGroup());
@@ -29,28 +29,25 @@ namespace Sla.DECCORE
         /// INT_AND to BOOL_AND, INT_OR to BOOL_OR etc.
         public override void getOpList(List<OpCode> oplist)
         {
-            uint list[] = { OpCode.CPUI_INT_AND, OpCode.CPUI_INT_OR, OpCode.CPUI_INT_XOR };
-            oplist.insert(oplist.end(), list, list + 3);
+            OpCode[] list = { OpCode.CPUI_INT_AND, OpCode.CPUI_INT_OR, OpCode.CPUI_INT_XOR };
+            oplist.AddRange(list);
         }
 
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* boolVn;
+            Varnode boolVn;
 
             boolVn = op.getIn(0);
             if (!boolVn.isBooleanValue(data.isTypeRecoveryOn())) return 0;
-            Varnode* in1 = op.getIn(1);
-            if (in1.isConstant())
-            {
+            Varnode in1 = op.getIn(1);
+            if (in1.isConstant()) {
                 if (in1.getOffset() > (ulong)1) // If one side is a constant 0 or 1, this is boolean
                     return 0;
             }
-            else if (!in1.isBooleanValue(data.isTypeRecoveryOn()))
-            {
+            else if (!in1.isBooleanValue(data.isTypeRecoveryOn())) {
                 return 0;
             }
-            switch (op.code())
-            {
+            switch (op.code()) {
                 case OpCode.CPUI_INT_AND:
                     data.opSetOpcode(op, OpCode.CPUI_BOOL_AND);
                     break;

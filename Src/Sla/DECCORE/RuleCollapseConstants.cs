@@ -14,7 +14,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleCollapseConstants(getGroup());
@@ -23,7 +23,7 @@ namespace Sla.DECCORE
         // applies to all opcodes
         /// \class RuleCollapseConstants
         /// \brief Collapse constant expressions
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
             int i;
             Varnode* vn;

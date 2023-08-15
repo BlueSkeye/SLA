@@ -24,8 +24,8 @@ namespace Sla.EXTRA
 
         ~ConstraintGroup()
         {
-            for (uint i = 0; i < constraintlist.size(); ++i)
-                delete constraintlist[i];
+            //for (uint i = 0; i < constraintlist.size(); ++i)
+            //    delete constraintlist[i];
             // We do not own the traverselist objects
         }
 

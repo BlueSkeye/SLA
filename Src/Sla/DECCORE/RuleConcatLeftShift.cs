@@ -16,7 +16,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleConcatLeftShift(getGroup());
@@ -29,7 +29,7 @@ namespace Sla.DECCORE
             oplist.Add(CPUI_PIECE);
         }
 
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* vn2 = op.getIn(1);
             if (!vn2.isWritten()) return 0;

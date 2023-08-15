@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +16,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleTrivialShift(getGroup());
@@ -26,27 +26,26 @@ namespace Sla.DECCORE
         /// \brief Simplify trivial shifts:  `V << 0  =>  V,  V << #64  =>  0`
         public override void getOpList(List<OpCode> oplist)
         {
-            uint list[] = { OpCode.CPUI_INT_LEFT, OpCode.CPUI_INT_RIGHT, OpCode.CPUI_INT_SRIGHT };
-            oplist.insert(oplist.end(), list, list + 3);
+            OpCode[] list = { OpCode.CPUI_INT_LEFT, OpCode.CPUI_INT_RIGHT, OpCode.CPUI_INT_SRIGHT };
+            oplist.AddRange(list);
         }
 
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
             ulong val;
-            Varnode* constvn = op.getIn(1);
-            if (!constvn.isConstant()) return 0;   // Must shift by a constant
+            Varnode constvn = op.getIn(1);
+            if (!constvn.isConstant()) return false;   // Must shift by a constant
             val = constvn.getOffset();
-            if (val != 0)
-            {
-                Varnode* replace;
-                if (val < 8 * op.getIn(0).getSize()) return 0;    // Non-trivial
-                if (op.code() == OpCode.CPUI_INT_SRIGHT) return 0; // Cant predict signbit
+            if (val != 0) {
+                Varnode replace;
+                if (val < 8 * op.getIn(0).getSize()) return false;    // Non-trivial
+                if (op.code() == OpCode.CPUI_INT_SRIGHT) return false; // Cant predict signbit
                 replace = data.newConstant(op.getIn(0).getSize(), 0);
                 data.opSetInput(op, replace, 0);
             }
             data.opRemoveInput(op, 1);
             data.opSetOpcode(op, OpCode.CPUI_COPY);
-            return 1;
+            return true;
         }
     }
 }

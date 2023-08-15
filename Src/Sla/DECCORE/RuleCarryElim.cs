@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +16,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleCarryElim(getGroup());
@@ -29,12 +29,12 @@ namespace Sla.DECCORE
         ///   - `carry(V,0)  => false`
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_INT_CARRY);
+            oplist.Add(OpCode.CPUI_INT_CARRY);
         }
 
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* vn1,*vn2;
+            Varnode vn1, vn2;
 
             vn2 = op.getIn(1);
             if (!vn2.isConstant()) return 0;

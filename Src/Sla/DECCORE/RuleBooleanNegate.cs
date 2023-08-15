@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +16,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleBooleanNegate(getGroup());
@@ -29,15 +29,15 @@ namespace Sla.DECCORE
         /// must be boolean values.
         public override void getOpList(List<OpCode> oplist)
         {
-            uint list[] = { OpCode.CPUI_INT_NOTEQUAL, OpCode.CPUI_INT_EQUAL };
-            oplist.insert(oplist.end(), list, list + 2);
+            OpCode[] list = { OpCode.CPUI_INT_NOTEQUAL, OpCode.CPUI_INT_EQUAL };
+            oplist.AddRange(list);
         }
 
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
             OpCode opc;
-            Varnode* constvn;
-            Varnode* subbool;
+            Varnode constvn;
+            Varnode subbool;
             bool negate;
             ulong val;
 

@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +16,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleSignForm(getGroup());
@@ -26,20 +26,17 @@ namespace Sla.DECCORE
         /// \brief Normalize sign extraction:  `sub(sext(V),c)  =>  V s>> 31`
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_SUBPIECE);
+            oplist.Add(OpCode.CPUI_SUBPIECE);
         }
 
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* sextout,*a;
-            PcodeOp* sextop;
-
-            sextout = op.getIn(0);
+            Varnode sextout = op.getIn(0);
             if (!sextout.isWritten()) return 0;
-            sextop = sextout.getDef();
+            PcodeOp sextop = sextout.getDef() ?? throw new BugException();
             if (sextop.code() != OpCode.CPUI_INT_SEXT)
                 return 0;
-            a = sextop.getIn(0);
+            Varnode a = sextop.getIn(0);
             int c = op.getIn(1).getOffset();
             if (c < a.getSize()) return 0;
             if (a.isFree()) return 0;

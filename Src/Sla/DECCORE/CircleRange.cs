@@ -1216,28 +1216,25 @@ namespace Sla.DECCORE
         /// \param constMarkup is the reference for passing back the constant relevant to the pull-back
         /// \param usenzmask specifies whether to use the NZMASK
         /// \return the input Varnode or NULL
-        public Varnode pullBack(PcodeOp op, Varnode[] constMarkup, bool usenzmask)
+        public Varnode? pullBack(PcodeOp op, out Varnode constMarkup, bool usenzmask)
         {
-            Varnode* res;
+            Varnode res;
 
-            if (op.numInput() == 1)
-            {
+            if (op.numInput() == 1) {
                 res = op.getIn(0);
                 if (res.isConstant()) return (Varnode)null;
                 if (!pullBackUnary(op.code(), res.getSize(), op.getOut().getSize()))
                     return (Varnode)null;
             }
-            else if (op.numInput() == 2)
-            {
-                Varnode* constvn;
+            else if (op.numInput() == 2) {
+                Varnode constvn;
                 ulong val;
                 // Find non-constant varnode input, and slot
                 // Make sure second input is constant
                 int slot = 0;
                 res = op.getIn(slot);
                 constvn = op.getIn(1 - slot);
-                if (res.isConstant())
-                {
+                if (res.isConstant()) {
                     slot = 1;
                     constvn = res;
                     res = op.getIn(slot);
@@ -1248,17 +1245,14 @@ namespace Sla.DECCORE
                     return (Varnode)null;
                 val = constvn.getOffset();
                 OpCode opc = op.code();
-                if (!pullBackBinary(opc, val, slot, res.getSize(), op.getOut().getSize()))
-                {
-                    if (usenzmask && opc == OpCode.CPUI_SUBPIECE && val == 0)
-                    {
+                if (!pullBackBinary(opc, val, slot, res.getSize(), op.getOut().getSize())) {
+                    if (usenzmask && opc == OpCode.CPUI_SUBPIECE && val == 0) {
                         // If everything we are truncating is known to be zero, we may still have a range
                         int msbset = Globals.mostsigbit_set(res.getNZMask());
                         msbset = (msbset + 8) / 8;
                         if (op.getOut().getSize() < msbset) // Some bytes we are chopping off might not be zero
                             return (Varnode)null;
-                        else
-                        {
+                        else {
                             mask = Globals.calc_mask(res.getSize()); // Keep the range but make the mask bigger
                                                               // If the range wraps (left>right) then, increasing the mask adds all the new space into
                                                               // the range, and it would be an inaccurate pullback by itself, but with the nzmask intersection
@@ -1269,14 +1263,13 @@ namespace Sla.DECCORE
                         return (Varnode)null;
                 }
                 if (constvn.getSymbolEntry() != (SymbolEntry)null)
-                    *constMarkup = constvn;
+                    constMarkup = constvn;
             }
             else    // Neither unary or binary
                 return (Varnode)null;
 
-            if (usenzmask)
-            {
-                CircleRange nzrange;
+            if (usenzmask) {
+                CircleRange nzrange = new CircleRange();
                 if (!nzrange.setNZMask(res.getNZMask(), res.getSize()))
                     return res;
                 intersect(nzrange);
@@ -1309,13 +1302,11 @@ namespace Sla.DECCORE
                     isempty = false;
                     step = in1.step;
                     mask = Globals.calc_mask(outSize);
-                    if (in1.left == in1.right)
-                    {
+                    if (in1.left == in1.right) {
                         left = in1.left % step;
                         right = in1.mask + 1 + left;
                     }
-                    else
-                    {
+                    else {
                         left = in1.left;
                         right = (in1.right - in1.step) & in1.mask;
                         if (right < left)
@@ -1390,32 +1381,27 @@ namespace Sla.DECCORE
                 isempty = true;
                 return true;
             }
-            switch (opc)
-            {
+            switch (opc) {
                 case OpCode.CPUI_PTRSUB:
                 case OpCode.CPUI_INT_ADD:
                     isempty = false;
                     mask = in1.mask | in2.mask;
-                    if (in1.left == in1.right || in2.left == in2.right)
-                    {
+                    if (in1.left == in1.right || in2.left == in2.right) {
                         step = (in1.step < in2.step) ? in1.step : in2.step; // Smaller step
                         left = (in1.left + in2.left) % step;
                         right = left;
                     }
-                    else if (in2.isSingle())
-                    {
+                    else if (in2.isSingle()) {
                         step = in1.step;
                         left = (in1.left + in2.left) & mask;
                         right = (in1.right + in2.left) & mask;
                     }
-                    else if (in1.isSingle())
-                    {
+                    else if (in1.isSingle()) {
                         step = in2.step;
                         left = (in2.left + in1.left) & mask;
                         right = (in2.right + in1.left) & mask;
                     }
-                    else
-                    {
+                    else {
                         step = (in1.step < in2.step) ? in1.step : in2.step; // Smaller step
                         ulong size1 = (in1.left < in1.right) ? (in1.right - in1.left) : (in1.mask - (in1.left - in1.right) + in1.step);
                         left = (in1.left + in2.left) & mask;
@@ -1428,8 +1414,7 @@ namespace Sla.DECCORE
                         normalize();
                     }
                     break;
-                case OpCode.CPUI_INT_MULT:
-                    {
+                case OpCode.CPUI_INT_MULT: {
                         isempty = false;
                         mask = in1.mask | in2.mask;
                         ulong constVal;
@@ -1446,27 +1431,24 @@ namespace Sla.DECCORE
                         else
                             return false;
                         uint tmp = (uint)constVal;
-                        while (step < maxStep)
-                        {
+                        while (step < maxStep) {
                             if ((tmp & 1) != 0) break;
                             step <<= 1;
                             tmp >>= 1;
                         }
                         int wholeSize = 8 * sizeof(ulong) - Globals.count_leading_zeros(mask);
-                        if (in1.getMaxInfo() + in2.getMaxInfo() > wholeSize)
-                        {
+                        if (in1.getMaxInfo() + in2.getMaxInfo() > wholeSize) {
                             left = in1.left;    // Covered everything
                             right = in1.left;
                             normalize();
                             return true;
                         }
-                        if ((constVal & (mask ^ (mask >> 1))) != 0)
-                        {   // Multiplying by negative number
+                        if ((constVal & (mask ^ (mask >> 1))) != 0) {
+                            // Multiplying by negative number
                             left = ((in1.right - in1.step) * (in2.right - in2.step)) & mask;
                             right = ((in1.left * in2.left) + step) & mask;
                         }
-                        else
-                        {
+                        else {
                             left = (in1.left * in2.left) & mask;
                             right = ((in1.right - in1.step) * (in2.right - in2.step) + step) & mask;
                         }
@@ -1480,38 +1462,34 @@ namespace Sla.DECCORE
                         step = in1.step;
                         uint sa = (uint)in2.getMin();
                         uint tmp = sa;
-                        while (step < maxStep && tmp > 0)
-                        {
+                        while (step < maxStep && tmp > 0) {
                             step <<= 1;
                             sa -= 1;
                         }
                         left = (in1.left << sa) & mask;
                         right = (in1.right << sa) & mask;
                         int wholeSize = 8 * sizeof(ulong) - Globals.count_leading_zeros(mask);
-                        if (in1.getMaxInfo() + sa > wholeSize)
-                        {
+                        if (in1.getMaxInfo() + sa > wholeSize) {
                             right = left;   // Covered everything
                             normalize();
                             return true;
                         }
                         break;
                     }
-                case OpCode.CPUI_SUBPIECE:
-                    {
+                case OpCode.CPUI_SUBPIECE: {
                         if (!in2.isSingle()) return false;
                         isempty = false;
                         int sa = (int)in2.left * 8;
-                        mask = Globals.calc_mask(outSize);
+                        mask = Globals.calc_mask((uint)outSize);
                         step = (sa == 0) ? in1.step : 1;
 
                         left = (in1.left >> sa) & mask;
                         right = (in1.right >> sa) & mask;
-                        if ((left & ~mask) != (right & ~mask))
-                        {   // Truncated part is different
+                        if ((left & ~mask) != (right & ~mask)) {
+                            // Truncated part is different
                             left = right = 0;   // We cover everything
                         }
-                        else
-                        {
+                        else {
                             left &= mask;
                             right &= mask;
                             normalize();
@@ -1523,15 +1501,13 @@ namespace Sla.DECCORE
                         if (!in2.isSingle()) return false;
                         isempty = false;
                         int sa = (int)in2.left;
-                        mask = Globals.calc_mask(outSize);
+                        mask = Globals.calc_mask((uint)outSize);
                         step = 1;           // Lose any step
-                        if (in1.left < in1.right)
-                        {
+                        if (in1.left < in1.right) {
                             left = in1.left >> sa;
                             right = ((in1.right - in1.step) >> sa) + 1;
                         }
-                        else
-                        {
+                        else {
                             left = 0;
                             right = in1.mask >> sa;
                         }
@@ -1544,15 +1520,14 @@ namespace Sla.DECCORE
                         if (!in2.isSingle()) return false;
                         isempty = false;
                         int sa = (int)in2.left;
-                        mask = Globals.calc_mask(outSize);
+                        mask = Globals.calc_mask((uint)outSize);
                         step = 1;           // Lose any step
                         long valLeft = in1.left;
                         long valRight = in1.right;
                         int bitPos = 8 * inSize - 1;
                         Globals.sign_extend(valLeft, bitPos);
                         Globals.sign_extend(valRight, bitPos);
-                        if (valLeft >= valRight)
-                        {
+                        if (valLeft >= valRight) {
                             valRight = (long)(mask >> 1);   // Max positive
                             valLeft = valRight + 1;     // Min negative
                             Globals.sign_extend(valLeft, bitPos);
@@ -1621,8 +1596,7 @@ namespace Sla.DECCORE
         /// \param leftIsStable is \b true if we want to match right boundaries
         public void widen(CircleRange op2, bool leftIsStable)
         {
-            if (leftIsStable)
-            {
+            if (leftIsStable) {
                 ulong lmod = left % step;
                 ulong mod = op2.right % step;
                 if (mod <= lmod)
@@ -1631,8 +1605,7 @@ namespace Sla.DECCORE
                     right = op2.right - (mod - lmod);
                 right &= mask;
             }
-            else
-            {
+            else {
                 left = op2.left & mask;
             }
             normalize();
@@ -1650,48 +1623,47 @@ namespace Sla.DECCORE
         /// \param c will contain the constant input to the op
         /// \param cslot will indicate the slot holding the constant
         /// \return the success code
-        public int translate2Op(OpCode opc, ulong c, int cslot)
+        public int translate2Op(out OpCode? opc, out ulong c, out int cslot)
         {
+            opc = null;
+            c = 0;
+            cslot = 0;
             if (isempty) return 3;
             if (step != 1) return 2;    // Not possible with a stride
-            if (right == ((left + 1) & mask))
-            {   // Single value
+            if (right == ((left + 1) & mask)) {
+                // Single value
                 opc = OpCode.CPUI_INT_EQUAL;
                 cslot = 0;
                 c = left;
                 return 0;
             }
-            if (left == ((right + 1) & mask))
-            {   // All but one value
+            if (left == ((right + 1) & mask)) {
+                // All but one value
                 opc = OpCode.CPUI_INT_NOTEQUAL;
                 cslot = 0;
                 c = right;
                 return 0;
             }
             if (left == right) return 1;    // All outputs are possible
-            if (left == 0)
-            {
+            if (left == 0) {
                 opc = OpCode.CPUI_INT_LESS;
                 cslot = 1;
                 c = right;
                 return 0;
             }
-            if (right == 0)
-            {
+            if (right == 0) {
                 opc = OpCode.CPUI_INT_LESS;
                 cslot = 0;
                 c = (left - 1) & mask;
                 return 0;
             }
-            if (left == (mask >> 1) + 1)
-            {
+            if (left == (mask >> 1) + 1) {
                 opc = OpCode.CPUI_INT_SLESS;
                 cslot = 1;
                 c = right;
                 return 0;
             }
-            if (right == (mask >> 1) + 1)
-            {
+            if (right == (mask >> 1) + 1) {
                 opc = OpCode.CPUI_INT_SLESS;
                 cslot = 0;
                 c = (left - 1) & mask;
@@ -1704,28 +1676,24 @@ namespace Sla.DECCORE
         /// \param s is the stream to write to
         public void printRaw(TextWriter s)
         {
-            if (isempty)
-            {
-                s << "(empty)";
+            if (isempty) {
+                s.Write("(empty)");
                 return;
             }
-            if (left == right)
-            {
-                s << "(full";
+            if (left == right) {
+                s.Write("(full");
                 if (step != 1)
-                    s << ',' << dec << step;
-                s << ')';
+                    s.Write($",{step}");
+                s.Write(')');
             }
-            else if (right == ((left + 1) & mask))
-            {
-                s << '[' << hex << left << ']';
+            else if (right == ((left + 1) & mask)) {
+                s.Write($"[{left:X}]");
             }
-            else
-            {
-                s << '[' << hex << left << ',' << right;
+            else {
+                s.Write($"[{left:X},{right:X}");
                 if (step != 1)
-                    s << ',' << dec << step;
-                s << ')';
+                    s.Write($",{step}");
+                s.Write(')');
             }
         }
     }

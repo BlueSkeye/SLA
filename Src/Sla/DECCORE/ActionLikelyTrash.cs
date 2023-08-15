@@ -177,7 +177,7 @@ namespace Sla.DECCORE
             IEnumerator<VarnodeData> iter = data.getFuncProto().trashBegin();
             while (iter.MoveNext()) {
                 VarnodeData vdata = iter.Current;
-                Varnode vn? = data.findCoveredInput((int)vdata.size, vdata.getAddr());
+                Varnode? vn = data.findCoveredInput((int)vdata.size, vdata.getAddr());
                 if (vn == (Varnode)null) continue;
                 if (vn.isTypeLock() || vn.isNameLock()) continue;
                 indlist.Clear();

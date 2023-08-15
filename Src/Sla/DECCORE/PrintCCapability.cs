@@ -33,6 +33,9 @@ namespace Sla.DECCORE
         // Not implemented
         private static PrintCCapability operator=(PrintCCapability op);
 
-        public virtual PrintLanguage buildLanguage(Architecture glb);
+        public override PrintLanguage buildLanguage(Architecture glb)
+        {
+            return new PrintC(glb, name);
+        }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.DECCORE;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,9 +16,7 @@ namespace Sla.EXTRA
         /// before functions and other symbols are layed down.
         public override void execute(TextReader s)
         {
-            unsigned long adjust;
-
-            adjust = 0uL;
+            ulong adjust = 0uL;
             if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("No load image present");
             s.unsetf(ios::dec | ios::hex | ios::oct); // Let user specify base

@@ -18,7 +18,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleAddMultCollapse(getGroup());
@@ -33,11 +33,11 @@ namespace Sla.DECCORE
         ///  - `((V + (W + c)) + d)  =>  (W + (c+d)) + V`
         public override void getOpList(List<OpCode> oplist)
         {
-            uint list[] = { OpCode.CPUI_INT_ADD, OpCode.CPUI_INT_MULT };
-            oplist.insert(oplist.end(), list, list + 2);
+            OpCode[] list = { OpCode.CPUI_INT_ADD, OpCode.CPUI_INT_MULT };
+            oplist.AddRange(list);
         }
 
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
             Varnode[] c = new Varnode[2];           // Constant varnodes
             Varnode sub;

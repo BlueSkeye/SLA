@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +16,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleFloatRange(getGroup());
@@ -28,37 +28,34 @@ namespace Sla.DECCORE
         /// Convert `(V f< W)||(V f== W)   =>   V f<= W` (and similar variants)
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_BOOL_OR);
-            oplist.Add(CPUI_BOOL_AND);
+            oplist.Add(OpCode.CPUI_BOOL_OR);
+            oplist.Add(OpCode.CPUI_BOOL_AND);
         }
 
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
-            PcodeOp* cmp1,*cmp2;
-            Varnode* vn1,*vn2;
+            PcodeOp cmp1, cmp2;
+            Varnode vn1, vn2;
 
             vn1 = op.getIn(0);
             if (!vn1.isWritten()) return 0;
             vn2 = op.getIn(1);
             if (!vn2.isWritten()) return 0;
-            cmp1 = vn1.getDef();
-            cmp2 = vn2.getDef();
+            cmp1 = vn1.getDef() ?? throw new BugException();
+            cmp2 = vn2.getDef() ?? throw new BugException();
             OpCode opccmp1 = cmp1.code();
             // Set cmp1 to LESS or LESSEQUAL operator, cmp2 is the "other" operator
-            if ((opccmp1 != OpCode.CPUI_FLOAT_LESS) && (opccmp1 != OpCode.CPUI_FLOAT_LESSEQUAL))
-            {
+            if ((opccmp1 != OpCode.CPUI_FLOAT_LESS) && (opccmp1 != OpCode.CPUI_FLOAT_LESSEQUAL)) {
                 cmp1 = cmp2;
-                cmp2 = vn1.getDef();
+                cmp2 = vn1.getDef() ?? throw new BugException();
                 opccmp1 = cmp1.code();
             }
             OpCode resultopc = OpCode.CPUI_COPY;
-            if (opccmp1 == OpCode.CPUI_FLOAT_LESS)
-            {
+            if (opccmp1 == OpCode.CPUI_FLOAT_LESS) {
                 if ((cmp2.code() == OpCode.CPUI_FLOAT_EQUAL) && (op.code() == OpCode.CPUI_BOOL_OR))
                     resultopc = OpCode.CPUI_FLOAT_LESSEQUAL;
             }
-            else if (opccmp1 == OpCode.CPUI_FLOAT_LESSEQUAL)
-            {
+            else if (opccmp1 == OpCode.CPUI_FLOAT_LESSEQUAL) {
                 if ((cmp2.code() == OpCode.CPUI_FLOAT_NOTEQUAL) && (op.code() == OpCode.CPUI_BOOL_AND))
                     resultopc = OpCode.CPUI_FLOAT_LESS;
             }
@@ -66,11 +63,10 @@ namespace Sla.DECCORE
             if (resultopc == OpCode.CPUI_COPY) return 0;
 
             // Make sure both operators are comparing the same things
-            Varnode* nvn1,*cvn1;
+            Varnode nvn1, cvn1;
             int slot1 = 0;
             nvn1 = cmp1.getIn(slot1);  // Set nvn1 to a non-constant off of cmp1
-            if (nvn1.isConstant())
-            {
+            if (nvn1.isConstant()) {
                 slot1 = 1;
                 nvn1 = cmp1.getIn(slot1);
                 if (nvn1.isConstant()) return 0;
@@ -78,17 +74,15 @@ namespace Sla.DECCORE
             if (nvn1.isFree()) return 0;
             cvn1 = cmp1.getIn(1 - slot1);  // Set cvn1 to the "other" slot off of cmp1
             int slot2;
-            if (nvn1 != cmp2.getIn(0))
-            {
+            if (nvn1 != cmp2.getIn(0)) {
                 slot2 = 1;
                 if (nvn1 != cmp2.getIn(1))
                     return 0;
             }
             else
                 slot2 = 0;
-            Varnode* matchvn = cmp2.getIn(1 - slot2);
-            if (cvn1.isConstant())
-            {
+            Varnode matchvn = cmp2.getIn(1 - slot2);
+            if (cvn1.isConstant()) {
                 if (!matchvn.isConstant()) return 0;
                 if (matchvn.getOffset() != cvn1.getOffset()) return 0;
             }

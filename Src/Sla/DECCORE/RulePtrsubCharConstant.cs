@@ -45,7 +45,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RulePtrsubCharConstant(getGroup());
@@ -62,7 +62,7 @@ namespace Sla.DECCORE
             oplist.Add(CPUI_PTRSUB);
         }
 
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* sb = op.getIn(0);
             Datatype* sbType = sb.getTypeReadFacing(op);

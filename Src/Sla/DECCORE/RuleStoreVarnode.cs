@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +16,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleStoreVarnode(getGroup());
@@ -30,27 +30,26 @@ namespace Sla.DECCORE
         /// the \e spacebase register's address space.
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_STORE);
+            oplist.Add(OpCode.CPUI_STORE);
         }
 
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
             int size;
-            AddrSpace* baseoff;
             ulong offoff;
 
-            baseoff = RuleLoadVarnode::checkSpacebase(data.getArch(), op, offoff);
-            if (baseoff == (AddrSpace)null) return 0;
+            AddrSpace? baseoff = RuleLoadVarnode.checkSpacebase(data.getArch(), op, out offoff);
+            if (baseoff == (AddrSpace)null) return false;
 
             size = op.getIn(2).getSize();
             offoff = AddrSpace.addressToByte(offoff, baseoff.getWordSize());
-            Address addr(baseoff, offoff);
+            Address addr = new Address(baseoff, offoff);
             data.newVarnodeOut(size, addr, op);
             op.getOut().setStackStore();  // Mark as originally coming from OpCode.CPUI_STORE
             data.opRemoveInput(op, 1);
             data.opRemoveInput(op, 0);
             data.opSetOpcode(op, OpCode.CPUI_COPY);
-            return 1;
+            return true;
         }
     }
 }

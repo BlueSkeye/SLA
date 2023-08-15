@@ -1,9 +1,8 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static ghidra.FuncCallSpecs;
 
 namespace Sla.DECCORE
 {
@@ -20,22 +19,21 @@ namespace Sla.DECCORE
             VarnodeData[] vars, int isize)
         {
             // Convert template data into a real PcodeOp
-            PcodeOp* op;
-            Varnode* vn;
+            PcodeOp op;
+            Varnode vn;
 
-            if (outvar != (VarnodeData)null)
-            {
-                Address oaddr(outvar.space, outvar.offset);
+            if (outvar != (VarnodeData)null) {
+                Address oaddr = new Address(outvar.space, outvar.offset);
                 op = fd.newOp(isize, addr);
-                fd.newVarnodeOut(outvar.size, oaddr, op);
+                fd.newVarnodeOut((int)outvar.size, oaddr, op);
             }
             else
                 op = fd.newOp(isize, addr);
             fd.opSetOpcode(op, opc);
             int i = 0;
-            if (op.isCodeRef())
-            { // Is the first input parameter a code reference
-                Address addrcode(vars[0].space, vars[0].offset);
+            if (op.isCodeRef()) {
+                // Is the first input parameter a code reference
+                Address addrcode = new Address(vars[0].space, vars[0].offset);
                 // addrcode.toPhysical()  // For backward compatibility with SLED
                 fd.opSetInput(op, fd.newCodeRef(addrcode), 0);
                 i += 1;
@@ -45,9 +43,8 @@ namespace Sla.DECCORE
                 //      fd.op_setopcode(op,CPUI_BRANCH);
                 //    }
             }
-            for (; i < isize; ++i)
-            {
-                vn = fd.newVarnode(vars[i].size, vars[i].space, vars[i].offset);
+            for (; i < isize; ++i) {
+                vn = fd.newVarnode((int)vars[i].size, vars[i].space, vars[i].offset);
                 fd.opSetInput(op, vn, i);
             }
         }

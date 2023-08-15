@@ -135,7 +135,7 @@ namespace Sla.DECCORE
         /// \param sizein is the size of the input in bytes
         /// \return the input value
         public ulong recoverInputUnary(int sizeout, ulong @out, int sizein) 
-            => behave.recoverInputUnary(sizeout,out, sizein);
+            => behave.recoverInputUnary(sizeout, @out, sizein);
 
         /// Return \b true if this op-code is commutative
         /// \return \b true if the ordering of the inputs does not affect the output

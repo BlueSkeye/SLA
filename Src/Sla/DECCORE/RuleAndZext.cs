@@ -16,7 +16,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleAndZext(getGroup());
@@ -31,7 +31,7 @@ namespace Sla.DECCORE
             oplist.Add(CPUI_INT_AND);
         }
 
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* cvn1 = op.getIn(1);
             if (!cvn1.isConstant()) return 0;

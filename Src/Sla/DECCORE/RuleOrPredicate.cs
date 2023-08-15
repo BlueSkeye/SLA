@@ -274,7 +274,7 @@ namespace Sla.DECCORE
             oplist.Add(CPUI_INT_XOR);
         }
 
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
             MultiPredicate branch0;
             MultiPredicate branch1;

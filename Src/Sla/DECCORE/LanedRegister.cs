@@ -47,11 +47,11 @@ namespace Sla.DECCORE
             }
 
             /// Preincrement operator
-            public static LanedIterator operator++()
+            public static LanedIterator operator++(LanedIterator item)
             {
-                size += 1;
-                normalize();
-                return *this;
+                item.size += 1;
+                item.normalize();
+                return item;
             }
 
             /// Dereference operator

@@ -150,7 +150,7 @@ namespace Sla.DECCORE
         /// \param off if the offset into the Symbol for this (piece of) storage
         /// \param sz is the size in bytes of this (piece of) storage
         /// \param rnglist is the set of code addresses where \b this SymbolEntry represents the Symbol
-        public SymbolEntry(Symbol sym, uint exfl, ulong h, int off, int sz, RangeList rnglist)
+        public SymbolEntry(Symbol sym, Varnode.varnode_flags exfl, ulong h, int off, int sz, RangeList rnglist)
         {
             symbol = sym;
             extraflags = exfl;

@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +16,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleDoubleShift(getGroup());
@@ -32,15 +32,15 @@ namespace Sla.DECCORE
         ///    - `(V << c) >> c` =>  V & 0xff`
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_INT_LEFT);
-            oplist.Add(CPUI_INT_RIGHT);
-            oplist.Add(CPUI_INT_MULT);
+            oplist.Add(OpCode.CPUI_INT_LEFT);
+            oplist.Add(OpCode.CPUI_INT_RIGHT);
+            oplist.Add(OpCode.CPUI_INT_MULT);
         }
 
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* secvn,*newvn;
-            PcodeOp* secop;
+            Varnode secvn, newvn;
+            PcodeOp secop;
             OpCode opc1, opc2;
             int sa1, sa2, size;
             ulong mask;
@@ -57,8 +57,7 @@ namespace Sla.DECCORE
             size = secvn.getSize();
             if (!secop.getIn(0).isHeritageKnown()) return 0;
 
-            if (opc1 == OpCode.CPUI_INT_MULT)
-            {
+            if (opc1 == OpCode.CPUI_INT_MULT) {
                 ulong val = op.getIn(1).getOffset();
                 sa1 = Globals.leastsigbit_set(val);
                 if ((val >> sa1) != (ulong)1) return 0; // Not multiplying by a power of 2
@@ -66,8 +65,7 @@ namespace Sla.DECCORE
             }
             else
                 sa1 = op.getIn(1).getOffset();
-            if (opc2 == OpCode.CPUI_INT_MULT)
-            {
+            if (opc2 == OpCode.CPUI_INT_MULT) {
                 ulong val = secop.getIn(1).getOffset();
                 sa2 = Globals.leastsigbit_set(val);
                 if ((val >> sa2) != (ulong)1) return 0; // Not multiplying by a power of 2
@@ -75,25 +73,22 @@ namespace Sla.DECCORE
             }
             else
                 sa2 = secop.getIn(1).getOffset();
-            if (opc1 == opc2)
-            {
-                if (sa1 + sa2 < 8 * size)
-                {
+            if (opc1 == opc2) {
+                if (sa1 + sa2 < 8 * size) {
                     newvn = data.newConstant(4, sa1 + sa2);
                     data.opSetOpcode(op, opc1);
                     data.opSetInput(op, secop.getIn(0), 0);
                     data.opSetInput(op, newvn, 1);
                 }
-                else
-                {
+                else {
                     newvn = data.newConstant(size, 0);
                     data.opSetOpcode(op, OpCode.CPUI_COPY);
                     data.opSetInput(op, newvn, 0);
                     data.opRemoveInput(op, 1);
                 }
             }
-            else if (sa1 == sa2 && size <= sizeof(ulong))
-            {   // FIXME:  precision
+            else if (sa1 == sa2 && size <= sizeof(ulong)) {
+                // FIXME:  precision
                 mask = Globals.calc_mask(size);
                 if (opc1 == OpCode.CPUI_INT_LEFT)
                     mask = (mask << sa1) & mask;

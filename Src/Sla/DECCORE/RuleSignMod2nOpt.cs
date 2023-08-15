@@ -16,7 +16,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleSignMod2nOpt(getGroup());
@@ -31,7 +31,7 @@ namespace Sla.DECCORE
             oplist.Add(CPUI_INT_RIGHT);
         }
 
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
             if (!op.getIn(1).isConstant()) return 0;
             int shiftAmt = op.getIn(1).getOffset();

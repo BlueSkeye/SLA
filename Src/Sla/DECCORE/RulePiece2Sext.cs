@@ -1,11 +1,10 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
-using static ghidra.TraceDAG.BlockTrace;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Sla.DECCORE
@@ -17,7 +16,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RulePiece2Sext(getGroup());
@@ -25,17 +24,16 @@ namespace Sla.DECCORE
 
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_PIECE);
+            oplist.Add(OpCode.CPUI_PIECE);
         }
 
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* shiftout,*x;
-            PcodeOp* shiftop;
+            Varnode shiftout, x;
 
             shiftout = op.getIn(0);
             if (!shiftout.isWritten()) return 0;
-            shiftop = shiftout.getDef();
+            PcodeOp shiftop = shiftout.getDef() ?? throw new BugException();
             if (shiftop.code() != OpCode.CPUI_INT_SRIGHT) return 0;
             if (!shiftop.getIn(1).isConstant()) return 0;
             int n = shiftop.getIn(1).getOffset();

@@ -37,7 +37,7 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_INT_SRIGHT); // added
         }
 
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
             int n;
             OpCode shiftopc;

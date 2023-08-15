@@ -21,7 +21,7 @@ namespace Sla.DECCORE
             int comp = x.name.CompareTo(y.name);
             if (comp < 0) return comp;
             if (comp > 0) return comp;
-            return (x.nameDedup.CompareTo(y.nameDedup);
+            return x.nameDedup.CompareTo(y.nameDedup);
         }
     }
 }

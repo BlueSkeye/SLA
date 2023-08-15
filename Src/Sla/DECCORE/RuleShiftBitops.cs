@@ -16,7 +16,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleShiftBitops(getGroup());
@@ -35,7 +35,7 @@ namespace Sla.DECCORE
             oplist.Add(CPUI_INT_MULT);
         }
 
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* constvn = op.getIn(1);
             if (!constvn.isConstant()) return 0;   // Must be a constant shift

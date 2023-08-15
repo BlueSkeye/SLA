@@ -12,10 +12,14 @@ namespace Sla.EXTRA
     /// \brief Common data shared by decompiler commands
     internal class IfaceDecompData : IfaceData
     {
-        public Funcdata fd;     ///< Current function active in the console
-        public Architecture conf; ///< Current architecture/program active in the console
-        public CallGraph cgraph;  ///< Call-graph information for the program
-        public FunctionTestCollection testCollection;     ///< Executable environment from a datatest
+        /// Current function active in the console
+        public Funcdata? fd;
+        /// Current architecture/program active in the console
+        public Architecture? conf;
+        /// Call-graph information for the program
+        public CallGraph? cgraph;
+        /// Executable environment from a datatest
+        public FunctionTestCollection? testCollection;
 
 #if CPUI_RULECOMPILE
         public string experimental_file;   // File containing experimental rules
@@ -28,7 +32,7 @@ namespace Sla.EXTRA
             conf = (Architecture)null;
             fd = (Funcdata)null;
             cgraph = (CallGraph)null;
-            testCollection = (FunctionTestCollection*)0;
+            testCollection = (FunctionTestCollection)null;
 #if OPACTION_DEBUG
             jumptabledebug = false;
 #endif
@@ -36,20 +40,20 @@ namespace Sla.EXTRA
 
         ~IfaceDecompData()
         {
-            if (cgraph != (CallGraph)null)
-                delete cgraph;
-            if (conf != (Architecture)null)
-                delete conf;
-            if (testCollection != (FunctionTestCollection*)0)
-                delete testCollection;
+            //if (cgraph != (CallGraph)null)
+            //    delete cgraph;
+            //if (conf != (Architecture)null)
+            //    delete conf;
+            //if (testCollection != (FunctionTestCollection)null)
+            //    delete testCollection;
             // fd will get deleted with Database
         }
 
         ///< Allocate the call-graph object
         public void allocateCallGraph()
         {
-            if (cgraph != (CallGraph)null)
-                delete cgraph;
+            //if (cgraph != (CallGraph)null)
+            //    delete cgraph;
             cgraph = new CallGraph(conf);
         }
 
@@ -61,7 +65,7 @@ namespace Sla.EXTRA
         public void abortFunction(TextWriter s)
         {
             if (fd == (Funcdata)null) return;
-            s << "Unable to proceed with function: " << fd.getName() << endl;
+            s.WriteLine($"Unable to proceed with function: {fd.getName()}");
             conf.clearAnalysis(fd);
             fd = (Funcdata)null;
         }
@@ -69,8 +73,8 @@ namespace Sla.EXTRA
         /// Free all resources for the current architecture/program
         public void clearArchitecture()
         {
-            if (conf != (Architecture)null)
-                delete conf;
+            //if (conf != (Architecture)null)
+            //    delete conf;
             conf = (Architecture)null;
             fd = (Funcdata)null;
         }
@@ -89,22 +93,20 @@ namespace Sla.EXTRA
             if (jumptabledebug)
                 fd.enableJTCallback(jump_callback);
 #endif
-            try
-            {
-                if (size == 0)
-                {
+            try {
+                if (size == 0) {
                     Address baddr = new Address(fd.getAddress().getSpace(),0);
                     Address eaddr = new Address(fd.getAddress().getSpace(), fd.getAddress().getSpace().getHighest());
                     fd.followFlow(baddr, eaddr);
                 }
                 else
                     fd.followFlow(fd.getAddress(), fd.getAddress() + size);
-                s << "Function " << fd.getName() << ": ";
+                s.Write($"Function {fd.getName()}: ");
                 fd.getAddress().printRaw(s);
-                s << endl;
+                s.WriteLine();
             }
             catch (RecovError err) {
-                s << "Function " << fd.getName() << ": " << err.ToString() << endl;
+                s.WriteLine($"Function {fd.getName()}: {err.ToString()}");
             }
         }
 
@@ -137,26 +139,22 @@ namespace Sla.EXTRA
         {
             uint uq;
             int defsize;
-            Varnode vn = (Varnode)null;
+            Varnode? vn = (Varnode)null;
 
             if (fd == (Funcdata)null)
                 throw new IfaceExecutionError("No function selected");
 
             Address pc;
-            Address loc = new Address(parse_varnode(s, defsize, pc, uq,* conf.types));
-            if (loc.getSpace().getType() == spacetype.IPTR_CONSTANT)
-            {
+            Address loc = new Address(parse_varnode(s, defsize, pc, uq, conf.types));
+            if (loc.getSpace().getType() == spacetype.IPTR_CONSTANT) {
                 if (pc.isInvalid() || (uq == uint.MaxValue))
                     throw new IfaceParseError("Missing p-code sequence number");
                 SeqNum seq = new SeqNum(pc, uq);
                 PcodeOp op = fd.findOp(seq);
-                if (op != (PcodeOp)null)
-                {
-                    for (int i = 0; i < op.numInput(); ++i)
-                    {
+                if (op != (PcodeOp)null) {
+                    for (int i = 0; i < op.numInput(); ++i) {
                         Varnode tmpvn = op.getIn(i);
-                        if (tmpvn.getAddr() == loc)
-                        {
+                        if (tmpvn.getAddr() == loc) {
                             vn = tmpvn;
                             break;
                         }
@@ -167,17 +165,14 @@ namespace Sla.EXTRA
                 vn = fd.findVarnodeInput(defsize, loc);
             else if ((!pc.isInvalid()) && (uq != uint.MaxValue))
                 vn = fd.findVarnodeWritten(defsize, loc, pc, uq);
-            else
-            {
+            else {
                 VarnodeLocSet::const_iterator iter, enditer;
                 iter = fd.beginLoc(defsize, loc);
                 enditer = fd.endLoc(defsize, loc);
-                while (iter != enditer)
-                {
+                while (iter != enditer) {
                     vn = *iter++;
                     if (vn.isFree()) continue;
-                    if (vn.isWritten())
-                    {
+                    if (vn.isWritten()) {
                         if ((!pc.isInvalid()) && (vn.getDef().getAddr() == pc)) break;
                         if ((uq != uint.MaxValue) && (vn.getDef().getTime() == uq)) break;
                     }

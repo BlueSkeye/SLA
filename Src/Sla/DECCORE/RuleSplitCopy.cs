@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -17,7 +17,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleSplitCopy(getGroup());
@@ -30,23 +30,21 @@ namespace Sla.DECCORE
         /// rewrite the COPY operator as multiple COPYs.
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_COPY);
+            oplist.Add(OpCode.CPUI_COPY);
         }
 
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
-            Datatype* inType = op.getIn(0).getTypeReadFacing(op);
-            Datatype* outType = op.getOut().getTypeDefFacing();
+            Datatype inType = op.getIn(0).getTypeReadFacing(op);
+            Datatype outType = op.getOut().getTypeDefFacing();
             type_metatype metain = inType.getMetatype();
             type_metatype metaout = outType.getMetatype();
             if (metain != type_metatype.TYPE_PARTIALSTRUCT && metaout != type_metatype.TYPE_PARTIALSTRUCT &&
                 metain != type_metatype.TYPE_ARRAY && metaout != type_metatype.TYPE_ARRAY &&
                 metain != type_metatype.TYPE_STRUCT && metaout != type_metatype.TYPE_STRUCT)
                 return false;
-            SplitDatatype splitter(data);
-            if (splitter.splitCopy(op, inType, outType))
-                return 1;
-            return 0;
+            SplitDatatype splitter = new SplitDatatype(data);
+            return splitter.splitCopy(op, inType, outType);
         }
     }
 }

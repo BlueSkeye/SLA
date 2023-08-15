@@ -14,7 +14,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleEarlyRemoval(getGroup());
@@ -23,7 +23,7 @@ namespace Sla.DECCORE
         // This rule applies to all ops
         /// \class RuleEarlyRemoval
         /// \brief Get rid of unused PcodeOp objects where we can guarantee the output is unused
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* vn;
 

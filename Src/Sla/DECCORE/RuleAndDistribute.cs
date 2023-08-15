@@ -17,7 +17,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleAndDistribute(getGroup());
@@ -30,22 +30,21 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_INT_AND);
         }
 
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
             Varnode orvn;
             Varnode othervn;
             Varnode newvn1;
             Varnode newvn2;
-            PcodeOp orop = (PcodeOp)null;
-            PcodeOp newop1,*newop2;
+            PcodeOp? orop = (PcodeOp)null;
+            PcodeOp newop1, newop2;
             ulong ormask1, ormask2, othermask, fullmask;
             int i, size;
 
             size = op.getOut().getSize();
             if (size > sizeof(ulong)) return 0; // FIXME: ulong should be arbitrary precision
-            fullmask = Globals.calc_mask(size);
-            for (i = 0; i < 2; ++i)
-            {
+            fullmask = Globals.calc_mask((uint)size);
+            for (i = 0; i < 2; ++i) {
                 othervn = op.getIn(1 - i);
                 if (!othervn.isHeritageKnown()) continue;
                 orvn = op.getIn(i);
@@ -61,8 +60,7 @@ namespace Sla.DECCORE
                 if ((ormask1 & othermask) == 0) break; // AND would cancel if distributed
                 ormask2 = orop.getIn(1).getNZMask();
                 if ((ormask2 & othermask) == 0) break; // AND would cancel if distributed
-                if (othervn.isConstant())
-                {
+                if (othervn.isConstant()) {
                     if ((ormask1 & othermask) == ormask1) break; // AND is trivial if distributed
                     if ((ormask2 & othermask) == ormask2) break;
                 }

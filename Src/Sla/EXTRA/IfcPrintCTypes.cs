@@ -17,7 +17,7 @@ namespace Sla.EXTRA
             if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("No load image present");
 
-            if (dcp.conf.types != (TypeFactory*)0)
+            if (dcp.conf.types != (TypeFactory)null)
             {
                 dcp.conf.print.setOutputStream(status.fileoptr);
                 dcp.conf.print.docTypeDefinitions(dcp.conf.types);

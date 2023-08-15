@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +16,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleExtensionPush(getGroup());
@@ -27,51 +27,46 @@ namespace Sla.DECCORE
         ///
         /// By making the extension operation part of each pointer calculation (where it is usually an implied cast),
         /// we can frequently eliminate an explicit variable that would just hold the extension.
-        public override void getOpList(List<OpCode> &oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_INT_ZEXT);
-            oplist.Add(CPUI_INT_SEXT);
+            oplist.Add(OpCode.CPUI_INT_ZEXT);
+            oplist.Add(OpCode.CPUI_INT_SEXT);
         }
 
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* inVn = op.getIn(0);
+            Varnode inVn = op.getIn(0);
             if (inVn.isConstant()) return 0;
             if (inVn.isAddrForce()) return 0;
             if (inVn.isAddrTied()) return 0;
-            Varnode* outVn = op.getOut();
+            Varnode outVn = op.getOut();
             if (outVn.isTypeLock() || outVn.isNameLock()) return 0;
             if (outVn.isAddrForce() || outVn.isAddrTied()) return 0;
-            list<PcodeOp*>::const_iterator iter;
             int addcount = 0;      // Number of INT_ADD descendants
             int ptrcount = 0;      // Number of PTRADD descendants
-            for (iter = outVn.beginDescend(); iter != outVn.endDescend(); ++iter)
-            {
-                PcodeOp* decOp = *iter;
+            IEnumerator<PcodeOp> iter = outVn.beginDescend();
+            while (iter.MoveNext()) {
+                PcodeOp decOp = iter.Current;
                 OpCode opc = decOp.code();
-                if (opc == OpCode.CPUI_PTRADD)
-                {
+                if (opc == OpCode.CPUI_PTRADD) {
                     // This extension will likely be hidden
                     ptrcount += 1;
                 }
-                else if (opc == OpCode.CPUI_INT_ADD)
-                {
-                    PcodeOp* subOp = decOp.getOut().loneDescend();
+                else if (opc == OpCode.CPUI_INT_ADD) {
+                    PcodeOp? subOp = decOp.getOut().loneDescend();
                     if (subOp == (PcodeOp)null || subOp.code() != OpCode.CPUI_PTRADD)
                         return 0;
                     addcount += 1;
                 }
-                else
-                {
+                else {
                     return 0;
                 }
             }
             if ((addcount + ptrcount) <= 1) return 0;
-            if (addcount > 0)
-            {
+            if (addcount > 0) {
                 if (op.getIn(0).loneDescend() != (PcodeOp)null) return 0;
             }
-            RulePushPtr::duplicateNeed(op, data);       // Duplicate the extension to all result descendants
+            RulePushPtr.duplicateNeed(op, data);       // Duplicate the extension to all result descendants
             return 1;
         }
     }

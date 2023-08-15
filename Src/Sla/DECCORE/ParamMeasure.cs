@@ -120,21 +120,18 @@ namespace Sla.DECCORE
 
         private void walkbackward(WalkState state, PcodeOp ignoreop, Varnode vn)
         {
-            if (vn.isInput())
-            {
-                updaterank(THISFNPARAM, state.best);
+            if (vn.isInput()) {
+                updaterank(ParamRank.THISFNPARAM, state.best);
                 return;
             }
-            else if (!vn.isWritten())
-            {
-                updaterank(THISFNPARAM, state.best); //TODO: not sure about this.
+            else if (!vn.isWritten()) {
+                updaterank(ParamRank.THISFNPARAM, state.best); //TODO: not sure about this.
                 return;
             }
 
-            PcodeOp* op = vn.getDef();
+            PcodeOp op = vn.getDef() ?? throw new BugException();
             OpCode oc = op.getOpcode().getOpcode();
-            switch (oc)
-            {
+            switch (oc) {
                 case OpCode.CPUI_BRANCH:
                 case OpCode.CPUI_BRANCHIND:
                 case OpCode.CPUI_CBRANCH:
@@ -142,13 +139,13 @@ namespace Sla.DECCORE
                 case OpCode.CPUI_CALLIND:
                     break;
                 case OpCode.CPUI_CALLOTHER:
-                    if (op.getOut() != (Varnode)null) updaterank(DIRECTREAD, state.best);
+                    if (op.getOut() != (Varnode)null) updaterank(ParamRank.DIRECTREAD, state.best);
                     break;
                 case OpCode.CPUI_RETURN:
-                    updaterank(SUBFNRETURN, state.best);
+                    updaterank(ParamRank.SUBFNRETURN, state.best);
                     break;
                 case OpCode.CPUI_INDIRECT:
-                    updaterank(INDIRECT, state.best);
+                    updaterank(ParamRank.INDIRECT, state.best);
                     break;
                 case OpCode.CPUI_MULTIEQUAL:
                     // The only op for which there can be a loop in the graph is with the MULTIEQUAL (not for CALL, etc.).
@@ -161,19 +158,22 @@ namespace Sla.DECCORE
                     //So now try to walk forward to see if there is at least one path
                     // forward (other than the path we took to get here walking backward)
                     // in which there is not a direct read of this write.
-                    ParamMeasure pmfw(vn.getAddr(), vn.getSize(), vn.getType(), INPUT );
+                    ParamMeasure pmfw = new ParamMeasure(vn.getAddr(), vn.getSize(), vn.getType(),
+                        ParamIDIO.INPUT);
                     pmfw.calculateRank(false, vn, ignoreop);
-                    if (pmfw.getMeasure() == DIRECTREAD)
-                        updaterank(DIRECTWRITEWITHREAD, state.best);
+                    if (pmfw.getMeasure() == ParamRank.DIRECTREAD)
+                        updaterank(ParamRank.DIRECTWRITEWITHREAD, state.best);
                     else
-                        updaterank(DIRECTWRITEWITHOUTREAD, state.best);
+                        updaterank(ParamRank.DIRECTWRITEWITHOUTREAD, state.best);
                     break;
             }
         }
 
         private void updaterank(ParamRank rank_in, bool best)
         {
-            rank = (best == true) ? min(rank, rank_in) : max(rank, rank_in);
+            rank = (best == true)
+                ? (ParamRank)Math.Min((int)rank, (int)rank_in)
+                : (ParamRank)Math.Max((int)rank, (int)rank_in);
         }
 
         public ParamMeasure(Address addr, int sz, Datatype dt, ParamIDIO io_in)
@@ -183,7 +183,7 @@ namespace Sla.DECCORE
             vndata.size = sz;
             vntype = dt;
             io = io_in;
-            rank = WORSTRANK;
+            rank = ParamRank.WORSTRANK;
         }
 
         private void calculateRank(bool best, Varnode basevn, PcodeOp ignoreop)
@@ -191,18 +191,18 @@ namespace Sla.DECCORE
             WalkState state;
             state.best = best;
             state.depth = 0;
-            if (best)
-            {
-                rank = WORSTRANK;
-                state.terminalrank = (io == INPUT) ? DIRECTREAD : DIRECTWRITEWITHOUTREAD;
+            if (best) {
+                rank = ParamRank.WORSTRANK;
+                state.terminalrank = (io == ParamIDIO.INPUT)
+                    ? ParamRank.DIRECTREAD
+                    : ParamRank.DIRECTWRITEWITHOUTREAD;
             }
-            else
-            {
-                rank = BESTRANK;
-                state.terminalrank = INDIRECT;
+            else {
+                rank = ParamRank.BESTRANK;
+                state.terminalrank = ParamRank.INDIRECT;
             }
             numcalls = 0;
-            if (io == INPUT)
+            if (io == ParamIDIO.INPUT)
                 walkforward(state, ignoreop, basevn);
             else
                 walkbackward(state, ignoreop, basevn);
@@ -212,13 +212,13 @@ namespace Sla.DECCORE
         {
             encoder.openElement(tag);
             encoder.openElement(ElementId.ELEM_ADDR);
-            vndata.space.encodeAttributes(encoder, vndata.offset, vndata.size);
+            vndata.space.encodeAttributes(encoder, vndata.offset, (int)vndata.size);
             encoder.closeElement(ElementId.ELEM_ADDR);
             vntype.encode(encoder);
             if (moredetail)
             {
                 encoder.openElement(ElementId.ELEM_RANK);
-                encoder.writeSignedInteger(AttributeId.ATTRIB_VAL, rank);
+                encoder.writeSignedInteger(AttributeId.ATTRIB_VAL, (int)rank);
                 encoder.closeElement(ElementId.ELEM_RANK);
             }
             encoder.closeElement(tag);
@@ -226,12 +226,12 @@ namespace Sla.DECCORE
 
         private void savePretty(TextWriter s, bool moredetail)
         {
-            s << "  Space: " << vndata.space.getName() << "\n";
-            s << "  Addr: " << vndata.offset << "\n";
-            s << "  Size: " << vndata.size << "\n";
-            s << "  Rank: " << rank << "\n";
+            s.WriteLine($"  Space: {vndata.space.getName()}");
+            s.WriteLine($"  Space: {vndata.offset}");
+            s.WriteLine($"  Space: {vndata.size}");
+            s.WriteLine($"  Space: {rank}");
         }
 
-        private int getMeasure() => (int) rank;
+        private ParamRank getMeasure() => rank;
     }
 }

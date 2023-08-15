@@ -16,7 +16,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleEqual2Zero(getGroup());
@@ -28,11 +28,11 @@ namespace Sla.DECCORE
         /// The Rule also applies to INT_NOTEQUAL comparisons.
         public override void getOpList(List<OpCode> oplist)
         {
-            uint list[] = { OpCode.CPUI_INT_EQUAL, OpCode.CPUI_INT_NOTEQUAL };
-            oplist.insert(oplist.end(), list, list + 2);
+            OpCode[] list = { OpCode.CPUI_INT_EQUAL, OpCode.CPUI_INT_NOTEQUAL };
+            oplist.AddRange(list);
         }
 
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
             Varnode vn;
             Varnode vn2;
@@ -59,7 +59,7 @@ namespace Sla.DECCORE
                 if (!boolop.isBoolOutput()) return 0;
             }
             //  if (addvn.lone_descendant() != op) return 0;
-            addop = addvn.getDef();
+            addop = addvn.getDef() ?? throw new BugException();
             if (addop == (PcodeOp)null) return 0;
             if (addop.code() != OpCode.CPUI_INT_ADD) return 0;
             vn = addop.getIn(0);
@@ -70,15 +70,12 @@ namespace Sla.DECCORE
                 unnegvn.copySymbolIfValid(vn2);    // Propagate any markup
                 posvn = vn;
             }
-            else
-            {
-                if ((vn.isWritten()) && (vn.getDef().code() == OpCode.CPUI_INT_MULT))
-                {
+            else {
+                if ((vn.isWritten()) && (vn.getDef().code() == OpCode.CPUI_INT_MULT)) {
                     negvn = vn;
                     posvn = vn2;
                 }
-                else if ((vn2.isWritten()) && (vn2.getDef().code() == OpCode.CPUI_INT_MULT))
-                {
+                else if ((vn2.isWritten()) && (vn2.getDef().code() == OpCode.CPUI_INT_MULT)) {
                     negvn = vn2;
                     posvn = vn;
                 }

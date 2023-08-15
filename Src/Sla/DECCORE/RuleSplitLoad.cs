@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -17,7 +17,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleSplitLoad(getGroup());
@@ -30,21 +30,19 @@ namespace Sla.DECCORE
         /// rewrite the LOAD operator as multiple LOADs.
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_LOAD);
+            oplist.Add(OpCode.CPUI_LOAD);
         }
 
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
-            Datatype* inType = SplitDatatype::getValueDatatype(op, op.getOut().getSize(), data.getArch().types);
+            Datatype inType = SplitDatatype.getValueDatatype(op, op.getOut().getSize(), data.getArch().types);
             if (inType == (Datatype)null)
-                return 0;
+                return false;
             type_metatype metain = inType.getMetatype();
             if (metain != type_metatype.TYPE_STRUCT && metain != type_metatype.TYPE_ARRAY && metain != type_metatype.TYPE_PARTIALSTRUCT)
-                return 0;
-            SplitDatatype splitter(data);
-            if (splitter.splitLoad(op, inType))
-                return 1;
-            return 0;
+                return false;
+            SplitDatatype splitter = new SplitDatatype(data);
+            return splitter.splitLoad(op, inType);
         }
     }
 }

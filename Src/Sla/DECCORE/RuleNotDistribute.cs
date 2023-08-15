@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +16,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleNotDistribute(getGroup());
@@ -26,19 +26,18 @@ namespace Sla.DECCORE
         /// \brief Distribute BOOL_NEGATE:  `!(V && W)  =>  !V || !W`
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_BOOL_NEGATE);
+            oplist.Add(OpCode.CPUI_BOOL_NEGATE);
         }
 
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
-            PcodeOp* compop = op.getIn(0).getDef();
-            PcodeOp* newneg1,*newneg2;
-            Varnode* newout1,*newout2;
+            PcodeOp? compop = op.getIn(0).getDef();
+            PcodeOp newneg1, newneg2;
+            Varnode newout1, newout2;
             OpCode opc;
 
             if (compop == (PcodeOp)null) return 0;
-            switch (compop.code())
-            {
+            switch (compop.code()) {
                 case OpCode.CPUI_BOOL_AND:
                     opc = OpCode.CPUI_BOOL_OR;
                     break;

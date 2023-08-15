@@ -100,7 +100,7 @@ namespace Sla.DECCORE
         }
 
         /// Build an unattached Scope to be associated as a sub-scope of \b this
-        protected override Scope buildSubScope(ulong id, string nm)
+        internal override Scope buildSubScope(ulong id, string nm)
         {
             return new ScopeInternal(id, nm, glb);
         }
@@ -141,12 +141,12 @@ namespace Sla.DECCORE
             }
         }
 
-        protected override SymbolEntry addMapInternal(Symbol sym, uint exfl, Address addr,
+        protected override SymbolEntry addMapInternal(Symbol sym, Varnode.varnode_flags exfl, Address addr,
             int off, int sz, RangeList uselim)
         {
             // Find or create the appropriate rangemap
             AddrSpace spc = addr.getSpace();
-            EntryMap rangemap? = maptable[spc.getIndex()];
+            EntryMap? rangemap = maptable[spc.getIndex()];
             if (rangemap == (EntryMap)null) {
                 rangemap = new EntryMap();
                 maptable[spc.getIndex()] = rangemap;
@@ -173,7 +173,7 @@ namespace Sla.DECCORE
             return &(*iter);
         }
 
-        protected override SymbolEntry addDynamicMapInternal(Symbol sym, uint exfl, ulong hash,
+        protected override SymbolEntry addDynamicMapInternal(Symbol sym, Varnode.varnode_flags exfl, ulong hash,
             int off, int sz, RangeList uselim)
         {
             dynamicentry.Add(new SymbolEntry(sym, exfl, hash, off, sz, uselim));
@@ -1006,13 +1006,13 @@ namespace Sla.DECCORE
             return category[(int)cat].size();
         }
 
-        public override Symbol? getCategorySymbol(int cat, int ind)
+        public override Symbol? getCategorySymbol(Symbol.SymbolCategory cat, int ind)
         {
-            if ((cat >= category.size()) || (cat < 0))
+            if (((int)cat >= category.Count) || (cat < 0))
                 return (Symbol)null;
-            if ((ind < 0) || (ind >= category[cat].size()))
+            if ((ind < 0) || (ind >= category[(int)cat].size()))
                 return (Symbol)null;
-            return category[cat][ind];
+            return category[(int)cat][ind];
         }
 
         public override void setCategory(Symbol sym, Symbol.SymbolCategory cat, int ind)
@@ -1039,7 +1039,7 @@ namespace Sla.DECCORE
         /// Run through all the symbols whose name is undefined. Build a variable name, uniquify it, and
         /// rename the variable.
         /// \param base is the base index to start at for generating generic names
-        public override assignDefaultNames(int @base)
+        public override void assignDefaultNames(int @base)
         {
             SymbolNameTree::const_iterator iter;
 

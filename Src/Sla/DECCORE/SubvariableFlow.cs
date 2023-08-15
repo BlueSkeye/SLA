@@ -182,9 +182,7 @@ namespace Sla.DECCORE
                 iter = varmap.find(vn);
                 res = &(*iter).second;
                 inworklist = false;
-                if (res.mask != mask)
-                    return (ReplaceVarnode)null;
-                return res;
+                return (res.mask != mask) ? (ReplaceVarnode)null : res;
             }
 
             if (vn.isConstant()) {
@@ -193,7 +191,7 @@ namespace Sla.DECCORE
                     // Check that -vn- is a sign extension
                     ulong cval = vn.getOffset();
                     ulong smallval = cval & mask; // From its logical size
-                    ulong sextval = Globals.sign_extend(smallval, flowsize, vn.getSize());// to its fullsize
+                    ulong sextval = Globals.sign_extend(ref smallval, flowsize, vn.getSize());// to its fullsize
                     if (sextval != cval)
                         return (ReplaceVarnode)null;
                 }
@@ -206,38 +204,33 @@ namespace Sla.DECCORE
             if (vn.isAddrForce() && (vn.getSize() != flowsize))
                 return (ReplaceVarnode)null;
 
-            if (sextrestrictions)
-            {
-                if (vn.getSize() != flowsize)
-                {
+            if (sextrestrictions) {
+                if (vn.getSize() != flowsize) {
                     if ((!aggressive) && vn.isInput()) return (ReplaceVarnode)null; // Cannot assume input is sign extended
                     if (vn.isPersist()) return (ReplaceVarnode)null;
                 }
-                if (vn.isTypeLock() && vn.getType().getMetatype() != type_metatype.TYPE_PARTIALSTRUCT)
-                {
+                if (vn.isTypeLock() && vn.getType().getMetatype() != type_metatype.TYPE_PARTIALSTRUCT) {
                     if (vn.getType().getSize() != flowsize)
                         return (ReplaceVarnode)null;
                 }
             }
-            else
-            {
-                if (bitsize >= 8)
-                {       // Not a flag
+            else {
+                if (bitsize >= 8) {
+                    // Not a flag
                         // If the logical variable is not a flag, don't consider the case where multiple variables
                         // are packed into a single location, i.e. always consider it a single variable
                     if ((!aggressive) && ((vn.getConsume() & ~mask) != 0)) // If there is any use of value outside of the logical variable
                         return (ReplaceVarnode)null; // This probably means the whole thing is a variable, i.e. quit
-                    if (vn.isTypeLock() && vn.getType().getMetatype() != type_metatype.TYPE_PARTIALSTRUCT)
-                    {
+                    if (vn.isTypeLock() && vn.getType().getMetatype() != type_metatype.TYPE_PARTIALSTRUCT) {
                         int sz = vn.getType().getSize();
                         if (sz != flowsize)
                             return (ReplaceVarnode)null;
                     }
                 }
 
-                if (vn.isInput())
-                {       // Must be careful with inputs
-                        // Inputs must come in from the right register/memory
+                if (vn.isInput()) {
+                    // Must be careful with inputs
+                    // Inputs must come in from the right register/memory
                     if (bitsize < 8) return (ReplaceVarnode)null; // Dont create input flag
                     if ((mask & 1) == 0) return (ReplaceVarnode)null; // Dont create unique input
                                                                     // Its extremely important that the code (above) which doesn't allow packed variables be applied
@@ -245,7 +238,7 @@ namespace Sla.DECCORE
                 }
             }
 
-            res = &varmap[vn];
+            res = varmap[vn];
             vn.setMark();
             res.vn = vn;
             res.replacement = (Varnode)null;
@@ -253,17 +246,13 @@ namespace Sla.DECCORE
             res.def = (ReplaceOp)null;
             inworklist = true;
             // Check if vn already represents the logical variable being traced
-            if (vn.getSize() == flowsize)
-            {
-                if (mask == Globals.calc_mask(flowsize))
-                {
+            if (vn.getSize() == flowsize) {
+                if (mask == Globals.calc_mask((uint)flowsize)) {
                     inworklist = false;
                     res.replacement = vn;
                 }
-                else if (mask == 1)
-                {
-                    if ((vn.isWritten()) && (vn.getDef().isBoolOutput()))
-                    {
+                else if (mask == 1) {
+                    if ((vn.isWritten()) && (vn.getDef().isBoolOutput())) {
                         inworklist = false;
                         res.replacement = vn;
                     }
@@ -602,7 +591,7 @@ namespace Sla.DECCORE
                         break;
                     case OpCode.CPUI_SUBPIECE:
                         sa = (int)op.getIn(1).getOffset() * 8;
-                        newmask = (rvn.mask >> sa) & Globals.calc_mask(outvn.getSize());
+                        newmask = (rvn.mask >> sa) & Globals.calc_mask((uint)outvn.getSize());
                         if (newmask == 0) break;    // subvar is set to zero, truncate flow
                         if (rvn.mask != (newmask << sa)) {
                             // Some kind of truncation of the logical value
@@ -1245,7 +1234,7 @@ namespace Sla.DECCORE
         {
             ReplaceVarnode res = new ReplaceVarnode() {
                 vn = constvn,
-                replacement = (Varnode)null
+                replacement = (Varnode)null,
                 mask = mask
             };
             newvarlist.Add(res);
@@ -1257,7 +1246,7 @@ namespace Sla.DECCORE
             if (rop != (ReplaceOp)null) {
                 while (rop.input.size() <= slot)
                     rop.input.Add((ReplaceVarnode)null);
-                rop.input[slot] = res;
+                rop.input[(int)slot] = res;
             }
             return res;
         }
@@ -1282,7 +1271,7 @@ namespace Sla.DECCORE
             if (rop != (ReplaceOp)null) {
                 while (rop.input.size() <= slot)
                     rop.input.Add((ReplaceVarnode)null);
-                rop.input[slot] = res;
+                rop.input[(int)slot] = res;
             }
             return res;
         }
@@ -1535,7 +1524,7 @@ namespace Sla.DECCORE
                             // These are operations that flow the small variable into a bigger variable but
                             // where all the remaining bits are zero
                             int sa = piter.Current.slot;
-                            List<Varnode> invec;
+                            List<Varnode> invec = new List<Varnode>();
                             Varnode inVn = getReplaceVarnode(piter.Current.in1);
                             int outSize = pullop.getOut().getSize();
                             if (sa == 0) {
@@ -1557,7 +1546,7 @@ namespace Sla.DECCORE
                                 }
                                 else
                                     invec.Add(inVn);
-                                invec.Add(fd.newConstant(4, sa));
+                                invec.Add(fd.newConstant(4, (ulong)sa));
                                 fd.opSetAllInput(pullop, invec);
                                 fd.opSetOpcode(pullop, OpCode.CPUI_INT_LEFT);
                             }

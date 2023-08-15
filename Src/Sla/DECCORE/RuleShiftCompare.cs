@@ -18,7 +18,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleShiftCompare(getGroup());
@@ -36,7 +36,7 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_INT_NOTEQUAL);
         }
 
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
             Varnode shiftvn;
             Varnode constvn;

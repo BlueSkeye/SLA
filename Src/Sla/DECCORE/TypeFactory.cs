@@ -46,7 +46,7 @@ namespace Sla.DECCORE
         /// present in \b this type factory
         /// \param ct is the data-type to match
         /// \return the matching Datatype or NULL
-        private Datatype findNoName(Datatype ct)
+        private Datatype? findNoName(Datatype ct)
         {
             DatatypeSet::const_iterator iter;
             Datatype? res = (Datatype)null;
@@ -83,7 +83,8 @@ namespace Sla.DECCORE
         /// \return the matching Datatype object in this container
         private Datatype findAdd(Datatype ct)
         {
-            Datatype newtype, res;
+            Datatype newtype;
+            Datatype? res;
 
             if (ct.name.Length != 0) {
                 // If there is a name
@@ -155,7 +156,7 @@ namespace Sla.DECCORE
             Datatype defedType = decodeType(decoder);
             //  decoder.closeElement(elemId);
             if (defedType.isVariableLength()) {
-                id = Datatype.hashSize(id, defedType.size);
+                id = Datatype.hashSize(id, defedType.size());
             }
             if (defedType.getMetatype() == type_metatype.TYPE_STRUCT || defedType.getMetatype() == type_metatype.TYPE_UNION)
             {
@@ -201,7 +202,7 @@ namespace Sla.DECCORE
             }
             else if (ct.getMetatype() != type_metatype.TYPE_STRUCT)
                 throw new LowlevelError("Trying to redefine type: " + ts.name);
-            ts.decodeFields(decoder, *this);
+            ts.decodeFields(decoder, this);
             if (!ct.isIncomplete())
             {   // Structure of this name was already present
                 if (0 != ct.compareDependency(ts))
@@ -223,7 +224,7 @@ namespace Sla.DECCORE
         /// \return the newly minted union data-type
         private Datatype decodeUnion(Decoder decoder, bool forcecore)
         {
-            TypeUnion tu;
+            TypeUnion tu = new TypeUnion();
             //  uint elemId = decoder.openElement();
             tu.decodeBasic(decoder);
             if (forcecore)
@@ -234,7 +235,7 @@ namespace Sla.DECCORE
             }
             else if (ct.getMetatype() != type_metatype.TYPE_UNION)
                 throw new LowlevelError("Trying to redefine type: " + tu.name);
-            tu.decodeFields(decoder, *this);
+            tu.decodeFields(decoder, this);
             if (!ct.isIncomplete())
             {   // Structure of this name was already present
                 if (0 != ct.compareDependency(tu))
@@ -272,7 +273,7 @@ namespace Sla.DECCORE
             }
             else if (ct.getMetatype() != type_metatype.TYPE_CODE)
                 throw new LowlevelError("Trying to redefine type: " + tc.name);
-            tc.decodePrototype(decoder, isConstructor, isDestructor, *this);
+            tc.decodePrototype(decoder, isConstructor, isDestructor, this);
             if (!ct.isIncomplete()) {
                 // Code data-type of this name was already present
                 if (0 != ct.compareDependency(tc))
@@ -680,7 +681,7 @@ namespace Sla.DECCORE
         /// \param fixedsize is 0 or the forced size of the structure
         /// \param flags are other flags to set on the structure
         /// \return true if modification was successful
-        public bool setFields(List<TypeField> fd, TypeStruct ot, int fixedsize, uint flags)
+        public bool setFields(List<TypeField> fd, TypeStruct ot, int fixedsize, Datatype.Properties flags)
         {
             if (!ot.isIncomplete())
                 throw new LowlevelError("Can only set fields on an incomplete structure");
@@ -709,8 +710,8 @@ namespace Sla.DECCORE
 
             tree.erase(ot);
             ot.setFields(fd);
-            ot.flags &= ~(uint)Datatype::type_incomplete;
-            ot.flags |= (flags & (Datatype::opaque_string | Datatype::variable_length | Datatype::type_incomplete));
+            ot.flags &= ~(uint)Datatype.Properties.type_incomplete;
+            ot.flags |= (flags & (Datatype::opaque_string | Datatype.Properties.variable_length | Datatype.Properties.type_incomplete));
             if (fixedsize > 0)
             {       // If the caller is trying to force a size
                 if (fixedsize > ot.size)   // If the forced size is bigger than the size required for fields
@@ -749,8 +750,8 @@ namespace Sla.DECCORE
 
             tree.erase(ot);
             ot.setFields(fd);
-            ot.flags &= ~(uint)Datatype::type_incomplete;
-            ot.flags |= (flags & (Datatype::variable_length | Datatype::type_incomplete));
+            ot.flags &= ~(uint)Datatype.Properties.type_incomplete;
+            ot.flags |= (flags & (Datatype.Properties.variable_length | Datatype.Properties.type_incomplete));
             if (fixedsize > 0)
             {       // If the caller is trying to force a size
                 if (fixedsize > ot.size)   // If the forced size is bigger than the size required for fields
@@ -768,14 +769,14 @@ namespace Sla.DECCORE
         /// \param fp is the given prototype to copy
         /// \param newCode is the given code data-type
         /// \param flags are additional flags to transfer into the code data-type
-        public void setPrototype(FuncProto fp, TypeCode newCode, uint flags)
+        public void setPrototype(FuncProto fp, TypeCode newCode, Datatype.Properties flags)
         {
             if (!newCode.isIncomplete())
                 throw new LowlevelError("Can only set prototype on incomplete data-type");
             tree.erase(newCode);
             newCode.setPrototype(this, fp);
-            newCode.flags &= ~(uint)Datatype::type_incomplete;
-            newCode.flags |= (flags & (Datatype::variable_length | Datatype::type_incomplete));
+            newCode.flags &= ~Datatype.Properties.type_incomplete;
+            newCode.flags |= (flags & (Datatype.Properties.variable_length | Datatype.Properties.type_incomplete));
             tree.insert(newCode);
         }
 
@@ -791,39 +792,32 @@ namespace Sla.DECCORE
         public bool setEnumValues(List<string> namelist, List<ulong> vallist, List<bool> assignlist,
             TypeEnum te)
         {
-            Dictionary<ulong, string> nmap;
-            Dictionary<ulong, string>::iterator mapiter;
+            Dictionary<ulong, string> nmap = new Dictionary<ulong, string>();
 
-            ulong mask = Globals.calc_mask(te.getSize());
+            ulong mask = Globals.calc_mask((uint)te.getSize());
             ulong maxval = 0;
-            for (uint i = 0; i < namelist.size(); ++i)
-            {
+            for (int i = 0; i < namelist.size(); ++i) {
                 ulong val;
-                if (assignlist[i])
-                {   // Did the user explicitly set value
+                if (assignlist[i]) {
+                    // Did the user explicitly set value
                     val = vallist[i];
                     if (val > maxval)
                         maxval = val;
                     val &= mask;
-                    mapiter = nmap.find(val);
-                    if (mapiter != nmap.end()) return false; // Duplicate value
+                    if (nmap.ContainsKey(val)) return false; // Duplicate value
                     nmap[val] = namelist[i];
                 }
             }
-            for (uint i = 0; i < namelist.size(); ++i)
-            {
+            for (int i = 0; i < namelist.size(); ++i) {
                 ulong val;
-                if (!assignlist[i])
-                {
+                if (!assignlist[i]) {
                     val = maxval;
                     maxval += 1;
                     val &= mask;
-                    mapiter = nmap.find(val);
-                    if (mapiter != nmap.end()) return false;
+                    if (nmap.ContainsKey(val)) return false;
                     nmap[val] = namelist[i];
                 }
             }
-
             tree.erase(te);
             te.setNameMap(nmap);
             tree.insert(te);
@@ -954,14 +948,13 @@ namespace Sla.DECCORE
                 if (ct != (Datatype)null)
                     return ct;
             }
-            if (s > glb.max_basetype_size)
-            {
+            if (s > glb.max_basetype_size) {
                 // Create array of unknown bytes to match size
-                ct = typecache[1][TYPE_UNKNOWN - type_metatype.TYPE_FLOAT];
+                ct = typecache[1][type_metatype.TYPE_UNKNOWN - type_metatype.TYPE_FLOAT];
                 ct = getTypeArray(s, ct);
-                return findAdd(*ct);
+                return findAdd(ct);
             }
-            TypeBase tmp(s, m);
+            TypeBase tmp = new TypeBase(s, m);
             return findAdd(tmp);
         }
 

@@ -16,7 +16,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleSwitchSingle(getGroup());
@@ -29,7 +29,7 @@ namespace Sla.DECCORE
             oplist.Add(CPUI_BRANCHIND);
         }
 
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
             BlockBasic* bb = op.getParent();
             if (bb.sizeOut() != 1) return 0;

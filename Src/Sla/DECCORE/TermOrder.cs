@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -35,8 +35,8 @@ namespace Sla.DECCORE
             return (-1 == op1.getVarnode().termOrder(op2.getVarnode()));
         }
 
-    /// Construct given root PcodeOp
-    public TermOrder(PcodeOp rt)
+        /// Construct given root PcodeOp
+        public TermOrder(PcodeOp rt)
         {
             root = rt;
         }
@@ -49,52 +49,49 @@ namespace Sla.DECCORE
         /// OpCode.CPUI_INT_ADD op, collect all the Varnode \e terms of the expression.
         public void collect()
         {
-            Varnode* curvn;
-            PcodeOp* curop;
-            PcodeOp* subop,*multop;
+            Varnode curvn;
+            PcodeOp curop;
+            PcodeOp subop;
+            PcodeOp? multop;
 
-            List<PcodeOp*> opstack;   // Depth first traversal path
-            List<PcodeOp*> multstack;
+            List<PcodeOp> opstack = new List<PcodeOp>();   // Depth first traversal path
+            List<PcodeOp?> multstack = new List<PcodeOp?>();
 
             opstack.Add(root);
             multstack.Add((PcodeOp)null);
 
-            while (!opstack.empty())
-            {
+            while (!opstack.empty()) {
                 curop = opstack.GetLastItem();
                 multop = multstack.GetLastItem();
                 opstack.RemoveLastItem();
                 multstack.RemoveLastItem();
-                for (int i = 0; i < curop.numInput(); ++i)
-                {
-                    curvn = curop.getIn(i);    // curvn is a node of the subtree IF
-                    if (!curvn.isWritten())
-                    { // curvn is not defined by another operation
-                        terms.Add(AdditiveEdge(curop, i, multop));
+                for (int i = 0; i < curop.numInput(); ++i) {
+                    // curvn is a node of the subtree IF
+                    curvn = curop.getIn(i);
+                    if (!curvn.isWritten()) {
+                        // curvn is not defined by another operation
+                        terms.Add(new AdditiveEdge(curop, i, multop));
                         continue;
                     }
-                    if (curvn.loneDescend() == (PcodeOp)null)
-                    { // curvn has more then one use
-                        terms.Add(AdditiveEdge(curop, i, multop));
+                    if (curvn.loneDescend() == (PcodeOp)null) {
+                        // curvn has more then one use
+                        terms.Add(new AdditiveEdge(curop, i, multop));
                         continue;
                     }
                     subop = curvn.getDef();
-                    if (subop.code() != OpCode.CPUI_INT_ADD)
-                    { // or if curvn is defined with some other type of op
-                        if ((subop.code() == OpCode.CPUI_INT_MULT) && (subop.getIn(1).isConstant()))
-                        {
-                            PcodeOp* addop = subop.getIn(0).getDef();
-                            if ((addop != (PcodeOp)null) && (addop.code() == OpCode.CPUI_INT_ADD))
-                            {
-                                if (addop.getOut().loneDescend() != (PcodeOp)null)
-                                {
+                    if (subop.code() != OpCode.CPUI_INT_ADD) {
+                        // or if curvn is defined with some other type of op
+                        if ((subop.code() == OpCode.CPUI_INT_MULT) && (subop.getIn(1).isConstant())) {
+                            PcodeOp? addop = subop.getIn(0).getDef();
+                            if ((addop != (PcodeOp)null) && (addop.code() == OpCode.CPUI_INT_ADD)) {
+                                if (addop.getOut().loneDescend() != (PcodeOp)null) {
                                     opstack.Add(addop);
                                     multstack.Add(subop);
                                     continue;
                                 }
                             }
                         }
-                        terms.Add(AdditiveEdge(curop, i, multop));
+                        terms.Add(new AdditiveEdge(curop, i, multop));
                         continue;
                     }
                     opstack.Add(subop);
@@ -106,10 +103,9 @@ namespace Sla.DECCORE
         /// Sort the terms using additiveCompare()
         public void sortTerms()
         {
-            for (List<AdditiveEdge>::iterator iter = terms.begin(); iter != terms.end(); ++iter)
-                sorter.Add(&(*iter));
-
-            sort(sorter.begin(), sorter.end(), additiveCompare);
+            foreach (AdditiveEdge edge in terms)
+                sorter.Add(edge);
+            sorter.Sort(additiveCompare);
         }
 
         /// Get the sorted list of references

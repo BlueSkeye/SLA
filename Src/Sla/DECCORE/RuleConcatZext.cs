@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +16,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleConcatZext(getGroup());
@@ -26,17 +26,16 @@ namespace Sla.DECCORE
         /// \brief Commute PIECE with INT_ZEXT:  `concat(zext(V),W)  =>  zext(concat(V,W))`
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_PIECE);
+            oplist.Add(OpCode.CPUI_PIECE);
         }
 
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
-            PcodeOp* zextop;
-            Varnode* hi,*lo;
+            Varnode hi, lo;
 
             hi = op.getIn(0);
             if (!hi.isWritten()) return 0;
-            zextop = hi.getDef();
+            PcodeOp zextop = hi.getDef() ?? throw new BugException();
             if (zextop.code() != OpCode.CPUI_INT_ZEXT) return 0;
             hi = zextop.getIn(0);
             lo = op.getIn(1);
@@ -44,9 +43,9 @@ namespace Sla.DECCORE
             if (lo.isFree()) return 0;
 
             // Create new (earlier) concat out of hi and lo
-            PcodeOp* newconcat = data.newOp(2, op.getAddr());
+            PcodeOp newconcat = data.newOp(2, op.getAddr());
             data.opSetOpcode(newconcat, OpCode.CPUI_PIECE);
-            Varnode* newvn = data.newUniqueOut(hi.getSize() + lo.getSize(), newconcat);
+            Varnode newvn = data.newUniqueOut(hi.getSize() + lo.getSize(), newconcat);
             data.opSetInput(newconcat, hi, 0);
             data.opSetInput(newconcat, lo, 1);
             data.opInsertBefore(newconcat, op);

@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +16,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleAndOrLump(getGroup());
@@ -26,25 +26,21 @@ namespace Sla.DECCORE
         /// \brief Collapse constants in logical expressions:  `(V & c) & d  =>  V & (c & d)`
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_INT_AND);
-            oplist.Add(CPUI_INT_OR);
-            oplist.Add(CPUI_INT_XOR);
+            oplist.Add(OpCode.CPUI_INT_AND);
+            oplist.Add(OpCode.CPUI_INT_OR);
+            oplist.Add(OpCode.CPUI_INT_XOR);
         }
 
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
-            OpCode opc;
-            Varnode* vn1,*basevn;
-            PcodeOp* op2;
-
-            opc = op.code();
+            OpCode opc = op.code();
             if (!op.getIn(1).isConstant()) return 0;
-            vn1 = op.getIn(0);
+            Varnode vn1 = op.getIn(0);
             if (!vn1.isWritten()) return 0;
-            op2 = vn1.getDef();
+            PcodeOp op2 = vn1.getDef() ?? throw new BugException();
             if (op2.code() != opc) return 0; // Must be same op
             if (!op2.getIn(1).isConstant()) return 0;
-            basevn = op2.getIn(0);
+            Varnode basevn = op2.getIn(0);
             if (basevn.isFree()) return 0;
 
             ulong val = op.getIn(1).getOffset();

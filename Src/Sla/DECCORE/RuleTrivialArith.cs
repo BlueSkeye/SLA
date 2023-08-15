@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +16,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleTrivialArith(getGroup());
@@ -37,30 +37,27 @@ namespace Sla.DECCORE
         /// Handles other signed, boolean, and floating-point variants.
         public override void getOpList(List<OpCode> oplist)
         {
-            uint list[] ={ OpCode.CPUI_INT_NOTEQUAL, OpCode.CPUI_INT_SLESS, OpCode.CPUI_INT_LESS, OpCode.CPUI_BOOL_XOR, OpCode.CPUI_BOOL_AND, OpCode.CPUI_BOOL_OR,
-         OpCode.CPUI_INT_EQUAL, OpCode.CPUI_INT_SLESSEQUAL, OpCode.CPUI_INT_LESSEQUAL,
-         OpCode.CPUI_INT_XOR, OpCode.CPUI_INT_AND, OpCode.CPUI_INT_OR,
-                 OpCode.CPUI_FLOAT_EQUAL, OpCode.CPUI_FLOAT_NOTEQUAL, OpCode.CPUI_FLOAT_LESS, OpCode.CPUI_FLOAT_LESSEQUAL };
-            oplist.insert(oplist.end(), list, list + 16);
+            OpCode[] list ={ OpCode.CPUI_INT_NOTEQUAL, OpCode.CPUI_INT_SLESS, OpCode.CPUI_INT_LESS, OpCode.CPUI_BOOL_XOR, OpCode.CPUI_BOOL_AND, OpCode.CPUI_BOOL_OR,
+                OpCode.CPUI_INT_EQUAL, OpCode.CPUI_INT_SLESSEQUAL, OpCode.CPUI_INT_LESSEQUAL,
+                OpCode.CPUI_INT_XOR, OpCode.CPUI_INT_AND, OpCode.CPUI_INT_OR,
+                OpCode.CPUI_FLOAT_EQUAL, OpCode.CPUI_FLOAT_NOTEQUAL, OpCode.CPUI_FLOAT_LESS, OpCode.CPUI_FLOAT_LESSEQUAL };
+            oplist.AddRange(list);
         }
 
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* vn;
-            Varnode* in0,*in1;
+            Varnode? vn;
 
             if (op.numInput() != 2) return 0;
-            in0 = op.getIn(0);
-            in1 = op.getIn(1);
-            if (in0 != in1)
-            {       // Inputs must be identical
+            Varnode in0 = op.getIn(0);
+            Varnode in1 = op.getIn(1);
+            if (in0 != in1) {
+                // Inputs must be identical
                 if (!in0.isWritten()) return 0;
                 if (!in1.isWritten()) return 0;
-                if (!in0.getDef().isCseMatch(in1.getDef())) return 0; // or constructed identically
+                if (!in0.getDef().isCseMatch(in1.getDef())) return false; // or constructed identically
             }
-            switch (op.code())
-            {
-
+            switch (op.code()) {
                 case OpCode.CPUI_INT_NOTEQUAL: // Boolean 0
                 case OpCode.CPUI_INT_SLESS:
                 case OpCode.CPUI_INT_LESS:
@@ -77,7 +74,7 @@ namespace Sla.DECCORE
                     vn = data.newConstant(1, 1);
                     break;
                 case OpCode.CPUI_INT_XOR:      // Same size 0
-                                        //  case OpCode.CPUI_INT_SUB:
+                //case OpCode.CPUI_INT_SUB:
                     vn = data.newConstant(op.getOut().getSize(), 0);
                     break;
                 case OpCode.CPUI_BOOL_AND:     // Identity
@@ -87,7 +84,7 @@ namespace Sla.DECCORE
                     vn = (Varnode)null;
                     break;
                 default:
-                    return 0;
+                    return false;
             }
 
             data.opRemoveInput(op, 1);
@@ -95,7 +92,7 @@ namespace Sla.DECCORE
             if (vn != (Varnode)null)
                 data.opSetInput(op, vn, 0);
 
-            return 1;
+            return true;
         }
     }
 }

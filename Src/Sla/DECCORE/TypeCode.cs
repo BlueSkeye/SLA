@@ -1,11 +1,10 @@
-﻿using ghidra;
+﻿using Sla.CORE;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.Intrinsics;
-using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
@@ -18,7 +17,7 @@ namespace Sla.DECCORE
     {
         // friend class TypeFactory;
         /// If non-null, this describes the prototype of the underlying function
-        protected FuncProto proto;
+        internal FuncProto proto;
         /// Factory owning \b this
         protected TypeFactory factory;
 
@@ -30,7 +29,7 @@ namespace Sla.DECCORE
         /// \param intypes is the list of input parameters
         /// \param dotdotdot is true if the prototype takes variable arguments
         /// \param voidtype is the reference "void" data-type
-        internal void setPrototype(TypeFactory tfact, ProtoModel model, Datatype outtype,
+        internal void setPrototype(TypeFactory tfact, ProtoModel model, Datatype? outtype,
             List<Datatype> intypes, bool dotdotdot, Datatype voidtype)
         {
             factory = tfact;
@@ -59,27 +58,25 @@ namespace Sla.DECCORE
         /// \param fp is the prototype to set (may be null)
         protected void setPrototype(TypeFactory typegrp,FuncProto fp)
         {
-            if (proto != (FuncProto)null)
-            {
-                delete proto;
+            if (proto != (FuncProto)null) {
+                // delete proto;
                 proto = (FuncProto)null;
-                factory = (TypeFactory*)0;
+                factory = (TypeFactory)null;
             }
             if (fp != (FuncProto)null) {
                 factory = typegrp;
                 proto = new FuncProto();
-                proto.copy(*fp);
+                proto.copy(fp);
             }
         }
 
         /// Restore stub of data-type without the full prototype
         /// \param decoder is the stream decoder
-        protected void decodeStub(Decoder decoder)
+        internal void decodeStub(Sla.CORE.Decoder decoder)
         {
-            if (decoder.peekElement() != 0)
-            {
+            if (decoder.peekElement() != 0) {
                 // Traditionally a <prototype> tag implies variable length, without a "varlength" attribute
-                flags |= variable_length;
+                flags |= Properties.variable_length;
             }
             decodeBasic(decoder);
         }
@@ -90,13 +87,12 @@ namespace Sla.DECCORE
         /// \param isConstructor is \b true if the prototype is a constructor
         /// \param isDestructor is \b true if the prototype is a destructor
         /// \param typegrp is the factory owning the code object
-        protected void decodePrototype(Decoder decoder, bool isConstructor, bool isDestructor,
+        internal void decodePrototype(Decoder decoder, bool isConstructor, bool isDestructor,
             TypeFactory typegrp)
         {
-            if (decoder.peekElement() != 0)
-            {
-                Architecture* glb = typegrp.getArch();
-                factory = &typegrp;
+            if (decoder.peekElement() != 0) {
+                Architecture glb = typegrp.getArch();
+                factory = typegrp;
                 proto = new FuncProto();
                 proto.setInternal(glb.defaultfp, typegrp.getTypeVoid());
                 proto.decode(decoder, glb);
@@ -112,10 +108,9 @@ namespace Sla.DECCORE
         {
             proto = (FuncProto)null;
             factory = op.factory;
-            if (op.proto != (FuncProto)null)
-            {
+            if (op.proto != (FuncProto)null) {
                 proto = new FuncProto();
-                proto.copy(*op.proto);
+                proto.copy(op.proto);
             }
         }
 
@@ -124,7 +119,7 @@ namespace Sla.DECCORE
             : base(1, type_metatype.TYPE_CODE)
         {
             proto = (FuncProto)null;
-            factory = (TypeFactory*)0;
+            factory = (TypeFactory)null;
             flags |= type_incomplete;
         }
 
@@ -137,20 +132,17 @@ namespace Sla.DECCORE
         /// \return the comparison value
         public int compareBasic(TypeCode op)
         {
-            if (proto == (FuncProto)null)
-            {
+            if (proto == (FuncProto)null) {
                 if (op.proto == (FuncProto)null) return 0;
                 return 1;
             }
             if (op.proto == (FuncProto)null)
                 return -1;
 
-            if (!proto.hasModel())
-            {
+            if (!proto.hasModel()) {
                 if (op.proto.hasModel()) return 1;
             }
-            else
-            {
+            else {
                 if (!op.proto.hasModel()) return -1;
                 string model1 = proto.getModelName();
                 string model2 = op.proto.getModelName();
@@ -174,80 +166,75 @@ namespace Sla.DECCORE
 
         ~TypeCode()
         {
-            if (proto != (FuncProto)null)
-                delete proto;
+            //if (proto != (FuncProto)null)
+            //    delete proto;
         }
 
         public override void printRaw(TextWriter s)
         {
-            if (name.size() > 0)
-                s << name;
+            if (name.Length > 0)
+                s.Write(name);
             else
-                s << "funcptr";
-            s << "()";
+                s.Write("funcptr");
+            s.Write("()");
         }
 
-        public override Datatype getSubType(ulong off, ulong newoff)
+        public override Datatype getSubType(ulong off, out ulong newoff)
         {
-            if (factory == (TypeFactory*)0) return (Datatype)null;
-            *newoff = 0;
+            if (factory == (TypeFactory)null) return (Datatype)null;
+            newoff = 0;
             return factory.getBase(1, type_metatype.TYPE_CODE);  // Return code byte unattached to function prototype
         }
 
         public override int compare(Datatype op, int level)
         {
-            int res = Datatype::compare(op, level);
+            int res = base.compare(op, level);
             if (res != 0) return res;
-            TypeCode tc = (TypeCode*)&op;
+            TypeCode tc = (TypeCode)op;
             res = compareBasic(tc);
             if (res != 2) return res;
 
             level -= 1;
-            if (level < 0)
-            {
+            if (level < 0) {
                 if (id == op.getId()) return 0;
                 return (id < op.getId()) ? -1 : 1;
             }
             int nump = proto.numParams();
-            for (int i = 0; i < nump; ++i)
-            {
-                Datatype* param = proto.getParam(i).getType();
-                Datatype* opparam = tc.proto.getParam(i).getType();
-                int c = param.compare(*opparam, level);
+            for (int i = 0; i < nump; ++i) {
+                Datatype param = proto.getParam(i).getType();
+                Datatype opparam = tc.proto.getParam(i).getType();
+                int c = param.compare(opparam, level);
                 if (c != 0)
                     return c;
             }
-            Datatype* otype = proto.getOutputType();
-            Datatype* opotype = tc.proto.getOutputType();
-            if (otype == (Datatype)null)
-            {
+            Datatype? otype = proto.getOutputType();
+            Datatype opotype = tc.proto.getOutputType();
+            if (otype == (Datatype)null) {
                 if (opotype == (Datatype)null) return 0;
                 return 1;
             }
             if (opotype == (Datatype)null) return -1;
-            return otype.compare(*opotype, level);
+            return otype.compare(opotype, level);
         }
 
         public override int compareDependency(Datatype op)
         {
-            int res = Datatype::compareDependency(op);
+            int res = base.compareDependency(op);
             if (res != 0) return res;
-            TypeCode tc = (TypeCode*)&op;
+            TypeCode tc = (TypeCode)op;
             res = compareBasic(tc);
             if (res != 2) return res;
 
             int nump = proto.numParams();
-            for (int i = 0; i < nump; ++i)
-            {
-                Datatype* param = proto.getParam(i).getType();
-                Datatype* opparam = tc.proto.getParam(i).getType();
+            for (int i = 0; i < nump; ++i) {
+                Datatype param = proto.getParam(i).getType();
+                Datatype opparam = tc.proto.getParam(i).getType();
                 if (param != opparam)
                     return (param < opparam) ? -1 : 1; // Compare pointers directly
             }
-            Datatype* otype = proto.getOutputType();
-            Datatype* opotype = tc.proto.getOutputType();
-            if (otype == (Datatype)null)
-            {
+            Datatype otype = proto.getOutputType();
+            Datatype opotype = tc.proto.getOutputType();
+            if (otype == (Datatype)null) {
                 if (opotype == (Datatype)null) return 0;
                 return 1;
             }
@@ -257,12 +244,11 @@ namespace Sla.DECCORE
             return 0;
         }
 
-        public override Datatype clone() => new TypeCode(this);
+        internal override Datatype? clone() => new TypeCode(this);
 
         public override void encode(Sla.CORE.Encoder encoder)
         {
-            if (typedefImm != (Datatype)null)
-            {
+            if (typedefImm != (Datatype)null) {
                 encodeTypedef(encoder);
                 return;
             }

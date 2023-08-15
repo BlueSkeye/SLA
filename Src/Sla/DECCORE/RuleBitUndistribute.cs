@@ -16,7 +16,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleBitUndistribute(getGroup());
@@ -31,26 +31,24 @@ namespace Sla.DECCORE
         /// Works with INT_ZEXT, INT_SEXT, INT_LEFT, INT_RIGHT, and INT_SRIGHT.
         public override void getOpList(List<OpCode> oplist)
         {
-            uint list[] = { OpCode.CPUI_INT_AND, OpCode.CPUI_INT_OR, OpCode.CPUI_INT_XOR };
-            oplist.insert(oplist.end(), list, list + 3);
+            OpCode[] list = { OpCode.CPUI_INT_AND, OpCode.CPUI_INT_OR, OpCode.CPUI_INT_XOR };
+            oplist.AddRange(list);
         }
 
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
             Varnode vn1 = op.getIn(0);
             Varnode vn2 = op.getIn(1);
             Varnode in1;
             Varnode in2;
             Varnode vnextra;
-            OpCode opc;
 
             if (!vn1.isWritten()) return 0;
             if (!vn2.isWritten()) return 0;
 
-            opc = vn1.getDef().code();
+            OpCode opc = vn1.getDef().code();
             if (vn2.getDef().code() != opc) return 0;
-            switch (opc)
-            {
+            switch (opc) {
                 case OpCode.CPUI_INT_ZEXT:
                 case OpCode.CPUI_INT_SEXT:
                     // Test for full equality of extension operation
@@ -67,16 +65,14 @@ namespace Sla.DECCORE
                     // Test for full equality of shift operation
                     in1 = vn1.getDef().getIn(1);
                     in2 = vn2.getDef().getIn(1);
-                    if (in1.isConstant() && in2.isConstant())
-                    {
+                    if (in1.isConstant() && in2.isConstant()) {
                         if (in1.getOffset() != in2.getOffset())
                             return 0;
                         vnextra = data.newConstant(in1.getSize(), in1.getOffset());
                     }
                     else if (in1 != in2)
                         return 0;
-                    else
-                    {
+                    else {
                         if (in1.isFree()) return 0;
                         vnextra = in1;
                     }
@@ -90,8 +86,8 @@ namespace Sla.DECCORE
                     return 0;
             }
 
-            PcodeOp* newext = data.newOp(2, op.getAddr());
-            Varnode* smalllogic = data.newUniqueOut(in1.getSize(), newext);
+            PcodeOp newext = data.newOp(2, op.getAddr());
+            Varnode smalllogic = data.newUniqueOut(in1.getSize(), newext);
             data.opSetInput(newext, in1, 0);
             data.opSetInput(newext, in2, 1);
             data.opSetOpcode(newext, op.code());

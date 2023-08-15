@@ -1,9 +1,8 @@
-﻿using ghidra;
+﻿using Sla.CORE;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Reflection.Emit;
 using System.Runtime.Intrinsics;
 using System.Text;
 using System.Threading.Tasks;
@@ -72,37 +71,37 @@ namespace Sla.DECCORE
         {
             int opi = findStartOp(trialvn);
             if (opi < 0) return -1;
-            PcodeOp* startop = pathMeld.getOp(opi);
+            PcodeOp startop = pathMeld.getOp(opi);
 
             if (!values.empty())        // Have we already worked out the values and addresses
                 return opi;
 
-            EmulateFunction emul(fd);
+            EmulateFunction emul = new EmulateFunction(fd);
             //  if (loadpoints != (List<LoadTable> *)0)
             //    emul.setLoadCollect(true);
 
-            AddrSpace* spc = startop.getAddr().getSpace();
+            AddrSpace spc = startop.getAddr().getSpace();
             ulong val = startingvalue;
             ulong addr;
             uint total = 0;
             uint miss = 0;
-            set<Address> alreadyseen;
-            while (total < adset.size())
-            {
-                try
-                {
+            HashSet<Address> alreadyseen = new HashSet<Address>();
+            while (total < adset.size()) {
+                try {
                     addr = emul.emulatePath(val, pathMeld, startop, trialvn);
                 }
-                catch (LowlevelError err) { // Something went wrong with emulation
+                catch (LowlevelError ) { // Something went wrong with emulation
                     addr = 0;
                     miss = tolerance;       // Terminate early
                 }
                 addr = AddrSpace.addressToByte(addr, spc.getWordSize());
-                Address newaddr(spc, addr);
-                if (adset.find(newaddr) != adset.end())
-                {
-                    if (alreadyseen.insert(newaddr).second) // If this is the first time we've seen this address
+                Address newaddr = new Address(spc, addr);
+                if (adset.find(newaddr) != adset.end()) {
+                    if (!alreadyseen.Contains(newaddr)) {
+                        alreadyseen.Add(newaddr);
+                        // If this is the first time we've seen this address
                         total += 1;     // Count it
+                    }
                     values.Add(val);
                     addrtable.Add(newaddr);
                     // We may be seeing the same (valid) address over and over, without seeing others in -adset-
@@ -110,8 +109,7 @@ namespace Sla.DECCORE
                     if (values.size() > adset.size() + 100) break;
                     miss = 0;
                 }
-                else
-                {
+                else {
                     miss += 1;
                     if (miss >= tolerance) break;
                 }
@@ -122,8 +120,8 @@ namespace Sla.DECCORE
             //    emul.collectLoadPoints(*loadpoints);
             if (total == adset.size())
                 return opi;
-            values.clear();
-            addrtable.clear();
+            values.Clear();
+            addrtable.Clear();
             return -1;
         }
 
@@ -133,16 +131,12 @@ namespace Sla.DECCORE
         /// as the normalized switch and the addresses as the values, similar to JumpModelTrivial
         private void setupTrivial()
         {
-            set<Address>::const_iterator iter;
-            if (addrtable.empty())
-            {
-                for (iter = adset.begin(); iter != adset.end(); ++iter)
-                {
-                    Address addr = *iter;
+            if (addrtable.empty()) {
+                foreach (Address addr in adset) {
                     addrtable.Add(addr);
                 }
             }
-            values.clear();
+            values.Clear();
             for (int i = 0; i < addrtable.size(); ++i)
                 values.Add(addrtable[i].getOffset());
             varnodeIndex = 0;
@@ -156,17 +150,16 @@ namespace Sla.DECCORE
         /// It looks for the normalized Varnode in the most common jump-table constructions,
         /// otherwise it returns null.
         /// \return the potential normalized switch variable or null
-        private Varnode findLikelyNorm()
+        private Varnode? findLikelyNorm()
         {
-            Varnode* res = (Varnode)null;
-            PcodeOp* op;
-            uint i;
+            Varnode? res = (Varnode)null;
+            PcodeOp op;
+            int i;
 
-            for (i = 0; i < pathMeld.numOps(); ++i)
-            { // Look for last LOAD
+            for (i = 0; i < pathMeld.numOps(); ++i) {
+                // Look for last LOAD
                 op = pathMeld.getOp(i);
-                if (op.code() == OpCode.CPUI_LOAD)
-                {
+                if (op.code() == OpCode.CPUI_LOAD) {
                     res = pathMeld.getOpParent(i);
                     break;
                 }
@@ -200,7 +193,7 @@ namespace Sla.DECCORE
         /// \brief Clear varnodes and ops that are specific to one instance of a function
         private void clearCopySpecific()
         {
-            selectguards.clear();
+            selectguards.Clear();
             pathMeld.clear();
             normalvn = (Varnode)null;
             switchvn = (Varnode)null;
@@ -243,11 +236,10 @@ namespace Sla.DECCORE
         {
             clearCopySpecific();
             findDeterminingVarnodes(indop, 0);
-            if (!istrivial)
-            {       // If we haven't previously decided to use trivial model
-                Varnode* trialvn = (Varnode)null;
-                if (hash != 0)
-                {
+            if (!istrivial) {
+                // If we haven't previously decided to use trivial model
+                Varnode? trialvn = (Varnode)null;
+                if (hash != 0) {
                     DynamicHash dyn;
                     trialvn = dyn.findVarnode(fd, normaddress, hash);
                 }
@@ -255,11 +247,9 @@ namespace Sla.DECCORE
                 if ((trialvn == (Varnode)null) && (values.empty() || (hash == 0)))
                     trialvn = findLikelyNorm();
 
-                if (trialvn != (Varnode)null)
-                {
+                if (trialvn != (Varnode)null) {
                     int opi = trialNorm(fd, trialvn, 10);
-                    if (opi >= 0)
-                    {
+                    if (opi >= 0) {
                         varnodeIndex = opi;
                         normalvn = trialvn;
                         return true;
@@ -309,7 +299,7 @@ namespace Sla.DECCORE
 
         public override JumpModel clone(JumpTable jt)
         {
-            JumpBasicOverride* res = new JumpBasicOverride(jt);
+            JumpBasicOverride res = new JumpBasicOverride(jt);
             res.adset = adset;
             res.values = values;
             res.addrtable = addrtable;
@@ -325,26 +315,22 @@ namespace Sla.DECCORE
             // -startingvalue- is permanent
             // -normaddress- is permanent
             // -hash- is permanent
-            values.clear();
-            addrtable.clear();
+            values.Clear();
+            addrtable.Clear();
             istrivial = false;
         }
 
         public override void encode(Sla.CORE.Encoder encoder)
         {
-            set<Address>::const_iterator iter;
-
             encoder.openElement(ElementId.ELEM_BASICOVERRIDE);
-            for (iter = adset.begin(); iter != adset.end(); ++iter)
-            {
+            foreach (Address address in adset) {
                 encoder.openElement(ElementId.ELEM_DEST);
-                AddrSpace* spc = (*iter).getSpace();
-                ulong off = (*iter).getOffset();
+                AddrSpace spc = address.getSpace();
+                ulong off = address.getOffset();
                 spc.encodeAttributes(encoder, off);
                 encoder.closeElement(ElementId.ELEM_DEST);
             }
-            if (hash != 0)
-            {
+            if (hash != 0) {
                 encoder.openElement(ElementId.ELEM_NORMADDR);
                 normaddress.getSpace().encodeAttributes(encoder, normaddress.getOffset());
                 encoder.closeElement(ElementId.ELEM_NORMADDR);
@@ -352,8 +338,7 @@ namespace Sla.DECCORE
                 encoder.writeUnsignedInteger(AttributeId.ATTRIB_CONTENT, hash);
                 encoder.closeElement(ElementId.ELEM_NORMHASH);
             }
-            if (startingvalue != 0)
-            {
+            if (startingvalue != 0) {
                 encoder.openElement(ElementId.ELEM_STARTVAL);
                 encoder.writeUnsignedInteger(AttributeId.ATTRIB_CONTENT, startingvalue);
                 encoder.closeElement(ElementId.ELEM_STARTVAL);
@@ -364,28 +349,22 @@ namespace Sla.DECCORE
         public override void decode(Sla.CORE.Decoder decoder)
         {
             uint elemId = decoder.openElement(ElementId.ELEM_BASICOVERRIDE);
-            while(true)
-            {
+            while(true) {
                 uint subId = decoder.openElement();
                 if (subId == 0) break;
-                if (subId == ELEM_DEST)
-                {
-                    VarnodeData vData;
+                if (subId == ElementId.ELEM_DEST) {
+                    VarnodeData vData = new VarnodeData();
                     vData.decodeFromAttributes(decoder);
                     adset.insert(vData.getAddr());
                 }
-                else if (subId == ELEM_NORMADDR)
-                {
-                    VarnodeData vData;
-                    vData.decodeFromAttributes(decoder);
+                else if (subId == ElementId.ELEM_NORMADDR) {
+                    VarnodeData vData = VarnodeData.decodeFromAttributes(decoder);
                     normaddress = vData.getAddr();
                 }
-                else if (subId == ELEM_NORMHASH)
-                {
+                else if (subId == ElementId.ELEM_NORMHASH) {
                     hash = decoder.readUnsignedInteger(AttributeId.ATTRIB_CONTENT);
                 }
-                else if (subId == ELEM_STARTVAL)
-                {
+                else if (subId == ElementId.ELEM_STARTVAL) {
                     startingvalue = decoder.readUnsignedInteger(AttributeId.ATTRIB_CONTENT);
                 }
                 decoder.closeElement(subId);

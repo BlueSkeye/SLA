@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,13 +20,13 @@ namespace Sla.DECCORE
         /// \param vn is the given Varnode
         /// \param spc is the address space being loaded from
         /// \return the associated space or NULL if the Varnode is not of the correct form
-        private static AddrSpace correctSpacebase(Architecture glb, Varnode vn, AddrSpace spc)
+        private static AddrSpace? correctSpacebase(Architecture glb, Varnode vn, AddrSpace spc)
         {
             if (!vn.isSpacebase()) return (AddrSpace)null;
             if (vn.isConstant())       // We have a global pseudo spacebase
                 return spc;         // Associate with load/stored space
             if (!vn.isInput()) return (AddrSpace)null;
-            AddrSpace* assoc = glb.getSpaceBySpacebase(vn.getAddr(), vn.getSize());
+            AddrSpace assoc = glb.getSpaceBySpacebase(vn.getAddr(), vn.getSize());
             if (assoc.getContain() != spc) // Loading off right space?
                 return (AddrSpace)null;
             return assoc;
@@ -40,38 +40,30 @@ namespace Sla.DECCORE
         /// \param val is the reference for passing back the constant
         /// \param spc is the space being loaded from
         /// \return the associated space or NULL
-        private static AddrSpace vnSpacebase(Architecture glb, Varnode vn, ulong val, AddrSpace spc)
+        private static AddrSpace? vnSpacebase(Architecture glb, Varnode vn, out ulong val, AddrSpace spc)
         {
-            PcodeOp* op;
-            Varnode* vn1,*vn2;
-            AddrSpace* retspace;
-
-            retspace = correctSpacebase(glb, vn, spc);
-            if (retspace != (AddrSpace)null)
-            {
+            Varnode vn1, vn2;
+            AddrSpace? retspace = correctSpacebase(glb, vn, spc);
+            if (retspace != (AddrSpace)null) {
                 val = 0;
                 return retspace;
             }
             if (!vn.isWritten()) return (AddrSpace)null;
-            op = vn.getDef();
+            PcodeOp op = vn.getDef() ?? throw new BugException();
             if (op.code() != OpCode.CPUI_INT_ADD) return (AddrSpace)null;
             vn1 = op.getIn(0);
             vn2 = op.getIn(1);
             retspace = correctSpacebase(glb, vn1, spc);
-            if (retspace != (AddrSpace)null)
-            {
-                if (vn2.isConstant())
-                {
+            if (retspace != (AddrSpace)null) {
+                if (vn2.isConstant()) {
                     val = vn2.getOffset();
                     return retspace;
                 }
                 return (AddrSpace)null;
             }
             retspace = correctSpacebase(glb, vn2, spc);
-            if (retspace != (AddrSpace)null)
-            {
-                if (vn1.isConstant())
-                {
+            if (retspace != (AddrSpace)null) {
+                if (vn1.isConstant()) {
                     val = vn1.getOffset();
                     return retspace;
                 }
@@ -86,16 +78,13 @@ namespace Sla.DECCORE
         /// \param op is the STORE or LOAD PcodeOp
         /// \param offoff is a reference to where the offset should get passed back
         /// \return the associated space or NULL
-        private static AddrSpace checkSpacebase(Architecture glb, PcodeOp op, ulong offoff)
+        internal static AddrSpace? checkSpacebase(Architecture glb, PcodeOp op, out ulong offoff)
         {
-            Varnode* offvn;
-            AddrSpace* loadspace;
 
-            offvn = op.getIn(1);       // Address offset
-            loadspace = op.getIn(0).getSpaceFromConst(); // Space being loaded/stored
+            Varnode offvn = op.getIn(1);       // Address offset
+            AddrSpace loadspace = op.getIn(0).getSpaceFromConst(); // Space being loaded/stored
                                                            // Treat segmentop as part of load/store
-            if (offvn.isWritten() && (offvn.getDef().code() == OpCode.CPUI_SEGMENTOP))
-            {
+            if (offvn.isWritten() && (offvn.getDef().code() == OpCode.CPUI_SEGMENTOP)) {
                 offvn = offvn.getDef().getIn(2);
                 // If we are looking for a spacebase (i.e. stackpointer)
                 // Then currently we COMPLETELY IGNORE the base part of the
@@ -108,12 +97,12 @@ namespace Sla.DECCORE
                 if (offvn.isConstant())
                     return (AddrSpace)null;
             }
-            else if (offvn.isConstant())
-            { // Check for constant
+            else if (offvn.isConstant()) {
+                // Check for constant
                 offoff = offvn.getOffset();
                 return loadspace;
             }
-            return vnSpacebase(glb, offvn, offoff, loadspace);
+            return vnSpacebase(glb, offvn, out offoff, loadspace);
         }
 
         public RuleLoadVarnode(string g)
@@ -121,7 +110,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleLoadVarnode(getGroup());
@@ -135,17 +124,16 @@ namespace Sla.DECCORE
         /// the \e spacebase register's address space.
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_LOAD);
+            oplist.Add(OpCode.CPUI_LOAD);
         }
 
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
             int size;
-            Varnode* newvn;
-            AddrSpace* baseoff;
+            Varnode newvn;
             ulong offoff;
 
-            baseoff = checkSpacebase(data.getArch(), op, offoff);
+            AddrSpace? baseoff = checkSpacebase(data.getArch(), op, out offoff);
             if (baseoff == (AddrSpace)null) return 0;
 
             size = op.getOut().getSize();
@@ -154,14 +142,12 @@ namespace Sla.DECCORE
             data.opSetInput(op, newvn, 0);
             data.opRemoveInput(op, 1);
             data.opSetOpcode(op, OpCode.CPUI_COPY);
-            Varnode* refvn = op.getOut();
-            if (refvn.isSpacebasePlaceholder())
-            {
+            Varnode refvn = op.getOut();
+            if (refvn.isSpacebasePlaceholder()) {
                 refvn.clearSpacebasePlaceholder(); // Clear the trigger
-                PcodeOp* placeOp = refvn.loneDescend();
-                if (placeOp != (PcodeOp)null)
-                {
-                    FuncCallSpecs* fc = data.getCallSpecs(placeOp);
+                PcodeOp? placeOp = refvn.loneDescend();
+                if (placeOp != (PcodeOp)null) {
+                    FuncCallSpecs fc = data.getCallSpecs(placeOp);
                     if (fc != (FuncCallSpecs)null)
                         fc.resolveSpacebaseRelative(data, refvn);
                 }

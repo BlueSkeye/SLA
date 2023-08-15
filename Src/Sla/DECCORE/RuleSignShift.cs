@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +16,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleSignShift(getGroup());
@@ -29,28 +29,24 @@ namespace Sla.DECCORE
         /// in an arithmetic expression or a comparison.
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_INT_RIGHT);
+            oplist.Add(OpCode.CPUI_INT_RIGHT);
         }
 
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
-            ulong val;
-            Varnode* constVn = op.getIn(1);
-            if (!constVn.isConstant()) return 0;
-            val = constVn.getOffset();
-            Varnode* inVn = op.getIn(0);
-            if (val != 8 * inVn.getSize() - 1) return 0;
-            if (inVn.isFree()) return 0;
+            Varnode constVn = op.getIn(1);
+            if (!constVn.isConstant()) return false;
+            ulong val = constVn.getOffset();
+            Varnode inVn = op.getIn(0);
+            if (val != 8 * inVn.getSize() - 1) return false;
+            if (inVn.isFree()) return false;
 
             bool doConversion = false;
-            Varnode* outVn = op.getOut();
-            list<PcodeOp*>::const_iterator iter = outVn.beginDescend();
-            while (iter != outVn.endDescend())
-            {
-                PcodeOp* arithOp = *iter;
-                ++iter;
-                switch (arithOp.code())
-                {
+            Varnode outVn = op.getOut();
+            IEnumerator<PcodeOp> iter = outVn.beginDescend();
+            while (iter.MoveNext()) {
+                PcodeOp arithOp = iter.Current;
+                switch (arithOp.code()) {
                     case OpCode.CPUI_INT_EQUAL:
                     case OpCode.CPUI_INT_NOTEQUAL:
                         if (arithOp.getIn(1).isConstant())
@@ -67,17 +63,17 @@ namespace Sla.DECCORE
                     break;
             }
             if (!doConversion)
-                return 0;
-            PcodeOp* shiftOp = data.newOp(2, op.getAddr());
+                return false;
+            PcodeOp shiftOp = data.newOp(2, op.getAddr());
             data.opSetOpcode(shiftOp, OpCode.CPUI_INT_SRIGHT);
-            Varnode* uniqueVn = data.newUniqueOut(inVn.getSize(), shiftOp);
+            Varnode uniqueVn = data.newUniqueOut(inVn.getSize(), shiftOp);
             data.opSetInput(op, uniqueVn, 0);
             data.opSetInput(op, data.newConstant(inVn.getSize(), Globals.calc_mask(inVn.getSize())), 1);
             data.opSetOpcode(op, OpCode.CPUI_INT_MULT);
             data.opSetInput(shiftOp, inVn, 0);
             data.opSetInput(shiftOp, constVn, 1);
             data.opInsertBefore(shiftOp, op);
-            return 1;
+            return true;
         }
     }
 }

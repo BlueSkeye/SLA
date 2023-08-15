@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.EXTRA;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -30,25 +30,20 @@ namespace Sla.DECCORE
             string res;
             if (p1 == "unknown")
                 expop = ProtoModel.extrapop_unknown;
-            else
-            {
-                istringstream s1(p1);
-                s1.unsetf(ios::dec | ios::hex | ios::oct); // Let user specify base
-                s1 >> expop;
+            else {
+                // Let user specify base
+                expop = int.Parse(p1);
             }
             if (expop == -300)
-                throw ParseError("Bad extrapop adjustment parameter");
-            if (p2.size() != 0)
-            {
-                Funcdata* fd;
-                fd = glb.symboltab.getGlobalScope().queryFunction(p2);
+                throw new ParseError("Bad extrapop adjustment parameter");
+            if (p2.Length != 0) {
+                Funcdata? fd = glb.symboltab.getGlobalScope().queryFunction(p2);
                 if (fd == (Funcdata)null)
                     throw new RecovError("Unknown function name: " + p2);
                 fd.getFuncProto().setExtraPop(expop);
                 res = "ExtraPop set for function " + p2;
             }
-            else
-            {
+            else {
                 glb.defaultfp.setExtraPop(expop);
                 if (glb.evalfp_current != (ProtoModel)null)
                     glb.evalfp_current.setExtraPop(expop);

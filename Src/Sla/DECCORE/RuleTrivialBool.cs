@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +16,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleTrivialBool(getGroup());
@@ -33,22 +33,21 @@ namespace Sla.DECCORE
         ///   - `V ^^ false  =>  V`
         public override void getOpList(List<OpCode> oplist)
         {
-            uint list[] = { OpCode.CPUI_BOOL_AND, OpCode.CPUI_BOOL_OR, OpCode.CPUI_BOOL_XOR };
-            oplist.insert(oplist.end(), list, list + 3);
+            OpCode[] list = { OpCode.CPUI_BOOL_AND, OpCode.CPUI_BOOL_OR, OpCode.CPUI_BOOL_XOR };
+            oplist.AddRange(list);
         }
 
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* vnconst = op.getIn(1);
-            Varnode* vn;
+            Varnode vnconst = op.getIn(1);
+            Varnode vn;
             ulong val;
             OpCode opc;
 
             if (!vnconst.isConstant()) return 0;
             val = vnconst.getOffset();
 
-            switch (op.code())
-            {
+            switch (op.code()) {
                 case OpCode.CPUI_BOOL_XOR:
                     vn = op.getIn(0);
                     opc = (val == 1) ? OpCode.CPUI_BOOL_NEGATE : OpCode.CPUI_COPY;
@@ -68,13 +67,13 @@ namespace Sla.DECCORE
                         vn = op.getIn(0);
                     break;
                 default:
-                    return 0;
+                    return false;
             }
 
             data.opRemoveInput(op, 1);
             data.opSetOpcode(op, opc);
             data.opSetInput(op, vn, 0);
-            return 1;
+            return true;
         }
     }
 }

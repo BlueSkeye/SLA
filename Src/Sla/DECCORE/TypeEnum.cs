@@ -29,34 +29,25 @@ namespace Sla.DECCORE
         /// Set the map. Calculate the independent bit-fields within the named values of the enumeration
         /// Two bits are in the same bit-field if there is a name in the map whose value
         /// has those two bits set.  Bit-fields must be a contiguous range of bits.
-        protected void setNameMap(Dictionary<ulong, string> nmap)
+        internal void setNameMap(Dictionary<ulong, string> nmap)
         {
-            Dictionary<ulong, string>::const_iterator iter;
-            ulong curmask, lastmask;
-            int maxbit;
-            int curmaxbit;
-            bool fieldisempty;
-
             namemap = nmap;
             masklist.Clear();
-
             flags &= ~(Properties.poweroftwo);
-
-            maxbit = 8 * size - 1;
-
-            curmaxbit = 0;
+            int maxbit = 8 * size - 1;
+            int curmaxbit = 0;
             while (curmaxbit <= maxbit) {
-                curmask = 1;
+                ulong curmask = 1;
                 curmask <<= curmaxbit;
-                lastmask = 0;
-                fieldisempty = true;
+                ulong lastmask = 0;
+                bool fieldisempty = true;
                 while (curmask != lastmask) {
                     // Repeat until there is no change in the current mask
                     lastmask = curmask;     // Note changes from last time through
 
-                    for (iter = namemap.begin(); iter != namemap.end(); ++iter) {
+                    foreach (ulong value in namemap.Keys) {
                         // For every named enumeration value
-                        ulong val = iter.Current.Key;
+                        ulong val = value;
                         if ((val & curmask) != 0) {
                             // If the value shares ANY bits in common with the current mask
                             curmask |= val;     // Absorb ALL defined bits of the value into the current mask
@@ -104,25 +95,24 @@ namespace Sla.DECCORE
             submeta = (metatype == type_metatype.TYPE_INT)
                 ? sub_metatype.SUB_INT_ENUM
                 : sub_metatype.SUB_UINT_ENUM;
-            Dictionary<ulong, string> nmap;
+            Dictionary<ulong, string> nmap = new Dictionary<ulong, string>();
 
             while (true) {
                 uint childId = decoder.openElement();
                 if (childId == 0) break;
                 ulong val = 0;
-                string nm;
-                while(true)
-                {
+                string nm = string.Empty;
+                while(true) {
                     AttributeId  attrib = decoder.getNextAttributeId();
                     if (attrib == 0) break;
                     if (attrib == AttributeId.ATTRIB_VALUE) {
                         long valsign = decoder.readSignedInteger(); // Value might be negative
-                        val = (ulong)valsign & Globals.calc_mask(size);
+                        val = (ulong)valsign & Globals.calc_mask((uint)size);
                     }
                     else if (attrib == AttributeId.ATTRIB_NAME)
                         nm = decoder.readString();
                 }
-                if (nm.size() == 0)
+                if (nm.Length == 0)
                     throw new LowlevelError(name + ": TypeEnum field missing name attribute");
                 nmap[val] = nm;
                 decoder.closeElement(childId);

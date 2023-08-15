@@ -25,15 +25,14 @@ namespace Sla.DECCORE
         /// \param g is the owning Architecture
         /// \param sp is the segmented space
         /// \param sop is the segment operator
-        public SegmentedResolver(Architecture g, AddrSpace, SegmentOp sop)
+        public SegmentedResolver(Architecture g, AddrSpace sp, SegmentOp sop)
         {
             glb = g;
             spc = sp;
             segop = sop;
         }
 
-        public override Address resolve(ulong val, int sz, Address point,
-            out ulong fullEncoding)
+        public override Address resolve(ulong val, int sz, Address point, out ulong fullEncoding)
         {
             int innersz = segop.getInnerSize();
             if (sz >= 0 && sz <= innersz) {
@@ -64,6 +63,7 @@ namespace Sla.DECCORE
                 return new Address(spc, AddrSpace.addressToByte(val, spc.getWordSize()));
             }
             // Return invalid address
+            fullEncoding = 0;
             return new Address();
         }
     }

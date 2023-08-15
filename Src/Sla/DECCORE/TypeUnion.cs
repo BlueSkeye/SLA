@@ -41,7 +41,7 @@ namespace Sla.DECCORE
         /// Parse children of the \<type> element describing each field.
         /// \param decoder is the stream decoder
         /// \param typegrp is the factory owning the new union
-        protected void decodeFields(Sla.CORE.Decoder decoder, TypeFactory typegrp)
+        internal void decodeFields(Sla.CORE.Decoder decoder, TypeFactory typegrp)
         {
             while (decoder.peekElement() != 0) {
                 field.Add(new TypeField(decoder, typegrp));

@@ -16,7 +16,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleFuncPtrEncoding(getGroup());
@@ -33,7 +33,7 @@ namespace Sla.DECCORE
             oplist.Add(CPUI_CALLIND);
         }
 
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
             int align = data.getArch().funcptr_align;
             if (align == 0) return 0;

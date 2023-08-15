@@ -17,7 +17,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleRangeMeld(getGroup());
@@ -38,50 +38,47 @@ namespace Sla.DECCORE
         ///
         /// Try to union or intersect the ranges to produce
         /// a more concise expression.
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
-            PcodeOp* sub1,*sub2;
-            Varnode* vn1,*vn2;
-            Varnode* A1,*A2;
+            Varnode vn1, vn2;
             int restype;
 
             vn1 = op.getIn(0);
             if (!vn1.isWritten()) return 0;
             vn2 = op.getIn(1);
             if (!vn2.isWritten()) return 0;
-            sub1 = vn1.getDef();
+            PcodeOp sub1 = vn1.getDef() ?? throw new BugException();
             if (!sub1.isBoolOutput())
                 return 0;
-            sub2 = vn2.getDef();
+            PcodeOp sub2 = vn2.getDef() ?? throw new BugException();
             if (!sub2.isBoolOutput())
                 return 0;
 
             CircleRange range1 = new CircleRange(true);
-            Varnode markup = (Varnode)null;
-            A1 = range1.pullBack(sub1, &markup, false);
+            Varnode? markup = (Varnode)null;
+            Varnode? A1 = range1.pullBack(sub1, out markup, false);
             if (A1 == (Varnode)null) return 0;
             CircleRange range2 = new CircleRange(true);
-            A2 = range2.pullBack(sub2, &markup, false);
+            Varnode? A2 = range2.pullBack(sub2, out markup, false);
             if (A2 == (Varnode)null) return 0;
-            if (sub1.code() == OpCode.CPUI_BOOL_NEGATE)
-            { // Do an extra pull back, if the last step is a '!'
+            if (sub1.code() == OpCode.CPUI_BOOL_NEGATE) {
+                // Do an extra pull back, if the last step is a '!'
                 if (!A1.isWritten()) return 0;
-                A1 = range1.pullBack(A1.getDef(), &markup, false);
+                A1 = range1.pullBack(A1.getDef(), out markup, false);
                 if (A1 == (Varnode)null) return 0;
             }
-            if (sub2.code() == OpCode.CPUI_BOOL_NEGATE)
-            { // Do an extra pull back, if the last step is a '!'
+            if (sub2.code() == OpCode.CPUI_BOOL_NEGATE) {
+                // Do an extra pull back, if the last step is a '!'
                 if (!A2.isWritten()) return 0;
-                A2 = range2.pullBack(A2.getDef(), &markup, false);
+                A2 = range2.pullBack(A2.getDef(), out markup, false);
                 if (A2 == (Varnode)null) return 0;
             }
-            if (!functionalEquality(A1, A2))
-            {
+            if (!functionalEquality(A1, A2)) {
                 if (A2.getSize() == A1.getSize()) return 0;
                 if ((A1.getSize() < A2.getSize()) && (A2.isWritten()))
-                    A2 = range2.pullBack(A2.getDef(), &markup, false);
+                    A2 = range2.pullBack(A2.getDef(), out markup, false);
                 else if (A1.isWritten())
-                    A1 = range1.pullBack(A1.getDef(), &markup, false);
+                    A1 = range1.pullBack(A1.getDef(), out markup, false);
                 if (A1 != A2) return 0;
             }
             if (!A1.isHeritageKnown()) return 0;
@@ -91,17 +88,15 @@ namespace Sla.DECCORE
             else
                 restype = range1.circleUnion(range2);
 
-            if (restype == 0)
-            {
+            if (restype == 0) {
                 OpCode opc;
                 ulong resc;
                 int resslot;
-                restype = range1.translate2Op(opc, resc, resslot);
-                if (restype == 0)
-                {
-                    Varnode* newConst = data.newConstant(A1.getSize(), resc);
-                    if (markup != (Varnode)null)
-                    {       // We have potential constant markup
+                restype = range1.translate2Op(out opc, out resc, out resslot);
+                if (restype == 0) {
+                    Varnode newConst = data.newConstant(A1.getSize(), resc);
+                    if (markup != (Varnode)null) {
+                        // We have potential constant markup
                         newConst.copySymbolIfValid(markup);    // Propagate the markup into our new constant
                     }
                     data.opSetOpcode(op, opc);
@@ -112,14 +107,14 @@ namespace Sla.DECCORE
             }
 
             if (restype == 2) return 0; // Cannot represent
-            if (restype == 1)
-            {       // Pieces covers everything, condition is always true
+            if (restype == 1) {
+                // Pieces covers everything, condition is always true
                 data.opSetOpcode(op, OpCode.CPUI_COPY);
                 data.opRemoveInput(op, 1);
                 data.opSetInput(op, data.newConstant(1, 1), 0);
             }
-            else if (restype == 3)
-            {   // Nothing left in intersection, condition is always false
+            else if (restype == 3) {
+                // Nothing left in intersection, condition is always false
                 data.opSetOpcode(op, OpCode.CPUI_COPY);
                 data.opRemoveInput(op, 1);
                 data.opSetInput(op, data.newConstant(1, 0), 0);

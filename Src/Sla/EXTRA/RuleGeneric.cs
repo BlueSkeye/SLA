@@ -36,7 +36,7 @@ namespace Sla.EXTRA
             delete constraint;
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleGeneric(getGroup(), getName(), starterops, opinit,
@@ -49,7 +49,7 @@ namespace Sla.EXTRA
                 oplist.Add((uint)starterops[i]);
         }
 
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
             state.setFunction(&data);
             state.initialize(opinit, op);

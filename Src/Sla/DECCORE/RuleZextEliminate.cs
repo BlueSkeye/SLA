@@ -17,7 +17,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleZextEliminate(getGroup());
@@ -33,12 +33,12 @@ namespace Sla.DECCORE
         ///   - `zext(V) <= c =>  V <= c`
         public override void getOpList(List<OpCode> oplist)
         {
-            uint list[] = {OpCode.CPUI_INT_EQUAL, OpCode.CPUI_INT_NOTEQUAL,
-          OpCode.CPUI_INT_LESS,OpCode.CPUI_INT_LESSEQUAL };
-            oplist.insert(oplist.end(), list, list + 4);
+            OpCode[] list = {OpCode.CPUI_INT_EQUAL, OpCode.CPUI_INT_NOTEQUAL,
+                OpCode.CPUI_INT_LESS,OpCode.CPUI_INT_LESSEQUAL };
+            oplist.AddRange(list);
         }
 
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
             PcodeOp zext;
             Varnode vn1;
@@ -53,33 +53,32 @@ namespace Sla.DECCORE
             vn2 = op.getIn(1);
             zextslot = 0;
             otherslot = 1;
-            if ((vn2.isWritten()) && (vn2.getDef().code() == OpCode.CPUI_INT_ZEXT))
-            {
+            if ((vn2.isWritten()) && (vn2.getDef().code() == OpCode.CPUI_INT_ZEXT)) {
                 vn1 = vn2;
                 vn2 = op.getIn(0);
                 zextslot = 1;
                 otherslot = 0;
             }
             else if ((!vn1.isWritten()) || (vn1.getDef().code() != OpCode.CPUI_INT_ZEXT))
-                return 0;
+                return false;
 
-            if (!vn2.isConstant()) return 0;
+            if (!vn2.isConstant()) return false;
             zext = vn1.getDef();
-            if (!zext.getIn(0).isHeritageKnown()) return 0;
+            if (!zext.getIn(0).isHeritageKnown()) return false;
             if (vn1.loneDescend() != op) return 0; // Make sure extension is not used for anything else
             smallsize = zext.getIn(0).getSize();
             val = vn2.getOffset();
-            if ((val >> (8 * smallsize)) == 0)
-            { // Is zero extension unnecessary
+            if ((val >> (8 * smallsize)) == 0) {
+                // Is zero extension unnecessary
                 newvn = data.newConstant(smallsize, val);
                 newvn.copySymbolIfValid(vn2);
                 data.opSetInput(op, zext.getIn(0), zextslot);
                 data.opSetInput(op, newvn, otherslot);
-                return 1;
+                return true;
             }
             // Should have else for doing 
             // constant comparison here and now
-            return 0;
+            return false;
         }
     }
 }

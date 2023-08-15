@@ -53,7 +53,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RulePushMulti(getGroup());
@@ -70,51 +70,49 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_MULTIEQUAL);
         }
 
-        public override int applyOp(PcodeOp op, Funcdata data)
+        public override bool applyOp(PcodeOp op, Funcdata data)
         {
             if (op.numInput() != 2) return 0;
 
-            Varnode* in1 = op.getIn(0);
-            Varnode* in2 = op.getIn(1);
+            Varnode in1 = op.getIn(0);
+            Varnode in2 = op.getIn(1);
 
             if (!in1.isWritten()) return 0;
             if (!in2.isWritten()) return 0;
             if (in1.isSpacebase()) return 0;
             if (in2.isSpacebase()) return 0;
-            Varnode* buf1[2];
-            Varnode* buf2[2];
+            Varnode[] buf1 = new Varnode[2];
+            Varnode[] buf2 = new Varnode[2];
             int res = functionalEqualityLevel(in1, in2, buf1, buf2);
             if (res < 0) return 0;
             if (res > 1) return 0;
-            PcodeOp* op1 = in1.getDef();
+            PcodeOp op1 = in1.getDef() ?? throw new BugException();
             if (op1.code() == OpCode.CPUI_SUBPIECE) return 0; // SUBPIECE is pulled not pushed
 
-            BlockBasic* bl = op.getParent();
-            PcodeOp* earliest = earliestUseInBlock(op.getOut(), bl);
-            if (op1.code() == OpCode.CPUI_COPY)
-            { // Special case of MERGE of 2 shadowing varnodes
+            BlockBasic bl = op.getParent();
+            PcodeOp earliest = earliestUseInBlock(op.getOut(), bl);
+            if (op1.code() == OpCode.CPUI_COPY) {
+                // Special case of MERGE of 2 shadowing varnodes
                 if (res == 0) return 0;
-                PcodeOp* substitute = findSubstitute(buf1[0], buf2[0], bl, earliest);
+                PcodeOp substitute = findSubstitute(buf1[0], buf2[0], bl, earliest);
                 if (substitute == (PcodeOp)null) return 0;
                 // Eliminate this op in favor of the shadowed merge
                 data.totalReplace(op.getOut(), substitute.getOut());
                 data.opDestroy(op);
                 return 1;
             }
-            PcodeOp* op2 = in2.getDef();
+            PcodeOp op2 = in2.getDef() ?? throw new BugException();
             if (in1.loneDescend() != op) return 0;
             if (in2.loneDescend() != op) return 0;
 
-            Varnode* outvn = op.getOut();
+            Varnode outvn = op.getOut();
 
             data.opSetOutput(op1, outvn);   // Move MULTIEQUAL output to op1, which will be new unified op
             data.opUninsert(op1);       // Move the unified op
-            if (res == 1)
-            {
+            if (res == 1) {
                 int slot1 = op1.getSlot(buf1[0]);
-                PcodeOp* substitute = findSubstitute(buf1[0], buf2[0], bl, earliest);
-                if (substitute == (PcodeOp)null)
-                {
+                PcodeOp? substitute = findSubstitute(buf1[0], buf2[0], bl, earliest);
+                if (substitute == (PcodeOp)null) {
                     substitute = data.newOp(2, op.getAddr());
                     data.opSetOpcode(substitute, OpCode.CPUI_MULTIEQUAL);
                     // Try to preserve the storage location if the input varnodes share it

@@ -46,7 +46,7 @@ namespace Sla.DECCORE
         /// A unique id for the type (or 0 if an id is not assigned)
         internal ulong id;
         /// Size (of variable holding a value of this type)
-        protected int size;
+        internal int size;
         /// Boolean properties of the type
         internal Properties flags;
         /// Name of type
