@@ -124,7 +124,7 @@ namespace Sla.CORE
                         if (attribId == 0) break;
                         if (attribId == AttributeId.ATTRIB_READONLY)
                             if (decoder.readBool())
-                                readonlyset.insert(addr);
+                                readonlyset.Add(addr);
                     }
                     StringReader @is = new StringReader(decoder.readString(AttributeId.ATTRIB_CONTENT));
                     int val;

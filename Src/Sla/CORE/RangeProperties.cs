@@ -33,7 +33,7 @@ namespace Sla.CORE
                 throw new DecoderError("Expecting <range> or <register> element");
             }
             while(true) {
-                uint attribId = decoder.getNextAttributeId();
+                AttributeId attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == AttributeId.ATTRIB_SPACE) {
                     spaceName = decoder.readString();

@@ -30,14 +30,14 @@ namespace Sla.SLEIGH
         ~Next2Symbol()
         {
             if (patexp != (PatternExpression)null)
-                PatternExpression::release(patexp);
+                PatternExpression.release(patexp);
         }
 
         public override VarnodeTpl getVarnode()
         { // Return instruction offset after next instruction offset as a constant
-            ConstTpl spc(const_space);
-            ConstTpl off(ConstTpl.const_type.j_next2);
-            ConstTpl sz_zero;
+            ConstTpl spc = new ConstTpl(const_space);
+            ConstTpl off = new ConstTpl(ConstTpl.const_type.j_next2);
+            ConstTpl sz_zero = new ConstTpl();
             return new VarnodeTpl(spc, off, sz_zero);
         }
 
@@ -54,23 +54,23 @@ namespace Sla.SLEIGH
         public override void print(TextWriter s, ParserWalker walker)
         {
             long val = (long)walker.getN2addr().getOffset();
-            s << "0x" << hex << val;
+            s.Write($"0x{val:X}");
         }
 
         public override symbol_type getType() => SleighSymbol.symbol_type.next2_symbol;
 
         public override void saveXml(TextWriter s)
         {
-            s << "<next2_sym";
-            SleighSymbol::saveXmlHeader(s);
-            s << "/>\n";
+            s.Write("<next2_sym");
+            base.saveXmlHeader(s);
+            s.WriteLine("/>");
         }
 
         public override void saveXmlHeader(TextWriter s)
         {
-            s << "<next2_sym_head";
-            SleighSymbol::saveXmlHeader(s);
-            s << "/>\n";
+            s.Write("<next2_sym_head");
+            base.saveXmlHeader(s);
+            s.WriteLine("/>");
         }
 
         public override void restoreXml(Element el, SleighBase trans)

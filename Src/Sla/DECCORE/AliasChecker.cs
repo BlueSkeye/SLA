@@ -70,7 +70,7 @@ namespace Sla.DECCORE
 
                 Range local = localrange.getFirstRange();
                 Range param = paramrange.getLastRange();
-                if ((local != (Range*)0)&& (param != (Range*)0)) {
+                if ((local != (Range)null)&& (param != (Range)null)) {
                     localBoundary = param.getLast();
                     if (direction == -1)
                     {

@@ -59,16 +59,14 @@ namespace Sla.DECCORE
         internal static MapIterator operator ++()
         {
             ++curiter;
-            while ((curmap != map.end()) && (curiter == (*curmap).end_list()))
-            {
-                do
-                {
+            while ((curmap != map.end()) && (curiter == (*curmap).end_list())) {
+                do {
                     ++curmap;
                 } while ((curmap != map.end()) && ((*curmap) == (EntryMap)null));
                 if (curmap != map.end())
                     curiter = (*curmap).begin_list();
             }
-            return *this;
+            return this;
         }
 
         /// Post-increment the iterator

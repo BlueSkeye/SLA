@@ -946,7 +946,7 @@ public static bool signbit_negative(ulong val, int size)
         /// \param opc is the OpCode to complement
         /// \param reorder is set to \b true if the inputs need to be reordered
         /// \return the complementary OpCode or OpCode.CPUI_MAX if not given a comparison operation
-        public static OpCode get_booleanflip(OpCode opc, ref bool reorder)
+        public static OpCode get_booleanflip(OpCode opc, out bool reorder)
         {
             switch (opc) {
                 case OpCode.CPUI_INT_EQUAL:

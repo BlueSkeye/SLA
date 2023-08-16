@@ -1,4 +1,4 @@
-﻿using ghidra;
+﻿using Sla.CORE;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -58,18 +58,18 @@ namespace Sla.DECCORE
             public static int operator *() => size;
 
             ///< Assignment
-            public static LanedIterator operator=(LanedIterator op2)
+            public static LanedIterator operator=(LanedIterator op1, LanedIterator op2)
             {
-                size = op2.size;
-                mask = op2.mask;
-                return *this;
+                op1.size = op2.size;
+                op1.mask = op2.mask;
+                return this;
             }
 
             /// Equal operator
-            public static bool operator ==(LanedIterator op2) => (size == op2.size);
+            public static bool operator ==(LanedIterator op1, LanedIterator op2) => (op1.size == op2.size);
 
             /// Not-equal operator
-            public static bool operator !=(LanedIterator op2) => (size != op2.size); 
+            public static bool operator !=(LanedIterator op1, LanedIterator op2) => (op1.size != op2.size); 
         }
         /// Iterator over possible lane sizes for this register
         // typedef LanedIterator const_iterator;
@@ -100,27 +100,23 @@ namespace Sla.DECCORE
         {
             uint elemId = decoder.openElement(ElementId.ELEM_REGISTER);
             string laneSizes;
-            while(true)
-            {
-                uint attribId = decoder.getNextAttributeId();
+            while(true) {
+                AttributeId attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
-                if (attribId == ATTRIB_VECTOR_LANE_SIZES)
-                {
+                if (attribId == AttributeId.ATTRIB_VECTOR_LANE_SIZES) {
                     laneSizes = decoder.readString();
                     break;
                 }
             }
-            if (laneSizes.empty())
-            {
+            if (laneSizes.empty()) {
                 decoder.closeElement(elemId);
                 return false;
             }
             decoder.rewindAttributes();
-            VarnodeData storage;
+            VarnodeData storage = VarnodeData.decodeFromAttributes(decoder);
             storage.space = (AddrSpace)null;
-            storage.decodeFromAttributes(decoder);
             decoder.closeElement(elemId);
-            wholeSize = storage.size;
+            wholeSize = (int)storage.size;
             sizeBitMask = 0;
             int pos = 0;
             while (-1 != pos) {
@@ -136,10 +132,8 @@ namespace Sla.DECCORE
                     if (pos >= laneSizes.Length)
                         pos = -1;
                 }
-                istringstream s = new istringstream(value);
-                s.unsetf(ios::dec | ios::hex | ios::oct);
                 int sz = -1;
-                s >> sz;
+                sz = int.Parse(value);
                 if (sz < 0 || sz > 16)
                     throw new LowlevelError("Bad lane size: " + value);
                 addLaneSize(sz);

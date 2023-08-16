@@ -1,4 +1,4 @@
-﻿using ghidra;
+﻿using Sla.CORE;
 using Sla.DECCORE;
 using System;
 using System.Collections.Generic;
@@ -8,7 +8,6 @@ using System.Numerics;
 using System.Runtime.Intrinsics;
 using System.Text;
 using System.Threading.Tasks;
-using static ghidra.AliasChecker;
 
 using EntryMap = Sla.EXTRA.rangemap<Sla.DECCORE.SymbolEntry>;
 
@@ -46,20 +45,18 @@ namespace Sla.DECCORE
             if (!guard.isValid(opc)) return;
             int step = guard.getStep();
             if (step == 0) return;      // No definitive sign of array access
-            Datatype* ct = guard.getOp().getIn(1).getTypeReadFacing(guard.getOp());
-            if (ct.getMetatype() == type_metatype.TYPE_PTR)
-            {
-                ct = ((TypePointer*)ct).getPtrTo();
+            Datatype ct = guard.getOp().getIn(1).getTypeReadFacing(guard.getOp());
+            if (ct.getMetatype() == type_metatype.TYPE_PTR) {
+                ct = ((TypePointer)ct).getPtrTo();
                 while (ct.getMetatype() == type_metatype.TYPE_ARRAY)
-                    ct = ((TypeArray*)ct).getBase();
+                    ct = ((TypeArray)ct).getBase();
             }
             int outSize;
             if (opc == OpCode.CPUI_STORE)
                 outSize = guard.getOp().getIn(2).getSize();   // The Varnode being stored
             else
                 outSize = guard.getOp().getOut().getSize();   // The Varnode being loaded
-            if (outSize != step)
-            {
+            if (outSize != step) {
                 // LOAD size doesn't match step:  field in array of structures or something more unusual
                 if (outSize > step || (step % outSize) != 0)
                     return;
@@ -67,14 +64,13 @@ namespace Sla.DECCORE
                 // we pretend we have an array of LOAD's size
                 step = outSize;
             }
-            if (ct.getSize() != step)
-            {   // Make sure data-type matches our step size
+            if (ct.getSize() != step) {
+                // Make sure data-type matches our step size
                 if (step > 8)
                     return;     // Don't manufacture primitives bigger than 8-bytes
                 ct = typeFactory.getBase(step, type_metatype.TYPE_UNKNOWN);
             }
-            if (guard.isRangeLocked())
-            {
+            if (guard.isRangeLocked()) {
                 int minItems = ((guard.getMaximum() - guard.getMinimum()) + 1) / step;
                 addRange(guard.getMinimum(), ct, 0, RangeHint.RangeType.open, minItems - 1);
             }
@@ -90,21 +86,20 @@ namespace Sla.DECCORE
         /// \param fl is additional boolean properties
         /// \param rt is the type of the hint
         /// \param hi is the biggest guaranteed index for \e open range hints
-        private void addRange(ulong st, Datatype ct, uint fl, RangeHint::RangeType rt, int hi)
+        private void addRange(ulong st, Datatype ct, Varnode.varnode_flags fl, RangeHint.RangeType rt, int hi)
         {
             if ((ct == (Datatype)null) || (ct.getSize() == 0)) // Must have a real type
                 ct = defaultType;
             int sz = ct.getSize();
-            if (!range.inRange(Address(spaceid, st), sz))
+            if (!range.inRange(new Address(spaceid, st), sz))
                 return;
             long sst = (long)AddrSpace.byteToAddress(st, spaceid.getWordSize());
             Globals.sign_extend(sst, spaceid.getAddrSize() * 8 - 1);
             sst = (long)AddrSpace.addressToByte(sst, spaceid.getWordSize());
-            RangeHint* newRange = new RangeHint(st, sz, sst, ct, fl, rt, hi);
+            RangeHint newRange = new RangeHint(st, sz, sst, ct, fl, rt, hi);
             maplist.Add(newRange);
 #if OPACTION_DEBUG
-            if (debugon)
-            {
+            if (debugon) {
                 ostringstream s;
                 s << "Add Range: " << hex << st << ":" << dec << sz;
                 s << " ";
@@ -131,9 +126,9 @@ namespace Sla.DECCORE
                 RangeHint curHint = maplist[curPos++];
                 if (curHint.start == startHint.start && curHint.size == startHint.size) {
                     Datatype curDatatype = curHint.type;
-                    if (curDatatype.typeOrder(*startDatatype) < 0) // Take the most specific variant of data-type
+                    if (curDatatype.typeOrder(startDatatype) < 0) // Take the most specific variant of data-type
                         startDatatype = curDatatype;
-                    if (curHint.compare(*newList.GetLastItem()) != 0)
+                    if (curHint.compare(newList.GetLastItem()) != 0)
                         newList.Add(curHint);     // Keep the current hint if it is otherwise different
                     else {
                         // delete curHint;     // RangeHint is on the heap, so delete if we are not keeping it
@@ -179,13 +174,13 @@ namespace Sla.DECCORE
         {
             spaceid = spc;
             defaultType = dt;
-            set<Range>::const_iterator pmiter;
-            for (pmiter = pm.begin(); pmiter != pm.end(); ++pmiter)
-            {
-                AddrSpace* pmSpc = (*pmiter).getSpace();
-                ulong first = (*pmiter).getFirst();
-                ulong last = (*pmiter).getLast();
-                range.removeRange(pmSpc, first, last); // Clear possible input symbols
+            IEnumerator<Sla.CORE.Range> pmiter = pm.begin();
+            while (pmiter.MoveNext()) {
+                AddrSpace pmSpc = pmiter.Current.getSpace();
+                ulong first = pmiter.Current.getFirst();
+                ulong last = pmiter.Current.getLast();
+                // Clear possible input symbols
+                range.removeRange(pmSpc, first, last);
             }
 #if OPACTION_DEBUG
             debugon = false;
@@ -194,9 +189,9 @@ namespace Sla.DECCORE
 
         ~MapState()
         {
-            List<RangeHint*>::iterator riter;
-            for (riter = maplist.begin(); riter != maplist.end(); ++riter)
-                delete* riter;
+            //List<RangeHint*>::iterator riter;
+            //for (riter = maplist.begin(); riter != maplist.end(); ++riter)
+            //    delete* riter;
         }
 
         /// Initialize the hint collection for iteration
@@ -205,18 +200,18 @@ namespace Sla.DECCORE
         public bool initialize()
         {
             // Enforce boundaries of local variables
-            Range lastrange = range.getLastSignedRange(spaceid);
-            if (lastrange == (Range*)0) return false;
+            Sla.CORE.Range? lastrange = range.getLastSignedRange(spaceid);
+            if (lastrange == (Sla.CORE.Range)null) return false;
             if (maplist.empty()) return false;
             ulong high = spaceid.wrapOffset(lastrange.getLast() + 1);
             long sst = (long)AddrSpace.byteToAddress(high, spaceid.getWordSize());
-            Globals.sign_extend(sst, spaceid.getAddrSize() * 8 - 1);
+            Globals.sign_extend(ref sst, (int)(spaceid.getAddrSize() * 8 - 1));
             sst = (long)AddrSpace.addressToByte(sst, spaceid.getWordSize());
             // Add extra range to bound any final open entry
-            RangeHint* termRange = new RangeHint(high, 1, sst, defaultType, 0, RangeHint::endpoint, -2);
+            RangeHint termRange = new RangeHint(high, 1, sst, defaultType, 0, RangeHint.RangeType.endpoint, -2);
             maplist.Add(termRange);
 
-            stable_sort(maplist.begin(), maplist.end(), RangeHint::compareRanges);
+            stable_sort(maplist.begin(), maplist.end(), RangeHint.compareRanges);
             reconcileDatatypes();
             iter = maplist.begin();
             return true;
@@ -237,17 +232,16 @@ namespace Sla.DECCORE
         /// \param rangemap is the given map of Symbols
         public void gatherSymbols(EntryMap rangemap)
         {
-            list<SymbolEntry>::const_iterator riter;
-            Symbol* sym;
+            Symbol? sym;
             if (rangemap == (EntryMap)null) return;
-            for (riter = rangemap.begin_list(); riter != rangemap.end_list(); ++riter)
-            {
-                sym = (*riter).getSymbol();
+            IEnumerator<SymbolEntry> riter = = rangemap.begin_list();
+            while (riter.MoveNext()) {
+                sym = riter.Current.getSymbol();
                 if (sym == (Symbol)null) continue;
-                //    if ((*iter).isPiece()) continue;     // This should probably never happen
-                ulong start = (*riter).getAddr().getOffset();
-                Datatype* ct = sym.getType();
-                addRange(start, ct, sym.getFlags(), RangeHint::@fixed, -1);
+                //    if (riter.Current.isPiece()) continue;     // This should probably never happen
+                ulong start = riter.Current.getAddr().getOffset();
+                Datatype? ct = sym.getType();
+                addRange(start, ct, sym.getFlags(), RangeHint.RangeType.@fixed, -1);
             }
         }
 
@@ -259,22 +253,21 @@ namespace Sla.DECCORE
         public void gatherVarnodes(Funcdata fd)
         {
             VarnodeLocSet::const_iterator riter, iterend;
-            Varnode* vn;
+            Varnode vn;
             riter = fd.beginLoc(spaceid);
             iterend = fd.endLoc(spaceid);
-            while (riter != iterend)
-            {
+            while (riter != iterend) {
                 vn = *riter++;
                 if (vn.isFree()) continue;
                 ulong start = vn.getOffset();
-                Datatype* ct = vn.getType();
+                Datatype ct = vn.getType();
                 // Assume parents are present so partials aren't needed
                 if (ct.getMetatype() == type_metatype.TYPE_PARTIALSTRUCT) continue;
                 if (ct.getMetatype() == type_metatype.TYPE_PARTIALUNION) continue;
                 // Do not force Varnode flags on the entry
                 // as the flags were inherited from the previous
                 // (now obsolete) entry
-                addRange(start, ct, 0, RangeHint::@fixed,-1);
+                addRange(start, ct, 0, RangeHint.RangeType.@fixed, -1);
             }
         }
 
@@ -284,14 +277,13 @@ namespace Sla.DECCORE
         /// \param fd is the given function
         public void gatherHighs(Funcdata fd)
         {
-            List<HighVariable*> varvec;
+            List<HighVariable> varvec = new List<HighVariable>();
             VarnodeLocSet::const_iterator riter, iterend;
-            Varnode* vn;
-            HighVariable* high;
+            Varnode vn;
+            HighVariable high;
             riter = fd.beginLoc(spaceid);
             iterend = fd.endLoc(spaceid);
-            while (riter != iterend)
-            {
+            while (riter != iterend) {
                 vn = *riter++;
                 high = vn.getHigh();
                 if (high == (HighVariable)null) continue;
@@ -301,9 +293,9 @@ namespace Sla.DECCORE
                 high.setMark();
                 varvec.Add(high);
                 ulong start = vn.getOffset();
-                Datatype* ct = high.getType(); // Get type from high
+                Datatype? ct = high.getType() ?? throw new BugException(); // Get type from high
                 if (ct.getMetatype() == type_metatype.TYPE_PARTIALUNION) continue;
-                addRange(start, ct, 0, RangeHint::@fixed,-1);
+                addRange(start, ct, 0, RangeHint.RangeType.@fixed,-1);
             }
             for (int i = 0; i < varvec.size(); ++i)
                 varvec[i].clearMark();
@@ -315,45 +307,40 @@ namespace Sla.DECCORE
         /// \param fd is the given function
         public void gatherOpen(Funcdata fd)
         {
-            checker.gather(&fd, spaceid, false);
+            checker.gather(fd, spaceid, false);
 
-            List<AliasChecker::AddBase> addbase = checker.getAddBase();
+            List<AliasChecker.AddBase> addbase = checker.getAddBase();
             List<ulong> alias = checker.getAlias();
             ulong offset;
-            Datatype* ct;
+            Datatype ct;
 
-            for (int i = 0; i < addbase.size(); ++i)
-            {
+            for (int i = 0; i < addbase.size(); ++i) {
                 offset = alias[i];
                 ct = addbase[i].@base.getType();
-                if (ct.getMetatype() == type_metatype.TYPE_PTR)
-                {
-                    ct = ((TypePointer*)ct).getPtrTo();
+                if (ct.getMetatype() == type_metatype.TYPE_PTR) {
+                    ct = ((TypePointer)ct).getPtrTo();
                     while (ct.getMetatype() == type_metatype.TYPE_ARRAY)
-                        ct = ((TypeArray*)ct).getBase();
+                        ct = ((TypeArray)ct).getBase();
                 }
                 else
                     ct = (Datatype)null;  // Do unknown array
                 int minItems;
-                if (addbase[i].index != (Varnode)null)
-                {
+                if (addbase[i].index != (Varnode)null) {
                     minItems = 3;           // If there is an index, assume it takes on at least the 4 values [0,3]
                 }
-                else
-                {
+                else {
                     minItems = -1;
                 }
                 addRange(offset, ct, 0, RangeHint.RangeType.open, minItems);
             }
 
-            TypeFactory* typeFactory = fd.getArch().types;
+            TypeFactory typeFactory = fd.getArch().types ?? throw new BugException();
             List<LoadGuard> loadGuard = fd.getLoadGuards();
-            for (list<LoadGuard>::const_iterator giter = loadGuard.begin(); giter != loadGuard.end(); ++giter)
-                addGuard(*giter, OpCode.CPUI_LOAD, typeFactory);
+            foreach (LoadGuard guard in loadGuard)
+                addGuard(guard, OpCode.CPUI_LOAD, typeFactory);
 
-            List<LoadGuard> storeGuard = fd.getStoreGuards();
-            for (list<LoadGuard>::const_iterator siter = storeGuard.begin(); siter != storeGuard.end(); ++siter)
-                addGuard(*siter, OpCode.CPUI_STORE, typeFactory);
+            foreach (LoadGuard guard in fd.getStoreGuards())
+                addGuard(guard, OpCode.CPUI_STORE, typeFactory);
         }
 
         /// Get the current RangeHint in the collection

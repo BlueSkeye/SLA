@@ -510,46 +510,40 @@ namespace Sla.DECCORE
         {
             uint elemId = decoder.openElement(ElementId.ELEM_DB);
             idByNameHash = false;       // Default
-            while(true)
-            {
-                uint attribId = decoder.getNextAttributeId();
+            while(true) {
+                AttributeId attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
-                if (attribId == ATTRIB_SCOPEIDBYNAME)
+                if (attribId == AttributeId.ATTRIB_SCOPEIDBYNAME)
                     idByNameHash = decoder.readBool();
             }
-            while(true)
-            {
+            while(true) {
                 uint subId = decoder.peekElement();
-                if (subId != ELEM_PROPERTY_CHANGEPOINT) break;
+                if (subId != ElementId.ELEM_PROPERTY_CHANGEPOINT) break;
                 decoder.openElement();
-                uint val = decoder.readUnsignedInteger(AttributeId.ATTRIB_VAL);
-                VarnodeData vData;
-                vData.decodeFromAttributes(decoder);
+                uint val = (uint)decoder.readUnsignedInteger(AttributeId.ATTRIB_VAL);
+                VarnodeData vData = VarnodeData.decodeFromAttributes(decoder);
                 Address addr = vData.getAddr();
                 decoder.closeElement(subId);
                 flagbase.split(addr) = val;
             }
 
-            while(true)
-            {
+            while(true) {
                 uint subId = decoder.openElement();
-                if (subId != ELEM_SCOPE) break;
+                if (subId != ElementId.ELEM_SCOPE) break;
                 string name;
                 string displayName;
                 ulong id = 0;
                 bool seenId = false;
-                while(true)
-                {
-                    uint attribId = decoder.getNextAttributeId();
+                while(true) {
+                    AttributeId attribId = decoder.getNextAttributeId();
                     if (attribId == 0) break;
                     if (attribId == AttributeId.ATTRIB_NAME)
                         name = decoder.readString();
-                    else if (attribId == ATTRIB_ID)
-                    {
+                    else if (attribId == AttributeId.ATTRIB_ID) {
                         id = decoder.readUnsignedInteger();
                         seenId = true;
                     }
-                    else if (attribId == ATTRIB_LABEL)
+                    else if (attribId == AttributeId.ATTRIB_LABEL)
                         displayName = decoder.readString();
                 }
                 if (name.empty() || !seenId)
@@ -604,28 +598,26 @@ namespace Sla.DECCORE
         /// \return the namespace described by the path
         public Scope decodeScopePath(Decoder decoder)
         {
-            Scope* curscope = getGlobalScope();
+            Scope curscope = getGlobalScope();
             uint elemId = decoder.openElement(ElementId.ELEM_PARENT);
             uint subId = decoder.openElement();
             decoder.closeElementSkipping(subId);        // Skip element describing the root scope
-            while(true)
-            {
+            while(true) {
                 subId = decoder.openElement();
-                if (subId != ELEM_VAL) break;
-                string displayName;
+                if (subId != ElementId.ELEM_VAL) break;
+                string displayName = string.Empty;
                 ulong scopeId = 0;
-                while(true)
-                {
-                    uint attribId = decoder.getNextAttributeId();
+                while(true) {
+                    AttributeId attribId = decoder.getNextAttributeId();
                     if (attribId == 0) break;
-                    if (attribId == ATTRIB_ID)
+                    if (attribId == AttributeId.ATTRIB_ID)
                         scopeId = decoder.readUnsignedInteger();
-                    else if (attribId == ATTRIB_LABEL)
+                    else if (attribId == AttributeId.ATTRIB_LABEL)
                         displayName = decoder.readString();
                 }
                 string name = decoder.readString(AttributeId.ATTRIB_CONTENT);
                 if (scopeId == 0)
-                    throw DecoderError("Missing name and id in scope");
+                    throw new DecoderError("Missing name and id in scope");
                 curscope = findCreateScope(scopeId, name, curscope);
                 if (!displayName.empty())
                     curscope.setDisplayName(displayName);

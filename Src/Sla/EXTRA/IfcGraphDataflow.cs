@@ -126,7 +126,7 @@ namespace Sla.EXTRA
             s.WriteLine("        Category=Edges;\n");
 
             s.WriteLine("*CMD=SetKeyAttribute,");
-            s.WriteLine("        Category=Vertices,";
+            s.WriteLine("        Category=Vertices,");
             s.WriteLine("        Name=Internal;\n");
             Graph.dump_varnode_vertex(data, s);
             Graph.dump_op_vertex(data, s);

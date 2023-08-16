@@ -65,7 +65,7 @@ namespace Sla.SLEIGH
         public override void saveXmlHeader(TextWriter s)
         {
             s.Write("<flowref_sym_head");
-            base.:saveXmlHeader(s);
+            base.saveXmlHeader(s);
             s.WriteLine("/>");
         }
 

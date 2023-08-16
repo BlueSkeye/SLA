@@ -455,7 +455,7 @@ namespace Sla.DECCORE
         public bool doesSpecialPropagation() => ((addlflags&PcodeOp::special_prop)!= 0);
 
         /// Return \b true if this needs to special printing
-        public bool doesSpecialPrinting() => ((addlflags&PcodeOp::special_print)!= 0);
+        public bool doesSpecialPrinting() => ((addlflags&PcodeOp.AdditionalFlags.special_print)!= 0);
 
         /// Return \b true if \b this COPY is \e incidental
         public bool isIncidentalCopy() => ((addlflags&PcodeOp::incidental_copy)!= 0);
@@ -464,7 +464,7 @@ namespace Sla.DECCORE
         public bool isCalculatedBool() => ((flags&(PcodeOp.Flags.calculated_bool|PcodeOp.Flags.booloutput))!= 0);
         
         /// \brief Return \b true if we have already examined this cpool
-        public bool isCpoolTransformed() => ((addlflags&PcodeOp::is_cpool_transformed)!= 0);
+        public bool isCpoolTransformed() => ((addlflags&PcodeOp.AdditionalFlags.is_cpool_transformed)!= 0);
 
         /// Return \b true if this can be collapsed to a COPY of a constant
         /// Can this be collapsed to a copy op, i.e. are all inputs constants

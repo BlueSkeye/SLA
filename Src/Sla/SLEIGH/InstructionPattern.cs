@@ -12,10 +12,10 @@ namespace Sla.SLEIGH
     internal class InstructionPattern : DisjointPattern
     {
         // Matches the instruction bitstream
-        private PatternBlock maskvalue;
+        private PatternBlock? maskvalue;
 
-        protected virtual PatternBlock getBlock(bool context)
-            => context? (PatternBlock)null : maskvalue;
+        protected override PatternBlock? getBlock(bool context)
+            => context ? (PatternBlock)null : maskvalue;
     
         public InstructionPattern()
         {
@@ -32,11 +32,11 @@ namespace Sla.SLEIGH
             maskvalue = new PatternBlock(tf);
         }
 
-        public PatternBlock getBlock() => maskvalue;
+        public PatternBlock? getBlock() => maskvalue;
 
         ~InstructionPattern()
         {
-            if (maskvalue != (PatternBlock)null) delete maskvalue;
+            // if (maskvalue != (PatternBlock)null) delete maskvalue;
         }
 
         public override Pattern simplifyClone() => new InstructionPattern(maskvalue.clone());
@@ -51,13 +51,12 @@ namespace Sla.SLEIGH
             if (b.numDisjoint() > 0)
                 return b.doOr(this, -sa);
 
-            CombinePattern* b2 = dynamic_cast < CombinePattern*> (b);
-            if (b2 != (CombinePattern*)0)
+            CombinePattern b2 = b as CombinePattern;
+            if (b2 != (CombinePattern)null)
                 return b.doOr(this, -sa);
 
-            DisjointPattern* res1,*res2;
-            res1 = (DisjointPattern*)simplifyClone();
-            res2 = (DisjointPattern*)b.simplifyClone();
+            DisjointPattern res1 = (DisjointPattern)simplifyClone();
+            DisjointPattern res2 = (DisjointPattern)b.simplifyClone();
             if (sa < 0)
                 res1.shiftInstruction(-sa);
             else
@@ -70,33 +69,31 @@ namespace Sla.SLEIGH
             if (b.numDisjoint() > 0)
                 return b.doAnd(this, -sa);
 
-            CombinePattern* b2 = dynamic_cast <CombinePattern*> (b);
-            if (b2 != (CombinePattern*)0)
+            CombinePattern? b2 = b as CombinePattern;
+            if (b2 != (CombinePattern)null)
                 return b.doAnd(this, -sa);
 
-            ContextPattern* b3 = dynamic_cast <ContextPattern*> (b);
-            if (b3 != (ContextPattern*)0) {
-                InstructionPattern* newpat = (InstructionPattern*)simplifyClone();
+            ContextPattern? b3 = b as ContextPattern;
+            if (b3 != (ContextPattern)null) {
+                InstructionPattern newpat = (InstructionPattern)simplifyClone();
                 if (sa < 0)
                     newpat.shiftInstruction(-sa);
-                return new CombinePattern((ContextPattern*)b3.simplifyClone(), newpat);
+                return new CombinePattern((ContextPattern)b3.simplifyClone(), newpat);
             }
-            InstructionPattern* b4 = (InstructionPattern*)b;
+            InstructionPattern b4 = (InstructionPattern)b;
 
-            PatternBlock* respattern;
-            if (sa < 0)
-            {
-                PatternBlock* a = maskvalue.clone();
+            PatternBlock respattern;
+            if (sa < 0) {
+                PatternBlock a = maskvalue.clone();
                 a.shift(-sa);
                 respattern = a.intersect(b4.maskvalue);
-                delete a;
+                // delete a;
             }
-            else
-            {
-                PatternBlock* c = b4.maskvalue.clone();
+            else {
+                PatternBlock c = b4.maskvalue.clone();
                 c.shift(sa);
                 respattern = maskvalue.intersect(c);
-                delete c;
+                // delete c;
             }
             return new InstructionPattern(respattern);
         }
@@ -106,31 +103,29 @@ namespace Sla.SLEIGH
             if (b.numDisjoint() > 0)
                 return b.commonSubPattern(this, -sa);
 
-            CombinePattern* b2 = dynamic_cast <CombinePattern*> (b);
-            if (b2 != (CombinePattern*)0)
+            CombinePattern? b2 = b as CombinePattern;
+            if (b2 != (CombinePattern)null)
                 return b.commonSubPattern(this, -sa);
 
-            ContextPattern* b3 = dynamic_cast <ContextPattern*> (b);
-            if (b3 != (ContextPattern*)0) {
-                InstructionPattern* res = new InstructionPattern(true);
+            ContextPattern? b3 = b as ContextPattern;
+            if (b3 != (ContextPattern)null) {
+                InstructionPattern res = new InstructionPattern(true);
                 return res;
             }
-            InstructionPattern* b4 = (InstructionPattern*)b;
+            InstructionPattern b4 = (InstructionPattern)b;
 
-            PatternBlock* respattern;
-            if (sa < 0)
-            {
-                PatternBlock* a = maskvalue.clone();
+            PatternBlock respattern;
+            if (sa < 0) {
+                PatternBlock a = maskvalue.clone();
                 a.shift(-sa);
                 respattern = a.commonSubPattern(b4.maskvalue);
-                delete a;
+                // delete a;
             }
-            else
-            {
-                PatternBlock* c = b4.maskvalue.clone();
+            else {
+                PatternBlock c = b4.maskvalue.clone();
                 c.shift(sa);
                 respattern = maskvalue.commonSubPattern(c);
-                delete c;
+                // delete c;
             }
             return new InstructionPattern(respattern);
         }

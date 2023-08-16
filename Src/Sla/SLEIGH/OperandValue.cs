@@ -46,28 +46,27 @@ namespace Sla.SLEIGH
         public override TokenPattern genMinPattern(List<TokenPattern> ops) => ops[index];
 
         public override long getValue(ParserWalker walker)
-        {               // Get the value of an operand when it is used in
-                        // an expression. 
-            OperandSymbol* sym = ct.getOperand(index);
-            PatternExpression* patexp = sym.getDefiningExpression();
-            if (patexp == (PatternExpression)null)
-            {
-                TripleSymbol* defsym = sym.getDefiningSymbol();
+        {
+            // Get the value of an operand when it is used in an expression. 
+            OperandSymbol sym = ct.getOperand(index);
+            PatternExpression? patexp = sym.getDefiningExpression();
+            if (patexp == (PatternExpression)null) {
+                TripleSymbol? defsym = sym.getDefiningSymbol();
                 if (defsym != (TripleSymbol)null)
                     patexp = defsym.getPatternExpression();
                 if (patexp == (PatternExpression)null)
                     return 0;
             }
-            ConstructState tempstate;
-            ParserWalker newwalker(walker.getParserContext());
-            newwalker.setOutOfBandState(ct, index, &tempstate, walker);
+            ConstructState tempstate = new ConstructState();
+            ParserWalker newwalker = new ParserWalker(walker.getParserContext());
+            newwalker.setOutOfBandState(ct, index, tempstate, walker);
             long res = patexp.getValue(newwalker);
             return res;
         }
 
         public override long getSubValue(List<long> replace, int listpos)
         {
-            OperandSymbol* sym = ct.getOperand(index);
+            OperandSymbol sym = ct.getOperand(index);
             return sym.getDefiningExpression().getSubValue(replace, listpos);
         }
 
@@ -83,32 +82,21 @@ namespace Sla.SLEIGH
 
         public override void saveXml(TextWriter s)
         {
-            s << "<operand_exp";
-            s << " index=\"" << dec << index << "\"";
-            s << " table=\"0x" << hex << ct.getParent().getId() << "\"";
-            s << " ct=\"0x" << ct.getId() << "\"/>\n"; // Save id of our constructor
+            s.Write("<operand_exp";
+            s.Write($" index=\"{index}\"");
+            s.Write(" table=\"0x{ct.getParent().getId():X}\"");
+            // Save id of our constructor
+            s.WriteLine($" ct=\"0x{ct.getId():X}\"/>");
         }
 
         public override void restoreXml(Element el, Translate trans)
         {
             uint ctid, tabid;
-            {
-                istringstream s = new istringstream(el.getAttributeValue("index"));
-                s.unsetf(ios::dec | ios::hex | ios::oct);
-                s >> index;
-            }
-            {
-                istringstream s = new istringstream(el.getAttributeValue("table"));
-                s.unsetf(ios::dec | ios::hex | ios::oct);
-                s >> tabid;
-            }
-            {
-                istringstream s = new istringstream(el.getAttributeValue("ct"));
-                s.unsetf(ios::dec | ios::hex | ios::oct);
-                s >> ctid;
-            }
-            SleighBase* sleigh = (SleighBase*)trans;
-            SubtableSymbol* tab = dynamic_cast<SubtableSymbol*>(sleigh.findSymbol(tabid));
+            index = int.Parse(el.getAttributeValue("index"));
+            tabid = uint.Parse(el.getAttributeValue("table"));
+            ctid = uint.Parse(el.getAttributeValue("ct"));
+            SleighBase sleigh = (SleighBase)trans;
+            SubtableSymbol? tab = sleigh.findSymbol(tabid) as SubtableSymbol;
             ct = tab.getConstructor(ctid);
         }
     }

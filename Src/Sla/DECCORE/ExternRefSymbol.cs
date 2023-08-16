@@ -75,15 +75,14 @@ namespace Sla.DECCORE
         public override void decode(Sla.CORE.Decoder decoder)
         {
             uint elemId = decoder.openElement(ElementId.ELEM_EXTERNREFSYMBOL);
-            name.clear();           // Name is empty
-            displayName.clear();
-            while(true)
-            {
-                uint attribId = decoder.getNextAttributeId();
+            name = string.Empty;           // Name is empty
+            displayName = string.Empty;
+            while(true) {
+                AttributeId attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == AttributeId.ATTRIB_NAME) // Unless we see it explicitly
                     name = decoder.readString();
-                else if (attribId == ATTRIB_LABEL)
+                else if (attribId == AttributeId.ATTRIB_LABEL)
                     displayName = decoder.readString();
             }
             refaddr = Address.decode(decoder);

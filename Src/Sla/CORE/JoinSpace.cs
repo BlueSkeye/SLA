@@ -85,7 +85,7 @@ namespace Sla.CORE
             uint sizesum = 0;
             uint logicalsize = 0;
             while(true) {
-                uint attribId = decoder.getNextAttributeId();
+                AttributeId attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == AttributeId.ATTRIB_LOGICALSIZE) {
                     logicalsize = (uint)decoder.readUnsignedInteger();

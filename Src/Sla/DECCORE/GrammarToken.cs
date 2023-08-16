@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -55,11 +55,9 @@ namespace Sla.DECCORE
             switch (tp) {
                 case Token.integer:
                     string charstring(ptr, len);
-                    istringstream s(charstring);
                     // s.unsetf(ios::dec | ios::hex | ios::oct);
-                    intb val;
-                    s >> val;
-                    value.integer = (uintb)val;
+                    long val = long.Parse(charstring);
+                    value.integer = (ulong)val;
                     break;
                 case Token.identifier:
                 case Token.stringval:
@@ -67,7 +65,7 @@ namespace Sla.DECCORE
                     break;
                 case Token.charconstant:
                     if (len == 1)
-                        value.integer = (uintb) * ptr;
+                        value.integer = (ulong) * ptr;
                     else {
                         // Backslash
                         switch (ptr[1]) {
@@ -96,7 +94,7 @@ namespace Sla.DECCORE
                                 value.integer = 13;
                                 break;
                             default:
-                                value.integer = (uintb)ptr[1];
+                                value.integer = (ulong)ptr[1];
                                 break;
                         }
                     }

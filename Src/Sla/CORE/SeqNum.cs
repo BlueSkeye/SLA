@@ -117,7 +117,7 @@ namespace Sla.CORE
             Address pc = Address.decode(decoder); // Recover address
             while(true)
             {
-                uint attribId = decoder.getNextAttributeId();
+                AttributeId attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == AttributeId.ATTRIB_UNIQ) {
                     uniq = (uint)decoder.readUnsignedInteger();

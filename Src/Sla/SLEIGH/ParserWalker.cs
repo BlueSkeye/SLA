@@ -39,8 +39,7 @@ namespace Sla.SLEIGH
             breadcrumb[0] = 0;
         }
 
-        public void setOutOfBandState(Constructor ct, int index, ConstructState tempstate,
-            ParserWalker otherwalker)
+        public void setOutOfBandState(Constructor ct, int index, ConstructState tempstate, ParserWalker otherwalker)
         {
             // Initialize walker for future calls into getInstructionBytes assuming -ct- is the current position in the walk
             ConstructState pt = otherwalker.point;

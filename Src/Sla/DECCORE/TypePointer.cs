@@ -8,11 +8,11 @@ namespace Sla.DECCORE
     {
         // friend class TypeFactory;
         /// Type being pointed to
-        protected Datatype ptrto;
+        internal Datatype ptrto;
         /// If non-null, the address space \b this is intented to point into
         protected AddrSpace? spaceid;
         /// What size unit does the pointer address
-        protected uint wordsize;
+        internal uint wordsize;
 
         /// Restore \b this pointer data-type from a stream
         /// Parse a \<type> element with a child describing the data-type being pointed to

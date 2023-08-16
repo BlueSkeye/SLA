@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -112,7 +112,7 @@ namespace Sla.DECCORE
                 decoder.openElement();
                 symbolId = 0;
                 while(true) {
-                    uint attribId = decoder.getNextAttributeId();
+                    AttributeId attribId = decoder.getNextAttributeId();
                     if (attribId == 0) break;
                     if (attribId == AttributeId.ATTRIB_NAME)
                         name = decoder.readString();

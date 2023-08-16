@@ -172,7 +172,8 @@ namespace Sla.CORE
         internal static readonly AttributeId ATTRIB_UNKNOWN = new AttributeId("XMLunknown", 149);
 
         /// A map of AttributeId names to their associated id
-        private static Dictionary<string, uint> lookupAttributeId;
+        private static Dictionary<string, uint> lookupAttributeId =
+            new Dictionary<string, uint>();
 
         private static List<AttributeId>? _thelist;
 

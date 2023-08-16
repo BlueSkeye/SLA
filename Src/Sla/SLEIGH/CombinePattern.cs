@@ -20,7 +20,7 @@ namespace Sla.SLEIGH
 
         public CombinePattern()
         {
-            context = (ContextPattern*)0;
+            context = (ContextPattern)null;
             instr = (InstructionPattern*)0;
         }
 
@@ -32,7 +32,7 @@ namespace Sla.SLEIGH
     
         ~CombinePattern()
         {
-            if (context != (ContextPattern*)0)
+            if (context != (ContextPattern)null)
                 delete context;
             if (instr != (InstructionPattern*)0)
                 delete instr;
@@ -91,7 +91,7 @@ namespace Sla.SLEIGH
                 return b.doAnd(this, -sa);
 
             CombinePattern b2 = dynamic_cast <CombinePattern*> (b);
-            if (b2 != (CombinePattern*)0)
+            if (b2 != (CombinePattern)null)
             {
                 ContextPattern* c = (ContextPattern*)context.doAnd(b2.context, 0);
                 InstructionPattern* i = (InstructionPattern*)instr.doAnd(b2.instr, sa);
@@ -124,7 +124,7 @@ namespace Sla.SLEIGH
                 return b.commonSubPattern(this, -sa);
 
             CombinePattern b2 = dynamic_cast <CombinePattern*> (b);
-            if (b2 != (CombinePattern*)0)
+            if (b2 != (CombinePattern)null)
             {
                 ContextPattern* c = (ContextPattern*)context.commonSubPattern(b2.context, 0);
                 InstructionPattern* i = (InstructionPattern*)instr.commonSubPattern(b2.instr, sa);

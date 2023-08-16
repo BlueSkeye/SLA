@@ -502,7 +502,7 @@ namespace Sla.DECCORE
         }
 
         /// Clear a boolean property
-        protected void clearFlag(uint fl)
+        internal void clearFlag(FlowBlock.block_flags fl)
         {
             flags &= ~fl;
         }

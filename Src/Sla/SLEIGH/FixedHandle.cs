@@ -12,7 +12,7 @@ namespace Sla.SLEIGH
         // A handle that is fully resolved
         internal AddrSpace space;
         internal uint size;
-        internal AddrSpace offset_space;    // Either null or where dynamic offset is stored
+        internal AddrSpace? offset_space;    // Either null or where dynamic offset is stored
         internal ulong offset_offset;        // Either static offset or ptr offset
         internal uint offset_size;      // Size of pointer
         internal AddrSpace temp_space;  // Consistent temporary location for value

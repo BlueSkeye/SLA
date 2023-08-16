@@ -43,7 +43,7 @@ namespace Sla.SLEIGH
         public override Pattern doOr(Pattern b, int sa)
         {
             ContextPattern* b2 = dynamic_cast <ContextPattern*> (b);
-            if (b2 == (ContextPattern*)0)
+            if (b2 == (ContextPattern)null)
                 return b.doOr(this, -sa);
 
             return new OrPattern((DisjointPattern*)simplifyClone(), (DisjointPattern*)b2.simplifyClone());
@@ -52,7 +52,7 @@ namespace Sla.SLEIGH
         public override Pattern doAnd(Pattern b, int sa)
         {
             ContextPattern* b2 = dynamic_cast <ContextPattern*> (b);
-            if (b2 == (ContextPattern*)0)
+            if (b2 == (ContextPattern)null)
                 return b.doAnd(this, -sa);
 
             PatternBlock* resblock = maskvalue.intersect(b2.maskvalue);
@@ -62,7 +62,7 @@ namespace Sla.SLEIGH
         public override Pattern commonSubPattern(Pattern b, int sa)
         {
             ContextPattern* b2 = dynamic_cast <ContextPattern*> (b);
-            if (b2 == (ContextPattern*)0)
+            if (b2 == (ContextPattern)null)
                 return b.commonSubPattern(this, -sa);
 
             PatternBlock* resblock = maskvalue.commonSubPattern(b2.maskvalue);

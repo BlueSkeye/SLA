@@ -52,9 +52,8 @@ namespace Sla.EXTRA
             processorspec = decoder.readString(AttributeId.ATTRIB_PROCESSORSPEC);
             id = decoder.readString(AttributeId.ATTRIB_ID);
             deprecated = false;
-            while(true)
-            {
-                uint attribId = decoder.getNextAttributeId();
+            while(true) {
+                AttributeId attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == AttributeId.ATTRIB_DEPRECATED)
                     deprecated = decoder.readBool();

@@ -200,7 +200,7 @@ namespace Sla.CORE {
         {
             deadcodedelay = -1;
             while(true) {
-                uint attribId = decoder.getNextAttributeId();
+                AttributeId attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == AttributeId.ATTRIB_NAME) {
                     name = decoder.readString();

@@ -434,7 +434,7 @@ namespace Sla.DECCORE
         }
 
         /// Change name displayed in output
-        protected void setDisplayName(string nm)
+        internal void setDisplayName(string nm)
         {
             displayName = nm;
         }

@@ -115,20 +115,20 @@ namespace Sla.DECCORE
         {
             for (int mode = 0; mode < 3; ++mode) {
                 bool allStorageProcessed = true;
-                IEnumerator<KeyValuePair<VarnodeData, LanedRegister>> iter;
-                for (iter = data.beginLaneAccess(); iter != data.endLaneAccess(); ++iter) {
-                    LanedRegister lanedReg = (*iter).second;
+                IEnumerator<KeyValuePair<VarnodeData, LanedRegister>> iter = data.beginLaneAccess();
+                while (iter.MoveNext()) {
+                    LanedRegister lanedReg = iter.Current.Value;
                     Address addr = iter.Current.Key.getAddr();
-                    int sz = iter.Current.Key.size;
+                    uint sz = iter.Current.Key.size;
                     VarnodeLocSet::const_iterator viter = data.beginLoc(sz, addr);
                     VarnodeLocSet::const_iterator venditer = data.endLoc(sz, addr);
                     bool allVarnodesProcessed = true;
                     while (viter != venditer) {
-                        Varnode* vn = *viter;
-                        if (processVarnode(data, vn, *lanedReg, mode)) {
-                            viter = data.beginLoc(sz, addr);
+                        Varnode vn = viter.Current;
+                        if (processVarnode(data, vn, lanedReg, mode)) {
+                            viter = data.beginLoc((int)sz, addr);
                             // Recalculate bounds
-                            venditer = data.endLoc(sz, addr);
+                            venditer = data.endLoc((int)sz, addr);
                             allVarnodesProcessed = true;
                         }
                         else {

@@ -821,24 +821,21 @@ namespace Sla.DECCORE
         /// \return the decoded Datatype object
         public Datatype decodeType(Decoder decoder)
         {
-            Datatype* ct;
+            Datatype ct;
             uint elemId = decoder.peekElement();
-            if (ElementId.ELEM_TYPEREF == elemId)
-            {
+            if (ElementId.ELEM_TYPEREF == elemId) {
                 elemId = decoder.openElement();
                 ulong newid = 0;
                 int size = -1;
-                while(true)
-                {
-                    uint attribId = decoder.getNextAttributeId();
+                while(true) {
+                    AttributeId attribId = decoder.getNextAttributeId();
                     if (attribId == 0) break;
-                    if (attribId == ATTRIB_ID)
-                    {
+                    if (attribId == AttributeId.ATTRIB_ID) {
                         newid = decoder.readUnsignedInteger();
                     }
-                    else if (attribId == ATTRIB_SIZE)
-                    {       // A "size" attribute indicates a "variable length" base
-                        size = decoder.readSignedInteger();
+                    else if (attribId == AttributeId.ATTRIB_SIZE) {
+                        // A "size" attribute indicates a "variable length" base
+                        size = (int)decoder.readSignedInteger();
                     }
                 }
                 string newname = decoder.readString(AttributeId.ATTRIB_NAME);
@@ -846,7 +843,7 @@ namespace Sla.DECCORE
                     newid = Datatype.hashName(newname);
                 ct = findById(newname, newid, size);
                 if (ct == (Datatype)null)
-                    throw new LowlevelError("Unable to resolve type: " + newname);
+                    throw new LowlevelError($"Unable to resolve type: {newname}");
                 decoder.closeElement(elemId);
                 return ct;
             }
@@ -862,18 +859,16 @@ namespace Sla.DECCORE
         /// \return the decoded Datatype object
         public Datatype decodeTypeWithCodeFlags(Decoder decoder, bool isConstructor, bool isDestructor)
         {
-            TypePointer tp;
+            TypePointer tp = new TypePointer();
             uint elemId = decoder.openElement();
             tp.decodeBasic(decoder);
             if (tp.getMetatype() != type_metatype.TYPE_PTR)
                 throw new LowlevelError("Special type decode does not see pointer");
-            while(true)
-            {
-                uint attribId = decoder.getNextAttributeId();
+            while(true) {
+                AttributeId attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
-                if (attribId == ATTRIB_WORDSIZE)
-                {
-                    tp.wordsize = decoder.readUnsignedInteger();
+                if (attribId == AttributeId.ATTRIB_WORDSIZE) {
+                    tp.wordsize = (uint)decoder.readUnsignedInteger();
                 }
             }
             tp.ptrto = decodeCode(decoder, isConstructor, isDestructor, false);
