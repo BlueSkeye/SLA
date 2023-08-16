@@ -525,7 +525,7 @@ namespace Sla.DECCORE
                 miter = visited.upper_bound(retop.getAddr());
                 if (miter != visited.begin()) {
                     --miter;
-                    res = (*miter).first + (*miter).second.size;
+                    res = miter.Current.first + miter.Current.second.size;
                     if (op.getAddr() < res)
                         return (PcodeOp)null; // Indicate that res has the fallthru address
                 }
@@ -916,7 +916,7 @@ namespace Sla.DECCORE
 
             data.getOverride().applyIndirect(data, res);
             if (fc != (FuncCallSpecs)null && fc.getEntryAddress() == res.getEntryAddress())
-                res.setAddress(Address()); // Cancel any indirect override
+                res.setAddress(new Address()); // Cancel any indirect override
             data.getOverride().applyPrototype(data, res);
             queryCall(res);
 
@@ -1020,7 +1020,7 @@ namespace Sla.DECCORE
                 icontext.output.Add(new VarnodeData() {
                     space = outvn.getSpace(),
                     offset = outvn.getOffset(),
-                    size = outvn.getSize()
+                    size = (uint)outvn.getSize()
                 });
             }
             doInjection(payload, icontext, op, (FuncCallSpecs)null);
@@ -1375,8 +1375,8 @@ namespace Sla.DECCORE
                         if (jt == (JumpTable)null) continue;
 
                         int num = jt.numEntries();
-                        for (int i = 0; i < num; ++i)
-                            newAddress(jt.getIndirectOp(), jt.getAddressByIndex(i));
+                        for (int j = 0; i < num; ++i)
+                            newAddress(jt.getIndirectOp(), jt.getAddressByIndex(j));
                         if (jt.isPossibleMultistage())
                             collapsed_jumptable = true;
                         while (!addrlist.empty())   // Try to fill in as much more as possible

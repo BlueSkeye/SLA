@@ -141,22 +141,19 @@ namespace Sla.SLEIGH
 
         public override bool alwaysFalse() => maskvalue.alwaysFalse();
 
-        public override bool alwaysInstructionTrue) => maskvalue.alwaysTrue();
+        public override bool alwaysInstructionTrue() => maskvalue.alwaysTrue();
 
         public override void saveXml(TextWriter s)
         {
-            s << "<instruct_pat>\n";
+            s.WriteLine("<instruct_pat>");
             maskvalue.saveXml(s);
-            s << "</instruct_pat>\n";
+            s.WriteLine("</instruct_pat>");
         }
 
         public override void restoreXml(Element el)
         {
-            List list = el.getChildren();
-            List::const_iterator iter;
-            iter = list.begin();
             maskvalue = new PatternBlock(true);
-            maskvalue.restoreXml(*iter);
+            maskvalue.restoreXml(el.getChildren().First());
         }
     }
 }

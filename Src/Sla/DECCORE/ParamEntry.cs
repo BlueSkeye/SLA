@@ -1,10 +1,4 @@
 ﻿using Sla.CORE;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.DECCORE
 {
@@ -57,7 +51,7 @@ namespace Sla.DECCORE
         }
 
         /// Boolean properties of the parameter
-        private uint flags;
+        private ParamFlags flags;
         /// Data-type class that this entry must match
         private type_metatype type;
         /// Group(s) \b this entry belongs to
@@ -105,7 +99,7 @@ namespace Sla.DECCORE
         {
             if (spaceid.getType() != spacetype.IPTR_JOIN)
             {
-                joinrec = (JoinRecord*)0;
+                joinrec = (JoinRecord)null;
                 return;
             }
             joinrec = spaceid.getManager().findJoin(addressbase);
@@ -133,7 +127,7 @@ namespace Sla.DECCORE
         /// \param curList is the list of previous entries
         private void resolveOverlap(List<ParamEntry> curList)
         {
-            if (joinrec != (JoinRecord*)0)
+            if (joinrec != (JoinRecord)null)
                 return;     // Overlaps with join records dealt with in resolveJoin
             List<int> overlapSet;
             list<ParamEntry>::const_iterator iter, enditer;
@@ -274,7 +268,7 @@ namespace Sla.DECCORE
         public bool intersects(Address addr, int sz)
         {
             ulong rangeend;
-            if (joinrec != (JoinRecord*)0)
+            if (joinrec != (JoinRecord)null)
             {
                 rangeend = addr.getOffset() + sz - 1;
                 for (int i = 0; i < joinrec.numPieces(); ++i)
@@ -309,7 +303,7 @@ namespace Sla.DECCORE
         /// \return the endian aware alignment or -1 if the given range isn't contained
         public int justifiedContain(Address addr, int sz)
         {
-            if (joinrec != (JoinRecord*)0)
+            if (joinrec != (JoinRecord)null)
             {
                 int res = 0;
                 for (int i = joinrec.numPieces() - 1; i >= 0; --i)
@@ -341,11 +335,11 @@ namespace Sla.DECCORE
             endaddr -= addressbase;
             if (!isLeftJustified())
             {   // For right justified (big endian), endaddr must be aligned
-                int res = (int)((endaddr + 1) % alignment);
+                int res = (int)((endaddr + 1) % (uint)alignment);
                 if (res == 0) return 0;
                 return (alignment - res);
             }
-            return (int)(startaddr % alignment);
+            return (int)(startaddr % (uint)alignment);
         }
 
         /// \brief Calculate the containing memory range
@@ -361,7 +355,7 @@ namespace Sla.DECCORE
         public bool getContainer(Address addr, int sz, VarnodeData res)
         {
             Address endaddr = addr + (sz - 1);
-            if (joinrec != (JoinRecord*)0)
+            if (joinrec != (JoinRecord)null)
             {
                 for (int i = joinrec.numPieces() - 1; i >= 0; --i)
                 { // Move from least significant to most
@@ -383,16 +377,16 @@ namespace Sla.DECCORE
                 // Ordinary endian containment
                 res.space = spaceid;
                 res.offset = addressbase;
-                res.size = size;
+                res.size = (uint)size;
                 return true;
             }
-            ulong al = (addr.getOffset() - addressbase) % alignment;
+            ulong al = (addr.getOffset() - addressbase) % (uint)alignment;
             res.space = spaceid;
             res.offset = addr.getOffset() - al;
-            res.size = (int)(endaddr.getOffset() - res.offset) + 1;
-            int al2 = res.size % alignment;
+            res.size = (uint)(endaddr.getOffset() - res.offset) + 1U;
+            int al2 = (int)res.size % alignment;
             if (al2 != 0)
-                res.size += (alignment - al2); // Bump up size to nearest alignment
+                res.size += (uint)(alignment - al2); // Bump up size to nearest alignment
             return true;
         }
 
@@ -404,8 +398,8 @@ namespace Sla.DECCORE
         /// \return \b true if the given ParamEntry is contained
         public bool contains(ParamEntry op2)
         {
-            if (op2.joinrec != (JoinRecord*)0) return false;    // Assume a join entry cannot be contained
-            if (joinrec == (JoinRecord*)0)
+            if (op2.joinrec != (JoinRecord)null) return false;    // Assume a join entry cannot be contained
+            if (joinrec == (JoinRecord)null)
             {
                 Address addr(spaceid, addressbase);
                 return op2.containedBy(addr, size);
@@ -436,32 +430,32 @@ namespace Sla.DECCORE
         /// \return the type of extension
         public OpCode assumedExtension(Address addr, int sz, VarnodeData res)
         {
-            if ((flags & (smallsize_zext | smallsize_sext | smallsize_inttype)) == 0) return OpCode.CPUI_COPY;
-            if (alignment != 0)
-            {
+            if ((flags & (ParamFlags.smallsize_zext | ParamFlags.smallsize_sext | ParamFlags.smallsize_inttype)) == 0)
+                return OpCode.CPUI_COPY;
+            if (alignment != 0) {
                 if (sz >= alignment)
                     return OpCode.CPUI_COPY;
             }
             else if (sz >= size)
                 return OpCode.CPUI_COPY;
-            if (joinrec != (JoinRecord*)0) return OpCode.CPUI_COPY;
+            if (joinrec != (JoinRecord)null) return OpCode.CPUI_COPY;
             if (justifiedContain(addr, sz) != 0) return OpCode.CPUI_COPY; // (addr,sz) is not justified properly to allow an extension
-            if (alignment == 0)
-            {   // If exclusion, take up the whole entry
+            if (alignment == 0) {
+                // If exclusion, take up the whole entry
                 res.space = spaceid;
                 res.offset = addressbase;
-                res.size = size;
+                res.size = (uint)size;
             }
-            else
-            {   // Otherwise take up whole alignment
+            else {
+                // Otherwise take up whole alignment
                 res.space = spaceid;
-                int alignAdjust = (addr.getOffset() - addressbase) % alignment;
-                res.offset = addr.getOffset() - alignAdjust;
-                res.size = alignment;
+                int alignAdjust = (int)((addr.getOffset() - addressbase) % (uint)alignment);
+                res.offset = addr.getOffset() - (uint)alignAdjust;
+                res.size = (uint)alignment;
             }
-            if ((flags & smallsize_zext) != 0)
+            if ((flags & ParamFlags.smallsize_zext) != 0)
                 return OpCode.CPUI_INT_ZEXT;
-            if ((flags & smallsize_inttype) != 0)
+            if ((flags & ParamFlags.smallsize_inttype) != 0)
                 return OpCode.CPUI_PIECE;
             return OpCode.CPUI_INT_SEXT;
         }
@@ -510,26 +504,26 @@ namespace Sla.DECCORE
         /// \param slotnum is a reference to used slots (which will be updated)
         /// \param sz is the size of the parameter to allocated
         /// \return the address of the new parameter (or an invalid address)
-        public Address getAddrBySlot(int slot, int sz)
+        public Address getAddrBySlot(int slotnum, int sz)
         {
-            Address res;            // Start with an invalid result
+            // Start with an invalid result
+            Address res = new Address();
             int spaceused;
             if (sz < minsize) return res;
-            if (alignment == 0)
-            {       // If not an aligned entry (allowing multiple slots)
+            if (alignment == 0) {
+                // If not an aligned entry (allowing multiple slots)
                 if (slotnum != 0) return res; // Can only allocate slot 0
                 if (sz > size) return res;  // Check on maximum size
-                res = Address(spaceid, addressbase);    // Get base address of the slot
+                res = new Address(spaceid, addressbase);    // Get base address of the slot
                 spaceused = size;
-                if (((flags & smallsize_floatext) != 0) && (sz != size))
-                { // Do we have an implied floating-point extension
-                    AddrSpaceManager* manager = spaceid.getManager();
-                    res = manager.constructFloatExtensionAddress(res, size, sz);
+                if (((flags & ParamFlags.smallsize_floatext) != 0) && (sz != size)) {
+                    // Do we have an implied floating-point extension
+                    AddrSpaceManager manager = spaceid.getManager();
+                    res = manager.constructFloatExtensionAddress(ref res, size, sz);
                     return res;
                 }
             }
-            else
-            {
+            else {
                 int slotsused = sz / alignment; // How many slots does a -sz- byte object need
                 if ((sz % alignment) != 0)
                     slotsused += 1;
@@ -537,15 +531,14 @@ namespace Sla.DECCORE
                     return res;
                 spaceused = slotsused * alignment;
                 int index;
-                if (isReverseStack())
-                {
+                if (isReverseStack()) {
                     index = numslots;
                     index -= slotnum;
                     index -= slotsused;
                 }
                 else
                     index = slotnum;
-                res = Address(spaceid, addressbase + index * alignment);
+                res = new Address(spaceid, addressbase + ((uint)index * (ulong)alignment));
                 slotnum += slotsused;   // Inform caller of number of slots used
             }
             if (!isLeftJustified())   // Adjust for right justified (big endian)
@@ -568,40 +561,36 @@ namespace Sla.DECCORE
             numslots = 1;
 
             uint elemId = decoder.openElement(ElementId.ELEM_PENTRY);
-            while(true)
-            {
-                uint attribId = decoder.getNextAttributeId();
+            while(true) {
+                AttributeId attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
-                if (attribId == ATTRIB_MINSIZE)
-                {
-                    minsize = decoder.readSignedInteger();
+                if (attribId == AttributeId.ATTRIB_MINSIZE) {
+                    minsize = (int)decoder.readSignedInteger();
                 }
-                else if (attribId == ATTRIB_SIZE)
-                { // old style
-                    alignment = decoder.readSignedInteger();
+                else if (attribId == AttributeId.ATTRIB_SIZE) {
+                    // old style
+                    alignment = (int)decoder.readSignedInteger();
                 }
-                else if (attribId == ATTRIB_ALIGN)
-                { // new style
-                    alignment = decoder.readSignedInteger();
+                else if (attribId == AttributeId.ATTRIB_ALIGN) {
+                    // new style
+                    alignment = (int)decoder.readSignedInteger();
                 }
-                else if (attribId == ATTRIB_MAXSIZE)
-                {
-                    size = decoder.readSignedInteger();
+                else if (attribId == AttributeId.ATTRIB_MAXSIZE) {
+                    size = (int)decoder.readSignedInteger();
                 }
-                else if (attribId == ATTRIB_METATYPE)
-                    type = string2metatype(decoder.readString());
-                else if (attribId == ATTRIB_EXTENSION)
-                {
-                    flags &= ~((uint)(smallsize_zext | smallsize_sext | smallsize_inttype));
+                else if (attribId == AttributeId.ATTRIB_METATYPE)
+                    type = Globals.string2metatype(decoder.readString());
+                else if (attribId == AttributeId.ATTRIB_EXTENSION) {
+                    flags &= ~(ParamFlags.smallsize_zext | ParamFlags.smallsize_sext | ParamFlags.smallsize_inttype);
                     string ext = decoder.readString();
                     if (ext == "sign")
-                        flags |= smallsize_sext;
+                        flags |= ParamFlags.smallsize_sext;
                     else if (ext == "zero")
-                        flags |= smallsize_zext;
+                        flags |= ParamFlags.smallsize_zext;
                     else if (ext == "inttype")
-                        flags |= smallsize_inttype;
+                        flags |= ParamFlags.smallsize_inttype;
                     else if (ext == "float")
-                        flags |= smallsize_floatext;
+                        flags |= ParamFlags.smallsize_floatext;
                     else if (ext != "none")
                         throw new LowlevelError("Bad extension attribute");
                 }
@@ -617,39 +606,35 @@ namespace Sla.DECCORE
             decoder.closeElement(elemId);
             spaceid = addr.getSpace();
             addressbase = addr.getOffset();
-            if (alignment != 0)
-            {
+            if (alignment != 0) {
                 //    if ((addressbase % alignment) != 0)
                 //      throw new LowlevelError("Stack <pentry> address must match alignment");
                 numslots = size / alignment;
             }
-            if (spaceid.isReverseJustified())
-            {
+            if (spaceid.isReverseJustified()) {
                 if (spaceid.isBigEndian())
-                    flags |= force_left_justify;
+                    flags |= ParamFlags.force_left_justify;
                 else
                     throw new LowlevelError("No support for right justification in little endian encoding");
             }
-            if (!normalstack)
-            {
-                flags |= reverse_stack;
-                if (alignment != 0)
-                {
+            if (!normalstack) {
+                flags |= ParamFlags.reverse_stack;
+                if (alignment != 0) {
                     if ((size % alignment) != 0)
                         throw new LowlevelError("For positive stack growth, <pentry> size must match alignment");
                 }
             }
             if (grouped)
-                flags |= is_grouped;
+                flags |= ParamFlags.is_grouped;
             resolveJoin(curList);
             resolveOverlap(curList);
         }
 
         /// Return \b true if there is a high overlap
-        public bool isParamCheckHigh() => ((flags & extracheck_high)!= 0);
+        public bool isParamCheckHigh() => ((flags & ParamFlags.extracheck_high)!= 0);
 
         /// Return \b true if there is a low overlap
-        public bool isParamCheckLow() => ((flags & extracheck_low)!= 0);
+        public bool isParamCheckLow() => ((flags & ParamFlags.extracheck_low)!= 0);
 
         /// Enforce ParamEntry group ordering rules
         /// Entries within a group must be distinguishable by size or by type.
@@ -660,10 +645,8 @@ namespace Sla.DECCORE
         {
             if (entry2.minsize > entry1.size || entry1.minsize > entry2.size)
                 return;
-            if (entry1.type != entry2.type)
-            {
-                if (entry1.type == type_metatype.TYPE_UNKNOWN)
-                {
+            if (entry1.type != entry2.type) {
+                if (entry1.type == type_metatype.TYPE_UNKNOWN) {
                     throw new LowlevelError("<pentry> tags with a specific type must come before the general type");
                 }
                 return;

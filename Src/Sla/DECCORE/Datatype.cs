@@ -137,7 +137,7 @@ namespace Sla.DECCORE
             }
             encoder.writeSignedInteger(AttributeId.ATTRIB_SIZE, size);
             string metastring;
-            metatype2string(meta, metastring);
+            Globals.metatype2string(meta, out metastring);
             encoder.writeString(AttributeId.ATTRIB_METATYPE, metastring);
             if ((flags & Properties.coretype) != 0)
                 encoder.writeBool(AttributeId.ATTRIB_CORE, true);
@@ -410,7 +410,7 @@ namespace Sla.DECCORE
         public virtual Datatype? nearestArrayedComponentBackward(ulong off, out ulong newoff, out int elSize)
         {
             newoff = 0;
-            elSize
+            elSize = 0;
             return (TypeArray)null;
         }
 

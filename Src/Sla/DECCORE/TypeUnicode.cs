@@ -31,7 +31,7 @@ namespace Sla.DECCORE
         /// Parse a \<type> tag for properties of the data-type.
         /// \param decoder is the stream decoder
         /// \param typegrp is the factory owning \b this data-type
-        protected void decode(Sla.CORE.Decoder decoder, TypeFactory typegrp)
+        internal void decode(Sla.CORE.Decoder decoder, TypeFactory typegrp)
         {
             //  uint elemId = decoder.openElement();
             decodeBasic(decoder);

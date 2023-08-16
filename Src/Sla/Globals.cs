@@ -2,6 +2,8 @@
 using Sla.DECCORE;
 using Sla.SLACOMP;
 using Sla.SLEIGH;
+using static Sla.EXTRA.UnifyDatatype;
+using System;
 
 namespace Sla
 {
@@ -96,12 +98,128 @@ namespace Sla
         //    addr.printRaw(s);
         //    return s;
         //}
+        /// Convert a type \b meta-type into the string name of the meta-type
+        /// \param metatype is the encoded type meta-type
+        /// \param res will hold the resulting string
+        internal static void metatype2string(type_metatype metatype, out string res)
 
-        /// Treat the given \b val as a constant of \b size bytes
-        /// \param val is the given value
-        /// \param size is the size in bytes
-        /// \return \b true if the constant (as sized) has its sign bit set
-        public static bool signbit_negative(ulong val, int size)
+        {
+            switch (metatype) {
+                case type_metatype.TYPE_VOID:
+                    res = "void";
+                    break;
+                case type_metatype.TYPE_PTR:
+                    res = "ptr";
+                    break;
+                case type_metatype.TYPE_PTRREL:
+                    res = "ptrrel";
+                    break;
+                case type_metatype.TYPE_ARRAY:
+                    res = "array";
+                    break;
+                case type_metatype.TYPE_PARTIALSTRUCT:
+                    res = "partstruct";
+                    break;
+                case type_metatype.TYPE_PARTIALUNION:
+                    res = "partunion";
+                    break;
+                case type_metatype.TYPE_STRUCT:
+                    res = "struct";
+                    break;
+                case type_metatype.TYPE_UNION:
+                    res = "union";
+                    break;
+                case type_metatype.TYPE_SPACEBASE:
+                    res = "spacebase";
+                    break;
+                case type_metatype.TYPE_UNKNOWN:
+                    res = "unknown";
+                    break;
+                case type_metatype.TYPE_UINT:
+                    res = "uint";
+                    break;
+                case type_metatype.TYPE_INT:
+                    res = "int";
+                    break;
+                case type_metatype.TYPE_BOOL:
+                    res = "bool";
+                    break;
+                case type_metatype.TYPE_CODE:
+                    res = "code";
+                    break;
+                case type_metatype.TYPE_FLOAT:
+                    res = "float";
+                    break;
+                default:
+                    throw new LowlevelError("Unknown metatype");
+            }
+        }
+
+        /// Given a string description of a type \b meta-type. Return the meta-type.
+        /// \param metastring is the description of the meta-type
+        /// \return the encoded type meta-type
+        internal static type_metatype string2metatype(string metastring)
+        {
+            switch (metastring[0]) {
+                case 'p':
+                    if (metastring == "ptr")
+                        return type_metatype.TYPE_PTR;
+                    else if (metastring == "ptrrel")
+                        return type_metatype.TYPE_PTRREL;
+                    else if (metastring == "partunion")
+                        return type_metatype.TYPE_PARTIALUNION;
+                    else if (metastring == "partstruct")
+                        return type_metatype.TYPE_PARTIALSTRUCT;
+                    break;
+                case 'a':
+                    if (metastring == "array")
+                        return type_metatype.TYPE_ARRAY;
+                    break;
+                case 's':
+                    if (metastring == "struct")
+                        return type_metatype.TYPE_STRUCT;
+                    if (metastring == "spacebase")
+                        return type_metatype.TYPE_SPACEBASE;
+                    break;
+                case 'u':
+                    if (metastring == "unknown")
+                        return type_metatype.TYPE_UNKNOWN;
+                    else if (metastring == "uint")
+                        return type_metatype.TYPE_UINT;
+                    else if (metastring == "union")
+                        return type_metatype.TYPE_UNION;
+                    break;
+                case 'i':
+                    if (metastring == "int")
+                        return type_metatype.TYPE_INT;
+                    break;
+                case 'f':
+                    if (metastring == "float")
+                        return type_metatype.TYPE_FLOAT;
+                    break;
+                case 'b':
+                    if (metastring == "bool")
+                        return type_metatype.TYPE_BOOL;
+                    break;
+                case 'c':
+                    if (metastring == "code")
+                        return type_metatype.TYPE_CODE;
+                    break;
+                case 'v':
+                    if (metastring == "void")
+                        return type_metatype.TYPE_VOID;
+                    break;
+                default:
+                    break;
+            }
+            throw new LowlevelError($"Unknown metatype: {metastring}");
+        }
+
+/// Treat the given \b val as a constant of \b size bytes
+/// \param val is the given value
+/// \param size is the size in bytes
+/// \return \b true if the constant (as sized) has its sign bit set
+public static bool signbit_negative(ulong val, int size)
         {
             // Return true if signbit is set (negative)
             ulong mask = 0x80;
@@ -640,7 +758,7 @@ namespace Sla
                     if (op2.getIn(0) != vnwhole) return false;
                     if (op2.getIn(1).getOffset() != 0)
                         return false;       // Must be least sig
-                    if (op1.getIn(1).getOffset() != vn2.getSize())
+                    if (op1.getIn(1).getOffset() != (uint)vn2.getSize())
                         return false;       // Must be contiguous
                     return true;
                 default:

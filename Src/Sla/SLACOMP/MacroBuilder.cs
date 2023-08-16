@@ -1,11 +1,4 @@
 ﻿using Sla.SLEIGH;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Runtime.Intrinsics.X86;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.SLACOMP
 {
@@ -138,8 +131,9 @@ namespace Sla.SLACOMP
         }
 
         public MacroBuilder(SleighCompile sl, List<OpTpl> ovec, uint lbcnt)
-            : PcodeBuilder(lbcnt),outvec(ovec)
+            : base(lbcnt)
         {
+            outvec = ovec;
             slgh = sl;
             haserror = false;
         }

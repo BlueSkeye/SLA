@@ -230,7 +230,7 @@ namespace Sla.SLEIGH
           if (hFind == INVALID_HANDLE_VALUE) return;
           do {
             if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY ) {
-              string fullname(FindFileData.cFileName);
+              string fullname = FindFileData.cFileName;
               if (allowdot || (fullname[0] != '.'))
 	        res.Add(dirfinal + fullname);
             }
