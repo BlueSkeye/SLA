@@ -11,12 +11,14 @@ namespace Sla.SLEIGH
 {
     internal class OperandValue : PatternValue
     {
-        private int index;         // This is the defining field of expression
-        private Constructor ct;        // cached pointer to constructor
+        // This is the defining field of expression
+        private int index;
+        // cached pointer to constructor
+        private Constructor ct;
         
         public OperandValue()
         {
-        } // For use with restoreXml
+        }
 
         public OperandValue(int ind, Constructor c)
         {
@@ -31,17 +33,29 @@ namespace Sla.SLEIGH
 
         public bool isConstructorRelative()
         {
-            OperandSymbol* sym = ct.getOperand(index);
+            OperandSymbol sym = ct.getOperand(index);
             return (sym.getOffsetBase() == -1);
         }
 
         public string getName()
         {
-            OperandSymbol* sym = ct.getOperand(index);
+            OperandSymbol sym = ct.getOperand(index);
             return sym.getName();
         }
 
-        public override TokenPattern genPattern(long val);
+        public override TokenPattern genPattern(long val)
+        {
+            // In general an operand cannot be interpreted as any sort
+            // of static constraint in an equation, and if it is being
+            // defined by the equation, it should be on the left hand side.
+            // If the operand has a defining expression already, use
+            // of the operand in the equation makes sense, its defining
+            // expression would become a subexpression in the full
+            // expression. However, since this can be accomplished
+            // by explicitly copying the subexpression into the full
+            // expression, we don't support operands as placeholders.
+            throw new SleighError("Operand used in pattern expression");
+        }
 
         public override TokenPattern genMinPattern(List<TokenPattern> ops) => ops[index];
 
@@ -96,7 +110,7 @@ namespace Sla.SLEIGH
             tabid = uint.Parse(el.getAttributeValue("table"));
             ctid = uint.Parse(el.getAttributeValue("ct"));
             SleighBase sleigh = (SleighBase)trans;
-            SubtableSymbol? tab = sleigh.findSymbol(tabid) as SubtableSymbol;
+            SubtableSymbol? tab = (sleigh.findSymbol(tabid) as SubtableSymbol) ?? throw new BugException();
             ct = tab.getConstructor(ctid);
         }
     }

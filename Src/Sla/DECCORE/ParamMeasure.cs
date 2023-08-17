@@ -60,7 +60,7 @@ namespace Sla.DECCORE
             internal ParamRank terminalrank;
         }
 
-        private VarnodeData vndata;
+        private VarnodeData vndata = new VarnodeData();
         private Datatype vntype;
         private ParamRank rank;
         private ParamIDIO io;
@@ -180,13 +180,13 @@ namespace Sla.DECCORE
         {
             vndata.space = addr.getSpace();
             vndata.offset = addr.getOffset();
-            vndata.size = sz;
+            vndata.size = (uint)sz;
             vntype = dt;
             io = io_in;
             rank = ParamRank.WORSTRANK;
         }
 
-        private void calculateRank(bool best, Varnode basevn, PcodeOp ignoreop)
+        internal void calculateRank(bool best, Varnode basevn, PcodeOp ignoreop)
         {
             WalkState state;
             state.best = best;
@@ -208,15 +208,14 @@ namespace Sla.DECCORE
                 walkbackward(state, ignoreop, basevn);
         }
 
-        private void encode(Sla.CORE.Encoder encoder, ElementId tag, bool moredetail)
+        internal void encode(Sla.CORE.Encoder encoder, ElementId tag, bool moredetail)
         {
             encoder.openElement(tag);
             encoder.openElement(ElementId.ELEM_ADDR);
             vndata.space.encodeAttributes(encoder, vndata.offset, (int)vndata.size);
             encoder.closeElement(ElementId.ELEM_ADDR);
             vntype.encode(encoder);
-            if (moredetail)
-            {
+            if (moredetail) {
                 encoder.openElement(ElementId.ELEM_RANK);
                 encoder.writeSignedInteger(AttributeId.ATTRIB_VAL, (int)rank);
                 encoder.closeElement(ElementId.ELEM_RANK);
@@ -224,7 +223,7 @@ namespace Sla.DECCORE
             encoder.closeElement(tag);
         }
 
-        private void savePretty(TextWriter s, bool moredetail)
+        internal void savePretty(TextWriter s, bool moredetail)
         {
             s.WriteLine($"  Space: {vndata.space.getName()}");
             s.WriteLine($"  Space: {vndata.offset}");

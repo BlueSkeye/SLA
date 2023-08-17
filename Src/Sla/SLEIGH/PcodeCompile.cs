@@ -87,14 +87,14 @@ namespace Sla.SLEIGH
             return labsym;
         }
 
-        public List<OpTpl> placeLabel(LabelSymbol sym)
+        public List<OpTpl> placeLabel(LabelSymbol labsym)
         {
             // Create placeholder OpTpl for a label
             if (labsym.isPlaced()) {
                 reportError(getLocation(labsym), $"Label '{labsym.getName()}' is placed more than once");
             }
             labsym.setPlaced();
-            List<OpTpl> res = new List<OpTpl();
+            List<OpTpl> res = new List<OpTpl>();
             OpTpl op = new OpTpl(OpCode.LABELBUILD);
             VarnodeTpl idvn = new VarnodeTpl(new ConstTpl(constantspace),
                 new ConstTpl(ConstTpl.const_type.real, labsym.getIndex()),
@@ -127,7 +127,7 @@ namespace Sla.SLEIGH
         public void newLocalDefinition(string varname, uint size = 0)
         { // Create a new temporary symbol (without generating any pcode)
             VarnodeSymbol sym;
-            sym = new VarnodeSymbol(varname, uniqspace, allocateTemp(), size);
+            sym = new VarnodeSymbol(varname, uniqspace, allocateTemp(), (int)size);
             addSymbol(sym);
             // delete varname;
         }
@@ -151,30 +151,30 @@ namespace Sla.SLEIGH
                         // built by performing -opc- on inputs vn1 and vn2.
                         // Free input expressions
             VarnodeTpl outvn = buildTemporary();
-            vn1.ops.insert(vn1.ops.end(), vn2.ops.begin(), vn2.ops.end());
-            vn2.ops.clear();
+            vn1.ops.AddRange(vn2);
+            vn2.ops.Clear();
             OpTpl op = new OpTpl(opc);
             op.addInput(vn1.outvn);
             op.addInput(vn2.outvn);
             vn2.outvn = (VarnodeTpl)null;
             op.setOutput(outvn);
             vn1.ops.Add(op);
-            vn1.outvn = new VarnodeTpl(*outvn);
+            vn1.outvn = new VarnodeTpl(outvn);
             // delete vn2;
             return vn1;
         }
 
         public ExprTree createOpOut(VarnodeTpl outvn, OpCode opc, ExprTree vn1, ExprTree vn2)
         { // Create an op with explicit output and two inputs
-            vn1.ops.insert(vn1.ops.end(), vn2.ops.begin(), vn2.ops.end());
-            vn2.ops.clear();
+            vn1.ops.AddRange(vn2.ops);
+            vn2.ops.Clear();
             OpTpl op = new OpTpl(opc);
             op.addInput(vn1.outvn);
             op.addInput(vn2.outvn);
             vn2.outvn = (VarnodeTpl)null;
             op.setOutput(outvn);
             vn1.ops.Add(op);
-            vn1.outvn = new VarnodeTpl(*outvn);
+            vn1.outvn = new VarnodeTpl(outvn);
             // delete vn2;
             return vn1;
         }
@@ -209,8 +209,8 @@ namespace Sla.SLEIGH
             // and inputs vn1 and vn2. Free the input expressions
             List<OpTpl> res = vn1.ops;
             vn1.ops = (List<OpTpl>)null;
-            res.insert(res.end(), vn2.ops.begin(), vn2.ops.end());
-            vn2.ops.clear();
+            res.AddRange(vn2.ops);
+            vn2.ops.Clear();
             OpTpl op = new OpTpl(opc);
             op.addInput(vn1.outvn);
             vn1.outvn = (VarnodeTpl)null;
@@ -258,8 +258,8 @@ namespace Sla.SLEIGH
         {
             List<OpTpl> res = ptr.ops;
             ptr.ops = (List<OpTpl>)null;
-            res.insert(res.end(), val.ops.begin(), val.ops.end());
-            val.ops.clear();
+            res.AddRange(val.ops);
+            val.ops.Clear();
             OpTpl op = new OpTpl(OpCode.CPUI_STORE);
             // The first varnode input to the store is a constant reference to the AddrSpace being loaded
             // from.  Internally, we really store the pointer to the AddrSpace as the reference, but this
@@ -271,7 +271,7 @@ namespace Sla.SLEIGH
             op.addInput(ptr.outvn);
             op.addInput(val.outvn);
             res.Add(op);
-            force_size(val.outvn, new ConstTpl(ConstTpl.const_type.real, qual.size), *res);
+            force_size(val.outvn, new ConstTpl(ConstTpl.const_type.real, qual.size), res);
             ptr.outvn = (VarnodeTpl)null;
             val.outvn = (VarnodeTpl)null;
             //delete ptr;
@@ -281,7 +281,8 @@ namespace Sla.SLEIGH
         }
 
         public ExprTree createUserOp(UserOpSymbol sym, List<ExprTree> param)
-        { // Create userdefined pcode op, given symbol and parameters
+        {
+            // Create userdefined pcode op, given symbol and parameters
             VarnodeTpl outvn = buildTemporary();
             ExprTree res = new ExprTree();
             res.ops = createUserOpNoOut(sym, param);
@@ -290,7 +291,7 @@ namespace Sla.SLEIGH
             return res;
         }
 
-        public List<OpTpl> createUserOpNoOut(UserOpSymbol sym, List<ExprTree> param)
+        public List<OpTpl>? createUserOpNoOut(UserOpSymbol sym, List<ExprTree> param)
         {
             OpTpl op = new OpTpl(OpCode.CPUI_CALLOTHER);
             VarnodeTpl vn = new VarnodeTpl(new ConstTpl(constantspace),
@@ -378,7 +379,7 @@ namespace Sla.SLEIGH
         public List<OpTpl> assignBitRange(VarnodeTpl vn, uint bitoffset, uint numbits, ExprTree rhs)
         {
             // Create an expression assigning the rhs to a bitrange within sym
-            string errmsg;
+            string errmsg = string.Empty;
             if (numbits == 0)
                 errmsg = "Size of bitrange is zero";
             uint smallsize = (numbits + 7) / 8; // Size of input (output of rhs)
@@ -390,7 +391,7 @@ namespace Sla.SLEIGH
             if (vn.getSize().getType() == ConstTpl.const_type.real) {
                 // If we know the size of the bitranged varnode, we can
                 // do some immediate checks, and possibly simplify things
-                uint symsize = vn.getSize().getReal();
+                uint symsize = (uint)vn.getSize().getReal();
                 if (symsize > 0)
                     zextneeded = (symsize > smallsize);
                 symsize *= 8;       // Convert to number of bits
@@ -411,7 +412,7 @@ namespace Sla.SLEIGH
             }
 
             // We know what the size of the input has to be
-            force_size(rhs.outvn, ConstTpl(ConstTpl.const_type.real, smallsize), *rhs.ops);
+            force_size(rhs.outvn, new ConstTpl(ConstTpl.const_type.real, smallsize), rhs.ops);
 
             ExprTree res;
             VarnodeTpl? finalout = buildTruncatedVarnode(vn, bitoffset, numbits);
@@ -446,7 +447,7 @@ namespace Sla.SLEIGH
             // The result is truncated to the smallest byte size that can
             // contain the indicated number of bits. The result has the
             // desired bits shifted all the way to the right
-            string errmsg;
+            string errmsg = string.Empty;
             if (numbits == 0)
                 errmsg = "Size of bitrange is zero";
             VarnodeTpl vn = sym.getVarnode();
@@ -454,13 +455,14 @@ namespace Sla.SLEIGH
             uint truncshift = 0;
             bool maskneeded = ((numbits % 8) != 0);
             bool truncneeded = true;
+            ExprTree res;
 
             // Special case where we can set the size, without invoking
             // a truncation operator
             if ((errmsg.Length == 0) && (bitoffset == 0) && (!maskneeded)) {
                 if ((vn.getSpace().getType() == ConstTpl.const_type.handle) && vn.isZeroSize()) {
-                    vn.setSize(ConstTpl(ConstTpl.const_type.real, finalsize));
-                    ExprTree res = new ExprTree(vn);
+                    vn.setSize(new ConstTpl(ConstTpl.const_type.real, finalsize));
+                    res = new ExprTree(vn);
                     //      VarnodeTpl *cruft = buildTemporary();
                     //      delete cruft;
                     return res;
@@ -471,7 +473,7 @@ namespace Sla.SLEIGH
                 VarnodeTpl? truncvn = buildTruncatedVarnode(vn, bitoffset, numbits);
                 if (truncvn != (VarnodeTpl)null) {
                     // If we are able to construct a simple truncated varnode
-                    ExprTree res = new ExprTree(truncvn); // Return just the varnode as an expression
+                    res = new ExprTree(truncvn); // Return just the varnode as an expression
                     // delete vn;
                     return res;
                 }
@@ -492,7 +494,7 @@ namespace Sla.SLEIGH
             }
 
             ulong mask = (ulong)2;
-            mask = ((mask << (numbits - 1)) - 1);
+            mask = ((mask << (int)(numbits - 1)) - 1);
 
             if (truncneeded && ((bitoffset % 8) == 0)) {
                 truncshift = bitoffset / 8;
@@ -501,12 +503,10 @@ namespace Sla.SLEIGH
 
             if ((bitoffset == 0) && (!truncneeded) && (!maskneeded))
                 errmsg = "Superfluous bitrange";
-
             if (maskneeded && (finalsize > 8))
                 errmsg = "Illegal masked bitrange producing varnode larger than 64 bits: " + sym.getName();
 
-            ExprTree res = new ExprTree(vn);
-
+            res = new ExprTree(vn);
             if (errmsg.Length > 0) {
                 // Check for error condition
                 reportError(getLocation(sym), errmsg);
@@ -518,8 +518,8 @@ namespace Sla.SLEIGH
             if (truncneeded)
                 appendOp(OpCode.CPUI_SUBPIECE, res, truncshift, 4);
             if (maskneeded)
-                appendOp(OpCode.CPUI_INT_AND, res, mask, finalsize);
-            force_size(res.outvn, ConstTpl(ConstTpl.const_type.real, finalsize), res.ops);
+                appendOp(OpCode.CPUI_INT_AND, res, mask, (int)finalsize);
+            force_size(res.outvn, new ConstTpl(ConstTpl.const_type.real, finalsize), res.ops);
             return res;
         }
 
@@ -611,14 +611,13 @@ namespace Sla.SLEIGH
         }
 
         public static void fillinZero(OpTpl op, List<OpTpl> ops)
-        {               // Try to get rid of zero size varnodes in op
-                        // Right now this is written assuming operands for the constructor are
-                        // are built before any other pcode in the constructor is generated
-
+        {
+            // Try to get rid of zero size varnodes in op
+            // Right now this is written assuming operands for the constructor are
+            // are built before any other pcode in the constructor is generated
             int inputsize, i;
 
-            switch (op.getOpcode())
-            {
+            switch (op.getOpcode()) {
                 case OpCode.CPUI_COPY:         // Instructions where all inputs and output are same size
                 case OpCode.CPUI_INT_ADD:
                 case OpCode.CPUI_INT_SUB:
@@ -668,7 +667,7 @@ namespace Sla.SLEIGH
                 case OpCode.CPUI_BOOL_AND:
                 case OpCode.CPUI_BOOL_OR:
                     if (op.getOut().isZeroSize())
-                        force_size(op.getOut(), ConstTpl(ConstTpl.const_type.real, 1), ops);
+                        force_size(op.getOut(), new ConstTpl(ConstTpl.const_type.real, 1), ops);
                     inputsize = op.numInput();
                     for (i = 0; i < inputsize; ++i)
                         if (op.getIn(i).isZeroSize())
@@ -679,27 +678,26 @@ namespace Sla.SLEIGH
                 case OpCode.CPUI_INT_LEFT:
                 case OpCode.CPUI_INT_RIGHT:
                 case OpCode.CPUI_INT_SRIGHT:
-                    if (op.getOut().isZeroSize())
-                    {
+                    if (op.getOut().isZeroSize()) {
                         if (!op.getIn(0).isZeroSize())
                             force_size(op.getOut(), op.getIn(0).getSize(), ops);
                     }
                     else if (op.getIn(0).isZeroSize())
                         force_size(op.getIn(0), op.getOut().getSize(), ops);
-                // fallthru to subpiece constant check
+                    // fallthru to subpiece constant check
+                    goto case OpCode.CPUI_SUBPIECE;
                 case OpCode.CPUI_SUBPIECE:
                     if (op.getIn(1).isZeroSize())
-                        force_size(op.getIn(1), ConstTpl(ConstTpl.const_type.real, 4), ops);
+                        force_size(op.getIn(1), new ConstTpl(ConstTpl.const_type.real, 4), ops);
                     break;
                 case OpCode.CPUI_CPOOLREF:
                     if (op.getOut().isZeroSize() && (!op.getIn(0).isZeroSize()))
                         force_size(op.getOut(), op.getIn(0).getSize(), ops);
                     if (op.getIn(0).isZeroSize() && (!op.getOut().isZeroSize()))
                         force_size(op.getIn(0), op.getOut().getSize(), ops);
-                    for (i = 1; i < op.numInput(); ++i)
-                    {
+                    for (i = 1; i < op.numInput(); ++i) {
                         if (op.getIn(i).isZeroSize())
-                            force_size(op.getIn(i), ConstTpl(ConstTpl.const_type.real, sizeof(ulong)), ops);
+                            force_size(op.getIn(i), new ConstTpl(ConstTpl.const_type.real, sizeof(ulong)), ops);
                     }
                     break;
                 default:
@@ -708,27 +706,28 @@ namespace Sla.SLEIGH
         }
 
         public static bool propagateSize(ConstructTpl ct)
-        {               // Fill in size for varnodes with size 0
-                        // Return first OpTpl with a size 0 varnode
-                        // that cannot be filled in or NULL otherwise
-            List<OpTpl> zerovec, zerovec2;
-            IEnumerator<OpTpl> iter;
+        {
+            // Fill in size for varnodes with size 0
+            // Return first OpTpl with a size 0 varnode
+            // that cannot be filled in or NULL otherwise
+            List<OpTpl> zerovec = new List<OpTpl>();
+            List<OpTpl> zerovec2 = new List<OpTpl>();
             int lastsize;
 
-            for (iter = ct.getOpvec().begin(); iter != ct.getOpvec().end(); ++iter)
-                if (iter.Current.isZeroSize()) {
-                    fillinZero(iter.Current, ct.getOpvec());
-                    if (iter.Current.isZeroSize())
-                        zerovec.Add(iter.Current);
+            foreach (OpTpl op in ct.getOpvec())
+                if (op.isZeroSize()) {
+                    fillinZero(op, ct.getOpvec());
+                    if (op.isZeroSize())
+                        zerovec.Add(op);
                 }
             lastsize = zerovec.size() + 1;
             while (zerovec.size() < lastsize) {
                 lastsize = zerovec.size();
                 zerovec2.Clear();
-                for (iter = zerovec.begin(); iter != zerovec.end(); ++iter) {
-                    fillinZero(iter.Current, ct.getOpvec());
-                    if (iter.Current.isZeroSize())
-                        zerovec2.Add(iter.Current);
+                foreach (OpTpl op in zerovec) {
+                    fillinZero(op, ct.getOpvec());
+                    if (op.isZeroSize())
+                        zerovec2.Add(op);
                 }
                 zerovec = zerovec2;
             }

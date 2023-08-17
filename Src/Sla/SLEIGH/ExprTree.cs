@@ -13,15 +13,15 @@ namespace Sla.SLEIGH
         // A flattened expression tree
         // friend class PcodeCompile;
         // flattened ops making up the expression
-        private List<OpTpl>? ops;
+        internal List<OpTpl>? ops;
         // Output varnode of the expression
         // If the last op has an output, -outvn- is
         // a COPY of that varnode
-        private VarnodeTpl outvn;
+        internal VarnodeTpl? outvn;
         
         public ExprTree()
         {
-            ops = (List<OpTpl>)nulll;
+            ops = (List<OpTpl>)null;
             outvn = (VarnodeTpl)null;
         }
 
@@ -35,10 +35,7 @@ namespace Sla.SLEIGH
         {
             ops = new List<OpTpl>();
             ops.Add(op);
-            if (op.getOut() != (VarnodeTpl)null)
-                outvn = new VarnodeTpl(op.getOut());
-            else
-                outvn = (VarnodeTpl)null;
+            outvn = (op.getOut() != (VarnodeTpl)null) ? new VarnodeTpl(op.getOut()) : (VarnodeTpl)null;
         }
 
         ~ExprTree()
@@ -75,9 +72,9 @@ namespace Sla.SLEIGH
             outvn = new VarnodeTpl(newout);
         }
 
-        public VarnodeTpl getOut() => outvn;
+        public VarnodeTpl? getOut() => outvn;
 
-        public ConstTpl getSize() => outvn.getSize();
+        public ConstTpl? getSize() => outvn.getSize();
 
         public static List<OpTpl?> appendParams(OpTpl op, List<ExprTree> param)
         {

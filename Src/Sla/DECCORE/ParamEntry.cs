@@ -55,7 +55,7 @@ namespace Sla.DECCORE
         /// Data-type class that this entry must match
         private type_metatype type;
         /// Group(s) \b this entry belongs to
-        private List<int> groupSet;
+        private List<int> groupSet = new List<int>();
         /// Address space containing the range
         private AddrSpace spaceid;
         /// Starting offset of the range
@@ -77,15 +77,12 @@ namespace Sla.DECCORE
         /// \param entryList is the list of ParamEntry to search through
         /// \param vn is the storage to search for
         /// \return the matching ParamEntry or null
-        private static ParamEntry findEntryByStorage(List<ParamEntry> entryList, VarnodeData vn)
+        private static ParamEntry? findEntryByStorage(List<ParamEntry> entryList, VarnodeData vn)
         {
-            list<ParamEntry>::const_reverse_iterator iter = entryList.rbegin();
-            for (; iter != entryList.rend(); ++iter)
-            {
-                ParamEntry entry = *iter;
-                if (entry.spaceid == vn.space && entry.addressbase == vn.offset && entry.size == vn.size)
-                {
-                    return &entry;
+            for (int index = entryList.Count - 1; 0 <= index; index--) {
+                ParamEntry entry = entryList[index];
+                if (entry.spaceid == vn.space && entry.addressbase == vn.offset && entry.size == vn.size) {
+                    return entry;
                 }
             }
             return (ParamEntry)null;
@@ -97,27 +94,25 @@ namespace Sla.DECCORE
         /// \param curList is the current list of ParamEntry
         private void resolveJoin(List<ParamEntry> curList)
         {
-            if (spaceid.getType() != spacetype.IPTR_JOIN)
-            {
+            if (spaceid.getType() != spacetype.IPTR_JOIN) {
                 joinrec = (JoinRecord)null;
                 return;
             }
             joinrec = spaceid.getManager().findJoin(addressbase);
-            groupSet.clear();
-            for (int i = 0; i < joinrec.numPieces(); ++i)
-            {
-                ParamEntry entry = findEntryByStorage(curList, joinrec.getPiece(i));
+            groupSet.Clear();
+            for (int i = 0; i < joinrec.numPieces(); ++i) {
+                ParamEntry? entry = findEntryByStorage(curList, joinrec.getPiece((uint)i));
                 if (entry != (ParamEntry)null) {
-                    groupSet.insert(groupSet.end(), entry.groupSet.begin(), entry.groupSet.end());
+                    groupSet.AddRange(entry.groupSet);
                     // For output <pentry>, if the most signifigant part overlaps with an earlier <pentry>
                     // the least signifigant part is marked for extra checks, and vice versa.
-                    flags |= (i == 0) ? extracheck_low : extracheck_high;
+                    flags |= (i == 0) ? ParamFlags.extracheck_low : ParamFlags.extracheck_high;
                 }
             }
             if (groupSet.empty())
                 throw new LowlevelError("<pentry> join must overlap at least one previous entry");
-            sort(groupSet.begin(), groupSet.end());
-            flags |= overlapping;
+            groupSet.Sort();
+            flags |= ParamFlags.overlapping;
         }
 
         /// Make adjustments for ParamEntry that overlaps others
@@ -129,39 +124,39 @@ namespace Sla.DECCORE
         {
             if (joinrec != (JoinRecord)null)
                 return;     // Overlaps with join records dealt with in resolveJoin
-            List<int> overlapSet;
-            list<ParamEntry>::const_iterator iter, enditer;
-            Address addr(spaceid, addressbase);
-            enditer = curList.end();
-            --enditer;      // The last entry is \b this ParamEntry
-            for (iter = curList.begin(); iter != enditer; ++iter)
-            {
-                ParamEntry entry = *iter;
+            List<int> overlapSet = new List<int>();
+            IEnumerator<ParamEntry> iter = curList.GetEnumerator();
+            Address addr = new Address(spaceid, addressbase);
+            if (!iter.MoveNext()) throw new BugException();
+            while (true) {
+                ParamEntry entry = iter.Current;
+                // The last entry is \b this ParamEntry
+                if (!iter.MoveNext()) break;
                 if (!entry.intersects(addr, size)) continue;
-                if (contains(entry))
-                {   // If this contains the intersecting entry
+                if (contains(entry)) {
+                    // If this contains the intersecting entry
                     if (entry.isOverlap()) continue;    // Don't count resources (already counted overlapped entry)
-                    overlapSet.insert(overlapSet.end(), entry.groupSet.begin(), entry.groupSet.end());
+                    overlapSet.AddRange(entry.groupSet);
                     // For output <pentry>, if the most signifigant part overlaps with an earlier <pentry>
                     // the least signifigant part is marked for extra checks, and vice versa.
                     if (addressbase == entry.addressbase)
-                        flags |= spaceid.isBigEndian() ? extracheck_low : extracheck_high;
+                        flags |= spaceid.isBigEndian() ? ParamFlags.extracheck_low : ParamFlags.extracheck_high;
                     else
-                        flags |= spaceid.isBigEndian() ? extracheck_high : extracheck_low;
+                        flags |= spaceid.isBigEndian() ? ParamFlags.extracheck_high : ParamFlags.extracheck_low;
                 }
                 else
                     throw new LowlevelError("Illegal overlap of <pentry> in compiler spec");
             }
 
             if (overlapSet.empty()) return;     // No overlaps
-            sort(overlapSet.begin(), overlapSet.end());
+            overlapSet.Sort();
             groupSet = overlapSet;
-            flags |= overlapping;
+            flags |= ParamFlags.overlapping;
         }
 
         /// \brief Is the logical value left-justified within its container
         private bool isLeftJustified()
-            => (((flags&force_left_justify)!=0)||(!spaceid.isBigEndian()));
+            => ((flags & ParamFlags.force_left_justify) != 0) || !spaceid.isBigEndian();
 
         /// Constructor for use with decode
         public ParamEntry(int grp)
@@ -184,16 +179,13 @@ namespace Sla.DECCORE
             int j = 0;
             int valThis = groupSet[i];
             int valOther = op2.groupSet[j];
-            while (valThis != valOther)
-            {
-                if (valThis < valOther)
-                {
+            while (valThis != valOther) {
+                if (valThis < valOther) {
                     i += 1;
                     if (i >= groupSet.size()) return false;
                     valThis = groupSet[i];
                 }
-                else
-                {
+                else {
                     j += 1;
                     if (j >= op2.groupSet.size()) return false;
                     valOther = op2.groupSet[j];
@@ -221,13 +213,13 @@ namespace Sla.DECCORE
         public bool isExclusion() => (alignment==0);
 
         /// Return \b true if parameters are allocated in reverse order
-        public bool isReverseStack() => ((flags & reverse_stack)!= 0);
+        public bool isReverseStack() => ((flags & ParamFlags.reverse_stack)!= 0);
 
         /// Return \b true if \b this is grouped with other entries
-        public bool isGrouped() => ((flags & is_grouped)!= 0);
+        public bool isGrouped() => ((flags & ParamFlags.is_grouped)!= 0);
 
         /// Return \b true if \b this overlaps another entry
-        public bool isOverlap() => ((flags & overlapping)!= 0);
+        public bool isOverlap() => ((flags & ParamFlags.overlapping)!= 0);
 
         /// Does \b this subsume the definition of the given ParamEntry
         /// This entry must properly contain the other memory range, and
@@ -240,7 +232,7 @@ namespace Sla.DECCORE
             if ((type != type_metatype.TYPE_UNKNOWN) && (op2.type != type)) return false;
             if (spaceid != op2.spaceid) return false;
             if (op2.addressbase < addressbase) return false;
-            if ((op2.addressbase + op2.size - 1) > (addressbase + size - 1)) return false;
+            if ((op2.addressbase + (ulong)(op2.size - 1)) > (addressbase + (ulong)(size - 1))) return false;
             if (alignment != op2.alignment) return false;
             return true;
         }
@@ -254,8 +246,8 @@ namespace Sla.DECCORE
         {
             if (spaceid != addr.getSpace()) return false;
             if (addressbase < addr.getOffset()) return false;
-            ulong entryoff = addressbase + size - 1;
-            ulong rangeoff = addr.getOffset() + sz - 1;
+            ulong entryoff = addressbase + (ulong)(size - 1);
+            ulong rangeoff = addr.getOffset() + (ulong)(sz - 1);
             return (entryoff <= rangeoff);
         }
 
@@ -268,12 +260,10 @@ namespace Sla.DECCORE
         public bool intersects(Address addr, int sz)
         {
             ulong rangeend;
-            if (joinrec != (JoinRecord)null)
-            {
-                rangeend = addr.getOffset() + sz - 1;
-                for (int i = 0; i < joinrec.numPieces(); ++i)
-                {
-                    VarnodeData vdata = joinrec.getPiece(i);
+            if (joinrec != (JoinRecord)null) {
+                rangeend = addr.getOffset() + (ulong)(sz - 1);
+                for (int i = 0; i < joinrec.numPieces(); ++i) {
+                    VarnodeData vdata = joinrec.getPiece((uint)i);
                     if (addr.getSpace() != vdata.space) continue;
                     ulong vdataend = vdata.offset + vdata.size - 1;
                     if (addr.getOffset() < vdata.offset && rangeend < vdataend)
@@ -284,8 +274,8 @@ namespace Sla.DECCORE
                 }
             }
             if (spaceid != addr.getSpace()) return false;
-            rangeend = addr.getOffset() + sz - 1;
-            ulong thisend = addressbase + size - 1;
+            rangeend = addr.getOffset() + (ulong)(sz - 1);
+            ulong thisend = addressbase + (ulong)(size - 1);
             if (addr.getOffset() < addressbase && rangeend < thisend)
                 return false;
             if (addr.getOffset() > addressbase && rangeend > thisend)
@@ -303,38 +293,35 @@ namespace Sla.DECCORE
         /// \return the endian aware alignment or -1 if the given range isn't contained
         public int justifiedContain(Address addr, int sz)
         {
-            if (joinrec != (JoinRecord)null)
-            {
+            if (joinrec != (JoinRecord)null) {
                 int res = 0;
-                for (int i = joinrec.numPieces() - 1; i >= 0; --i)
-                { // Move from least significant to most
-                    VarnodeData vdata = joinrec.getPiece(i);
-                    int cur = vdata.getAddr().justifiedContain(vdata.size, addr, sz, false);
+                for (int i = joinrec.numPieces() - 1; i >= 0; --i) {
+                    // Move from least significant to most
+                    VarnodeData vdata = joinrec.getPiece((uint)i);
+                    int cur = vdata.getAddr().justifiedContain((int)vdata.size, addr, sz, false);
                     if (cur < 0)
-                        res += vdata.size;  // We skipped this many less significant bytes
-                    else
-                    {
+                        res += (int)vdata.size;  // We skipped this many less significant bytes
+                    else {
                         return res + cur;
                     }
                 }
                 return -1;          // Not contained at all
             }
-            if (alignment == 0)
-            {
+            if (alignment == 0) {
                 // Ordinary endian containment
-                Address entry(spaceid, addressbase);
-                return entry.justifiedContain(size, addr, sz, ((flags & force_left_justify) != 0));
+                Address entry = new Address(spaceid, addressbase);
+                return entry.justifiedContain(size, addr, sz, ((flags & ParamFlags.force_left_justify) != 0));
             }
             if (spaceid != addr.getSpace()) return -1;
             ulong startaddr = addr.getOffset();
             if (startaddr < addressbase) return -1;
-            ulong endaddr = startaddr + sz - 1;
+            ulong endaddr = startaddr + (ulong)(sz - 1);
             if (endaddr < startaddr) return -1; // Don't allow wrap around
-            if (endaddr > (addressbase + size - 1)) return -1;
+            if (endaddr > (addressbase + (ulong)(size - 1))) return -1;
             startaddr -= addressbase;
             endaddr -= addressbase;
-            if (!isLeftJustified())
-            {   // For right justified (big endian), endaddr must be aligned
+            if (!isLeftJustified()) {
+                // For right justified (big endian), endaddr must be aligned
                 int res = (int)((endaddr + 1) % (uint)alignment);
                 if (res == 0) return 0;
                 return (alignment - res);
@@ -355,13 +342,12 @@ namespace Sla.DECCORE
         public bool getContainer(Address addr, int sz, VarnodeData res)
         {
             Address endaddr = addr + (sz - 1);
-            if (joinrec != (JoinRecord)null)
-            {
-                for (int i = joinrec.numPieces() - 1; i >= 0; --i)
-                { // Move from least significant to most
-                    VarnodeData vdata = joinrec.getPiece(i);
-                    if ((addr.overlap(0, vdata.getAddr(), vdata.size) >= 0) &&
-                    (endaddr.overlap(0, vdata.getAddr(), vdata.size) >= 0))
+            if (joinrec != (JoinRecord)null) {
+                for (int i = joinrec.numPieces() - 1; i >= 0; --i) {
+                    // Move from least significant to most
+                    VarnodeData vdata = joinrec.getPiece((uint)i);
+                    if (   (addr.overlap(0, vdata.getAddr(), (int)vdata.size) >= 0)
+                        && (endaddr.overlap(0, vdata.getAddr(), (int)vdata.size) >= 0))
                     {
                         res = vdata;
                         return true;
@@ -369,11 +355,10 @@ namespace Sla.DECCORE
                 }
                 return false;       // Not contained at all
             }
-            Address entry(spaceid, addressbase);
+            Address entry = new Address(spaceid, addressbase);
             if (addr.overlap(0, entry, size) < 0) return false;
             if (endaddr.overlap(0, entry, size) < 0) return false;
-            if (alignment == 0)
-            {
+            if (alignment == 0) {
                 // Ordinary endian containment
                 res.space = spaceid;
                 res.offset = addressbase;
@@ -399,16 +384,14 @@ namespace Sla.DECCORE
         public bool contains(ParamEntry op2)
         {
             if (op2.joinrec != (JoinRecord)null) return false;    // Assume a join entry cannot be contained
-            if (joinrec == (JoinRecord)null)
-            {
-                Address addr(spaceid, addressbase);
+            if (joinrec == (JoinRecord)null) {
+                Address addr = new Address(spaceid, addressbase);
                 return op2.containedBy(addr, size);
             }
-            for (int i = 0; i < joinrec.numPieces(); ++i)
-            {
-                VarnodeData vdata = joinrec.getPiece(i);
+            for (int i = 0; i < joinrec.numPieces(); ++i) {
+                VarnodeData vdata = joinrec.getPiece((uint)i);
                 Address addr = vdata.getAddr();
-                if (op2.containedBy(addr, vdata.size))
+                if (op2.containedBy(addr, (int)vdata.size))
                     return true;
             }
             return false;
@@ -476,15 +459,14 @@ namespace Sla.DECCORE
             int res = groupSet[0];
             if (alignment != 0)
             {
-                ulong diff = addr.getOffset() + skip - addressbase;
+                ulong diff = addr.getOffset() + (ulong)skip - addressbase;
                 int baseslot = (int)diff / alignment;
                 if (isReverseStack())
                     res += (numslots - 1) - baseslot;
                 else
                     res += baseslot;
             }
-            else if (skip != 0)
-            {
+            else if (skip != 0) {
                 res = groupSet.GetLastItem();
             }
             return res;

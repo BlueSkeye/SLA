@@ -16,94 +16,87 @@ namespace Sla.SLEIGH
     {
         private int offset;            // Offset to non-zero byte of mask
         private int nonzerosize;       // Last byte(+1) containing nonzero mask
-        private List<uint> maskvec;  // Mask
-        private List<uint> valvec;       // Value
+        private List<uint> maskvec = new List<uint>(); // Mask
+        private List<uint> valvec = new List<uint>(); // Value
 
         private void normalize()
         {
-            if (nonzerosize <= 0)
-            {       // Check if alwaystrue or alwaysfalse
+            if (nonzerosize <= 0) {
+                // Check if alwaystrue or alwaysfalse
                 offset = 0;         // in which case we don't need mask and value
-                maskvec.clear();
-                valvec.clear();
+                maskvec.Clear();
+                valvec.Clear();
                 return;
             }
-            List<uint>::iterator iter1, iter2;
+            int index1 = 0;
+            int index2 = 0;
 
-            iter1 = maskvec.begin();    // Cut zeros from beginning of mask
-            iter2 = valvec.begin();
-            while ((iter1 != maskvec.end()) && ((*iter1) == 0))
-            {
-                iter1++;
-                iter2++;
+            // Cut zeros from beginning of mask
+            while ((index1 < maskvec.Count) && (maskvec[index1] == 0)) {
+                index1++;
+                index2++;
                 offset += sizeof(uint);
             }
-            maskvec.erase(maskvec.begin(), iter1);
-            valvec.erase(valvec.begin(), iter2);
+            maskvec.RemoveRange(0, index1);
+            valvec.RemoveRange(0, index2);
 
-            if (!maskvec.empty())
-            {
+            uint tmp;
+            if (!maskvec.empty()) {
                 int suboff = 0;        // Cut off unaligned zeros from beginning of mask
-                uint tmp = maskvec[0];
-                while (tmp != 0)
-                {
+                tmp = maskvec[0];
+                while (tmp != 0) {
                     suboff += 1;
                     tmp >>= 8;
                 }
                 suboff = sizeof(uint) - suboff;
-                if (suboff != 0)
-                {
+                if (suboff != 0) {
                     offset += suboff;       // Slide up maskvec by suboff bytes
-                    for (int i = 0; i < maskvec.size() - 1; ++i)
-                    {
+                    for (int i = 0; i < maskvec.size() - 1; ++i) {
                         tmp = maskvec[i] << (suboff * 8);
                         tmp |= (maskvec[i + 1] >> ((sizeof(uint) - suboff) * 8));
                         maskvec[i] = tmp;
                     }
-                    maskvec.GetLastItem() <<= suboff * 8;
-                    for (int i = 0; i < valvec.size() - 1; ++i)
-                    { // Slide up valvec by suboff bytes
+                    maskvec.SetLastItem(maskvec.GetLastItem() << suboff * 8);
+                    for (int i = 0; i < valvec.size() - 1; ++i) {
+                        // Slide up valvec by suboff bytes
                         tmp = valvec[i] << (suboff * 8);
                         tmp |= (valvec[i + 1] >> ((sizeof(uint) - suboff) * 8));
                         valvec[i] = tmp;
                     }
-                    valvec.GetLastItem() <<= suboff * 8;
+                    valvec.SetLastItem(valvec.GetLastItem() << suboff * 8);
                 }
 
-                iter1 = maskvec.end();  // Cut zeros from end of mask
-                iter2 = valvec.end();
-                while (iter1 != maskvec.begin())
-                {
-                    --iter1;
-                    --iter2;
-                    if ((*iter1) != 0) break; // Find last non-zero
+                index1 = maskvec.Count;  // Cut zeros from end of mask
+                index2 = valvec.Count;
+                while (0 < index1) {
+                    --index1;
+                    --index2;
+                    if (maskvec[index1] != 0) break; // Find last non-zero
                 }
-                if (iter1 != maskvec.end())
-                {
-                    iter1++;            // Find first zero, in last zero chain
-                    iter2++;
+                if (index1 != maskvec.Count - 1) {
+                    index1++;            // Find first zero, in last zero chain
+                    index2++;
                 }
-                maskvec.erase(iter1, maskvec.end());
-                valvec.erase(iter2, valvec.end());
+                maskvec.RemoveRange(index1, maskvec.Count - index1);
+                valvec.RemoveRange(index2, valvec.Count - index2);
             }
 
-            if (maskvec.empty())
-            {
+            if (maskvec.empty()) {
                 offset = 0;
                 nonzerosize = 0;        // Always true
                 return;
             }
             nonzerosize = maskvec.size() * sizeof(uint);
-            uint tmp = maskvec.GetLastItem(); // tmp must be nonzero
-            while ((tmp & 0xff) == 0)
-            {
+            tmp = maskvec.GetLastItem(); // tmp must be nonzero
+            while ((tmp & 0xff) == 0) {
                 nonzerosize -= 1;
                 tmp >>= 8;
             }
         }
 
         public PatternBlock(int off, uint msk, uint val)
-        {               // Define mask and value pattern, confined to one uint
+        {
+            // Define mask and value pattern, confined to one uint
             offset = off;
             maskvec.Add(msk);
             valvec.Add(val);
@@ -121,52 +114,53 @@ namespace Sla.SLEIGH
         }
 
         public PatternBlock(PatternBlock a, PatternBlock b)
-        {               // Construct PatternBlock by ANDing two others together
-            PatternBlock* res = a.intersect(b);
+        {
+            // Construct PatternBlock by ANDing two others together
+            PatternBlock res = a.intersect(b);
             offset = res.offset;
             nonzerosize = res.nonzerosize;
             maskvec = res.maskvec;
             valvec = res.valvec;
-            delete res;
+            // delete res;
         }
 
         public PatternBlock(List<PatternBlock> list)
-        {               // AND several blocks together to construct new block
-            PatternBlock* res,*next;
+        {
+            // AND several blocks together to construct new block
+            PatternBlock res, next;
 
-            if (list.empty())
-            {       // If not ANDing anything
+            if (list.empty()) {
+                // If not ANDing anything
                 offset = 0;         // make constructed block always true
                 nonzerosize = 0;
                 return;
             }
             res = list[0];
-            for (int i = 1; i < list.size(); ++i)
-            {
+            for (int i = 1; i < list.size(); ++i) {
                 next = res.intersect(list[i]);
-                delete res;
+                // delete res;
                 res = next;
             }
             offset = res.offset;
             nonzerosize = res.nonzerosize;
             maskvec = res.maskvec;
             valvec = res.valvec;
-            delete res;
+            // delete res;
         }
 
         public PatternBlock commonSubPattern(PatternBlock b)
-        {               // The resulting pattern has a 1-bit in the mask
-                        // only if the two pieces have a 1-bit and the
-                        // values agree
-            PatternBlock* res = new PatternBlock(true);
+        {
+            // The resulting pattern has a 1-bit in the mask
+            // only if the two pieces have a 1-bit and the
+            // values agree
+            PatternBlock res = new PatternBlock(true);
             int maxlength = (getLength() > b.getLength()) ? getLength() : b.getLength();
 
             res.offset = 0;
             int offset = 0;
             uint mask1, val1, mask2, val2;
             uint resmask, resval;
-            while (offset < maxlength)
-            {
+            while (offset < maxlength) {
                 mask1 = getMask(offset * 8, sizeof(uint) * 8);
                 val1 = getValue(offset * 8, sizeof(uint) * 8);
                 mask2 = b.getMask(offset * 8, sizeof(uint) * 8);
@@ -183,25 +177,24 @@ namespace Sla.SLEIGH
         }
 
         public PatternBlock intersect(PatternBlock b)
-        { // Construct the intersecting pattern
+        {
+            // Construct the intersecting pattern
             if (alwaysFalse() || b.alwaysFalse())
                 return new PatternBlock(false);
-            PatternBlock* res = new PatternBlock(true);
+            PatternBlock res = new PatternBlock(true);
             int maxlength = (getLength() > b.getLength()) ? getLength() : b.getLength();
 
             res.offset = 0;
             int offset = 0;
             uint mask1, val1, mask2, val2, commonmask;
             uint resmask, resval;
-            while (offset < maxlength)
-            {
+            while (offset < maxlength) {
                 mask1 = getMask(offset * 8, sizeof(uint) * 8);
                 val1 = getValue(offset * 8, sizeof(uint) * 8);
                 mask2 = b.getMask(offset * 8, sizeof(uint) * 8);
                 val2 = b.getValue(offset * 8, sizeof(uint) * 8);
                 commonmask = mask1 & mask2; // Bits in mask shared by both patterns
-                if ((commonmask & val1) != (commonmask & val2))
-                {
+                if ((commonmask & val1) != (commonmask & val2)) {
                     res.nonzerosize = -1;  // Impossible pattern
                     res.normalize();
                     return res;
@@ -218,14 +211,14 @@ namespace Sla.SLEIGH
         }
 
         public bool specializes(PatternBlock op2)
-        {               // does every masked bit in -this- match the corresponding
-                        // masked bit in -op2-
+        {
+            // does every masked bit in -this- match the corresponding
+            // masked bit in -op2-
             int length = 8 * op2.getLength();
             int tmplength;
             uint mask1, mask2, value1, value2;
             int sbit = 0;
-            while (sbit < length)
-            {
+            while (sbit < length) {
                 tmplength = length - sbit;
                 if (tmplength > 8 * sizeof(uint))
                     tmplength = 8 * sizeof(uint);
@@ -241,7 +234,8 @@ namespace Sla.SLEIGH
         }
 
         public bool identical(PatternBlock op2)
-        {               // Do the mask and value match exactly
+        {
+            // Do the mask and value match exactly
             int tmplength;
             int length = 8 * op2.getLength();
             tmplength = 8 * getLength();
@@ -249,8 +243,7 @@ namespace Sla.SLEIGH
                 length = tmplength;     // Maximum of two lengths
             uint mask1, mask2, value1, value2;
             int sbit = 0;
-            while (sbit < length)
-            {
+            while (sbit < length) {
                 tmplength = length - sbit;
                 if (tmplength > 8 * sizeof(uint))
                     tmplength = 8 * sizeof(uint);
@@ -267,7 +260,7 @@ namespace Sla.SLEIGH
 
         public PatternBlock clone()
         {
-            PatternBlock* res = new PatternBlock(true);
+            PatternBlock res = new PatternBlock(true);
 
             res.offset = offset;
             res.nonzerosize = nonzerosize;
@@ -302,8 +295,7 @@ namespace Sla.SLEIGH
                 res = maskvec[wordnum1];
 
             res <<= shift;
-            if (wordnum1 != wordnum2)
-            {
+            if (wordnum1 != wordnum2) {
                 uint tmp;
                 if ((wordnum2 < 0) || (wordnum2 >= maskvec.size()))
                     tmp = 0;
@@ -312,7 +304,6 @@ namespace Sla.SLEIGH
                 res |= (tmp >> (8 * sizeof(uint) - shift));
             }
             res >>= (8 * sizeof(uint) - size);
-
             return res;
         }
 
@@ -329,8 +320,7 @@ namespace Sla.SLEIGH
             else
                 res = valvec[wordnum1];
             res <<= shift;
-            if (wordnum1 != wordnum2)
-            {
+            if (wordnum1 != wordnum2) {
                 uint tmp;
                 if ((wordnum2 < 0) || (wordnum2 >= valvec.size()))
                     tmp = 0;
@@ -351,8 +341,7 @@ namespace Sla.SLEIGH
         {
             if (nonzerosize <= 0) return (nonzerosize == 0);
             int off = offset;
-            for (int i = 0; i < maskvec.size(); ++i)
-            {
+            for (int i = 0; i < maskvec.size(); ++i) {
                 uint data = walker.getInstructionBytes(off, sizeof(uint));
                 if ((maskvec[i] & data) != valvec[i]) return false;
                 off += sizeof(uint);
@@ -364,8 +353,7 @@ namespace Sla.SLEIGH
         {
             if (nonzerosize <= 0) return (nonzerosize == 0);
             int off = offset;
-            for (int i = 0; i < maskvec.size(); ++i)
-            {
+            for (int i = 0; i < maskvec.size(); ++i) {
                 uint data = walker.getContextBytes(off, sizeof(uint));
                 if ((maskvec[i] & data) != valvec[i]) return false;
                 off += sizeof(uint);
@@ -375,50 +363,27 @@ namespace Sla.SLEIGH
 
         public void saveXml(TextWriter s)
         {
-            s << "<pat_block ";
-            s << "offset=\"" << dec << offset << "\" ";
-            s << "nonzero=\"" << nonzerosize << "\">\n";
-            for (int i = 0; i < maskvec.size(); ++i)
-            {
-                s << "  <mask_word ";
-                s << "mask=\"0x" << hex << maskvec[i] << "\" ";
-                s << "val=\"0x" << valvec[i] << "\"/>\n";
+            s.Write("<pat_block ");
+            s.Write("offset=\"{offset}\" ");
+            s.Write("nonzero=\"{nonzerosize}\">");
+            for (int i = 0; i < maskvec.size(); ++i) {
+                s.Write("  <mask_word ");
+                s.Write("mask=\"0x{maskvec[i]:X}\" ");
+                s.WriteLine("val=\"0x{valvec[i]}\"/>");
             }
-            s << "</pat_block>\n";
+            s.WriteLine("</pat_block>");
         }
 
         public void restoreXml(Element el)
         {
-            {
-                istringstream s = new istringstream(el.getAttributeValue("offset"));
-                s.unsetf(ios::dec | ios::hex | ios::oct);
-                s >> offset;
-            }
-            {
-                istringstream s = new istringstream(el.getAttributeValue("nonzero"));
-                s.unsetf(ios::dec | ios::hex | ios::oct);
-                s >> nonzerosize;
-            }
-            List list = el.getChildren();
-            List::const_iterator iter;
-            iter = list.begin();
+            offset = int.Parse(el.getAttributeValue("offset"));
+            nonzerosize = int.Parse(el.getAttributeValue("nonzero"));
             uint mask, val;
-            while (iter != list.end())
-            {
-                Element subel = *iter;
-                {
-                    istringstream s = new istringstream(subel.getAttributeValue("mask"));
-                    s.unsetf(ios::dec | ios::hex | ios::oct);
-                    s >> mask;
-                }
-                {
-                    istringstream s = new istringstream(subel.getAttributeValue("val"));
-                    s.unsetf(ios::dec | ios::hex | ios::oct);
-                    s >> val;
-                }
+            foreach(Element subel in el.getChildren()) {
+                mask = uint.Parse(subel.getAttributeValue("mask"));
+                val = uint.Parse(subel.getAttributeValue("val"));
                 maskvec.Add(mask);
                 valvec.Add(val);
-                ++iter;
             }
             normalize();
         }

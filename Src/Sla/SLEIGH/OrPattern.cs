@@ -14,7 +14,7 @@ namespace Sla.SLEIGH
 {
     internal class OrPattern : Pattern
     {
-        private List<DisjointPattern> orlist;
+        private List<DisjointPattern> orlist = new List<DisjointPattern>();
         
         public OrPattern()
         {
@@ -28,32 +28,27 @@ namespace Sla.SLEIGH
 
         public OrPattern(List<DisjointPattern> list)
         {
-            List<DisjointPattern*>::const_iterator iter;
-
-            for (iter = list.begin(); iter != list.end(); ++iter)
-                orlist.Add(*iter);
+            foreach (DisjointPattern pattern in list)
+                orlist.Add(pattern);
         }
 
         ~OrPattern()
         {
-            List<DisjointPattern*>::iterator iter;
-
-            for (iter = orlist.begin(); iter != orlist.end(); ++iter)
-                delete* iter;
+            //foreach (DisjointPattern pattern in orlist)
+            //    delete* iter;
         }
 
         public override Pattern simplifyClone()
-        {               // Look for alwaysTrue eliminate alwaysFalse
-            List<DisjointPattern*>::const_iterator iter;
-
-            for (iter = orlist.begin(); iter != orlist.end(); ++iter) // Look for alwaysTrue
-                if ((*iter).alwaysTrue())
+        {
+            // Look for alwaysTrue eliminate alwaysFalse
+            foreach (DisjointPattern pattern in orlist) // Look for alwaysTrue
+                if (pattern.alwaysTrue())
                     return new InstructionPattern(true);
 
-            List<DisjointPattern*> newlist;
-            for (iter = orlist.begin(); iter != orlist.end(); ++iter) // Look for alwaysFalse
-                if (!(*iter).alwaysFalse())
-                    newlist.Add((DisjointPattern*)(*iter).simplifyClone());
+            List<DisjointPattern> newlist = new List<DisjointPattern>();
+            foreach (DisjointPattern pattern in orlist) // Look for alwaysFalse
+                if (!pattern.alwaysFalse())
+                    newlist.Add((DisjointPattern)(pattern).simplifyClone());
 
             if (newlist.empty())
                 return new InstructionPattern(false);
@@ -64,10 +59,8 @@ namespace Sla.SLEIGH
 
         public override void shiftInstruction(int sa)
         {
-            List<DisjointPattern*>::iterator iter;
-
-            for (iter = orlist.begin(); iter != orlist.end(); ++iter)
-                (*iter).shiftInstruction(sa);
+            foreach (DisjointPattern pattern in orlist)
+                pattern.shiftInstruction(sa);
         }
 
         public override bool isMatch(ParserWalker walker)
@@ -83,81 +76,69 @@ namespace Sla.SLEIGH
         public override DisjointPattern getDisjoint(int i) => orlist[i];
 
         public override bool alwaysTrue()
-        {               // This isn't quite right because different branches
-                        // may cover the entire gamut
-            List<DisjointPattern*>::const_iterator iter;
-
-            for (iter = orlist.begin(); iter != orlist.end(); ++iter)
-                if ((*iter).alwaysTrue()) return true;
+        {
+            // This isn't quite right because different branches may cover the entire gamut
+            foreach (DisjointPattern pattern in orlist)
+                if (pattern.alwaysTrue()) return true;
             return false;
         }
 
         public override bool alwaysFalse()
         {
-            List<DisjointPattern*>::const_iterator iter;
-
-            for (iter = orlist.begin(); iter != orlist.end(); ++iter)
-                if (!(*iter).alwaysFalse()) return false;
+            foreach (DisjointPattern pattern in orlist)
+                if (!pattern.alwaysFalse()) return false;
             return true;
         }
 
         public override bool alwaysInstructionTrue()
         {
-            List<DisjointPattern*>::const_iterator iter;
-
-            for (iter = orlist.begin(); iter != orlist.end(); ++iter)
-                if (!(*iter).alwaysInstructionTrue()) return false;
+            foreach (DisjointPattern pattern in orlist)
+                if (!pattern.alwaysInstructionTrue()) return false;
             return true;
         }
 
         public override Pattern doOr(Pattern b, int sa)
         {
-            OrPattern b2 = dynamic_cast <OrPattern> (b);
-            List<DisjointPattern*> newlist;
-            List<DisjointPattern*>::const_iterator iter;
+            OrPattern? b2 = b as OrPattern;
+            List<DisjointPattern> newlist = new List<DisjointPattern>();
 
-            for (iter = orlist.begin(); iter != orlist.end(); ++iter)
-                newlist.Add((DisjointPattern*)(*iter).simplifyClone());
+            foreach (DisjointPattern pattern in orlist)
+                newlist.Add((DisjointPattern)(pattern).simplifyClone());
             if (sa < 0)
-                for (iter = orlist.begin(); iter != orlist.end(); ++iter)
-                    (*iter).shiftInstruction(-sa);
+                foreach (DisjointPattern pattern in orlist)
+                    pattern.shiftInstruction(-sa);
 
-            if (b2 == (OrPattern*)0)
-                newlist.Add((DisjointPattern*)b.simplifyClone());
-            else
-            {
-                for (iter = b2.orlist.begin(); iter != b2.orlist.end(); ++iter)
-                    newlist.Add((DisjointPattern*)(*iter).simplifyClone());
+            if (b2 == (OrPattern)null)
+                newlist.Add((DisjointPattern)b.simplifyClone());
+            else {
+                foreach (DisjointPattern pattern in b2.orlist)
+                    newlist.Add((DisjointPattern)(pattern).simplifyClone());
             }
             if (sa > 0)
                 for (int i = 0; i < newlist.size(); ++i)
                     newlist[i].shiftInstruction(sa);
 
-            OrPattern* tmpor = new OrPattern(newlist);
+            OrPattern tmpor = new OrPattern(newlist);
             return tmpor;
         }
 
         public override Pattern doAnd(Pattern b, int sa)
         {
-            OrPattern b2 = dynamic_cast <OrPattern*> (b);
-            List<DisjointPattern*> newlist;
-            List<DisjointPattern*>::const_iterator iter, iter2;
-            DisjointPattern* tmp;
-            OrPattern* tmpor;
+            OrPattern? b2 = b as OrPattern;
+            List<DisjointPattern> newlist = new List<DisjointPattern>();
+            DisjointPattern tmp;
+            OrPattern tmpor;
 
-            if (b2 == (OrPattern*)0) {
-                for (iter = orlist.begin(); iter != orlist.end(); ++iter)
-                {
-                    tmp = (DisjointPattern*)(*iter).doAnd(b, sa);
+            if (b2 == (OrPattern)null) {
+                foreach (DisjointPattern pattern in orlist) {
+                    tmp = (DisjointPattern)(pattern).doAnd(b, sa);
                     newlist.Add(tmp);
                 }
             }
-            else
-            {
-                for (iter = orlist.begin(); iter != orlist.end(); ++iter)
-                    for (iter2 = b2.orlist.begin(); iter2 != b2.orlist.end(); ++iter2)
-                    {
-                        tmp = (DisjointPattern*)(*iter).doAnd(*iter2, sa);
+            else {
+                foreach (DisjointPattern pattern in orlist)
+                    foreach (DisjointPattern b2Pattern in b2.orlist) {
+                        tmp = (DisjointPattern)(pattern).doAnd(b2Pattern, sa);
                         newlist.Add(tmp);
                     }
             }
@@ -167,43 +148,35 @@ namespace Sla.SLEIGH
 
         public override Pattern commonSubPattern(Pattern b, int sa)
         {
-            List<DisjointPattern*>::const_iterator iter;
-            Pattern* res,*next;
+            IEnumerator<DisjointPattern> iter = orlist.GetEnumerator();
+            Pattern res, next;
 
-            iter = orlist.begin();
-            res = (*iter).commonSubPattern(b, sa);
-            iter++;
+            if (!iter.MoveNext()) throw new BugException();
+            res = iter.Current.commonSubPattern(b, sa);
 
             if (sa > 0)
                 sa = 0;
-            while (iter != orlist.end())
-            {
-                next = (*iter).commonSubPattern(res, sa);
-                delete res;
+            while (iter.MoveNext()) {
+                next = iter.Current.commonSubPattern(res, sa);
+                // delete res;
                 res = next;
-                ++iter;
             }
             return res;
         }
 
         public override void saveXml(TextWriter s)
         {
-            s << "<or_pat>\n";
+            s.WriteLine("<or_pat>");
             for (int i = 0; i < orlist.size(); ++i)
                 orlist[i].saveXml(s);
-            s << "</or_pat>\n";
+            s.WriteLine("</or_pat>");
         }
 
         public override void restoreXml(Element el)
         {
-            List list = el.getChildren();
-            List::const_iterator iter;
-            iter = list.begin();
-            while (iter != list.end())
-            {
-                DisjointPattern* pat = DisjointPattern::restoreDisjoint(*iter);
+            foreach (Element subel in el.getChildren()) {
+                DisjointPattern pat = DisjointPattern.restoreDisjoint(subel);
                 orlist.Add(pat);
-                ++iter;
             }
         }
     }

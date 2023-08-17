@@ -1,51 +1,43 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
     internal class ParamIDAnalysis
     {
         private Funcdata fd;
-        private List<ParamMeasure> InputParamMeasures;
-        private List<ParamMeasure> OutputParamMeasures;
+        private List<ParamMeasure> InputParamMeasures = new List<ParamMeasure>();
+        private List<ParamMeasure> OutputParamMeasures = new List<ParamMeasure>();
         
         public ParamIDAnalysis(Funcdata fd_in, bool justproto)
         {
             fd = fd_in;
-            if (justproto)
-            {       // We only provide info on the recovered prototype
+            if (justproto) {
+                // We only provide info on the recovered prototype
                 FuncProto fproto = fd.getFuncProto();
                 int num = fproto.numParams();
-                for (int i = 0; i < num; ++i)
-                {
-                    ProtoParameter* param = fproto.getParam(i);
-                    InputParamMeasures.Add(ParamMeasure(param.getAddress(), param.getSize(),
-                                       param.getType(), ParamMeasure::INPUT));
-                    Varnode* vn = fd.findVarnodeInput(param.getSize(), param.getAddress());
+                for (int i = 0; i < num; ++i) {
+                    ProtoParameter param = fproto.getParam(i);
+                    InputParamMeasures.Add(new ParamMeasure(param.getAddress(), param.getSize(),
+                        param.getType(), ParamMeasure.ParamIDIO.INPUT));
+                    Varnode vn = fd.findVarnodeInput(param.getSize(), param.getAddress());
                     if (vn != (Varnode)null)
                         InputParamMeasures.GetLastItem().calculateRank(true, vn, (PcodeOp)null);
                 }
 
-                ProtoParameter* outparam = fproto.getOutput();
-                if (!outparam.getAddress().isInvalid())
-                { // If we don't have a void type
-                    OutputParamMeasures.Add(ParamMeasure(outparam.getAddress(), outparam.getSize(),
-                                         outparam.getType(), ParamMeasure::OUTPUT));
-                    list<PcodeOp*>::const_iterator rtn_iter = fd.beginOp(OpCode.CPUI_RETURN);
-                    while (rtn_iter != fd.endOp(OpCode.CPUI_RETURN))
-                    {
-                        PcodeOp* rtn_op = *rtn_iter;
+                ProtoParameter outparam = fproto.getOutput();
+                if (!outparam.getAddress().isInvalid()) {
+                    // If we don't have a void type
+                    OutputParamMeasures.Add(new ParamMeasure(outparam.getAddress(), outparam.getSize(),
+                        outparam.getType(), ParamMeasure.ParamIDIO.OUTPUT));
+                    IEnumerator<PcodeOp> rtn_iter = fd.beginOp(OpCode.CPUI_RETURN);
+                    while (rtn_iter != fd.endOp(OpCode.CPUI_RETURN)) {
+                        PcodeOp rtn_op = rtn_iter.Current;
                         // For RETURN op, input0 is address location of indirect return, input1,
                         // if it exists, is the Varnode returned, output = not sure.
-                        if (rtn_op.numInput() == 2)
-                        {
-                            Varnode* ovn = rtn_op.getIn(1);
-                            if (ovn != (Varnode)null)
-                            {  //Not a void return
+                        if (rtn_op.numInput() == 2) {
+                            Varnode? ovn = rtn_op.getIn(1);
+                            if (ovn != (Varnode)null) {
+                                //Not a void return
                                 OutputParamMeasures.GetLastItem().calculateRank(true, ovn, rtn_op);
                                 break;
                             }
@@ -54,18 +46,16 @@ namespace Sla.DECCORE
                     }
                 }
             }
-            else
-            {
+            else {
                 // Need to list input varnodes that are outside of the model
                 VarnodeDefSet::const_iterator iter, enditer;
                 iter = fd.beginDef(Varnode.varnode_flags.input);
                 enditer = fd.endDef(Varnode.varnode_flags.input);
-                while (iter != enditer)
-                {
-                    Varnode* invn = *iter;
+                while (iter != enditer) {
+                    Varnode invn = iter.Current;
                     ++iter;
-                    InputParamMeasures.Add(ParamMeasure(invn.getAddr(), invn.getSize(),
-                                       invn.getType(), ParamMeasure::INPUT));
+                    InputParamMeasures.Add(new ParamMeasure(invn.getAddr(), invn.getSize(),
+                        invn.getType(), ParamMeasure.ParamIDIO.INPUT));
                     InputParamMeasures.GetLastItem().calculateRank(true, invn, (PcodeOp)null);
                 }
             }
@@ -85,39 +75,31 @@ namespace Sla.DECCORE
             else
                 encoder.writeSignedInteger(AttributeId.ATTRIB_EXTRAPOP, extrapop);
             encoder.closeElement(ElementId.ELEM_PROTO);
-            list<ParamMeasure>::const_iterator pm_iter;
-            for (pm_iter = InputParamMeasures.begin(); pm_iter != InputParamMeasures.end(); ++pm_iter)
-            {
-                ParamMeasure pm = *pm_iter;
-                pm.encode(encoder, ELEM_INPUT, moredetail);
+            foreach (ParamMeasure pm in InputParamMeasures) {
+                pm.encode(encoder, ElementId.ELEM_INPUT, moredetail);
             }
-            for (pm_iter = OutputParamMeasures.begin(); pm_iter != OutputParamMeasures.end(); ++pm_iter)
-            {
-                ParamMeasure pm = *pm_iter;
-                pm.encode(encoder, ELEM_OUTPUT, moredetail);
+            foreach (ParamMeasure pm in OutputParamMeasures) {
+                pm.encode(encoder, ElementId.ELEM_OUTPUT, moredetail);
             }
             encoder.closeElement(ElementId.ELEM_PARAMMEASURES);
         }
 
         public void savePretty(TextWriter s, bool moredetail)
         {
-            s << "Param Measures\nFunction: " << fd.getName() << "\nAddress: 0x" << hex << fd.getAddress().getOffset() << "\n";
-            s << "Model: " << fd.getFuncProto().getModelName() << "\nExtrapop: " << fd.getFuncProto().getExtraPop() << "\n";
-            s << "Num Params: " << InputParamMeasures.size() << "\n";
-            list<ParamMeasure>::const_iterator pm_iter = InputParamMeasures.begin();
-            for (pm_iter = InputParamMeasures.begin(); pm_iter != InputParamMeasures.end(); ++pm_iter)
-            {
-                ParamMeasure pm = *pm_iter;
+            s.WriteLine($"Param Measures");
+            s.WriteLine($"Function: {fd.getName()}");
+            s.WriteLine($"Address: 0x{fd.getAddress().getOffset():X}");
+            s.WriteLine($"Model: {fd.getFuncProto().getModelName()}");
+            s.WriteLine($"Extrapop: {fd.getFuncProto().getExtraPop()}");
+            s.WriteLine($"Num Params: {InputParamMeasures.size()}");
+            foreach (ParamMeasure pm in InputParamMeasures) {
                 pm.savePretty(s, moredetail);
             }
-            s << "Num Returns: " << OutputParamMeasures.size() << "\n";
-            pm_iter = OutputParamMeasures.begin();
-            for (pm_iter = OutputParamMeasures.begin(); pm_iter != OutputParamMeasures.end(); ++pm_iter)
-            {
-                ParamMeasure pm = *pm_iter;
+            s.WriteLine("Num Returns: {OutputParamMeasures.size()}");
+            foreach (ParamMeasure pm in OutputParamMeasures) {
                 pm.savePretty(s, moredetail);
             }
-            s << "\n";
+            s.WriteLine();
         }
     }
 }

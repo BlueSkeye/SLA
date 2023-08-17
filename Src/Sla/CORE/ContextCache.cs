@@ -53,7 +53,7 @@ namespace Sla.CORE
         /// blob.  Otherwise, make a call to the database and cache a new block and valid range.
         /// \param addr is the given address
         /// \param buf is where the blob should be stored
-        public void getContext(ref Address addr, uint[] buf)
+        public void getContext(Address addr, uint[] buf)
         {
             if (   (addr.getSpace() != curspace) 
                 || (first > addr.getOffset())
@@ -77,15 +77,13 @@ namespace Sla.CORE
         /// \param num is the word index of the context variable
         /// \param mask is the mask delimiting the context variable
         /// \param value is the (already shifted) value to set
-        public void setContext(ref Address addr, int num, uint mask, uint value)
+        public void setContext(Address addr, int num, uint mask, uint value)
         {
-            if (!allowset)
-            {
+            if (!allowset) {
                 return;
             }
             database.setContextChangePoint(addr, num, mask, value);
-            if ((addr.getSpace() == curspace) && (first <= addr.getOffset()) && (last >= addr.getOffset()))
-            {
+            if ((addr.getSpace() == curspace) && (first <= addr.getOffset()) && (last >= addr.getOffset())) {
                 // Invalidate cache
                 curspace = null;
             }
@@ -99,11 +97,9 @@ namespace Sla.CORE
         /// \param num is the word index of the context variable
         /// \param mask is the mask delimiting the context variable
         /// \param value is the (already shifted) value to set
-        public void setContext(ref Address addr1, ref Address addr2, int num, uint mask,
-            uint value)
+        public void setContext(Address addr1, Address addr2, int num, uint mask, uint value)
         {
-            if (!allowset)
-            {
+            if (!allowset) {
                 return;
             }
             database.setContextRegion(addr1, addr2, num, mask, value);
@@ -114,13 +110,11 @@ namespace Sla.CORE
                 // Invalidate cache
                 curspace = null;
             }
-            if ((first <= addr2.getOffset()) && (last >= addr2.getOffset()))
-            {
+            if ((first <= addr2.getOffset()) && (last >= addr2.getOffset())) {
                 // Invalidate cache
                 curspace = null;
             }
-            if ((first >= addr1.getOffset()) && (first <= addr2.getOffset()))
-            {
+            if ((first >= addr1.getOffset()) && (first <= addr2.getOffset())) {
                 // Invalidate cache
                 curspace = null;
             }

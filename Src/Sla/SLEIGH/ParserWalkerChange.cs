@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Sla.SLEIGH
 {
     internal class ParserWalkerChange : ParserWalker
     {
         // Extension to walker that allows for on the fly modifications to tree
         // friend class ParserContext;
-        private ParserContext context;
+        internal ParserContext context;
         
         public ParserWalkerChange(ParserContext c)
             : base(c)
@@ -38,19 +33,19 @@ namespace Sla.SLEIGH
         }
 
         public void calcCurrentLength(int length, int numopers)
-        {               // Calculate the length of the current constructor
-                        // state assuming all its operands are constructed
-            length += point.offset;    // Convert relative length to absolute length
-            for (int i = 0; i < numopers; ++i)
-            {
-                ConstructState* subpoint = point.resolve[i];
-                int sublength = subpoint.length + subpoint.offset;
+        {
+            // Calculate the length of the current constructor
+            // state assuming all its operands are constructed
+            length += (int)point.offset;    // Convert relative length to absolute length
+            for (int i = 0; i < numopers; ++i) {
+                ConstructState subpoint = point.resolve[i];
+                int sublength = (int)(subpoint.length + subpoint.offset);
                 // Since subpoint.offset is an absolute offset
                 // (relative to beginning of instruction) sublength
                 if (sublength > length) // is absolute and must be compared to absolute length
                     length = sublength;
             }
-            point.length = length - point.offset; // Convert back to relative length
+            point.length = (int)(length - point.offset); // Convert back to relative length
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sla.SLACOMP;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,9 +10,9 @@ namespace Sla.SLEIGH
     internal struct IdentRec
     {
         internal readonly string nm;
-        internal int id;
+        internal sleightokentype id;
 
-        internal IdentRec(string name, int identifier)
+        internal IdentRec(string name, sleightokentype identifier)
         {
             nm = name;
             id = identifier;

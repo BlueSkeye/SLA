@@ -340,7 +340,7 @@ namespace Sla.CORE
         /// \param sz2 is the size of the second range
         /// \param forceleft is \b true if containments is forced to be on the left even for big endian
         /// \return the endian aware offset, or -1
-        public int justifiedContain(int sz, ref Address op2, int sz2, bool forceleft)
+        public int justifiedContain(int sz, Address op2, int sz2, bool forceleft)
         {
             if (@base != op2.@base) {
                 return -1;

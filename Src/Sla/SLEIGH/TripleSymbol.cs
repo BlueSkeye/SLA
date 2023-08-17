@@ -20,13 +20,13 @@ namespace Sla.SLEIGH
         {
         }
         
-        public override Constructor resolve(ParserWalker walker) => (Constructor)null;
+        public virtual Constructor? resolve(ParserWalker walker) => (Constructor)null;
 
         public abstract PatternExpression getPatternExpression();
 
-        public abstract void getFixedHandle(ref FixedHandle hand, ParserWalker walker);
+        public abstract void getFixedHandle(out FixedHandle hand, ParserWalker walker);
         
-        public override int getSize() => 0;
+        public virtual int getSize() => 0;
 
         public abstract void print(TextWriter s, ParserWalker walker);
     

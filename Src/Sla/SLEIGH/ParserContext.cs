@@ -26,8 +26,8 @@ namespace Sla.SLEIGH
         private Address naddr;      // Address of next instruction
         private /*mutable*/ Address n2addr; // Address of instruction after the next
         private Address calladdr;     // For injections, this is the address of the call being overridden
-        private List<ConstructState> state; // Current resolved instruction
-        private ConstructState base_state;
+        private List<ConstructState> state = new List<ConstructState>(); // Current resolved instruction
+        internal ConstructState base_state;
         private int alloc;         // Number of ConstructState's allocated
         private int delayslot;     // delayslot depth
         
@@ -60,7 +60,7 @@ namespace Sla.SLEIGH
             state[0].parent = (ConstructState)null;
             for (int i = 0; i < maxstate; ++i)
                 state[i].resolve.resize(maxparam);
-            base_state = &state[0];
+            base_state = state[0];
         }
 
         public State getParserState() => parsestate;
