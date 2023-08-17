@@ -104,7 +104,6 @@ namespace Sla.DECCORE
             PcodeOp op;
             BlockBasic parent;
             FlowBlock? bl;
-            IEnumerator<PcodeOp> iter, iterend;
             List<int> splitedge = new List<int>();
             List<BlockBasic> retnode = new List<BlockBasic>();
 
@@ -112,9 +111,9 @@ namespace Sla.DECCORE
                 // Some other restructuring happened first
                 return 0;
             }
-            iterend = data.endOp(OpCode.CPUI_RETURN);
-            for (iter = data.beginOp(OpCode.CPUI_RETURN); iter != iterend; ++iter) {
-                op = *iter;
+            IEnumerator<PcodeOp> iter = data.beginOp(OpCode.CPUI_RETURN);
+            while (iter.MoveNext()) {
+                op = iter.Current;
                 if (op.isDead()) {
                     continue;
                 }

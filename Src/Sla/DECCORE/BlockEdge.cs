@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using static Sla.DECCORE.FlowBlock;
 
 namespace Sla.DECCORE
 {
@@ -13,11 +14,11 @@ namespace Sla.DECCORE
     internal class BlockEdge
     {
         /// Label of the edge
-        private uint label;
+        internal edge_flags label;
         /// Other end of the edge
-        private FlowBlock point;
+        internal FlowBlock point;
         /// Index for edge coming other way
-        private int reverse_index;
+        internal int reverse_index;
 
         /// Constructor for use with decode
         internal BlockEdge()
@@ -25,7 +26,7 @@ namespace Sla.DECCORE
         }
 
         /// Constructor
-        internal BlockEdge(FlowBlock pt, uint lab, int rev)
+        internal BlockEdge(FlowBlock pt, edge_flags lab, int rev)
         {
             label = lab;
             point = pt;

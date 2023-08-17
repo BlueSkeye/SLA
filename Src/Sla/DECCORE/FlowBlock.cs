@@ -1,18 +1,4 @@
 ﻿using Sla.CORE;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using System.Xml.Linq;
-using System.Runtime.Intrinsics;
-using System.Runtime.InteropServices;
-using System.Diagnostics;
 
 namespace Sla.DECCORE
 {
@@ -128,9 +114,9 @@ namespace Sla.DECCORE
         /// Number of descendants of this block in spanning tree (+1)
         private int numdesc;
         /// Blocks which (can) fall into this block
-        private List<BlockEdge> intothis;
+        private List<BlockEdge> intothis = new List<BlockEdge>();
         /// Blocks into which this block (can) fall
-        private List<BlockEdge> outofthis;
+        private List<BlockEdge> outofthis = new List<BlockEdge>();
 
         // If there are two possible outputs as the
         // result of a conditional branch
@@ -150,7 +136,7 @@ namespace Sla.DECCORE
         /// Add an edge coming into \b this
         /// \param b is the FlowBlock coming in
         /// \param lab is a label for the edge
-        private void addInEdge(FlowBlock b, uint lab)
+        private void addInEdge(FlowBlock b, edge_flags lab)
         {
             int ourrev = b.outofthis.Count;
             int brev = intothis.Count;
@@ -170,11 +156,10 @@ namespace Sla.DECCORE
             while (inedge.point.outofthis.Count <= inedge.reverse_index) {
                 inedge.point.outofthis.Add(null);
             }
-            BlockEdge outedge = new BlockEdge(inedge.point.outofthis[inedge.reverse_index]) {
-                label = 0,
-                point = this,
-                reverse_index = intothis.Count - 1
-            };
+            BlockEdge outedge = inedge.point.outofthis[inedge.reverse_index];
+            outedge.label = 0;
+            outedge.point = this;
+            outedge.reverse_index = intothis.Count - 1;
         }
 
         /// Delete the \e in half of an edge, correcting indices
@@ -313,7 +298,7 @@ namespace Sla.DECCORE
             bl.intothis[outofthis[0].reverse_index].reverse_index = 0;
             bl = outofthis[1].point;
             bl.intothis[outofthis[1].reverse_index].reverse_index = 1;
-            flags ^= f_flip_path;
+            flags ^= block_flags.f_flip_path;
 #if BLOCKCONSISTENT_DEBUG
             checkEdges();
 #endif
@@ -322,7 +307,7 @@ namespace Sla.DECCORE
         /// Apply an \e out edge label
         /// \param i is the index of the outgoing edge
         /// \param lab is the new edge label
-        private void setOutEdgeFlag(int i, uint lab)
+        private void setOutEdgeFlag(int i, edge_flags lab)
         {
             FlowBlock bbout = outofthis[i].point;
             outofthis[i].label |= lab;
@@ -332,7 +317,7 @@ namespace Sla.DECCORE
         /// Remove an \e out edge label
         /// \param i is the index of the outgoing edge
         /// \param lab is the edge label to remove
-        private void clearOutEdgeFlag(int i, uint lab)
+        private void clearOutEdgeFlag(int i, edge_flags lab)
         {
             FlowBlock bbout = outofthis[i].point;
             outofthis[i].label &= ~lab;
@@ -408,22 +393,22 @@ namespace Sla.DECCORE
         private static void findDups(List<BlockEdge> @ref, List<FlowBlock> duplist)
         {
             foreach (BlockEdge iter in @ref) {
-                if ((iter.point.flags & f_mark2) != 0) {
+                if ((iter.point.flags & block_flags.f_mark2) != 0) {
                     // Already marked as a duplicate
                     continue;
                 }
-                if ((iter.point.flags & f_mark) != 0) {
+                if ((iter.point.flags & block_flags.f_mark) != 0) {
                     // We have a duplicate
                     duplist.Add(iter.point);
-                    iter.point.flags |= f_mark2;
+                    iter.point.flags |= block_flags.f_mark2;
                 }
                 else {
-                    iter.point.flags |= f_mark;
+                    iter.point.flags |= block_flags.f_mark;
                 }
             }
             foreach (BlockEdge iter in @ref) {
                 // Erase our marks
-                iter.point.flags &= ~(f_mark | f_mark2);
+                iter.point.flags &= ~(block_flags.f_mark | block_flags.f_mark2);
             }
         }
 
@@ -535,7 +520,7 @@ namespace Sla.DECCORE
         public FlowBlock getCopyMap() => copymap;
 
         /// Get the block_flags properties
-        public uint getFlags() => flags;
+        public block_flags getFlags() => flags;
 
         /// Get the starting address of code in \b this FlowBlock
         public virtual Address getStart() => new Address();
@@ -562,7 +547,7 @@ namespace Sla.DECCORE
         public virtual void markLabelBumpUp(bool bump)
         {
             if (bump) {
-                flags |= f_label_bumpup;
+                flags |= block_flags.f_label_bumpup;
             }
         }
 
@@ -821,14 +806,14 @@ namespace Sla.DECCORE
         public void setGotoBranch(int i)
         {
             if ((i >= 0) && (i < outofthis.Count)) {
-                setOutEdgeFlag(i, f_goto_edge);
+                setOutEdgeFlag(i, edge_flags.f_goto_edge);
             }
             else {
                 throw new LowlevelError("Could not find block edge to mark unstructured");
             }
             // Mark that there is a goto out of this block
-            flags |= f_interior_gotoout;
-            outofthis[i].point.flags |= f_interior_gotoin;
+            flags |= block_flags.f_interior_gotoout;
+            outofthis[i].point.flags |= block_flags.f_interior_gotoin;
         }
 
         /// Mark an edge as the switch default
@@ -839,82 +824,82 @@ namespace Sla.DECCORE
             for (int i = 0; i < outofthis.Count; ++i) {
                 if (isDefaultBranch(i)) {
                     // Clear any previous flag
-                    clearOutEdgeFlag(i, f_defaultswitch_edge);
+                    clearOutEdgeFlag(i, edge_flags.f_defaultswitch_edge);
                 }
             }
-            setOutEdgeFlag(pos, f_defaultswitch_edge);
+            setOutEdgeFlag(pos, edge_flags.f_defaultswitch_edge);
         }
 
         /// Return \b true if \b this block has been marked
         public bool isMark()
         {
-            return ((flags & f_mark) != 0);
+            return ((flags & block_flags.f_mark) != 0);
         }
 
         /// Mark \b this block
         public void setMark()
         {
-            flags |= f_mark;
+            flags |= block_flags.f_mark;
         }
 
         /// Clear any mark on \b this block
         public void clearMark()
         {
-            flags &= ~f_mark;
+            flags &= ~block_flags.f_mark;
         }
 
         /// Label \b this as a \e do \e nothing loop
         public void setDonothingLoop()
         {
-            flags |= f_donothing_loop;
+            flags |= block_flags.f_donothing_loop;
         }
 
         /// Label \b this as dead
         public void setDead()
         {
-            flags |= f_dead;
+            flags |= block_flags.f_dead;
         }
 
         /// Return \b true if \b this uses a different label
         public bool hasSpecialLabel()
         {
-            return ((flags & (f_joined_block | f_duplicate_block)) != 0);
+            return ((flags & (block_flags.f_joined_block | block_flags.f_duplicate_block)) != 0);
         }
 
         /// Return \b true if \b this is a \e joined basic block
         public bool isJoined()
         {
-            return ((flags & f_joined_block) != 0);
+            return ((flags & block_flags.f_joined_block) != 0);
         }
 
         /// Return \b true if \b this is a \e duplicated block
         public bool isDuplicated()
         {
-            return ((flags & f_duplicate_block) != 0);
+            return ((flags & block_flags.f_duplicate_block) != 0);
         }
 
         /// Label the edge exiting \b this as a loop
         public void setLoopExit(int i)
         {
-            setOutEdgeFlag(i, f_loop_exit_edge);
+            setOutEdgeFlag(i, edge_flags.f_loop_exit_edge);
         }
 
         /// Clear the loop exit edge
         public void clearLoopExit(int i)
         {
-            clearOutEdgeFlag(i, f_loop_exit_edge);
+            clearOutEdgeFlag(i, edge_flags.f_loop_exit_edge);
         }
 
         /// Label the \e back edge of a loop
         public void setBackEdge(int i)
         {
-            setOutEdgeFlag(i, f_back_edge);
+            setOutEdgeFlag(i, edge_flags.f_back_edge);
         }
 
         /// Have out edges been flipped
         public bool getFlipPath()
         {
-            return ((flags & f_flip_path)!= 0);
+            return ((flags & block_flags.f_flip_path)!= 0);
         }
 
         /// Return \b true if non-fallthru jump flows into \b this
@@ -1068,7 +1053,7 @@ namespace Sla.DECCORE
         public bool hasLoopIn()
         {
             for (int i = 0; i < intothis.Count; ++i) {
-                if ((intothis[i].label & f_loop_edge) != 0) {
+                if ((intothis[i].label & edge_flags.f_loop_edge) != 0) {
                     return true;
                 }
             }
@@ -1080,7 +1065,7 @@ namespace Sla.DECCORE
         public bool hasLoopOut()
         {
             for (int i = 0; i < outofthis.Count; ++i) {
-                if ((outofthis[i].label & f_loop_edge) != 0) {
+                if ((outofthis[i].label & edge_flags.f_loop_edge) != 0) {
                     return true;
                 }
             }
@@ -1090,13 +1075,13 @@ namespace Sla.DECCORE
         /// Is the i-th incoming edge a \e loop edge
         public bool isLoopIn(int i)
         {
-            return ((intothis[i].label & f_loop_edge)!= 0);
+            return ((intothis[i].label & edge_flags.f_loop_edge)!= 0);
         }
 
         /// Is the i-th outgoing edge a \e loop edge
         public bool isLoopOut(int i)
         {
-            return ((outofthis[i].label & f_loop_edge)!= 0);
+            return ((outofthis[i].label & edge_flags.f_loop_edge)!= 0);
         }
 
         /// Get the incoming edge index for the given FlowBlock
@@ -1129,115 +1114,103 @@ namespace Sla.DECCORE
         }
 
         /// Is the i-th out edge the switch default edge
-        public bool isDefaultBranch(int i)
-        {
-            return ((outofthis[i].label & f_defaultswitch_edge)!= 0);
-        }
+        public bool isDefaultBranch(int i) => ((outofthis[i].label & edge_flags.f_defaultswitch_edge) != 0);
 
         /// Are labels for \b this printed by the parent
-        public bool isLabelBumpUp()
-        {
-            return ((flags & f_label_bumpup)!= 0);
-        }
+        public bool isLabelBumpUp() => ((flags & block_flags.f_label_bumpup) != 0);
 
         /// Is \b this the target of an unstructured goto
-        public bool isUnstructuredTarget()
-        {
-            return ((flags & f_unstructured_targ)!= 0);
-        }
+        public bool isUnstructuredTarget() => ((flags & block_flags.f_unstructured_targ) != 0);
 
         /// Is there an unstructured goto to \b this block's interior
-        public bool isInteriorGotoTarget()
-        {
-            return ((flags & f_interior_gotoin)!= 0);
-        }
+        public bool isInteriorGotoTarget() => ((flags & block_flags.f_interior_gotoin) != 0);
 
         /// Is there an unstructured goto out of \b this block's interior
-        public bool hasInteriorGoto() => ((flags & f_interior_gotoout)!= 0);
+        public bool hasInteriorGoto() => ((flags & block_flags.f_interior_gotoout)!= 0);
 
         /// Is the entry point of the function
-        public bool isEntryPoint() => ((flags&f_entry_point)!= 0);
+        public bool isEntryPoint() => ((flags & block_flags.f_entry_point) != 0);
 
         /// Is \b this a switch block
-        public bool isSwitchOut() => ((flags&f_switch_out)!= 0);
+        public bool isSwitchOut() => ((flags & block_flags.f_switch_out) != 0);
 
         /// Is \b this a \e do \e nothing block
-        public bool isDonothingLoop() => ((flags&f_donothing_loop)!= 0);
+        public bool isDonothingLoop() => ((flags & block_flags.f_donothing_loop) != 0);
 
         /// Is \b this block dead
-        public bool isDead() => ((flags & f_dead)!= 0);
+        public bool isDead() => ((flags & block_flags.f_dead)!= 0);
 
         /// Is the i-th incoming edge part of the spanning tree
         public bool isTreeEdgeIn(int i)
         {
-            return ((intothis[i].label & f_tree_edge)!= 0);
+            return ((intothis[i].label & edge_flags.f_tree_edge)!= 0);
         }
 
         /// Is the i-th incoming edge a \e back edge
         public bool isBackEdgeIn(int i)
         {
-            return ((intothis[i].label & f_back_edge)!= 0);
+            return ((intothis[i].label & edge_flags.f_back_edge)!= 0);
         }
 
         /// Is the i-th outgoing edge a \e back edge
         public bool isBackEdgeOut(int i)
         {
-            return ((outofthis[i].label & f_back_edge)!= 0);
+            return ((outofthis[i].label & edge_flags.f_back_edge)!= 0);
         }
 
         /// Is the i-th outgoing edge an irreducible edge
         public bool isIrreducibleOut(int i)
         {
-            return ((outofthis[i].label & f_irreducible)!= 0);
+            return ((outofthis[i].label & edge_flags.f_irreducible)!= 0);
         }
 
         /// Is the i-th incoming edge an irreducible edge
         public bool isIrreducibleIn(int i)
         {
-            return ((intothis[i].label & f_irreducible)!= 0);
+            return ((intothis[i].label & edge_flags.f_irreducible)!= 0);
         }
 
         /// \brief Can \b this and the i-th output be merged into a BlockIf or BlockList
         public bool isDecisionOut(int i)
         {
-            return ((outofthis[i].label & (f_irreducible | f_back_edge | f_goto_edge))== 0);
+            return ((outofthis[i].label & (edge_flags.f_irreducible | edge_flags.f_back_edge | edge_flags.f_goto_edge))== 0);
         }
 
         /// \brief Can \b this and the i-th input be merged into a BlockIf or BlockList
         public bool isDecisionIn(int i)
         {
-            return ((intothis[i].label & (f_irreducible | f_back_edge | f_goto_edge))== 0);
+            return ((intothis[i].label & (edge_flags.f_irreducible | edge_flags.f_back_edge | edge_flags.f_goto_edge))== 0);
         }
 
         /// \brief Is the i-th outgoing edge part of the DAG sub-graph
         public bool isLoopDAGOut(int i)
         {
-            return ((outofthis[i].label & (f_irreducible | f_back_edge | f_loop_exit_edge | f_goto_edge))== 0);
+            return ((outofthis[i].label & (edge_flags.f_irreducible | edge_flags.f_back_edge | edge_flags.f_loop_exit_edge | edge_flags.f_goto_edge))== 0);
         }
 
         /// \brief Is the i-th incoming edge part of the DAG sub-graph
         public bool isLoopDAGIn(int i)
         {
-            return ((intothis[i].label & (f_irreducible | f_back_edge | f_loop_exit_edge | f_goto_edge))== 0);
+            return ((intothis[i].label & (edge_flags.f_irreducible | edge_flags.f_back_edge | edge_flags.f_loop_exit_edge | edge_flags.f_goto_edge))== 0);
         }
 
         /// Is the i-th incoming edge unstructured
         public bool isGotoIn(int i)
         {
-            return ((intothis[i].label & (f_irreducible | f_goto_edge))!= 0);
+            return ((intothis[i].label & (edge_flags.f_irreducible | edge_flags.f_goto_edge))!= 0);
         }
 
         /// Is the i-th outgoing edge unstructured
         public bool isGotoOut(int i)
         {
-            return ((outofthis[i].label & (f_irreducible | f_goto_edge))!= 0);
+            return ((outofthis[i].label & (edge_flags.f_irreducible | edge_flags.f_goto_edge))!= 0);
         }
 
         /// Get the JumpTable associated \b this block
         /// If \b this FlowBlock was ends with a computed jump, retrieve
         /// the associated JumpTable object
         /// \return the JumpTable object or NULL
-        public JumpTable getJumptable()
+        public JumpTable? getJumptable()
         {
             JumpTable? jt = null;
             if (!isSwitchOut()) {
@@ -1260,11 +1233,11 @@ namespace Sla.DECCORE
         {
             switch (name) {
                 case "graph":
-                    return FlowBlock.block_type.t_graph;
+                    return block_type.t_graph;
                 case "copy":
-                    return FlowBlock.block_type.t_copy;
+                    return block_type.t_copy;
                 default:
-                    return FlowBlock.block_type.t_plain;
+                    return block_type.t_plain;
             }
         }
 
@@ -1357,7 +1330,7 @@ namespace Sla.DECCORE
         /// \param bl1 is the first FlowBlock
         /// \param bl2 is the second
         /// \return the common ancestor which dominates both
-        public static FlowBlock findCommonBlock(FlowBlock bl1, FlowBlock bl2)
+        public static FlowBlock? findCommonBlock(FlowBlock bl1, FlowBlock bl2)
         {
             FlowBlock b1 = bl1;
             FlowBlock b2 = bl2;

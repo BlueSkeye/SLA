@@ -343,28 +343,23 @@ namespace Sla.DECCORE
         /// dead and is not a special halt.
         /// \param data is the function
         /// \return the representative OpCode.CPUI_RETURN op or NULL
-        private static PcodeOp canonicalReturnOp(Funcdata data)
+        private static PcodeOp? canonicalReturnOp(Funcdata data)
         {
             PcodeOp? res = (PcodeOp)null;
             Datatype? bestdt = (Datatype)null;
-            IEnumerator<PcodeOp> iter, iterend;
-            iterend = data.endOp(OpCode.CPUI_RETURN);
-            for (iter = data.beginOp(OpCode.CPUI_RETURN); iter != iterend; ++iter)
-            {
-                PcodeOp retop = *iter;
+            IEnumerator<PcodeOp> iter = data.beginOp(OpCode.CPUI_RETURN);
+            while (iter.MoveNext()) {
+                PcodeOp retop = iter.Current;
                 if (retop.isDead()) continue;
                 if (retop.getHaltType() != 0) continue;
-                if (retop.numInput() > 1)
-                {
-                    Varnode* vn = retop.getIn(1);
-                    Datatype* ct = vn.getTempType();
-                    if (bestdt == (Datatype)null)
-                    {
+                if (retop.numInput() > 1) {
+                    Varnode vn = retop.getIn(1);
+                    Datatype ct = vn.getTempType();
+                    if (bestdt == (Datatype)null) {
                         res = retop;
                         bestdt = ct;
                     }
-                    else if (ct.typeOrder(*bestdt) < 0)
-                    {
+                    else if (ct.typeOrder(bestdt) < 0) {
                         res = retop;
                         bestdt = ct;
                     }
@@ -387,10 +382,9 @@ namespace Sla.DECCORE
             Datatype ct = baseVn.getTempType();
             int baseSize = baseVn.getSize();
             bool isBool = ct.getMetatype() == type_metatype.TYPE_BOOL;
-            IEnumerator<PcodeOp> iter, iterend;
-            iterend = data.endOp(OpCode.CPUI_RETURN);
-            for (iter = data.beginOp(OpCode.CPUI_RETURN); iter != iterend; ++iter) {
-                PcodeOp retop = *iter;
+            IEnumerator<PcodeOp> iter = data.beginOp(OpCode.CPUI_RETURN);
+            while (iter.MoveNext()) {
+                PcodeOp retop = iter.Current;
                 if (retop == op) continue;
                 if (retop.isDead()) continue;
                 if (retop.getHaltType() != 0) continue;

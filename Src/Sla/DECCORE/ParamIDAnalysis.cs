@@ -30,7 +30,7 @@ namespace Sla.DECCORE
                     OutputParamMeasures.Add(new ParamMeasure(outparam.getAddress(), outparam.getSize(),
                         outparam.getType(), ParamMeasure.ParamIDIO.OUTPUT));
                     IEnumerator<PcodeOp> rtn_iter = fd.beginOp(OpCode.CPUI_RETURN);
-                    while (rtn_iter != fd.endOp(OpCode.CPUI_RETURN)) {
+                    while (rtn_iter.MoveNext()) {
                         PcodeOp rtn_op = rtn_iter.Current;
                         // For RETURN op, input0 is address location of indirect return, input1,
                         // if it exists, is the Varnode returned, output = not sure.

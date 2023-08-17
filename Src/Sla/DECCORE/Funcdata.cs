@@ -644,15 +644,18 @@ namespace Sla.DECCORE
                 opInsertBegin(replaceop, outblock);
 
                 // Replace obsolete origvn with replacevn
-                int i;
                 IEnumerator<PcodeOp> titer = origvn.descend.GetEnumerator();
                 while (titer.MoveNext()) {
                     PcodeOp op = titer.Current;
-                    i = op.getSlot(origvn);
+                    int i = op.getSlot(origvn);
                     // Do not replace MULTIEQUAL references in the same block
                     // as replaceop.  These are patched by block_remove
-                    if ((op.code() == OpCode.CPUI_MULTIEQUAL) && (op.getParent() == outblock) && (i == outblock_ind))
+                    if (   (op.code() == OpCode.CPUI_MULTIEQUAL)
+                        && (op.getParent() == outblock)
+                        && (i == outblock_ind))
+                    {
                         continue;
+                    }
                     opSetInput(op, replacevn, i);
                 }
             }
@@ -1411,7 +1414,7 @@ namespace Sla.DECCORE
         /// The caller can provide a bounding range that constrains where control can flow to.
         /// \param baddr is the beginning of the constraining range
         /// \param eaddr is the end of the constraining range
-        public void followFlow(Address baddr, Address eadddr)
+        public void followFlow(Address baddr, Address eaddr)
         {
             if (!obank.empty()) {
                 if ((flags & Flags.blocks_generated) == 0)
@@ -1972,7 +1975,7 @@ namespace Sla.DECCORE
         public void spacebase()
         {
             VarnodeLocSet::const_iterator iter, enditer;
-            int i, j, numspace;
+            int i, numspace;
             Varnode vn;
 
             for (int j = 0; j < glb.numSpaces(); ++j) {
@@ -2244,11 +2247,10 @@ namespace Sla.DECCORE
                 return funcp.getExtraPop(); // If we already know it, just return it
 
             IEnumerator<PcodeOp> iter = beginOp(OpCode.CPUI_RETURN);
-            if (iter == endOp(OpCode.CPUI_RETURN)) return 0; // If no return statements, answer is irrelevant
+            if (!iter.MoveNext()) return 0; // If no return statements, answer is irrelevant
 
-            PcodeOp retop = iter;
+            PcodeOp retop = iter.Current;
             byte[] buffer = new byte[4];
-
             glb.loader.loadFill(buffer, 4, retop.getAddr());
 
             // We are assuming x86 code here
@@ -2376,7 +2378,7 @@ namespace Sla.DECCORE
         {
             Datatype ct = glb.types.getBase(sizeof(op), type_metatype.TYPE_UNKNOWN);
             AddrSpace cspc = glb.getIopSpace();
-            Varnode vn = vbank.create(sizeof(op), Address(cspc, (ulong)(ulong)op), ct);
+            Varnode vn = vbank.create(sizeof(op), new Address(cspc, (ulong)(ulong)op), ct);
             assignHigh(vn);
             return vn;
         }
@@ -2520,7 +2522,7 @@ namespace Sla.DECCORE
                     throw new LowlevelError("Bad adjustment to input varnode");
                 PcodeOp subop = newOp(2, getAddress());
                 opSetOpcode(subop, OpCode.CPUI_SUBPIECE);
-                opSetInput(subop, newConstant(4, sa), 1);
+                opSetInput(subop, newConstant(4, (ulong)sa), 1);
                 Varnode newvn = newVarnodeOut(vn.getSize(), vn.getAddr(), subop);
                 // newvn must not be free in order to give all vn's descendants
                 opInsertBegin(subop, (BlockBasic)bblocks.getBlock(0));
@@ -3049,7 +3051,7 @@ namespace Sla.DECCORE
                         return ancestorOpUse(maxlevel - 1, def.getIn(0), op, trial, 0, mainFlags); // Follow into most sig piece
                     return false;
                 case OpCode.CPUI_SUBPIECE: {
-                        int newOff = def.getIn(1).getOffset();
+                        int newOff = (int)def.getIn(1).getOffset();
                         // This is a rather kludgy way to get around where a DIV (or other similar) instruction
                         // causes a register that looks like the high precision piece of the function return
                         // to be set with the remainder as a side effect
@@ -3149,7 +3151,7 @@ namespace Sla.DECCORE
         /// \param lsbOffset is the significance offset of the new Varnode within the exising
         public void transferVarnodeProperties(Varnode vn, Varnode newVn, int lsbOffset)
         {
-            ulong newConsume = (vn.getConsume() >> 8 * lsbOffset) & Globals.calc_mask(newVn.getSize());
+            ulong newConsume = (vn.getConsume() >> 8 * lsbOffset) & Globals.calc_mask((uint)newVn.getSize());
 
             Varnode.varnode_flags vnFlags = vn.getFlags()
                 & (Varnode.varnode_flags.directwrite | Varnode.varnode_flags.addrforce);
@@ -3215,13 +3217,12 @@ namespace Sla.DECCORE
             // Replace all references to vn
             bool changemade = false;
             PcodeOp op;
-            int i;
             Datatype? locktype = vn.isTypeLock() ? vn.getType() : (Datatype)null;
 
             IEnumerator<PcodeOp> iter = vn.beginDescend();
             while (iter.MoveNext()) {
                 op = iter.Current;
-                i = op.getSlot(vn);
+                int i = op.getSlot(vn);
                 if (op.isMarker()) {
                     // Must be careful putting constants in here
                     if ((op.code() != OpCode.CPUI_INDIRECT) || (i != 0)) continue;
@@ -3258,7 +3259,7 @@ namespace Sla.DECCORE
                 newop = newOp(3, defop.getAddr());
                 opSetOpcode(newop, OpCode.CPUI_CALLOTHER);
                 // Create a userop of type specified by vw_op
-                opSetInput(newop, newConstant(4, vw_op.getIndex()), 0);
+                opSetInput(newop, newConstant(4, (ulong)vw_op.getIndex()), 0);
                 // The first parameter is the offset of volatile memory location
                 Varnode annoteVn = newCodeRef(vn.getAddr());
                 annoteVn.setFlags(Varnode.varnode_flags.volatil);
@@ -3588,13 +3589,13 @@ namespace Sla.DECCORE
                 linkProtoPartial(vn);
             HighVariable high = vn.getHigh();
             SymbolEntry? entry;
-            uint fl = 0;
+            Varnode.varnode_flags fl = 0;
             Symbol? sym = high.getSymbol();
             if (sym != (Symbol)null) return sym; // Symbol already assigned
 
             Address usepoint = vn.getUsePoint(this);
             // Find any entry overlapping base address
-            entry = localmap.queryProperties(vn.getAddr(), 1, usepoint, fl);
+            entry = localmap.queryProperties(vn.getAddr(), 1, usepoint, out fl);
             if (entry != (SymbolEntry)null) {
                 sym = handleSymbolConflict(entry, vn);
             }
@@ -3685,7 +3686,7 @@ namespace Sla.DECCORE
         public void findLinkedVarnodes(SymbolEntry entry, List<Varnode> res)
         {
             if (entry.isDynamic()) {
-                DynamicHash dhash;
+                DynamicHash dhash = new DynamicHash();
                 Varnode? vn = dhash.findVarnode(this, entry.getFirstUseAddress(), entry.getHash());
                 if (vn != (Varnode)null)
                     res.Add(vn);
@@ -3901,9 +3902,8 @@ namespace Sla.DECCORE
         /// \return a representative OpCode.CPUI_RETURN op or NULL if there are none
         public PcodeOp? getFirstReturnOp()
         {
-            IEnumerator<PcodeOp> iter, iterend;
-            iterend = endOp(OpCode.CPUI_RETURN);
-            for (iter = beginOp(OpCode.CPUI_RETURN); iter != iterend; ++iter) {
+            IEnumerator<PcodeOp> iter = beginOp(OpCode.CPUI_RETURN);
+            while (iter.MoveNext()) {
                 PcodeOp retop = iter.Current;
                 if (retop.isDead()) continue;
                 if (retop.getHaltType() != 0) continue;
@@ -4587,8 +4587,8 @@ namespace Sla.DECCORE
         /// \brief Start of PcodeOp objects with the given op-code
         public IEnumerator<PcodeOp> beginOp(OpCode opc) => obank.begin(opc);
 
-        /// \brief End of PcodeOp objects with the given op-code
-        public IEnumerator<PcodeOp> endOp(OpCode opc) => obank.end(opc);
+        ///// \brief End of PcodeOp objects with the given op-code
+        //public IEnumerator<PcodeOp> endOp(OpCode opc) => obank.end(opc);
 
         /// \brief Start of PcodeOp objects in the \e alive list
         public IEnumerator<PcodeOp> beginOpAlive() => obank.beginAlive();
@@ -5257,13 +5257,13 @@ namespace Sla.DECCORE
             }
             if (!outbl.op.empty()) {
                 // Check for MULTIEQUALs
-                PcodeOp firstop = outbl.op.front();
+                PcodeOp firstop = outbl.op.First();
                 if (firstop.code() == OpCode.CPUI_MULTIEQUAL)
                     throw new LowlevelError("Splicing block with MULTIEQUAL");
                 firstop.clearFlag(PcodeOp.Flags.startbasic);
                 IEnumerator<PcodeOp> iter = outbl.beginOp();
                 // Move ops into -bl-
-                for (iter = outbl.beginOp(); iter != outbl.endOp(); ++iter) {
+                while (iter.MoveNext()) {
                     PcodeOp op = iter.Current;
                     op.setParent(bl);  // Reset ops parent to -bl-
                 }
@@ -5844,7 +5844,7 @@ namespace Sla.DECCORE
             IEnumerator<Tuple<uint, PcodeOp>> liter2 = list.GetEnumerator();
             if (!liter2.MoveNext()) throw new BugException();
             while (liter2.MoveNext()) {
-                if (!liter1.MoveNext()) throw new BugException(=);
+                if (!liter1.MoveNext()) throw new BugException();
                 if (liter1.Current.Item1 == liter2.Current.Item1) {
                     op1 = liter1.Current.Item2;
                     op2 = liter2.Current.Item2;

@@ -356,12 +356,9 @@ namespace Sla.DECCORE
             if (!returnsTraversed) {
                 // If we plan to truncate the size of a return variable, we need to propagate the logical size to any other
                 // return variables so that there can still be a single return value type for the function
-                IEnumerator<PcodeOp> iter, enditer;
-                iter = fd.beginOp(OpCode.CPUI_RETURN);
-                enditer = fd.endOp(OpCode.CPUI_RETURN);
-                while (iter != enditer) {
+                IEnumerator<PcodeOp> iter = fd.beginOp(OpCode.CPUI_RETURN);
+                while (iter.MoveNext()) {
                     PcodeOp retop = iter.Current;
-                    ++iter;
                     if (retop.getHaltType() != 0) continue;        // Artificial halt
                     Varnode retvn = retop.getIn(slot);
                     bool inworklist;

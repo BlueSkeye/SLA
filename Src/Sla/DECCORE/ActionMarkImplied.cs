@@ -146,10 +146,9 @@ namespace Sla.DECCORE
             PcodeOp op = vn.getDef() ?? throw new BugException();
             if (op.code() == OpCode.CPUI_LOAD) {
                 // Check for loads crossing stores
-                IEnumerator<PcodeOp> oiter;
-                IEnumerator<PcodeOp> iterend = data.endOp(OpCode.CPUI_STORE);
-                for (oiter = data.beginOp(OpCode.CPUI_STORE); oiter != iterend; ++oiter) {
-                    storeop = oiter;
+                IEnumerator<PcodeOp> oiter = data.beginOp(OpCode.CPUI_STORE);
+                while (oiter.MoveNext()) {
+                    storeop = oiter.Current;
                     if (storeop.isDead()) continue;
                     if (vn.getCover().contain(storeop, 2)) {
                         // The LOAD crosses a STORE. We are cavalier

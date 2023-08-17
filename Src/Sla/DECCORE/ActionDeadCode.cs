@@ -367,23 +367,19 @@ namespace Sla.DECCORE
         {
             if (data.getFuncProto().isOutputLocked() || data.getActiveOutput() != (ParamActive)null)
                 return ~((ulong)0);
-            IEnumerator<PcodeOp> iter, enditer;
-            enditer = data.endOp(OpCode.CPUI_RETURN);
+            IEnumerator<PcodeOp> iter = data.beginOp(OpCode.CPUI_RETURN);
             ulong consumeVal = 0;
-            for (iter = data.beginOp(OpCode.CPUI_RETURN); iter != enditer; ++iter)
-            {
-                PcodeOp returnOp = *iter;
+            while (iter.MoveNext()) {
+                PcodeOp returnOp = iter.Current;
                 if (returnOp.isDead()) continue;
-                if (returnOp.numInput() > 1)
-                {
-                    Varnode* vn = returnOp.getIn(1);
+                if (returnOp.numInput() > 1) {
+                    Varnode vn = returnOp.getIn(1);
                     consumeVal |= Globals.minimalmask(vn.getNZMask());
                 }
             }
             int val = data.getFuncProto().getReturnBytesConsumed();
-            if (val != 0)
-            {
-                consumeVal &= Globals.calc_mask(val);
+            if (val != 0) {
+                consumeVal &= Globals.calc_mask((uint)val);
             }
             return consumeVal;
         }
@@ -450,18 +446,14 @@ namespace Sla.DECCORE
             if (data.getHeritagePass() > 1) return false;
             if (data.isJumptableRecoveryOn()) return false;
             IEnumerator<PcodeOp> iter = data.beginOp(OpCode.CPUI_LOAD);
-            IEnumerator<PcodeOp> enditer = data.endOp(OpCode.CPUI_LOAD);
             bool res = false;
-            while (iter != enditer)
-            {
-                PcodeOp* op = *iter;
-                ++iter;
+            while (iter.MoveNext()) {
+                PcodeOp op = iter.Current;
                 if (op.isDead()) continue;
-                Varnode* vn = op.getOut();
+                Varnode vn = op.getOut();
                 if (vn.isConsumeVacuous()) continue;
-                if (isEventualConstant(op.getIn(1), 0, 0))
-                {
-                    pushConsumed(~(ulong)0, vn, worklist);
+                if (isEventualConstant(op.getIn(1), 0, 0)) {
+                    pushConsumed(ulong.MaxValue, vn, worklist);
                     vn.setAutoLiveHold();
                     res = true;
                 }

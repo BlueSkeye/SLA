@@ -184,7 +184,7 @@ namespace Sla.DECCORE
                     int numinhalf = (j - recnum) / 2;  // Will be at least 1
                     sizeaccum = 0;
                     for (int k = 0; k < numinhalf; ++k)
-                        sizeaccum += joinrec.getPiece((uint)(recnum + k)).size;
+                        sizeaccum += (int)joinrec.getPiece((uint)(recnum + k)).size;
                     Varnode mosthalf, leasthalf;
                     if (numinhalf == 1)
                         mosthalf = fd.newVarnode(sizeaccum, joinrec.getPiece((uint)recnum).space,
@@ -980,18 +980,14 @@ namespace Sla.DECCORE
 
             List<Varnode> sinks = new List<Varnode>();
             List<PcodeOp> reads = new List<PcodeOp>();
-            IEnumerator<LoadGuard> loadIter = loadGuard.end();
-            while (loadIter != loadGuard.begin()) {
-                --loadIter;
-                LoadGuard guard = loadIter.Current;
+            for(int index = loadGuard.Count - 1; 0 <= index; index--) {
+                LoadGuard guard = loadGuard[index];
                 if (guard.analysisState != 0) break;
                 reads.Add(guard.op);
                 sinks.Add(guard.op.getIn(1));    // The OpCode.CPUI_LOAD pointer
             }
-            IEnumerator<LoadGuard> storeIter = storeGuard.end();
-            while (storeIter != storeGuard.begin()) {
-                --storeIter;
-                LoadGuard guard = storeIter.Current;
+            for (int index = storeGuard.Count - 1; 0 <= index; index--) {
+                LoadGuard guard = storeGuard[index].Current;
                 if (guard.analysisState != 0) break;
                 reads.Add(guard.op);
                 sinks.Add(guard.op.getIn(1));    // The OpCode.CPUI_STORE pointer
@@ -1076,11 +1072,9 @@ namespace Sla.DECCORE
         private bool protectFreeStores(AddrSpace spc, List<PcodeOp> freeStores)
         {
             IEnumerator<PcodeOp> iter = fd.beginOp(OpCode.CPUI_STORE);
-            IEnumerator<PcodeOp> enditer = fd.endOp(OpCode.CPUI_STORE);
             bool hasNew = false;
-            while (iter != enditer) {
+            while (iter.MoveNext()) {
                 PcodeOp op = iter.Current;
-                ++iter;
                 if (op.isDead()) continue;
                 Varnode vn = op.getIn(1);
                 while (vn.isWritten()) {
@@ -1594,10 +1588,9 @@ namespace Sla.DECCORE
             AddrSpace spc = addr.getSpace();
             AddrSpace? container = spc.getContain();
 
-            IEnumerator<PcodeOp> iter, iterend;
-            iterend = fd.endOp(OpCode.CPUI_STORE);
-            for (iter = fd.beginOp(OpCode.CPUI_STORE); iter != iterend; ++iter) {
-                op = *iter;
+            IEnumerator<PcodeOp> iter = fd.beginOp(OpCode.CPUI_STORE);
+            while (iter.MoveNext()) {
+                op = iter.Current;
                 if (op.isDead()) continue;
                 AddrSpace storeSpace = op.getIn(0).getSpaceFromConst();
                 if ((container == storeSpace && op.usesSpacebasePtr()) || (spc == storeSpace)) {
@@ -1621,12 +1614,9 @@ namespace Sla.DECCORE
         private void guardLoads(Varnode.varnode_flags fl, Address addr, int size, List<Varnode> write)
         {
             PcodeOp copyop;
-            IEnumerator<LoadGuard> iter;
 
             if ((fl & Varnode.varnode_flags.addrtied) == 0) return;  // If not address tied, don't consider for index alias
-            iter = loadGuard.begin();
-            while (iter != loadGuard.end()) {
-                LoadGuard guardRec = iter.Current;
+            foreach (LoadGuard guardRec in loadGuard) {
                 if (!guardRec.isValid(OpCode.CPUI_LOAD)) {
                     list<LoadGuard>::iterator copyIter = iter;
                     ++iter;
@@ -1659,7 +1649,6 @@ namespace Sla.DECCORE
         private void guardReturnsOverlapping(Address addr, int size)
         {
             VarnodeData vData;
-            IEnumerator<PcodeOp> iter, iterend;
 
             if (!fd.getFuncProto().getBiggestContainedOutput(addr, size, vData))
                 return;
@@ -1669,16 +1658,16 @@ namespace Sla.DECCORE
             int offset = (int)(vData.offset - addr.getOffset());  // Number of least significant bytes to truncate
             if (vData.space.isBigEndian())
                 offset = (size - vData.size) - offset;
-            iterend = fd.endOp(OpCode.CPUI_RETURN);
-            for (iter = fd.beginOp(OpCode.CPUI_RETURN); iter != iterend; ++iter) {
-                PcodeOp op = *iter;
+            IEnumerator<PcodeOp> iter = fd.beginOp(OpCode.CPUI_RETURN);
+            while (iter.MoveNext()) {
+                PcodeOp op = iter.Current;
                 if (op.isDead()) continue;
                 if (op.getHaltType() != 0) continue; // Special halt points cannot take return values
                 Varnode invn = fd.newVarnode(size, addr);
                 PcodeOp subOp = fd.newOp(2, op.getAddr());
                 fd.opSetOpcode(subOp, OpCode.CPUI_SUBPIECE);
                 fd.opSetInput(subOp, invn, 0);
-                fd.opSetInput(subOp, fd.newConstant(4, offset), 1);
+                fd.opSetInput(subOp, fd.newConstant(4, (ulong)offset), 1);
                 fd.opInsertBefore(subOp, op);
                 Varnode retVal = fd.newVarnodeOut(vData.size, truncAddr, subOp);
                 invn.setActiveHeritage();
@@ -1700,7 +1689,6 @@ namespace Sla.DECCORE
         /// \param write is the list of written Varnodes in the range (unused)
         private void guardReturns(Varnode.varnode_flags fl, Address addr, int size, List<Varnode> write)
         {
-            IEnumerator<PcodeOp> iter, iterend;
             PcodeOp op, copyop;
 
             ParamActive? active = fd.getActiveOutput();
@@ -1710,9 +1698,9 @@ namespace Sla.DECCORE
                     guardReturnsOverlapping(addr, size);
                 else if (outputCharacter != ParamEntry.Containment.no_containment) {
                     active.registerTrial(addr, size);
-                    iterend = fd.endOp(OpCode.CPUI_RETURN);
-                    for (iter = fd.beginOp(OpCode.CPUI_RETURN); iter != iterend; ++iter) {
-                        op = *iter;
+                    IEnumerator<PcodeOp> iter = fd.beginOp(OpCode.CPUI_RETURN);
+                    while (iter.MoveNext()) {
+                        op = iter.Current;
                         if (op.isDead()) continue;
                         if (op.getHaltType() != 0) continue; // Special halt points cannot take return values
                         Varnode invn = fd.newVarnode(size, addr);
@@ -1722,9 +1710,9 @@ namespace Sla.DECCORE
                 }
             }
             if ((fl & Varnode.varnode_flags.persist) == 0) return;
-            iterend = fd.endOp(OpCode.CPUI_RETURN);
-            for (iter = fd.beginOp(OpCode.CPUI_RETURN); iter != iterend; ++iter) {
-                op = *iter;
+            IEnumerator<PcodeOp> iter = fd.beginOp(OpCode.CPUI_RETURN);
+            while (iter.MoveNext()) {
+                op = iter.Current;
                 if (op.isDead()) continue;
                 copyop = fd.newOp(1, op.getAddr());
                 Varnode vn = fd.newVarnodeOut(size, addr, copyop);

@@ -111,14 +111,13 @@ namespace Sla.DECCORE
             if (active != (ParamActive)null) {
                 PcodeOp op;
                 Varnode vn;
-                IEnumerator<PcodeOp> iter, iterend;
                 int i;
 
                 int maxancestor = data.getArch().trim_recurse_max;
-                iterend = data.endOp(OpCode.CPUI_RETURN);
                 AncestorRealistic ancestorReal;
-                for (iter = data.beginOp(OpCode.CPUI_RETURN); iter != iterend; ++iter) {
-                    op = *iter;
+                IEnumerator<PcodeOp> iter = data.beginOp(OpCode.CPUI_RETURN);
+                while (iter.MoveNext()) {
+                    op = iter.Current;
                     if (op.isDead()) continue;
                     if (op.getHaltType() != 0) continue; // Don't evaluate special halts
                     for (i = 0; i < active.getNumTrials(); ++i) {
@@ -126,7 +125,7 @@ namespace Sla.DECCORE
                         if (trial.isChecked()) continue; // Already checked
                         int slot = trial.getSlot();
                         vn = op.getIn(slot);
-                        if (ancestorReal.execute(op, slot, &trial, false))
+                        if (ancestorReal.execute(op, slot, trial, false))
                             if (data.ancestorOpUse(maxancestor, vn, op, trial, 0, 0))
                                 trial.markActive(); // This varnode sees active use as a parameter
                         count += 1;
@@ -139,9 +138,9 @@ namespace Sla.DECCORE
 
                 if (active.isFullyChecked()) {
                     data.getFuncProto().deriveOutputMap(active);
-                    iterend = data.endOp(OpCode.CPUI_RETURN);
-                    for (iter = data.beginOp(OpCode.CPUI_RETURN); iter != iterend; ++iter) {
-                        op = *iter;
+                    iter = data.beginOp(OpCode.CPUI_RETURN);
+                    while (iter.MoveNext()) {
+                        op = iter.Current;
                         if (op.isDead()) continue;
                         if (op.getHaltType() != 0) continue;
                         buildReturnOutput(active, op, data);

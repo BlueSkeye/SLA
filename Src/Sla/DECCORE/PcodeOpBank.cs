@@ -42,19 +42,18 @@ namespace Sla.DECCORE
         /// \param op is the given PcodeOp
         private void addToCodeList(PcodeOp op)
         {
-            switch (op.code())
-            {
+            switch (op.code()) {
                 case OpCode.CPUI_STORE:
-                    op.codeiter = storelist.insert(storelist.end(), op);
+                    op.codeiter = storelist.Add(op);
                     break;
                 case OpCode.CPUI_LOAD:
-                    op.codeiter = loadlist.insert(loadlist.end(), op);
+                    op.codeiter = loadlist.Add(op);
                     break;
                 case OpCode.CPUI_RETURN:
-                    op.codeiter = returnlist.insert(returnlist.end(), op);
+                    op.codeiter = returnlist.Add(op);
                     break;
                 case OpCode.CPUI_CALLOTHER:
-                    op.codeiter = useroplist.insert(useroplist.end(), op);
+                    op.codeiter = useroplist.Add(op);
                     break;
                 default:
                     break;
@@ -67,19 +66,18 @@ namespace Sla.DECCORE
         /// \param op is the given PcodeOp
         private void removeFromCodeList(PcodeOp op)
         {
-            switch (op.code())
-            {
+            switch (op.code()) {
                 case OpCode.CPUI_STORE:
-                    storelist.erase(op.codeiter);
+                    storelist.Remove(op);
                     break;
                 case OpCode.CPUI_LOAD:
-                    loadlist.erase(op.codeiter);
+                    loadlist.Remove(op);
                     break;
                 case OpCode.CPUI_RETURN:
-                    returnlist.erase(op.codeiter);
+                    returnlist.Remove(op);
                     break;
                 case OpCode.CPUI_CALLOTHER:
-                    useroplist.erase(op.codeiter);
+                    useroplist.Remove(op);
                     break;
                 default:
                     break;
@@ -89,10 +87,10 @@ namespace Sla.DECCORE
         /// Clear all op-code specific lists
         private void clearCodeLists()
         {
-            storelist.clear();
-            loadlist.clear();
-            returnlist.clear();
-            useroplist.clear();
+            storelist.Clear();
+            loadlist.Clear();
+            returnlist.Clear();
+            useroplist.Clear();
         }
 
         /// Clear all PcodeOps from \b this container
@@ -180,7 +178,7 @@ namespace Sla.DECCORE
                 throw new LowlevelError("Deleting integrated op");
 
             optree.erase(op.getSeqNum());
-            deadlist.erase(op.insertiter);
+            deadlist.Remove(op);
             removeFromCodeList(op);
             deadandgone.Add(op);
         }
@@ -212,9 +210,9 @@ namespace Sla.DECCORE
         /// \param op is the given PcodeOp to mark
         public void markAlive(PcodeOp op)
         {
-            deadlist.erase(op.insertiter);
-            op.clearFlag(PcodeOp::dead);
-            op.insertiter = alivelist.insert(alivelist.end(), op);
+            deadlist.Remove(op);
+            op.clearFlag(PcodeOp.Flags.dead);
+            op.insertiter = alivelist.Add(op);
         }
 
         /// Mark the given PcodeOp as \e dead
@@ -223,9 +221,9 @@ namespace Sla.DECCORE
         /// \param op is the given PcodeOp to mark
         public void markDead(PcodeOp op)
         {
-            alivelist.erase(op.insertiter);
-            op.setFlag(PcodeOp::dead);
-            op.insertiter = deadlist.insert(deadlist.end(), op);
+            alivelist.Remove(op);
+            op.setFlag(PcodeOp.Flags.dead);
+            op.insertiter = deadlist.Add(op);
         }
 
         /// Insert the given PcodeOp after a point in the \e dead list
@@ -234,9 +232,9 @@ namespace Sla.DECCORE
         /// \param prev is the specified op in the \e dead list
         public void insertAfterDead(PcodeOp op, PcodeOp prev)
         {
-            if ((!op.isDead()) || (!prev.isDead()))
+            if (!op.isDead() || !prev.isDead())
                 throw new LowlevelError("Dead move called on ops which aren't dead");
-            deadlist.erase(op.insertiter);
+            deadlist.Remove(op);
             IEnumerator<PcodeOp> iter = prev.insertiter;
             ++iter;
             op.insertiter = deadlist.insert(iter, op);
@@ -284,9 +282,9 @@ namespace Sla.DECCORE
         /// yet been broken up into basic blocks. Take into account delay slots.
         /// \param addr is the given Address
         /// \return the targeted PcodeOp (or NULL)
-        public PcodeOp target(Address addr)
+        public PcodeOp? target(Address addr)
         {
-            PcodeOpTree::const_iterator iter = optree.lower_bound(SeqNum(addr, 0));
+            PcodeOpTree::const_iterator iter = optree.lower_bound(new SeqNum(addr, 0));
             if (iter == optree.end()) return (PcodeOp)null;
             return (*iter).second.target();
         }
@@ -349,13 +347,13 @@ namespace Sla.DECCORE
         /// \brief Start of all PcodeOps at one Address
         public PcodeOpTree::const_iterator begin(Address addr)
         {
-            return optree.lower_bound(SeqNum(addr, 0));
+            return optree.lower_bound(new SeqNum(addr, 0));
         }
 
         /// \brief End of all PcodeOps at one Address
         public PcodeOpTree::const_iterator end(Address addr)
         {
-            return optree.upper_bound(SeqNum(addr, uint.MaxValue));
+            return optree.upper_bound(new SeqNum(addr, uint.MaxValue));
         }
 
         /// \brief Start of all PcodeOps marked as \e alive
@@ -375,40 +373,39 @@ namespace Sla.DECCORE
         /// \brief Start of all PcodeOps sharing the given op-code
         public IEnumerator<PcodeOp> begin(OpCode opc)
         {
-            switch (opc)
-            {
+            switch (opc) {
                 case OpCode.CPUI_STORE:
-                    return storelist.begin();
+                    return storelist.GetEnumerator();
                 case OpCode.CPUI_LOAD:
-                    return loadlist.begin();
+                    return loadlist.GetEnumerator();
                 case OpCode.CPUI_RETURN:
-                    return returnlist.begin();
+                    return returnlist.GetEnumerator();
                 case OpCode.CPUI_CALLOTHER:
-                    return useroplist.begin();
+                    return useroplist.GetEnumerator();
                 default:
                     break;
             }
             return alivelist.end();
         }
 
-        /// \brief End of all PcodeOps sharing the given op-code
-        public List<PcodeOp>::const_iterator end(OpCode opc)
-        {
-            switch (opc)
-            {
-                case OpCode.CPUI_STORE:
-                    return storelist.end();
-                case OpCode.CPUI_LOAD:
-                    return loadlist.end();
-                case OpCode.CPUI_RETURN:
-                    return returnlist.end();
-                case OpCode.CPUI_CALLOTHER:
-                    return useroplist.end();
-                default:
-                    break;
-            }
-            return alivelist.end();
-        }
+        ///// \brief End of all PcodeOps sharing the given op-code
+        //public IEnumerator<PcodeOp> end(OpCode opc)
+        //{
+        //    switch (opc) {
+        //        case OpCode.CPUI_STORE:
+        //            return storelist.end();
+        //        case OpCode.CPUI_LOAD:
+        //            return loadlist.end();
+        //        case OpCode.CPUI_RETURN:
+        //            return returnlist.end();
+        //        case OpCode.CPUI_CALLOTHER:
+        //            return useroplist.end();
+        //        default:
+        //            break;
+        //    }
+        //    return alivelist.end();
+        //}
+
         /// \brief Try to determine if \b vn1 and \b vn2 contain the same value
         ///
         /// Return:
@@ -422,14 +419,12 @@ namespace Sla.DECCORE
         /// \param res1 is a reference to the first returned Varnode
         /// \param res2 is a reference to the second returned Varnode
         /// \return the result of the comparison
-        internal static int functionalEqualityLevel(Varnode vn1, Varnode vn2,
-            out Varnode res1, out Varnode res2)
-
+        internal static int functionalEqualityLevel(Varnode vn1, Varnode vn2, Varnode[] res1, Varnode[] res2)
         {
             int testval = functionalEqualityLevel0(vn1, vn2);
             if (testval != 1) return testval;
-            PcodeOp* op1 = vn1.getDef();
-            PcodeOp* op2 = vn2.getDef();
+            PcodeOp op1 = vn1.getDef() ?? throw new BugException();
+            PcodeOp op2 = vn2.getDef() ?? throw new BugException();
             OpCode opc = op1.code();
 
             if (opc != op2.code()) return -1;
@@ -438,28 +433,25 @@ namespace Sla.DECCORE
             if (num != op2.numInput()) return -1;
             if (op1.isMarker()) return -1;
             if (op2.isCall()) return -1;
-            if (opc == OpCode.CPUI_LOAD)
-            {
+            if (opc == OpCode.CPUI_LOAD) {
                 // FIXME: We assume two loads produce the same
                 // result if the address is the same and the loads
                 // occur in the same instruction
                 if (op1.getAddr() != op2.getAddr()) return -1;
             }
-            if (num >= 3)
-            {
+            if (num >= 3) {
                 if (opc != OpCode.CPUI_PTRADD) return -1; // If this is a PTRADD
                 if (op1.getIn(2).getOffset() != op2.getIn(2).getOffset()) return -1; // Make sure the elsize constant is equal
                 num = 2;            // Otherwise treat as having 2 inputs
             }
-            for (int i = 0; i < num; ++i)
-            {
+            for (int i = 0; i < num; ++i) {
                 res1[i] = op1.getIn(i);
                 res2[i] = op2.getIn(i);
             }
 
             testval = functionalEqualityLevel0(res1[0], res2[0]);
-            if (testval == 0)
-            {           // A match locks in this comparison ordering
+            if (testval == 0) {
+                // A match locks in this comparison ordering
                 if (num == 1) return 0;
                 testval = functionalEqualityLevel0(res1[1], res2[1]);
                 if (testval == 0) return 0;
@@ -470,15 +462,11 @@ namespace Sla.DECCORE
             }
             if (num == 1) return testval;
             int testval2 = functionalEqualityLevel0(res1[1], res2[1]);
-            if (testval2 == 0)
-            {       // A match locks in this comparison ordering
+            if (testval2 == 0) {
+                // A match locks in this comparison ordering
                 return testval;
             }
-            int unmatchsize;
-            if ((testval == 1) && (testval2 == 1))
-                unmatchsize = 2;
-            else
-                unmatchsize = -1;
+            int unmatchsize = ((testval == 1) && (testval2 == 1)) ? 2 : -1;
 
             if (!op1.isCommutative()) return unmatchsize;
             // unmatchsize must be 2 or -1 here on a commutative operator,
@@ -489,20 +477,20 @@ namespace Sla.DECCORE
                 return 0;
             if ((comm1 < 0) || (comm2 < 0))
                 return unmatchsize;
-            if (comm1 == 0)
-            {       // AND (comm2==1)
+            if (comm1 == 0) {
+                // AND (comm2==1)
                 res1[0] = res1[1];      // Left over unmatch is res1[1] and res2[0]
                 return 1;
             }
-            if (comm2 == 0)
-            {       // AND (comm1==1)
+            if (comm2 == 0) {
+                // AND (comm1==1)
                 res2[0] = res2[1];      // Left over unmatch is res1[0] and res2[1]
                 return 1;
             }
             // If we reach here (comm1==1) AND (comm2==1)
             if (unmatchsize == 2)       // If the original ordering wasn't impossible
                 return 2;           // Prefer the original ordering
-            Varnode* tmpvn = res2[0];   // Otherwise swap the ordering
+            Varnode tmpvn = res2[0];   // Otherwise swap the ordering
             res2[0] = res2[1];
             res2[1] = tmpvn;
             return 2;
@@ -517,8 +505,8 @@ namespace Sla.DECCORE
         internal static bool functionalEquality(Varnode vn1, Varnode vn2)
 
         {
-            Varnode* buf1[2];
-            Varnode* buf2[2];
+            Varnode[] buf1 = new Varnode[2];
+            Varnode[] buf2 = new Varnode[2];
             return (functionalEqualityLevel(vn1, vn2, buf1, buf2) == 0);
         }
 
@@ -531,29 +519,39 @@ namespace Sla.DECCORE
         /// \return \b true if they are different
         internal static bool functionalDifference(Varnode vn1, Varnode vn2, int depth)
         {
-            PcodeOp* op1,*op2;
-            int i, num;
-
             if (vn1 == vn2) return false;
-            if ((!vn1.isWritten()) || (!vn2.isWritten()))
-            {
+            if (!vn1.isWritten() || !vn2.isWritten()) {
                 if (vn1.isConstant() && vn2.isConstant())
                     return !(vn1.getAddr() == vn2.getAddr());
                 if (vn1.isInput() && vn2.isInput()) return false; // Might be the same
                 if (vn1.isFree() || vn2.isFree()) return false; // Might be the same
                 return true;
             }
-            op1 = vn1.getDef();
-            op2 = vn2.getDef();
+            PcodeOp op1 = vn1.getDef() ?? throw new BugException();
+            PcodeOp op2 = vn2.getDef() ?? throw new BugException();
             if (op1.code() != op2.code()) return true;
-            num = op1.numInput();
+            int num = op1.numInput();
             if (num != op2.numInput()) return true;
             if (depth == 0) return true;    // Different as far as we can tell
             depth -= 1;
-            for (i = 0; i < num; ++i)
+            for (int i = 0; i < num; ++i)
                 if (functionalDifference(op1.getIn(i), op2.getIn(i), depth))
                     return true;
             return false;
+        }
+
+        private static int functionalEqualityLevel0(Varnode vn1, Varnode vn2)
+        {
+            // Return 0 if -vn1- and -vn2- must hold same value
+            // Return -1 if they definitely don't hold same value
+            // Return 1 if the same value depends on ops writing to -vn1- and -vn2-
+            if (vn1 == vn2) return 0;
+            if (vn1.getSize() != vn2.getSize()) return -1;
+            if (vn1.isConstant()) {
+                return !vn2.isConstant() ? -1 : (vn1.getOffset() == vn2.getOffset()) ? 0 : -1;
+            }
+            if (vn2.isConstant()) return -1;
+            return (vn1.isWritten() && vn2.isWritten()) ? 1 : -1;
         }
     }
 }

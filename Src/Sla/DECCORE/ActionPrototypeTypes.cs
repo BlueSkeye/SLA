@@ -55,8 +55,6 @@ namespace Sla.DECCORE
     
         public override int apply(Funcdata data)
         {
-            IEnumerator<PcodeOp> iter, iterend;
-
             // Set the evaluation prototype if we are not already locked
             ProtoModel? evalfp = data.getArch().evalfp_current;
             if (evalfp == (ProtoModel)null)
@@ -66,12 +64,11 @@ namespace Sla.DECCORE
             if (data.getFuncProto().hasThisPointer())
                 data.prepareThisPointer();
 
-            iterend = data.endOp(OpCode.CPUI_RETURN);
-
             // Strip the indirect register from all RETURN ops
             // (Because we don't want to see this compiler
             // mechanism in the high-level C output)
-            for (iter = data.beginOp(OpCode.CPUI_RETURN); iter != iterend; ++iter) {
+            IEnumerator<PcodeOp> iter = data.beginOp(OpCode.CPUI_RETURN);
+            while (iter.MoveNext()) {
                 PcodeOp op = iter.Current;
                 if (op.isDead()) continue;
                 if (!op.getIn(0).isConstant()) {
@@ -83,7 +80,8 @@ namespace Sla.DECCORE
             if (data.getFuncProto().isOutputLocked()) {
                 ProtoParameter outparam = data.getFuncProto().getOutput();
                 if (outparam.getType().getMetatype() != type_metatype.TYPE_VOID) {
-                    for (iter = data.beginOp(OpCode.CPUI_RETURN); iter != iterend; ++iter) {
+                    iter = data.beginOp(OpCode.CPUI_RETURN);
+                    while (iter.MoveNext()) {
                         PcodeOp op = iter.Current;
                         if (op.isDead()) continue;
                         if (op.getHaltType() != 0) continue;

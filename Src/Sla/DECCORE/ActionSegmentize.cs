@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -55,11 +49,10 @@ namespace Sla.DECCORE
                 }
                 AddrSpace spc = segdef.getSpace();
 
-                IEnumerator<PcodeOp> iter = data.beginOp(CPUI_CALLOTHER);
-                IEnumerator<PcodeOp> enditer = data.endOp(CPUI_CALLOTHER);
                 int uindex = segdef.getIndex();
-                while (iter != enditer) {
-                    PcodeOp segroot = *iter++;
+                IEnumerator<PcodeOp> iter = data.beginOp(CPUI_CALLOTHER);
+                while (iter.MoveNext()) {
+                    PcodeOp segroot = iter.Current;
                     if (segroot.isDead()) {
                         continue;
                     }
