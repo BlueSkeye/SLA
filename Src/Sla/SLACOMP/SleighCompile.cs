@@ -11,6 +11,8 @@ using System.Runtime.Intrinsics;
 using System.Text;
 using System.Threading.Tasks;
 
+using SymbolTree = System.Collections.Generic.HashSet<Sla.SLEIGH.SleighSymbol>; // SymbolCompare
+
 namespace Sla.SLACOMP
 {
     /// \brief SLEIGH specification compiling
@@ -410,18 +412,19 @@ namespace Sla.SLACOMP
         /// type \e spacetype.IPTR_PROCESSOR  (either RAM or REGISTER)
         private void checkCaseSensitivity()
         {
-            if (!failinsensitivedups) return;       // Case insensitive duplicates don't cause error
+            // Case insensitive duplicates don't cause error
+            if (!failinsensitivedups) return;
             Dictionary<string, SleighSymbol> registerMap = new Dictionary<string, SleighSymbol>();
             SymbolScope scope = symtab.getGlobalScope();
-            SymbolTree::const_iterator iter;
-            for (iter = scope.begin(); iter != scope.end(); ++iter) {
-                SleighSymbol sym = *iter;
+            IEnumerator<SleighSymbol> iter = scope.begin();
+            while (iter.MoveNext()) {
+                SleighSymbol sym = iter.Current;
                 if (sym.getType() != SleighSymbol.symbol_type.varnode_symbol) continue;
                 VarnodeSymbol vsym = (VarnodeSymbol)sym;
                 AddrSpace space = vsym.getFixedVarnode().space ?? throw new BugException();
                 if (space.getType() != spacetype.IPTR_PROCESSOR) continue;
                 string nm = sym.getName().ToUpper();
-                SleighSymbol oldsym;
+                SleighSymbol? oldsym;
                 if (!registerMap.TryGetValue(nm, out oldsym)) {
                     registerMap.Add(nm, sym);
                 }
@@ -448,9 +451,8 @@ namespace Sla.SLACOMP
         private string checkSymbols(SymbolScope scope)
         {
             TextWriter msg = new StringWriter();
-            SymbolTree::const_iterator iter;
-            for (iter = scope.begin(); iter != scope.end(); ++iter)
-            {
+            IEnumerator<SleighSymbol> iter = scope.begin();
+            while (iter.MoveNext()) {
                 LabelSymbol sym = (LabelSymbol)iter.Current;
                 if (sym.getType() != SleighSymbol.symbol_type.label_symbol) continue;
                 if (sym.getRefCount() == 0)

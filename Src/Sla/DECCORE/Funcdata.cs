@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static System.Formats.Asn1.AsnWriter;
 
+using PcodeOpTree = System.Collections.Generic.Dictionary<Sla.CORE.SeqNum, Sla.DECCORE.PcodeOp>;
 using ScopeMap = System.Collections.Generic.Dictionary<ulong, Sla.DECCORE.Scope>;
 
 namespace Sla.DECCORE
@@ -4603,16 +4604,16 @@ namespace Sla.DECCORE
         public IEnumerator<PcodeOp> endOpDead() => obank.endDead();
 
         /// \brief Start of all (alive) PcodeOp objects sorted by sequence number
-        public PcodeOpTree::const_iterator beginOpAll() => obank.beginAll();
+        public PcodeOpTree.Enumerator beginOpAll() => obank.beginAll();
 
         /// \brief End of all (alive) PcodeOp objects sorted by sequence number
-        public PcodeOpTree::const_iterator endOpAll() => obank.endAll();
+        public PcodeOpTree.Enumerator endOpAll() => obank.endAll();
 
         /// \brief Start of all (alive) PcodeOp objects attached to a specific Address
-        public PcodeOpTree::const_iterator beginOp(Address addr) => obank.begin(addr);
+        public PcodeOpTree.Enumerator beginOp(Address addr) => obank.begin(addr);
 
         /// \brief End of all (alive) PcodeOp objects attached to a specific Address
-        public PcodeOpTree::const_iterator endOp(Address addr) => obank.end(addr);
+        public PcodeOpTree.Enumerator endOp(Address addr) => obank.end(addr);
 
         /// Move given op past \e lastOp respecting covers if possible
         /// This routine should be called only after Varnode merging and explicit/implicit attributes have

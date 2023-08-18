@@ -1,12 +1,7 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+
+using PcodeOpTree = System.Collections.Generic.Dictionary<Sla.CORE.SeqNum, Sla.DECCORE.PcodeOp>;
 
 namespace Sla.DECCORE
 {
@@ -22,10 +17,20 @@ namespace Sla.DECCORE
         private List<Rule> allrules;
         /// Rules associated with each OpCode
         private List<Rule>[] perop = new List<Rule>[(int)OpCode.CPUI_MAX];
-        /// Current PcodeOp up for rule application
-        private PcodeOpTree::const_iterator op_state;
+        // Current PcodeOp up for rule application
+        // WARNING : On enumerator termination, we reset this member to null reference.
+        // WARNING : Use MoveOpState()
+        private IEnumerator<KeyValuePair<SeqNum, PcodeOp>> op_state = null;
         /// Iterator over Rules for one OpCode
         private int rule_index;
+
+        private bool MoveOpState()
+        {
+            if (null == op_state) throw new ApplicationException();
+            bool result = op_state.MoveNext();
+            if (!result) op_state = null;
+            return result;
+        }
 
         /// Apply the next possible Rule to a PcodeOp
         /// This method attempts to apply each Rule to the current PcodeOp
@@ -39,14 +44,14 @@ namespace Sla.DECCORE
         private int processOp(PcodeOp op, Funcdata data)
         {
             if (op.isDead()) {
-                op_state++;
+                MoveOpState();
                 data.opDeadAndGone(op);
                 rule_index = 0;
                 return 0;
             }
-            uint opc = op.code();
-            while (rule_index < perop[opc].Count) {
-                Rule rl = perop[opc][rule_index++];
+            OpCode opc = op.code();
+            while (rule_index < perop[(int)opc].Count) {
+                Rule rl = perop[(int)opc][rule_index++];
                 if (rl.isDisabled()) {
                     continue;
                 }
@@ -88,7 +93,7 @@ namespace Sla.DECCORE
                     rule_index = 0;
                 }
             }
-            op_state++;
+            MoveOpState();
             rule_index = 0;
             return 0;
         }
@@ -102,9 +107,9 @@ namespace Sla.DECCORE
         /// Destructor
         ~ActionPool()
         {
-            foreach (Rule iter in allrules) {
-                delete iter;
-            }
+            //foreach (Rule iter in allrules) {
+            //    delete iter;
+            //}
         }
 
         /// Add a Rule to the pool
@@ -128,7 +133,7 @@ namespace Sla.DECCORE
             foreach (Rule iter in allrules) {
                 iter.clearBreakPoints();
             }
-            @base.clearBreakPoints();
+            base.clearBreakPoints();
         }
 
         public override Action? clone(ActionGroupList grouplist)
@@ -148,7 +153,7 @@ namespace Sla.DECCORE
 
         public override void reset(Funcdata data)
         {
-            @base.reset(data);
+            base.reset(data);
             foreach (Rule iter in allrules) {
                 iter.reset(data);
             }
@@ -156,7 +161,7 @@ namespace Sla.DECCORE
 
         public override void resetStats()
         {
-            @base.resetStats();
+            base.resetStats();
             foreach (Rule iter in allrules) {
                 iter.resetStats();
             }
@@ -169,8 +174,8 @@ namespace Sla.DECCORE
                 op_state = data.beginOpAll();
                 rule_index = 0;
             }
-            for (; op_state != data.endOpAll();) {
-                if (0 != processOp((*op_state).second, data)) {
+            while (null != op_state) {
+                if (0 != processOp(op_state.Current.Value, data)) {
                     return -1;
                 }
             }
@@ -180,7 +185,7 @@ namespace Sla.DECCORE
 
         public override int print(TextWriter s, int num, int depth)
         {
-            num = @base.print(s, num, depth);
+            num = base.print(s, num, depth);
             s.WriteLine();
             depth += 1;
             foreach (Rule iter in allrules) {
@@ -199,9 +204,9 @@ namespace Sla.DECCORE
 
         public override void printState(TextWriter s)
         {
-            @base.printState(s);
+            base.printState(s);
             if (status == statusflags.status_mid) {
-                PcodeOp op = (*op_state).second;
+                PcodeOp op = op_state.Current.Value;
                 s.Write($" {op.getSeqNum()}");
             }
         }
@@ -239,7 +244,7 @@ namespace Sla.DECCORE
 
         public override void printStatistics(TextWriter s)
         {
-            @base.printStatistics(s);
+            base.printStatistics(s);
             foreach (Rule iter in allrules) {
                 iter.printStatistics(s);
             }

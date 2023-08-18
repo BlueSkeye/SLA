@@ -1,16 +1,4 @@
 ﻿using Sla.CORE;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 /// Container holding the stack system for the renaming algorithm.  Every disjoint address
 /// range (indexed by its initial address) maps to its own Varnode stack.
@@ -66,26 +54,26 @@ namespace Sla.DECCORE
         /// \brief Node for depth-first traversal of stack references
         private struct StackNode
         {
-            private enum IndexType
+            internal enum IndexType
             {
                 nonconstant_index = 1,
                 multiequal = 2
             }
 
             /// Varnode being traversed
-            private Varnode vn;
+            internal Varnode vn;
             /// Offset relative to base
             internal ulong offset;
             /// What kind of operations has this pointer accumulated
             internal uint traversals;
             /// Next PcodeOp to follow
-            private IEnumerator<PcodeOp> iter;
+            internal IEnumerator<PcodeOp> iter;
 
             /// \brief Constructor
             /// \param v is the Varnode being visited
             /// \param o is the current offset from the base pointer
             /// \param trav indicates what configurations were seen along the path to this Varnode
-            private StackNode(Varnode v, ulong o, uint trav)
+            internal StackNode(Varnode v, ulong o, uint trav)
             {
                 vn = v;
                 offset = o;
@@ -166,7 +154,7 @@ namespace Sla.DECCORE
             int recnum = 0;
             for (int i = 0; i < lastcombo.size(); ++i) {
                 Varnode curvn = lastcombo[i];
-                if (curvn.getSize() == joinrec.getPiece(recnum).size) {
+                if (curvn.getSize() == joinrec.getPiece((uint)recnum).size) {
                     nextlev.Add(curvn);
                     nextlev.Add((Varnode)null);
                     recnum += 1;
@@ -175,7 +163,7 @@ namespace Sla.DECCORE
                     int sizeaccum = 0;
                     int j;
                     for (j = recnum; j < numpieces; ++j) {
-                        sizeaccum += joinrec.getPiece(j).size;
+                        sizeaccum += (int)joinrec.getPiece((uint)j).size;
                         if (sizeaccum == curvn.getSize()) {
                             j += 1;
                             break;
@@ -417,7 +405,7 @@ namespace Sla.DECCORE
             augment.Clear();
             augment.resize(size);
             flags.Clear();
-            flags.resize(size, 0);
+            // flags.resize(size, 0);
 
             bblocks.buildDomTree(domchild);
 #if DFSVERIFY_DEBUG
@@ -510,13 +498,14 @@ namespace Sla.DECCORE
                     pos = targetOp.isDead()
                         ? op.getBasicIter()
                         : targetOp.getBasicIter();
-                    ++pos;      // Insert SUBPIECE after target of INDIRECT
+                    // Insert SUBPIECE after target of INDIRECT
+                    pos.MoveNext();
                 }
                 else {
-                    pos = op.getBasicIter();   // Insert SUBPIECE after all MULTIEQUALs in block
-                    ++pos;
-                    while (pos != bl.endOp() && (*pos).code() == OpCode.CPUI_MULTIEQUAL)
-                        ++pos;
+                    // Insert SUBPIECE after all MULTIEQUALs in block
+                    pos = op.getBasicIter();
+                    pos.MoveNext();
+                    while (pos.MoveNext() && pos.Current.code() == OpCode.CPUI_MULTIEQUAL) { }
                 }
                 int offset = vn.overlap(addr, size);
                 fd.opUninsert(op);
@@ -987,7 +976,7 @@ namespace Sla.DECCORE
                 sinks.Add(guard.op.getIn(1));    // The OpCode.CPUI_LOAD pointer
             }
             for (int index = storeGuard.Count - 1; 0 <= index; index--) {
-                LoadGuard guard = storeGuard[index].Current;
+                LoadGuard guard = storeGuard[index];
                 if (guard.analysisState != 0) break;
                 reads.Add(guard.op);
                 sinks.Add(guard.op.getIn(1));    // The OpCode.CPUI_STORE pointer
@@ -1118,16 +1107,16 @@ namespace Sla.DECCORE
             bool unknownStackStorage = false;
             for (int i = 0; i < spc.numSpacebase(); ++i) {
                 VarnodeData stackPointer = spc.getSpacebase(i);
-                Varnode? spInput = fd.findVarnodeInput(stackPointer.size, stackPointer.getAddr());
+                Varnode? spInput = fd.findVarnodeInput((int)stackPointer.size, stackPointer.getAddr());
                 if (spInput == (Varnode)null) continue;
-                path.Add(StackNode(spInput, 0, 0));
+                path.Add(new StackNode(spInput, 0, 0));
                 while (!path.empty()) {
                     StackNode curNode = path.GetLastItem();
                     if (curNode.iter == curNode.vn.endDescend()) {
                         path.RemoveLastItem();
                         continue;
                     }
-                    PcodeOp op = *curNode.iter;
+                    PcodeOp op = curNode.iter;
                     ++curNode.iter;
                     Varnode? outVn = op.getOut();
                     if (outVn != (Varnode)null && outVn.isMark()) continue;      // Don't revisit Varnodes
@@ -1178,7 +1167,8 @@ namespace Sla.DECCORE
                             }
                         case OpCode.CPUI_MULTIEQUAL:
                             {
-                                StackNode nextNode = new StackNode(outVn, curNode.offset, curNode.traversals | StackNode::multiequal);
+                                StackNode nextNode = new StackNode(outVn, curNode.offset,
+                                    curNode.traversals | StackNode.IndexType.multiequal);
                                 if (nextNode.iter != nextNode.vn.endDescend()) {
                                     outVn.setMark();
                                     path.Add(nextNode);
@@ -1283,19 +1273,17 @@ namespace Sla.DECCORE
             Varnode vn;
             IEnumerator<Varnode> iter;
 
-            for (iter = read.begin(); iter != read.end(); ++iter)
-            {
-                vn = *iter;
+            for (int index = 0; index < read.Count; index++) {
+                vn = read[index];
                 if (vn.getSize() < size)
-                    *iter = vn = normalizeReadSize(vn, addr, size);
+                    read[index] = vn = normalizeReadSize(vn, addr, size);
                 vn.setActiveHeritage();
             }
 
-            for (iter = write.begin(); iter != write.end(); ++iter)
-            {
-                vn = *iter;
+            for (int index = 0; index < write.Count; index++) {
+                vn = write[index];
                 if (vn.getSize() < size)
-                    *iter = vn = normalizeWriteSize(vn, addr, size);
+                    write[index] = vn = normalizeWriteSize(vn, addr, size);
                 vn.setActiveHeritage();
             }
 
@@ -1339,7 +1327,7 @@ namespace Sla.DECCORE
             ulong end = cur + (uint)size;
             //  bool seenunspliced = false;
             Varnode vn;
-            List<Varnode> newinput;
+            List<Varnode> newinput = new List<Varnode>();
 
             // Make sure the input range is filled
             while (cur < end) {
@@ -1364,13 +1352,13 @@ namespace Sla.DECCORE
                     //      seenunspliced = true;
                 }
                 newinput.Add(vn);
-                cur += vn.getSize();
+                cur += (uint)vn.getSize();
             }
 
             // Now we need to make sure that all the inputs get linked
             // together into a single input
             if (newinput.size() == 1) return; // Will get linked in automatically
-            for (uint j = 0; j < newinput.size(); ++j)
+            for (int j = 0; j < newinput.size(); ++j)
                 newinput[j].setWriteMask();
             //   if (!seenunspliced) {
             //     // Check to see if a concatenation of inputs already exists
@@ -1404,7 +1392,7 @@ namespace Sla.DECCORE
                 Address truncAddr = new Address(vData.space, vData.offset);
                 if (active.whichTrial(truncAddr, size) < 0) {
                     // If not already a trial
-                    int truncateAmount = transAddr.justifiedContain(size, truncAddr, vData.size, false);
+                    int truncateAmount = transAddr.justifiedContain(size, truncAddr, (int)vData.size, false);
                     int diff = (int)(truncAddr.getOffset() - transAddr.getOffset());
                     truncAddr = addr + diff;        // Convert truncated Address to caller's perspective
                     PcodeOp op = fc.getOp();
@@ -1413,10 +1401,10 @@ namespace Sla.DECCORE
                     Varnode wholeVn = fd.newVarnode(size, addr);
                     wholeVn.setActiveHeritage();
                     fd.opSetInput(subpieceOp, wholeVn, 0);
-                    fd.opSetInput(subpieceOp, fd.newConstant(4, truncateAmount), 1);
-                    Varnode vn = fd.newVarnodeOut(vData.size, truncAddr, subpieceOp);
+                    fd.opSetInput(subpieceOp, fd.newConstant(4, (ulong)truncateAmount), 1);
+                    Varnode vn = fd.newVarnodeOut((int)vData.size, truncAddr, subpieceOp);
                     fd.opInsertBefore(subpieceOp, op);
-                    active.registerTrial(truncAddr, vData.size);
+                    active.registerTrial(truncAddr, (int)vData.size);
                     fd.opInsertInput(op, vn, op.numInput());
                 }
             }
@@ -1436,9 +1424,9 @@ namespace Sla.DECCORE
         private bool guardCallOverlappingOutput(FuncCallSpecs fc, Address addr, int size,
             List<Varnode> write)
         {
-            VarnodeData vData;
+            VarnodeData vData = new VarnodeData();
 
-            if (!fc.getBiggestContainedOutput(addr, size, out vData))
+            if (!fc.getBiggestContainedOutput(addr, size, vData))
                 return false;
             ParamActive active = fc.getActiveOutput();
             Address truncAddr = new Address(vData.space, vData.offset);
@@ -1446,7 +1434,7 @@ namespace Sla.DECCORE
                 return false;       // Trial already exists
             int sizeFront = (int)(vData.offset - addr.getOffset());
             int sizeBack = size - vData.size - sizeFront;
-            PcodeOp indOp = fd.newIndirectCreation(fc.getOp(), truncAddr, vData.size, true);
+            PcodeOp indOp = fd.newIndirectCreation(fc.getOp(), truncAddr, (int)vData.size, true);
             Varnode vnCollect = indOp.getOut();
             PcodeOp insertPoint = fc.getOp();
             if (sizeFront != 0) {
@@ -1457,7 +1445,7 @@ namespace Sla.DECCORE
                 fd.opSetOpcode(concatFront, OpCode.CPUI_PIECE);
                 fd.opSetInput(concatFront, newFront, slotNew);
                 fd.opSetInput(concatFront, vnCollect, 1 - slotNew);
-                vnCollect = fd.newVarnodeOut(sizeFront + vData.size, addr, concatFront);
+                vnCollect = fd.newVarnodeOut((int)(sizeFront + vData.size), addr, concatFront);
                 fd.opInsertAfter(concatFront, insertPoint);
                 insertPoint = concatFront;
             }
@@ -1615,15 +1603,14 @@ namespace Sla.DECCORE
         {
             PcodeOp copyop;
 
-            if ((fl & Varnode.varnode_flags.addrtied) == 0) return;  // If not address tied, don't consider for index alias
-            foreach (LoadGuard guardRec in loadGuard) {
+            // If not address tied, don't consider for index alias
+            if ((fl & Varnode.varnode_flags.addrtied) == 0) return;
+            for(int index = 0; index < loadGuard.Count; index++) {
+                LoadGuard guardRec = loadGuard[index];
                 if (!guardRec.isValid(OpCode.CPUI_LOAD)) {
-                    list<LoadGuard>::iterator copyIter = iter;
-                    ++iter;
-                    loadGuard.erase(copyIter);
+                    loadGuard.RemoveAt(index--);
                     continue;
                 }
-                ++iter;
                 if (guardRec.spc != addr.getSpace()) continue;
                 if (addr.getOffset() < guardRec.minimumOffset) continue;
                 if (addr.getOffset() > guardRec.maximumOffset) continue;
@@ -1648,7 +1635,7 @@ namespace Sla.DECCORE
         /// \param size is the size of the range in bytes
         private void guardReturnsOverlapping(Address addr, int size)
         {
-            VarnodeData vData;
+            VarnodeData vData = new VarnodeData();
 
             if (!fd.getFuncProto().getBiggestContainedOutput(addr, size, vData))
                 return;
@@ -1657,7 +1644,7 @@ namespace Sla.DECCORE
             active.registerTrial(truncAddr, vData.size);
             int offset = (int)(vData.offset - addr.getOffset());  // Number of least significant bytes to truncate
             if (vData.space.isBigEndian())
-                offset = (size - vData.size) - offset;
+                offset = (int)((size - vData.size) - offset);
             IEnumerator<PcodeOp> iter = fd.beginOp(OpCode.CPUI_RETURN);
             while (iter.MoveNext()) {
                 PcodeOp op = iter.Current;
@@ -1669,7 +1656,7 @@ namespace Sla.DECCORE
                 fd.opSetInput(subOp, invn, 0);
                 fd.opSetInput(subOp, fd.newConstant(4, (ulong)offset), 1);
                 fd.opInsertBefore(subOp, op);
-                Varnode retVal = fd.newVarnodeOut(vData.size, truncAddr, subOp);
+                Varnode retVal = fd.newVarnodeOut((int)vData.size, truncAddr, subOp);
                 invn.setActiveHeritage();
                 fd.opInsertInput(op, retVal, op.numInput());
             }
@@ -2117,7 +2104,8 @@ namespace Sla.DECCORE
             for (i = 0; i < bl.sizeOut(); ++i) {
                 subbl = (BlockBasic)bl.getOut(i);
                 slot = bl.getOutRevIndex(i);
-                for (suboiter = subbl.beginOp(); suboiter != subbl.endOp(); ++suboiter) {
+                suboiter = subbl.beginOp();
+                while (suboiter.MoveNext()) {
                     multiop = suboiter.Current;
                     if (multiop.code() != OpCode.CPUI_MULTIEQUAL) break; // For each MULTIEQUAL
                     vnin = multiop.getIn(slot);

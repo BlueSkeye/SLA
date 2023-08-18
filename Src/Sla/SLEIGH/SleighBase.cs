@@ -10,6 +10,8 @@ using System.Runtime.Intrinsics;
 using System.Text;
 using System.Threading.Tasks;
 
+using SymbolTree = System.Collections.Generic.HashSet<Sla.SLEIGH.SleighSymbol>; // SymbolCompare
+
 namespace Sla.SLEIGH
 {
     /// \brief Common core of classes that read or write SLEIGH specification files natively.
@@ -41,13 +43,12 @@ namespace Sla.SLEIGH
         protected void buildXrefs(List<string> errorPairs)
         {
             SymbolScope glb = symtab.getGlobalScope();
-            SymbolTree::const_iterator iter;
-            ostringstream s;
+            IEnumerator<SleighSymbol> iter = glb.begin();
+            TextWriter s = new StringWriter();
 
-            for (iter = glb.begin(); iter != glb.end(); ++iter) {
-                SleighSymbol sym = *iter;
-                if (sym.getType() == SleighSymbol::varnode_symbol)
-                {
+            while (iter.MoveNext()) {
+                SleighSymbol sym = iter.Current;
+                if (sym.getType() == SleighSymbol.symbol_type.varnode_symbol) {
                     Tuple<VarnodeData, string> ins = 
                         new Tuple<VarnodeData, string>(((VarnodeSymbol) sym).getFixedVarnode(), sym.getName());
                     pair<Dictionary<VarnodeData, string>::iterator, bool> res = varnode_xref.insert(ins);
@@ -78,10 +79,10 @@ namespace Sla.SLEIGH
         protected void reregisterContext()
         {
             SymbolScope glb = symtab.getGlobalScope();
-            SymbolTree::const_iterator iter;
+            IEnumerator<SleighSymbol> iter = glb.begin();
             SleighSymbol sym;
-            for (iter = glb.begin(); iter != glb.end(); ++iter) {
-                sym = *iter;
+            while (iter.MoveNext()) {
+                sym = iter.Current;
                 if (sym.getType() == SleighSymbol.symbol_type.context_symbol) {
                     ContextSymbol csym = (ContextSymbol)sym;
                     ContextField field = (ContextField)csym.getPatternValue();

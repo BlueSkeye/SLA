@@ -1,10 +1,6 @@
 ﻿using Sla.CORE;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml;
+
+using PcodeOpTree = System.Collections.Generic.Dictionary<Sla.CORE.SeqNum, Sla.DECCORE.PcodeOp>;
 
 namespace Sla.DECCORE
 {
@@ -104,7 +100,7 @@ namespace Sla.DECCORE
             //    delete* iter;
             //for (iter = deadandgone.begin(); iter != deadandgone.end(); ++iter)
             //    delete* iter;
-            optree.clear();
+            optree.Clear();
             alivelist.Clear();
             deadlist.Clear();
             clearCodeLists();

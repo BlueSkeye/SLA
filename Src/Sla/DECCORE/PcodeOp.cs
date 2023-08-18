@@ -304,13 +304,13 @@ namespace Sla.DECCORE
         /// Get the time index indicating when this op was created
         public uint getTime() => start.getTime();
 
-        /// Get the sequence number associated with this op
+        // Get the sequence number associated with this op
         public SeqNum getSeqNum() => start;
 
-        /// Get position within alive/dead list
+        // Get position within alive/dead list
         public IEnumerator<PcodeOp> getInsertIter() => insertiter;
 
-        /// Get position within basic block
+        // Get position within basic block
         public IEnumerator<PcodeOp> getBasicIter() => basiciter;
 
         /// \brief Get the slot number of the indicated input varnode

@@ -155,7 +155,8 @@ namespace Sla.DECCORE
                 addr = op.getAddr();
             }
             else if (lastOp.isBranch()) {
-                iter = lastOp.getBasicIter();  // Insert before any branch
+                // Insert before any branch
+                iter = lastOp.getBasicIter();
                 addr = lastOp.getAddr();
             }
             else {

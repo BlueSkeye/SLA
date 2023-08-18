@@ -46,9 +46,9 @@ namespace Sla.DECCORE
         /// Group to which \b this Rule belongs
         private string basegroup;
         /// Number of times \b this Rule has attempted to apply
-        private uint count_tests;
+        internal uint count_tests;
         /// Number of times \b this Rule has successfully been applied
-        private uint count_apply;
+        internal uint count_apply;
 
         /// If enabled, print a warning that this Rule has been applied
         /// This method is called whenever \b this Rule applies. If warnings have been
@@ -56,7 +56,7 @@ namespace Sla.DECCORE
         /// indicating the Rule has been applied.  Even with repeat calls, the message
         /// will only be printed once (until reset() is called)
         /// \param glb is the Architecture holding the console to print to
-        private void issueWarning(Architecture glb)
+        internal void issueWarning(Architecture glb)
         {
             if ((flags & (typeflags.warnings_on | typeflags.warnings_given)) == typeflags.warnings_on) {
                 flags |= typeflags.warnings_given;
@@ -188,9 +188,9 @@ namespace Sla.DECCORE
         /// is returned.
         /// \param op is the given PcodeOp where the Rule may apply
         /// \param data is the function to which to apply
-        public virtual bool applyOp(PcodeOp op, Funcdata data)
+        public virtual int applyOp(PcodeOp op, Funcdata data)
         {
-            return false;
+            return 0;
         }
 
         /// Reset \b this Rule

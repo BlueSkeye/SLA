@@ -1,15 +1,4 @@
 ﻿using Sla.CORE;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using System.Runtime.Intrinsics;
-using System.Runtime.ConstrainedExecution;
 
 namespace Sla.DECCORE
 {
@@ -1470,7 +1459,7 @@ namespace Sla.DECCORE
                 }
                 else if (attribId == AttributeId.ATTRIB_EXTRAPOP) {
                     seenextrapop = true;
-                    readextrapop = decoder.readSignedIntegerExpectString("unknown", ProtoModel.extrapop_unknown);
+                    readextrapop = (int)decoder.readSignedIntegerExpectString("unknown", ProtoModel.extrapop_unknown);
                 }
                 else if (attribId == AttributeId.ATTRIB_MODELLOCK) {
                     if (decoder.readBool())
@@ -1512,7 +1501,7 @@ namespace Sla.DECCORE
 
             uint subId = decoder.peekElement();
             if (subId != 0) {
-                ParameterPieces outpieces;
+                ParameterPieces outpieces = new ParameterPieces();
                 bool outputlock = false;
 
                 if (subId == ElementId.ELEM_RETURNSYM) {
@@ -1524,7 +1513,7 @@ namespace Sla.DECCORE
                             outputlock = decoder.readBool();
                     }
                     int tmpsize;
-                    outpieces.addr = Address.decode(decoder, tmpsize);
+                    outpieces.addr = Address.decode(decoder, out tmpsize);
                     outpieces.type = glb.types.decodeType(decoder);
                     outpieces.flags = 0;
                     decoder.closeElement(subId);
@@ -1532,7 +1521,7 @@ namespace Sla.DECCORE
                 else if (subId == ElementId.ELEM_ADDR) {
                     // Old-style specification of return (supported partially for backward compat)
                     int tmpsize;
-                    outpieces.addr = Address.decode(decoder, tmpsize);
+                    outpieces.addr = Address.decode(decoder, out tmpsize);
                     outpieces.type = glb.types.decodeType(decoder);
                     outpieces.flags = 0;
                 }

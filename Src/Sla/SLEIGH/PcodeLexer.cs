@@ -95,7 +95,7 @@ namespace Sla.SLEIGH
         private int tokpos;
         private bool endofstream;
         private bool endofstreamsent;
-        private FileStream? s;
+        private TextReader? s;
         private string curidentifier;
         private ulong curnum;
 
@@ -402,7 +402,7 @@ namespace Sla.SLEIGH
             s = (FileStream)null;
         }
 
-        public void initialize(FileStream t)
+        public void initialize(TextReader t)
         {
             // Set up for new lex
             s = t;

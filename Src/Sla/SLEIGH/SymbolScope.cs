@@ -1,9 +1,5 @@
-﻿using Sla.SLEIGH;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
+using SymbolTree = System.Collections.Generic.HashSet<Sla.SLEIGH.SleighSymbol>; // SymbolCompare
 
 namespace Sla.SLEIGH
 {
@@ -11,7 +7,7 @@ namespace Sla.SLEIGH
     {
         // friend class SymbolTable;
         private SymbolScope parent;
-        private SymbolTree tree;
+        private SymbolTree tree = new SymbolTree();
         private uint id;
         
         public SymbolScope(SymbolScope p, uint i)
@@ -24,34 +20,32 @@ namespace Sla.SLEIGH
 
         public SleighSymbol addSymbol(SleighSymbol a)
         {
-            pair<SymbolTree::iterator, bool> res;
+            SleighSymbol result;
 
-            res = tree.insert(a);
-            if (!res.second)
-                return *res.first;      // Symbol already exists in this table
+            if (tree.TryGetValue(a, out result)) {
+                return result;
+            }
+            tree.Add(a);
             return a;
         }
 
-        public SleighSymbol findSymbol(string nm)
+        public SleighSymbol? findSymbol(string nm)
         {
-            SleighSymbol dummy(nm);
-            SymbolTree::const_iterator iter;
+            SleighSymbol dummy = new SleighSymbol(nm);
+            SleighSymbol? result;
 
-            iter = tree.find(&dummy);
-            if (iter != tree.end())
-                return *iter;
-            return (SleighSymbol)null;
+            return tree.TryGetValue(dummy, out result) ? result : (SleighSymbol)null;
         }
 
-        public SymbolTree::const_iterator begin() => tree.begin();
+        public IEnumerator<SleighSymbol> begin() => tree.GetEnumerator();
 
-        public SymbolTree::const_iterator end() => tree.end();
+        // public IEnumerator<SleighSymbol> end() => tree.end();
 
         public uint getId() => id;
 
         public void removeSymbol(SleighSymbol a)
         {
-            tree.erase(a);
+            tree.Remove(a);
         }
     }
 }

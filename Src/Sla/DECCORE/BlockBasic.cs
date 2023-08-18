@@ -1,13 +1,4 @@
 ﻿using Sla.CORE;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Sla.DECCORE
 {
@@ -56,7 +47,7 @@ namespace Sla.DECCORE
             }
             else {
                 --newiter;
-                ordbefore = (*newiter).getSeqNum().getOrder();
+                ordbefore = newiter.Current.getSeqNum().getOrder();
             }
             if (iter == op.end()) {
                 ordafter = ordbefore + 0x1000000;
@@ -64,7 +55,7 @@ namespace Sla.DECCORE
                     ordafter = uint.MaxValue;
             }
             else {
-                ordafter = (*iter).getSeqNum().getOrder();
+                ordafter = iter.Current.getSeqNum().getOrder();
             }
             if (ordafter - ordbefore <= 1) {
                 setOrder();
@@ -447,8 +438,8 @@ namespace Sla.DECCORE
         public IEnumerator<PcodeOp> reverseEnumerator() => op.GetBiDirectionalEnumerator(true);
 
         // list<PcodeOp*>::iterator endOp(void) { return op.end(); }       ///< Return an iterator to the end of the PcodeOps
-        //list<PcodeOp*>::const_iterator beginOp(void) { return op.begin(); }	///< Return an iterator to the beginning of the PcodeOps
-        //list<PcodeOp*>::const_iterator endOp(void) { return op.end(); }	///< Return an iterator to the end of the PcodeOps
+        // list<PcodeOp*>::const_iterator beginOp(void) { return op.begin(); }	///< Return an iterator to the beginning of the PcodeOps
+        // list<PcodeOp*>::const_iterator endOp(void) { return op.end(); }	///< Return an iterator to the end of the PcodeOps
 
         /// Return \b true if \b block contains no operations
         public bool emptyOp() => (0 == op.Count);
