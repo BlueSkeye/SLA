@@ -313,11 +313,10 @@ namespace Sla.DECCORE
         /// Find a PcodeOp by sequence number
         /// \param num is the given sequence number
         /// \return the matching PcodeOp (or NULL)
-        public PcodeOp findOp(SeqNum num)
+        public PcodeOp? findOp(SeqNum num)
         {
-            PcodeOpTree::const_iterator iter = optree.find(num);
-            if (iter == optree.end()) return (PcodeOp)null;
-            return (*iter).second;
+            PcodeOp? result;
+            return (optree.TryGetValue(num, out result)) ? result : null;
         }
 
         /// Find the PcodeOp considered a \e fallthru of the given PcodeOp

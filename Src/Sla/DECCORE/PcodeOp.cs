@@ -27,7 +27,7 @@ namespace Sla.DECCORE
         /// Boolean attributes (flags) that can be placed on a PcodeOp. Even though this enum is public, these are
         /// all set and read internally, although many are read publicly via \e get or \e is methods.
         [Flags()]
-        public enum Flags
+        public enum Flags : uint
         {
             /// This instruction starts a basic block
             startbasic = 1,
@@ -133,8 +133,8 @@ namespace Sla.DECCORE
         /// Basic block in which this op is contained
         private BlockBasic? parent;
         /// Iterator within basic block
-        private IEnumerator<PcodeOp> basiciter;
-        internal int _basicPosition;
+        //private IEnumerator<PcodeOp> basiciter;
+        internal LinkedListNode<PcodeOp>? _basicBlockNode;
         /// Position in alive/dead list
         // internal IEnumerator<PcodeOp> insertiter;
         internal LinkedListNode<PcodeOp> _deadAliveNode;
@@ -256,14 +256,22 @@ namespace Sla.DECCORE
         /// Set the parent basic block of this op
         internal void setParent(BlockBasic? p)
         {
+            if (null == p) {
+                if ((null != _basicBlockNode) && (null != _basicBlockNode.List))
+                    throw new ArgumentException();
+            }
+            else {
+                if ((null == _basicBlockNode) || (!object.ReferenceEquals(p.op, _basicBlockNode.List)))
+                    throw new ArgumentException();
+            }
             parent = p;
         }
 
-        /// Store the iterator into this op's basic block
-        internal void setBasicIter(IEnumerator<PcodeOp> iter)
-        {
-            basiciter = iter;
-        }
+        ///// Store the iterator into this op's basic block
+        //internal void setBasicIter(IEnumerator<PcodeOp> iter)
+        //{
+        //    basiciter = iter;
+        //}
 
         /// Construct an unattached PcodeOp
         /// Construct a completely unattached PcodeOp.  Space is reserved for input and output Varnodes
@@ -311,7 +319,7 @@ namespace Sla.DECCORE
         public LinkedListNode<PcodeOp> getInsertIter() => _deadAliveNode;
 
         // Get position within basic block
-        public IEnumerator<PcodeOp> getBasicIter() => basiciter;
+        public LinkedListNode<PcodeOp> getBasicIter() => _basicBlockNode ?? throw new InvalidOperationException();
 
         /// \brief Get the slot number of the indicated input varnode
         public int getSlot(Varnode vn)
@@ -587,6 +595,7 @@ namespace Sla.DECCORE
         public bool isMoveable(PcodeOp point)
         {
             if (this == point) return true; // No movement necessary
+            if (null == point._basicBlockNode) throw new ArgumentException();
             bool movingLoad = false;
             if (getEvalType() == PcodeOp.Flags.special) {
                 if (code() == OpCode.CPUI_LOAD)
@@ -631,11 +640,11 @@ namespace Sla.DECCORE
                     tiedList.Add(vn);
             }
             // IEnumerator<PcodeOp> biter = basiciter;
-            int bposition = _basicPosition;
+            LinkedListNode<PcodeOp> bposition = _basicBlockNode ?? throw new InvalidOperationException();
             do {
                 // ++biter;
-                bposition++;
-                PcodeOp op = biter.Current;
+                bposition = bposition.Next ?? throw new InvalidOperationException();
+                PcodeOp op = bposition.Value;
                 if (op.getEvalType() == PcodeOp.Flags.special) {
                     switch (op.code()) {
                         case OpCode.CPUI_LOAD:
@@ -646,11 +655,9 @@ namespace Sla.DECCORE
                         case OpCode.CPUI_STORE:
                             if (movingLoad)
                                 return false;
-                            else {
-                                if (!tiedList.empty()) return false;
-                                if (output != (Varnode)null) {
-                                    if (output.isAddrTied()) return false;
-                                }
+                            if (!tiedList.empty()) return false;
+                            if (output != (Varnode)null) {
+                                if (output.isAddrTied()) return false;
                             }
                             break;
                         case OpCode.CPUI_INDIRECT:     // Let thru, deal with what's INDIRECTed around separately
@@ -678,7 +685,7 @@ namespace Sla.DECCORE
                             return false;
                     }
                 }
-            } while (biter != point.basiciter);
+            } while (bposition != point._basicBlockNode);
             return true;
         }
 
@@ -764,38 +771,40 @@ namespace Sla.DECCORE
             newConst.copySymbolIfValid(copyVn);
         }
 
-        /// Return the next op in the control-flow from this or \e null
+        // Return the next op in the control-flow from this or \e null
         // Find the next op in sequence from this op.  This is usually in the same basic block, but this
         // routine will follow flow into successive blocks during its search, so long as there is only one path
         // \return the next PcodeOp or \e null
-        public PcodeOp nextOp()
+        public PcodeOp? nextOp()
         {
-            IEnumerator<PcodeOp> iter;
+            // IEnumerator<PcodeOp> iter;
             // Current parent
             BlockBasic p = parent ?? throw new BugException();
-            iter = basiciter;       // Current iterator
-
-            iter++;
-            while (iter == p.endOp()) {
+            // iter = basiciter;       // Current iterator
+            LinkedListNode<PcodeOp>? iter = _basicBlockNode ?? throw new InvalidOperationException();
+            // iter++;
+            iter = iter.Next;
+            while (null == iter) {
                 if ((p.sizeOut() != 1) && (p.sizeOut() != 2)) return (PcodeOp)null;
                 p = (BlockBasic)p.getOut(0);
                 iter = p.beginOp();
             }
-            return iter.Current;
+            return iter.Value;
         }
 
         /// Return the previous op within this op's basic block or \e null
         /// Find the previous op that flowed uniquely into this op, if it exists.  This routine will not search
         /// farther than the basic block containing this.
         /// \return the previous PcodeOp or \e null
-        public PcodeOp previousOp()
+        public PcodeOp? previousOp()
         {
-            IEnumerator<PcodeOp> iter;
+            if (null == _basicBlockNode) throw new InvalidOperationException();
+            //IEnumerator<PcodeOp> iter;
 
-            if (basiciter == parent.beginOp()) return (PcodeOp)null;
-            iter = basiciter;
-            iter--;
-            return *iter;
+            if (null == _basicBlockNode.Previous) return (PcodeOp)null;
+            // iter = basiciter;
+            // iter--;
+            return _basicBlockNode.Previous.Value;
         }
 
         /// Return starting op for instruction associated with this op

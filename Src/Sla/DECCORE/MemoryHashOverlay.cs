@@ -71,7 +71,7 @@ namespace Sla.DECCORE
             }
 
             // We didn't find the address in the hashtable
-            if (underlie == (MemoryBank*)0)
+            if (underlie == (MemoryBank)null)
                 return (ulong)0;
             return underlie.find(addr);
         }

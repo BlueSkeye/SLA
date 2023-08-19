@@ -21,7 +21,7 @@ namespace Sla.DECCORE
     {
         // friend class Funcdata;              // Only uses private functions
         /// The sequence of p-code operations
-        internal List<PcodeOp> op = new List<PcodeOp>();
+        internal LinkedList<PcodeOp> op = new LinkedList<PcodeOp>();
         /// The function of which this block is a part
         private Funcdata data;
         /// Original range of addresses covered by this basic block
@@ -30,40 +30,56 @@ namespace Sla.DECCORE
         /// Original range of addresses covered by this basic block
         /// The operation is inserted \e before the PcodeOp pointed at by the iterator.
         /// This method also assigns the ordering index for the PcodeOp, getSeqNum().getOrder()
-        /// \param iter points at the PcodeOp to insert before
+        /// \param insertBefore points at the PcodeOp to insert before or null to add at end.
         /// \param inst is the PcodeOp to insert
-        internal void insert(IEnumerator<PcodeOp> iter, PcodeOp inst)
+        internal void insert(LinkedListNode<PcodeOp>? insertBefore, PcodeOp inst)
         {
             uint ordbefore;
             uint ordafter;
-            IEnumerator<PcodeOp> newiter;
+            // IEnumerator<PcodeOp> newiter;
 
+            // Make sure the op node is instanciated.
+            if (null == inst._basicBlockNode) {
+                inst._basicBlockNode = new LinkedListNode<PcodeOp>(inst);
+            }
+            else if (null != inst._basicBlockNode.List) {
+                throw new InvalidOperationException();
+            }
+            // newiter = op.Insert(insertBefore, inst);
+            if (null == insertBefore) {
+                op.AddLast(inst._basicBlockNode);
+            }
+            else if (null == insertBefore.Previous) {
+                op.AddFirst(inst._basicBlockNode);
+            }
+            else {
+                op.AddBefore(inst._basicBlockNode, inst._basicBlockNode);
+            }
             inst.setParent(this);
-            newiter = op.Insert(iter, inst);
-            inst.setBasicIter(newiter);
-            if (newiter == op.begin()) {
+            // inst.setBasicIter(newiter);
+            if (null == inst._basicBlockNode.Previous) {
                 // This is minimum possible order val
                 ordbefore = 2;
             }
             else {
-                --newiter;
-                ordbefore = newiter.Current.getSeqNum().getOrder();
+                // --newiter;
+                ordbefore = inst._basicBlockNode.Previous.Value.getSeqNum().getOrder();
             }
-            if (iter == op.end()) {
+            if (null == inst._basicBlockNode.Previous) {
                 ordafter = ordbefore + 0x1000000;
                 if (ordafter <= ordbefore)
                     ordafter = uint.MaxValue;
             }
             else {
-                ordafter = iter.Current.getSeqNum().getOrder();
+                ordafter = inst._basicBlockNode.Value.getSeqNum().getOrder();
             }
             if (ordafter - ordbefore <= 1) {
                 setOrder();
             }
             else {
-                inst.setOrder(ordafter / 2 + ordbefore / 2); // Beware overflow
+                // Beware overflow
+                inst.setOrder(ordafter / 2 + ordbefore / 2);
             }
-
             if (inst.isBranch()) {
                 if (inst.code() == OpCode.CPUI_BRANCHIND)
                     setFlag(block_flags.f_switch_out);
@@ -115,8 +131,9 @@ namespace Sla.DECCORE
         /// \param inst is the PcodeOp to remove, which \e must be in the block
         internal void removeOp(PcodeOp inst)
         {
+            if (null == inst._basicBlockNode) throw new InvalidOperationException();
+            op.Remove(inst._basicBlockNode);
             inst.setParent(null);
-            op.RemoveAt(inst._basicPosition);
         }
 
         /// Construct given the underlying function
@@ -429,7 +446,7 @@ namespace Sla.DECCORE
         }
 
         /// Return an iterator to the beginning of the PcodeOps
-        public IEnumerator<PcodeOp> beginOp() => op.GetEnumerator();
+        public LinkedListNode<PcodeOp>? beginOp() => (0 == op.Count) ? null : op.First;
 
         public IBiDirEnumerator<PcodeOp> GetBiDirectionalEnumerator(bool reverseOrder = false)
             => op.GetBiDirectionalEnumerator(reverseOrder); 

@@ -226,7 +226,7 @@ namespace Sla.EXTRA
         public void clear()
         {
             tree.clear();
-            record.clear();
+            record.Clear();
         }
 
         /// Beginning of records
@@ -452,7 +452,7 @@ namespace Sla.EXTRA
                 zip(a - 1, tree.lower_bound(AddrRange(a - 1)));
             if (rightsew && rightoverlap)
                 zip(b, tree.lower_bound(AddrRange(b)));
-            record.erase(v);
+            record.Remove(v);
         }
 
         /// \brief Erase a record given an iterator

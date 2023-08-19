@@ -15,9 +15,9 @@ namespace Sla.DECCORE
     internal class MemoryPageOverlay : MemoryBank
     {
         /// Underlying memory object
-        private MemoryBank underlie;
+        private MemoryBank? underlie;
         /// Overlayed pages
-        private Dictionary<ulong, byte> page;
+        private Dictionary<ulong, byte[]> page = new Dictionary<ulong, byte[]>();
 
         /// Overridden aligned word insert
         /// This derived method looks for a previously cached page of the underlying memory bank.
@@ -29,19 +29,15 @@ namespace Sla.DECCORE
         protected override void insert(ulong addr, ulong val)
         {
             ulong pageaddr = addr & ~((ulong)(getPageSize() - 1));
-            Dictionary<ulong, byte*>::iterator iter;
+            IEnumerator<KeyValuePair<ulong, byte[]>> iter;
+            byte[] pageptr;
 
-            byte* pageptr;
-
-            iter = page.find(pageaddr);
-            if (iter != page.end())
-                pageptr = (*iter).second;
-            else
-            {
+            if (page.TryGetValue(pageaddr, out pageptr))
+                pageptr = pageptr;
+            else {
                 pageptr = new byte[getPageSize()];
                 page[pageaddr] = pageptr;
-                if (underlie == (MemoryBank*)0)
-                {
+                if (underlie == (MemoryBank)null) {
                     for (int i = 0; i < getPageSize(); ++i)
                         pageptr[i] = 0;
                 }
@@ -59,21 +55,16 @@ namespace Sla.DECCORE
         /// If there is no underlying bank, zero is returned.
         /// \param addr is the aligned offset of the word
         /// \return the retrieved value
-        protected override ulong find(ulong addr)
+        internal override ulong find(ulong addr)
         {
             ulong pageaddr = addr & ~((ulong)(getPageSize() - 1));
-            Dictionary<ulong, byte*>::const_iterator iter;
+            byte[] pageptr;
 
-            iter = page.find(pageaddr);
-            if (iter == page.end())
-            {
-                if (underlie == (MemoryBank*)0)
+            if (!page.TryGetValue(pageaddr, out pageptr)) {
+                if (underlie == (MemoryBank)null)
                     return (ulong)0;
                 return underlie.find(addr);
             }
-
-            byte* pageptr = (*iter).second;
-
             ulong pageoffset = addr & ((ulong)(getPageSize() - 1));
             return constructValue(pageptr + pageoffset, getWordSize(), getSpace().isBigEndian());
         }
@@ -86,15 +77,12 @@ namespace Sla.DECCORE
         /// \param res is the pointer to where retrieved bytes should be stored
         /// \param skip is the offset \e into \e the \e page from where bytes should be retrieved
         /// \param size is the number of bytes to retrieve
-        protected override void getPage(ulong addr, byte[] res, int skip, int size)
+        internal override void getPage(ulong addr, byte[] res, uint skip, uint size)
         {
-            Dictionary<ulong, byte*>::const_iterator iter;
+            byte[] pageptr;
 
-            iter = page.find(addr);
-            if (iter == page.end())
-            {
-                if (underlie == (MemoryBank*)0)
-                {
+            if (!page.TryGetValue(addr, out pageptr)) {
+                if (underlie == (MemoryBank)null) {
                     for (int i = 0; i < size; ++i)
                         res[i] = 0;
                     return;
@@ -102,8 +90,7 @@ namespace Sla.DECCORE
                 underlie.getPage(addr, res, skip, size);
                 return;
             }
-            byte* pageptr = (*iter).second;
-            memcpy(res, pageptr + skip, size);
+            Array.Copy(pageptr, skip, res, 0, size);
         }
 
         /// Overridden setPage
@@ -114,20 +101,15 @@ namespace Sla.DECCORE
         /// \param val is a pointer to bytes to be written into the page
         /// \param skip is the offset \e into \e the \e page where bytes should be written
         /// \param size is the number of bytes to write
-        protected override void setPage(ulong addr, byte[] val, int skip,int size)
+        protected override void setPage(ulong addr, byte[] val, uint skip, uint size)
         {
-            Dictionary<ulong, byte*>::iterator iter;
-            byte* pageptr;
+            byte[] pageptr;
 
-            iter = page.find(addr);
-            if (iter == page.end())
-            {
+            if (!page.TryGetValue(addr, out pageptr)) {
                 pageptr = new byte[getPageSize()];
                 page[addr] = pageptr;
-                if (size != getPageSize())
-                {
-                    if (underlie == (MemoryBank*)0)
-                    {
+                if (size != getPageSize()) {
+                    if (underlie == (MemoryBank)null) {
                         for (int i = 0; i < getPageSize(); ++i)
                             pageptr[i] = 0;
                     }
@@ -135,10 +117,7 @@ namespace Sla.DECCORE
                         underlie.getPage(addr, pageptr, 0, getPageSize());
                 }
             }
-            else
-                pageptr = (*iter).second;
-
-            memcpy(pageptr + skip, val, size);
+            Array.Copy(pageptr, skip, val, 0, size);
         }
 
         ///< Constructor for page overlay

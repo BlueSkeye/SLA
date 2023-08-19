@@ -49,7 +49,7 @@ namespace Sla.DECCORE
             int index = spc.getIndex();
 
             while (index >= memspace.size())
-                memspace.Add((MemoryBank*)0);
+                memspace.Add((MemoryBank)null);
 
             memspace[index] = bank;
         }
@@ -63,7 +63,7 @@ namespace Sla.DECCORE
         {
             int index = spc.getIndex();
             if (index >= memspace.size())
-                return (MemoryBank*)0;
+                return (MemoryBank)null;
             return memspace[index];
         }
 
@@ -78,7 +78,7 @@ namespace Sla.DECCORE
         public void setValue(AddrSpace spc, ulong off, int size, ulong cval)
         {
             MemoryBank* mspace = getMemoryBank(spc);
-            if (mspace == (MemoryBank*)0)
+            if (mspace == (MemoryBank)null)
                 throw new LowlevelError("Setting value for unmapped memory space: " + spc.getName());
             mspace.setValue(off, size, cval);
         }
@@ -95,7 +95,7 @@ namespace Sla.DECCORE
         {
             if (spc.getType() == spacetype.IPTR_CONSTANT) return off;
             MemoryBank* mspace = getMemoryBank(spc);
-            if (mspace == (MemoryBank*)0)
+            if (mspace == (MemoryBank)null)
                 throw new LowlevelError("Getting value from unmapped memory space: " + spc.getName());
             return mspace.getValue(off, size);
         }
@@ -157,7 +157,7 @@ namespace Sla.DECCORE
         public void getChunk(byte[] res, AddrSpace spc, ulong off, int size)
         {
             MemoryBank* mspace = getMemoryBank(spc);
-            if (mspace == (MemoryBank*)0)
+            if (mspace == (MemoryBank)null)
                 throw new LowlevelError("Getting chunk from unmapped memory space: " + spc.getName());
             mspace.getChunk(off, size, res);
         }
@@ -174,7 +174,7 @@ namespace Sla.DECCORE
         public void setChunk(byte[] val, AddrSpace spc,ulong off, int size)
         {
             MemoryBank* mspace = getMemoryBank(spc);
-            if (mspace == (MemoryBank*)0)
+            if (mspace == (MemoryBank)null)
                 throw new LowlevelError("Setting chunk of unmapped memory space: " + spc.getName());
             mspace.setChunk(off, size, val);
         }

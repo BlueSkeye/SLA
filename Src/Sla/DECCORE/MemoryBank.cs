@@ -1,9 +1,4 @@
 ﻿using Sla.CORE;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.DECCORE
 {
@@ -32,7 +27,7 @@ namespace Sla.DECCORE
         protected abstract void insert(ulong addr, ulong val);
 
         /// Retrieve a word from memory bank at an aligned location
-        protected abstract ulong find(ulong addr);
+        internal abstract ulong find(ulong addr);
 
         /// Retrieve data from a memory \e page 
         /// This routine only retrieves data from a single \e page in the memory bank. Bytes need not
@@ -45,7 +40,7 @@ namespace Sla.DECCORE
         /// \param res is a pointer to where fetched data should be written
         /// \param skip is the offset \e into \e the \e page to get the bytes from
         /// \param size is the number of bytes to retrieve
-        protected virtual void getPage(ulong addr, byte[] res, uint skip, uint size)
+        internal virtual void getPage(ulong addr, byte[] res, uint skip, uint size)
         {
             // Default implementation just iterates using find but could be optimized
             ulong ptraddr = addr + skip;
@@ -90,7 +85,7 @@ namespace Sla.DECCORE
         /// \param val is a pointer to the bytes to be written into the page
         /// \param skip is the offset \e into \e the \e page where bytes will be written
         /// \param size is the number of bytes to be written
-        protected virtual void setPage(ulong addr, byte val, uint skip, uint size)
+        protected virtual void setPage(ulong addr, byte[] val, uint skip, uint size)
         {
             // Default implementation just iterates using insert but could be optimized
             ulong ptraddr = addr + skip;

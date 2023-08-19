@@ -1,19 +1,10 @@
 ﻿using Sla.CORE;
-using Sla.DECCORE;
 using Sla.EXTRA;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Drawing;
-using System.Linq;
-using System.Numerics;
-using System.Reflection.PortableExecutable;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Formats.Asn1.AsnWriter;
 
 using PcodeOpTree = System.Collections.Generic.Dictionary<Sla.CORE.SeqNum, Sla.DECCORE.PcodeOp>;
 using ScopeMap = System.Collections.Generic.Dictionary<ulong, Sla.DECCORE.Scope>;
+using VarnodeLocSet = System.Collections.Generic.HashSet<Sla.DECCORE.Varnode>; // VarnodeCompareLocDef : A set of Varnodes sorted by location (then by definition)
+using VarnodeDefSet = System.Collections.Generic.HashSet<Sla.DECCORE.Varnode>; // VarnodeDefSet : A set of Varnodes sorted by definition (then location)
 
 namespace Sla.DECCORE
 {
@@ -1658,7 +1649,8 @@ namespace Sla.DECCORE
 
             emitter.setFuncdata(this);
             context.clear();
-            context.baseaddr = addr;        // Shouldn't be using inst_next, inst_next2 or inst_start here
+            // Shouldn't be using inst_next, inst_next2 or inst_start here
+            context.baseaddr = addr;
             context.nextaddr = addr;
 
             IEnumerator<PcodeOp> deaditer = obank.endDead();
@@ -4006,17 +3998,17 @@ namespace Sla.DECCORE
         /// \param follow is the op to insert before
         public void opInsertBefore(PcodeOp op, PcodeOp follow)
         {
-            IEnumerator<PcodeOp> iter = follow.getBasicIter();
+            LinkedListNode<PcodeOp> iter = follow.getBasicIter();
             BlockBasic parent = follow.getParent();
 
             if (op.code() != OpCode.CPUI_INDIRECT) {
                 // There should not be an INDIRECT immediately preceding op
                 PcodeOp previousop;
-                while (iter != parent.beginOp()) {
-                    --iter;
-                    previousop = iter.Current;
+                while (null != iter.Previous) {
+                    iter = iter.Previous;
+                    previousop = iter.Value;
                     if (previousop.code() != OpCode.CPUI_INDIRECT) {
-                        ++iter;
+                        iter = iter.Next ?? throw new ApplicationException();
                         break;
                     }
                 }
@@ -4044,21 +4036,18 @@ namespace Sla.DECCORE
                     }
                 }
             }
-            IEnumerator<PcodeOp> iter = prev.getBasicIter();
+            LinkedListNode<PcodeOp>? iter = prev.getBasicIter() ?? throw new ApplicationException();
             BlockBasic parent = prev.getParent();
 
-            iter++;
-
+            iter = iter.Next;
             if (op.code() != OpCode.CPUI_MULTIEQUAL) {
                 // There should not be a MULTIEQUAL immediately after op
-                PcodeOp nextop;
-                while (iter != parent.endOp()) {
-                    nextop = iter.Current;
-                    ++iter;
+                while (null != iter) {
+                    PcodeOp nextop = iter.Value;
                     if (nextop.code() != OpCode.CPUI_MULTIEQUAL) {
-                        --iter;
                         break;
                     }
+                    iter = iter.Next;
                 }
             }
             opInsert(op, prev.getParent(), iter);
@@ -4074,11 +4063,11 @@ namespace Sla.DECCORE
         /// \param bl is the basic block to insert into
         public void opInsertBegin(PcodeOp op, BlockBasic bl)
         {
-            IEnumerator<PcodeOp> iter = bl.beginOp();
+            LinkedListNode<PcodeOp>? iter = bl.beginOp() ?? throw new ApplicationException();
 
             if (op.code() != OpCode.CPUI_MULTIEQUAL) {
-                while (iter.MoveNext()) {
-                    if (iter.Current.code() != OpCode.CPUI_MULTIEQUAL)
+                while (null != (iter = iter.Next)) {
+                    if (iter.Value.code() != OpCode.CPUI_MULTIEQUAL)
                         break;
                 }
             }
@@ -4094,7 +4083,7 @@ namespace Sla.DECCORE
         /// \param bl is the basic block to insert into
         public void opInsertEnd(PcodeOp op, BlockBasic bl)
         {
-            IBiDirEnumerator<PcodeOp> iter = bl.GetBiDirectionalEnumerator(true);
+            IBiDirEnumerator<PcodeOp>? iter = bl.GetBiDirectionalEnumerator(true);
 
             if (!iter.MoveNext()) throw new BugException();
             if (!iter.IsBeforeFirst) {
@@ -4242,15 +4231,15 @@ namespace Sla.DECCORE
         /// the specified iterator.
         /// \param op is the given PcodeOp
         /// \param bl is the basic block being inserted into
-        /// \param iter indicates exactly where the op is inserted
-        public void opInsert(PcodeOp op, BlockBasic bl, IEnumerator<PcodeOp> iter)
+        /// \param insertBefore indicates exactly where the op is inserted or null to add at end.
+        public void opInsert(PcodeOp op, BlockBasic bl, LinkedListNode<PcodeOp>? insertBefore)
         {
 #if OPACTION_DEBUG
             if (opactdbg_active)
                 debugModCheck(op);
 #endif
             obank.markAlive(op);
-            bl.insert(iter, op);
+            bl.insert(insertBefore, op);
         }
 
         /// Remove the given PcodeOp from its basic block
@@ -4706,13 +4695,14 @@ namespace Sla.DECCORE
         public bool setUnionField(Datatype parent, PcodeOp op, int slot, ResolvedUnion resolve)
         {
             ResolveEdge edge = new ResolveEdge(parent, op, slot);
-            pair<Dictionary<ResolveEdge, ResolvedUnion>::iterator, bool> res;
-            res = unionMap.emplace(edge, resolve);
-            if (!res.second) {
-                if ((*res.first).second.isLocked()) {
+            //pair<Dictionary<ResolveEdge, ResolvedUnion>::iterator, bool> res;
+            //res = unionMap.emplace(edge, resolve);
+            ResolvedUnion resolvedUnion;
+            if (unionMap.TryGetValue(edge, out resolvedUnion)) {
+                if (resolvedUnion.isLocked()) {
                     return false;
                 }
-                (*res.first).second = resolve;
+                unionMap[edge] = resolve;
             }
             if (op.code() == OpCode.CPUI_MULTIEQUAL && slot >= 0) {
                 // Data-type propagation doesn't happen between MULTIEQUAL input slots holding the same Varnode
@@ -4720,12 +4710,13 @@ namespace Sla.DECCORE
                 Varnode vn = op.getIn(slot);        // The Varnode being directly set
                 for (int i = 0; i < op.numInput(); ++i) {
                     if (i == slot) continue;
-                    if (op.getIn(i) != vn) continue;       // Check that different input slot holds same Varnode
+                    // Check that different input slot holds same Varnode
+                    if (op.getIn(i) != vn) continue;
                     ResolveEdge dupedge = new ResolveEdge(parent, op, i);
-                    res = unionMap.emplace(dupedge, resolve);
-                    if (!res.second) {
-                        if (!(*res.first).second.isLocked())
-                            (*res.first).second = resolve;
+                    // res = unionMap.emplace(dupedge, resolve);
+                    if (unionMap.TryGetValue(dupedge, out resolvedUnion)) {
+                        if (!resolvedUnion.isLocked())
+                            unionMap[dupedge] = resolve;
                     }
                 }
             }
@@ -4733,7 +4724,6 @@ namespace Sla.DECCORE
         }
 
         /// \brief Force a specific union field resolution for the given edge
-        ///
         /// The \b parent data-type is taken directly from the given Varnode.
         /// \param parent is the parent data-type
         /// \param fieldNum is the index of the field to force
@@ -5291,7 +5281,8 @@ namespace Sla.DECCORE
                 // Move ops into -bl-
                 while (iter.MoveNext()) {
                     PcodeOp op = iter.Current;
-                    op.setParent(bl);  // Reset ops parent to -bl-
+                    // Reset ops parent to -bl-
+                    op.setParent(bl);
                 }
                 // Move all ops from -outbl- to end of -bl-
                 bl.op.splice(bl.op.end(), outbl.op, outbl.op.begin(), outbl.op.end());

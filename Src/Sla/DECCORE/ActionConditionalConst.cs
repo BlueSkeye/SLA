@@ -148,10 +148,10 @@ namespace Sla.DECCORE
         private static Varnode placeCopy(PcodeOp op, BlockBasic bl, Varnode constVn, Funcdata data)
         {
             PcodeOp? lastOp = bl.lastOp();
-            IEnumerator<PcodeOp> iter;
+            LinkedListNode<PcodeOp>? iter;
             Address addr;
             if (lastOp == (PcodeOp)null) {
-                iter = bl.endOp();
+                iter = null;
                 addr = op.getAddr();
             }
             else if (lastOp.isBranch()) {
@@ -160,7 +160,7 @@ namespace Sla.DECCORE
                 addr = lastOp.getAddr();
             }
             else {
-                iter = bl.endOp();
+                iter = null;
                 addr = lastOp.getAddr();
             }
             PcodeOp copyOp = data.newOp(1, addr);

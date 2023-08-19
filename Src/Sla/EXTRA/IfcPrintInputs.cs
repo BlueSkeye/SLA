@@ -1,12 +1,8 @@
-﻿using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
+using Sla.DECCORE;
+
+using VarnodeDefSet = System.Collections.Generic.HashSet<Sla.DECCORE.Varnode>; // VarnodeDefSet : A set of Varnodes sorted by definition (then location)
+using VarnodeLocSet = System.Collections.Generic.HashSet<Sla.DECCORE.Varnode>; // VarnodeCompareLocDef : A set of Varnodes sorted by location (then by definition)
 
 namespace Sla.EXTRA
 {
@@ -19,7 +15,7 @@ namespace Sla.EXTRA
             if (dcp.fd == (Funcdata)null)
                 throw new IfaceExecutionError("No function selected");
 
-            print(dcp.fd, *status.fileoptr);
+            print(dcp.fd, status.fileoptr);
         }
 
         /// Check for non-trivial use of given Varnode
@@ -29,32 +25,28 @@ namespace Sla.EXTRA
         /// \return \b true if there is a non-trivial use
         public static bool nonTrivialUse(Varnode vn)
         {
-            List<Varnode*> vnlist;
+            List<Varnode> vnlist = new List<Varnode>();
             bool res = false;
             vnlist.Add(vn);
             uint proc = 0;
-            while (proc < vnlist.size())
-            {
-                Varnode* tmpvn = vnlist[proc];
+            while (proc < vnlist.size()) {
+                Varnode tmpvn = vnlist[proc];
                 proc += 1;
-                list<PcodeOp*>::const_iterator iter;
-                for (iter = tmpvn.beginDescend(); iter != tmpvn.endDescend(); ++iter)
-                {
-                    PcodeOp* op = *iter;
-                    if ((op.code() == OpCode.CPUI_COPY) ||
-                    (op.code() == OpCode.CPUI_CAST) ||
-                    (op.code() == OpCode.CPUI_INDIRECT) ||
-                    (op.code() == OpCode.CPUI_MULTIEQUAL))
+                IEnumerator<PcodeOp> iter = tmpvn.beginDescend();
+                while (iter.MoveNext()) {
+                    PcodeOp op = iter.Current;
+                    if (   (op.code() == OpCode.CPUI_COPY)
+                        || (op.code() == OpCode.CPUI_CAST)
+                        || (op.code() == OpCode.CPUI_INDIRECT)
+                        || (op.code() == OpCode.CPUI_MULTIEQUAL))
                     {
-                        Varnode* outvn = op.getOut();
-                        if (!outvn.isMark())
-                        {
+                        Varnode outvn = op.getOut();
+                        if (!outvn.isMark()) {
                             outvn.setMark();
                             vnlist.Add(outvn);
                         }
                     }
-                    else
-                    {
+                    else {
                         res = true;
                         break;
                     }
@@ -73,63 +65,49 @@ namespace Sla.EXTRA
         /// \return 0 if Varnode is restored, 1 otherwise
         public static int checkRestore(Varnode vn)
         {
-            List<Varnode*> vnlist;
+            List<Varnode> vnlist = new List<Varnode>();
             int res = 0;
             vnlist.Add(vn);
             uint proc = 0;
-            while (proc < vnlist.size())
-            {
-                Varnode* tmpvn = vnlist[proc];
+            while (proc < vnlist.size()) {
+                Varnode tmpvn = vnlist[proc];
                 proc += 1;
-                if (tmpvn.isInput())
-                {
-                    if ((tmpvn.getSize() != vn.getSize()) ||
-                    (tmpvn.getAddr() != vn.getAddr()))
-                    {
+                if (tmpvn.isInput()) {
+                    if ((tmpvn.getSize() != vn.getSize()) || (tmpvn.getAddr() != vn.getAddr())) {
                         res = 1;
                         break;
                     }
                 }
-                else if (!tmpvn.isWritten())
-                {
+                else if (!tmpvn.isWritten()) {
                     res = 1;
                     break;
                 }
-                else
-                {
-                    PcodeOp* op = tmpvn.getDef();
-                    if ((op.code() == OpCode.CPUI_COPY) || (op.code() == OpCode.CPUI_CAST))
-                    {
+                else {
+                    PcodeOp op = tmpvn.getDef();
+                    if ((op.code() == OpCode.CPUI_COPY) || (op.code() == OpCode.CPUI_CAST)) {
                         tmpvn = op.getIn(0);
-                        if (!tmpvn.isMark())
-                        {
+                        if (!tmpvn.isMark()) {
                             tmpvn.setMark();
                             vnlist.Add(tmpvn);
                         }
                     }
-                    else if (op.code() == OpCode.CPUI_INDIRECT)
-                    {
+                    else if (op.code() == OpCode.CPUI_INDIRECT) {
                         tmpvn = op.getIn(0);
-                        if (!tmpvn.isMark())
-                        {
+                        if (!tmpvn.isMark()) {
                             tmpvn.setMark();
                             vnlist.Add(tmpvn);
                         }
                     }
-                    else if (op.code() == OpCode.CPUI_MULTIEQUAL)
-                    {
-                        for (int i = 0; i < op.numInput(); ++i)
-                        {
+                    else if (op.code() == OpCode.CPUI_MULTIEQUAL) {
+                        for (int i = 0; i < op.numInput(); ++i) {
                             tmpvn = op.getIn(i);
-                            if (!tmpvn.isMark())
-                            {
+                            if (!tmpvn.isMark()) {
                                 tmpvn.setMark();
                                 vnlist.Add(tmpvn);
                             }
                         }
                     }
-                    else
-                    {
+                    else {
                         res = 1;
                         break;
                     }
@@ -147,18 +125,17 @@ namespace Sla.EXTRA
         /// \param fd is the function being analyzed
         public static bool findRestore(Varnode vn, Funcdata fd)
         {
-            VarnodeLocSet::const_iterator iter, enditer;
+            VarnodeLocSet.Enumerator iter, enditer;
 
             iter = fd.beginLoc(vn.getAddr());
             enditer = fd.endLoc(vn.getAddr());
             int count = 0;
-            while (iter != enditer)
-            {
-                Varnode* vn = *iter;
+            while (iter.MoveNext()) {
+                Varnode vn = iter.Current;
                 ++iter;
                 if (!vn.hasNoDescend()) continue;
                 if (!vn.isWritten()) continue;
-                PcodeOp* op = vn.getDef();
+                PcodeOp op = vn.getDef();
                 if (op.code() == OpCode.CPUI_INDIRECT) continue; // Not a global return address force
                 int res = checkRestore(vn);
                 if (res != 0) return false;
@@ -174,29 +151,27 @@ namespace Sla.EXTRA
         /// \param s is the output stream to write to
         public static void print(Funcdata fd, TextWriter s)
         {
-            VarnodeDefSet::const_iterator iter, enditer;
+            VarnodeDefSet.Enumerator iter, enditer;
 
-            s << "Function: " << fd.getName() << endl;
+            s.WriteLine($"Function: {fd.getName()}");
             iter = fd.beginDef(Varnode.varnode_flags.input);
             enditer = fd.endDef(Varnode.varnode_flags.input);
-            while (iter != enditer)
-            {
-                Varnode* vn = *iter;
+            while (iter != enditer) {
+                Varnode vn = iter.Current;
                 ++iter;
                 vn.printRaw(s);
-                if (fd.isHighOn())
-                {
-                    Symbol* sym = vn.getHigh().getSymbol();
+                if (fd.isHighOn()) {
+                    Symbol sym = vn.getHigh().getSymbol();
                     if (sym != (Symbol)null)
-                        s << "    " << sym.getName();
+                        s.Write($"    {sym.getName()}");
                 }
                 bool findres = findRestore(vn, fd);
                 bool nontriv = nonTrivialUse(vn);
                 if (findres && !nontriv)
-                    s << "     restored";
+                    s.Write("     restored");
                 else if (nontriv)
-                    s << "     nontriv";
-                s << endl;
+                    s.Write("     nontriv");
+                s.WriteLine();
             }
         }
     }

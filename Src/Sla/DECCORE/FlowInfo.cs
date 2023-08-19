@@ -177,9 +177,9 @@ namespace Sla.DECCORE
             miter = visited.upper_bound(op.getAddr());
             if (miter == visited.begin()) return (PcodeOp)null;
             --miter;
-            if ((*miter).first + (*miter).second.size <= op.getAddr())
+            if (miter.Current.Key + miter.Current.Value.size <= op.getAddr())
                 return (PcodeOp)null;
-            return target((*miter).first + (*miter).second.size);
+            return target(miter.Current.Key + miter.Current.Value.size);
         }
 
         /// Register a new (non fall-thru) flow target
@@ -437,14 +437,16 @@ namespace Sla.DECCORE
             if (maxaddr < curaddr + step)   // Keep track of biggest and smallest address
                 maxaddr = curaddr + step;
 
-            if (emptyflag)      // Make sure oiter points at first new op
+            if (emptyflag)
+                // Make sure oiter points at first new op
                 oiter = obank.beginDead();
             else
                 ++oiter;
 
             if (oiter != obank.endDead()) {
-                stat.seqnum = (*oiter).getSeqNum();
-                data.opMarkStartInstruction(*oiter); // Mark the first op in the instruction
+                stat.seqnum = oiter.Current.getSeqNum();
+                // Mark the first op in the instruction
+                data.opMarkStartInstruction(oiter.Current);
                 if (flowoverride != Override.Branching.NONE)
                     data.overrideFlow(curaddr, flowoverride);
                 xrefControlFlow(oiter, startbasic, isfallthru, (FuncCallSpecs)null);
@@ -561,14 +563,17 @@ namespace Sla.DECCORE
             IEnumerator<Address> iter2;
 
             IEnumerator<Address> iter1 = unprocessed.GetEnumerator();
-            Address lastaddr = *iter1++;
+            Address lastaddr = iter1.Current;
+            iter1.MoveNext();
             iter2 = iter1;
             while (iter1 != unprocessed.end()) {
-                if (*iter1 == lastaddr)
-                    iter1++;
+                if (iter1.Current == lastaddr)
+                    iter1.MoveNext();
                 else {
-                    lastaddr = *iter1++;
-                    *iter2++ = lastaddr;
+                    lastaddr = iter1.Current;
+                    iter1.MoveNext();
+                    iter2.Current = lastaddr;
+                    iter2.MoveNext();
                 }
             }
             unprocessed.erase(iter2, unprocessed.end());
@@ -685,7 +690,7 @@ namespace Sla.DECCORE
             if (!op.isBlockStart())
                 throw new LowlevelError("First op not marked as entry point");
             cur = bblocks.newBlockBasic(data);
-            data.opInsert(op, cur, cur.endOp());
+            data.opInsert(op, cur, null);
             bblocks.setStartBlock(cur);
             Address start = op.getAddr();
             Address stop = start;
@@ -705,7 +710,7 @@ namespace Sla.DECCORE
                     if (stop < nextAddr)
                         stop = nextAddr;
                 }
-                data.opInsert(op, cur, cur.endOp());
+                data.opInsert(op, cur, null);
             }
             data.setBasicBlockRange(cur, start, stop);
         }
@@ -738,7 +743,7 @@ namespace Sla.DECCORE
         /// \return \b false if the address has already been visited
         private bool setFallthruBound(Address bound)
         {
-            Dictionary<Address, VisitStat>::const_iterator iter;
+            IEnumerator<KeyValuePair<Address, VisitStat>> iter;
             Address addr = addrlist.GetLastItem();
 
             iter = visited.upper_bound(addr); // First range greater than addr
@@ -751,9 +756,9 @@ namespace Sla.DECCORE
                     addrlist.RemoveLastItem();    // Throw it away
                     return false;
                 }
-                if (addr < iter.Current.Key + (*iter).second.size)
+                if (addr < iter.Current.Key + iter.Current.Value.size)
                     reinterpreted(addr);
-                ++iter;
+                iter.MoveNext();
             }
             if (iter != visited.end())  // Whats the maximum distance we can go
                 bound = iter.Current.Key;
@@ -814,7 +819,7 @@ namespace Sla.DECCORE
         /// \param addr is the address of a byte previously interpreted as (the interior of) an instruction
         private void reinterpreted(Address addr)
         {
-            Dictionary<Address, VisitStat>::const_iterator iter;
+            IEnumerator<KeyValuePair<Address, VisitStat>> iter;
 
             iter = visited.upper_bound(addr);
             if (iter == visited.begin()) return; // Should never happen
@@ -1044,7 +1049,7 @@ namespace Sla.DECCORE
             PcodeOp op = fc.getOp();
             Address retaddr;
 
-            if (!data.inlineFlow(fd, *this, op))
+            if (!data.inlineFlow(fd, this, op))
                 return false;
 
             // Changing CALL to JUMP may make some original code unreachable
@@ -1085,7 +1090,7 @@ namespace Sla.DECCORE
         /// This situation is most likely due to a Position Indepent Code construction.
         private void checkContainedCall()
         {
-            IEnumerator<FuncCallSpecs> iter = qlst.begin();
+            IEnumerator<FuncCallSpecs> iter = qlst.GetEnumerator();
             while (iter.MoveNext()) {
                 FuncCallSpecs fc = iter.Current;
                 Funcdata? fd = fc.getFuncdata();
@@ -1094,13 +1099,13 @@ namespace Sla.DECCORE
                 if (op.code() != OpCode.CPUI_CALL) continue;
 
                 Address addr = fc.getEntryAddress();
-                Dictionary<Address, VisitStat>::const_iterator miter;
+                IEnumerator<KeyValuePair<Address, VisitStat>> miter;
                 miter = visited.upper_bound(addr);
                 if (miter == visited.begin()) continue;
                 --miter;
-                if ((*miter).first + (*miter).second.size <= addr)
+                if (miter.Current.Key + miter.Current.Value.size <= addr)
                     continue;
-                if ((*miter).first == addr) {
+                if (miter.Current.Key == addr) {
                     data.warningHeader(
                         "Possible PIC construction at {op.getAddr().printRaw(s)}: Changing call to branch");
                     data.opSetOpcode(op, OpCode.CPUI_BRANCH);
@@ -1115,7 +1120,7 @@ namespace Sla.DECCORE
                         data.opMarkStartBasic(oiter.Value);
                     // Restore original address
                     data.opSetInput(op, data.newCodeRef(addr), 0);
-                    iter = qlst.erase(iter);    // Delete the call
+                    iter = qlst.Remove(iter.Current);    // Delete the call
                     // delete fc;
                     if (iter == qlst.end()) break;
                 }
@@ -1185,7 +1190,8 @@ namespace Sla.DECCORE
                 throw new LowlevelError("Misplaced callspec");
 
             // delete fc;
-            qlst.erase(qlst.begin() + i);
+            qlst.Remove(qlst.GetEnumerator() + i);
+            Varnode
         }
 
         /// Treat indirect jump as indirect call that never returns
@@ -1318,19 +1324,20 @@ namespace Sla.DECCORE
         /// \return the targetted p-code op
         public PcodeOp target(Address addr)
         {
-            Dictionary<Address, VisitStat>::const_iterator iter;
-
-            iter = visited.find(addr);
-            while (iter != visited.end()) {
-                SeqNum seq = (iter).second.seqnum;
+            //IEnumerator<KeyValuePair<Address, VisitStat>> iter;
+            // iter = visited.find(addr);
+            VisitStat visitationStatus;
+            while (visited.TryGetValue(addr, out visitationStatus)) {
+                SeqNum seq = visitationStatus.seqnum;
                 if (!seq.getAddr().isInvalid()){
-                    PcodeOp retop = obank.findOp(seq);
+                    PcodeOp? retop = obank.findOp(seq);
                     if (retop != (PcodeOp)null)
                         return retop;
                     break;
                 }
                 // Visit fall thru address in case of no-op
-                iter = visited.find(iter.Current.Key + (*iter).second.size);
+                // iter = visited.find(iter.Current.Key + (*iter).second.size);
+                addr = addr + visitationStatus.size;
             }
             TextWriter errmsg = new StringWriter();
             errmsg.Write($"Could not find op at target address: ({addr.getSpace().getName()},");

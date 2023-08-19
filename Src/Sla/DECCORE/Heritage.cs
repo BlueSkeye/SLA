@@ -3,6 +3,7 @@
 /// Container holding the stack system for the renaming algorithm.  Every disjoint address
 /// range (indexed by its initial address) maps to its own Varnode stack.
 using VariableStack = System.Collections.Generic.Dictionary<Sla.CORE.Address, System.Collections.Generic.List<Sla.DECCORE.Varnode>>;
+using VarnodeLocSet = System.Collections.Generic.HashSet<Sla.DECCORE.Varnode>; // VarnodeCompareLocDef : A set of Varnodes sorted by location (then by definition)
 
 namespace Sla.DECCORE
 {
@@ -487,7 +488,7 @@ namespace Sla.DECCORE
             }
 
             List<Varnode> newInputs = new List<Varnode>();
-            IEnumerator<PcodeOp> pos;
+            LinkedListNode<PcodeOp>? pos;
             for (int i = 0; i < remove.size(); ++i) {
                 Varnode vn = remove[i];
                 PcodeOp op = vn.getDef() ?? throw new BugException();
@@ -495,17 +496,16 @@ namespace Sla.DECCORE
                 if (op.code() == OpCode.CPUI_INDIRECT) {
                     Varnode iopVn = op.getIn(1);
                     PcodeOp targetOp = PcodeOp.getOpFromConst(iopVn.getAddr());
-                    pos = targetOp.isDead()
-                        ? op.getBasicIter()
-                        : targetOp.getBasicIter();
+                    pos = (targetOp.isDead() ? op.getBasicIter() : targetOp.getBasicIter())
+                        ?? throw new ApplicationException();
                     // Insert SUBPIECE after target of INDIRECT
-                    pos.MoveNext();
+                    pos = pos.Next;
                 }
                 else {
                     // Insert SUBPIECE after all MULTIEQUALs in block
                     pos = op.getBasicIter();
-                    pos.MoveNext();
-                    while (pos.MoveNext() && pos.Current.code() == OpCode.CPUI_MULTIEQUAL) { }
+                    pos = pos.Next ?? throw new ApplicationException();
+                    while ((null != (pos = pos.Next)) && pos.Value.code() == OpCode.CPUI_MULTIEQUAL) { }
                 }
                 int offset = vn.overlap(addr, size);
                 fd.opUninsert(op);
@@ -737,12 +737,12 @@ namespace Sla.DECCORE
             bool isbigendian = preexist.getAddr().isBigEndian();
             Address opaddress;
             BlockBasic bl;
-            IEnumerator<PcodeOp> insertiter;
+            LinkedListNode<PcodeOp> insertiter;
 
             if (insertop == (PcodeOp)null) {
                 // Insert at the beginning
                 bl = (BlockBasic)fd.getBasicBlocks().getStartBlock();
-                insertiter = bl.beginOp();
+                insertiter = bl.beginOp() ?? throw new ApplicationException();
                 opaddress = fd.getAddress();
             }
             else {
@@ -794,19 +794,20 @@ namespace Sla.DECCORE
             ulong baseoff;
             bool isbigendian;
             BlockBasic bl;
-            IEnumerator<PcodeOp> insertiter;
+            LinkedListNode<PcodeOp>? insertiter;
 
             isbigendian = addr.isBigEndian();
             baseoff = (isbigendian) ? addr.getOffset() + size : addr.getOffset();
             if (insertop == (PcodeOp)null) {
                 bl = (BlockBasic)fd.getBasicBlocks().getStartBlock();
-                insertiter = bl.beginOp();
+                insertiter = bl.beginOp() ?? throw new ApplicationException();
                 opaddress = fd.getAddress();
             }
             else {
                 bl = insertop.getParent();
-                insertiter = insertop.getBasicIter();
-                ++insertiter;       // Insert AFTER the write
+                insertiter = insertop.getBasicIter() ?? throw new ApplicationException();
+                // Insert AFTER the write
+                insertiter = insertiter.Next;
                 opaddress = insertop.getAddr();
             }
 
