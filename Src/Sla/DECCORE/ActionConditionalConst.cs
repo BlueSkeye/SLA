@@ -54,7 +54,7 @@ namespace Sla.DECCORE
                         for (tmpOp.slot = 0; tmpOp.slot < op.numInput(); ++tmpOp.slot) {
                             if (op.getIn(tmpOp.slot) != vn) continue;      // Find incoming slot for current Varnode
                                                                             // Don't count as flow if coming thru excised edge
-                            if (!binary_search(phiNodeEdges.begin(), phiNodeEdges.end(), tmpOp)) break;
+                            if (0 > phiNodeEdges.BinarySearch(tmpOp)) break;
                         }
                         if (tmpOp.slot == op.numInput()) continue;     // Was the MULTIEQUAL reached
                     }

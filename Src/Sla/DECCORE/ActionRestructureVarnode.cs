@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -23,29 +23,24 @@ namespace Sla.DECCORE
         /// \param op is the given BRANCHIND op
         private static void protectSwitchPathIndirects(PcodeOp op)
         {
-            List<PcodeOp*> indirects;
-            Varnode* curVn = op.getIn(0);
-            while (curVn.isWritten())
-            {
-                PcodeOp* curOp = curVn.getDef();
-                uint evalType = curOp.getEvalType();
-                if ((evalType & (PcodeOp.Flags.binary | PcodeOp::ternary)) != 0)
-                {
-                    if (curOp.numInput() > 1)
-                    {
+            List<PcodeOp> indirects = new List<PcodeOp>();
+            Varnode curVn = op.getIn(0);
+            while (curVn.isWritten()) {
+                PcodeOp curOp = curVn.getDef();
+                PcodeOp.Flags evalType = curOp.getEvalType();
+                if ((evalType & (PcodeOp.Flags.binary | PcodeOp.Flags.ternary)) != 0) {
+                    if (curOp.numInput() > 1) {
                         if (!curOp.getIn(1).isConstant()) return; // Multiple paths
                     }
                     curVn = curOp.getIn(0);
                 }
                 else if ((evalType & PcodeOp.Flags.unary) != 0)
                     curVn = curOp.getIn(0);
-                else if (curOp.code() == OpCode.CPUI_INDIRECT)
-                {
+                else if (curOp.code() == OpCode.CPUI_INDIRECT) {
                     indirects.Add(curOp);
                     curVn = curOp.getIn(0);
                 }
-                else if (curOp.code() == OpCode.CPUI_LOAD)
-                {
+                else if (curOp.code() == OpCode.CPUI_LOAD) {
                     curVn = curOp.getIn(1);
                 }
                 else
@@ -53,8 +48,7 @@ namespace Sla.DECCORE
             }
             if (!curVn.isConstant()) return;
             // If we reach here, there is exactly one path, from a constant to a switch
-            for (int i = 0; i < indirects.size(); ++i)
-            {
+            for (int i = 0; i < indirects.size(); ++i) {
                 indirects[i].setNoIndirectCollapse();
             }
         }
@@ -65,9 +59,8 @@ namespace Sla.DECCORE
         private static void protectSwitchPaths(Funcdata data)
         {
             BlockGraph bblocks = data.getBasicBlocks();
-            for (int i = 0; i < bblocks.getSize(); ++i)
-            {
-                PcodeOp* op = bblocks.getBlock(i).lastOp();
+            for (int i = 0; i < bblocks.getSize(); ++i) {
+                PcodeOp? op = bblocks.getBlock(i).lastOp();
                 if (op == (PcodeOp)null) continue;
                 if (op.code() != OpCode.CPUI_BRANCHIND) continue;
                 protectSwitchPathIndirects(op);
@@ -91,7 +84,7 @@ namespace Sla.DECCORE
 
         public override int apply(Funcdata data)
         {
-            ScopeLocal* l1 = data.getScopeLocal();
+            ScopeLocal l1 = data.getScopeLocal();
 
             bool aliasyes = (numpass != 0); // Alias calculations are not reliable on the first pass
             l1.restructureVarnode(aliasyes);

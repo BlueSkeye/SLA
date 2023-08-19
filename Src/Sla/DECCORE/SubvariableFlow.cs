@@ -424,6 +424,7 @@ namespace Sla.DECCORE
         /// \return \b true if the switch variable can be successfully trimmed to its logical size
         private bool trySwitchPull(PcodeOp op, ReplaceVarnode rvn)
         {
+            op.AssertIsIndirectBranching();
             if ((rvn.mask & 1) == 0) return false; // Logical value must be justified
             if ((rvn.vn.getConsume() & ~rvn.mask) != 0)  // If there's something outside the mask being consumed
                 return false;               //  we can't trim

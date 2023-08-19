@@ -4,31 +4,31 @@ using PcodeOpTree = System.Collections.Generic.Dictionary<Sla.CORE.SeqNum, Sla.D
 
 namespace Sla.DECCORE
 {
-    /// \brief Container class for PcodeOps associated with a single function
-    ///
+    /// <summary>Container class for PcodeOps associated with a single function.
     /// The PcodeOp objects are maintained under multiple different sorting criteria to
     /// facilitate quick access in various situations. The main sort (PcodeOpTree) is by
     /// sequence number (SeqNum). PcodeOps are also grouped into \e alive and \e dead lists
     /// to distinguish between raw p-code ops and those that are fully linked into control-flow.
-    /// Several lists group PcodeOps with important op-codes (like STORE and RETURN).
+    /// Several lists group PcodeOps with important op-codes (like STORE and RETURN).</summary>
+    /// <remarks>A single PcodeOp should be either in the deadlist or the alivelist, not in both.</remarks>
     internal class PcodeOpBank
     {
         /// The main sequence number sort
         private PcodeOpTree optree;
         /// List of \e dead PcodeOps
-        private List<PcodeOp> deadlist;
+        private LinkedList<PcodeOp> deadlist = new LinkedList<PcodeOp>();
         /// List of \e alive PcodeOps
-        private List<PcodeOp> alivelist;
+        private LinkedList<PcodeOp> alivelist = new LinkedList<PcodeOp>();
         /// List of STORE PcodeOps
-        private List<PcodeOp> storelist;
+        private List<PcodeOp> storelist = new List<PcodeOp>();
         /// list of LOAD PcodeOps
-        private List<PcodeOp> loadlist;
+        private List<PcodeOp> loadlist = new List<PcodeOp>();
         /// List of RETURN PcodeOps
-        private List<PcodeOp> returnlist;
+        private List<PcodeOp> returnlist = new List<PcodeOp>();
         /// List of user-defined PcodeOps
-        private List<PcodeOp> useroplist;
+        private List<PcodeOp> useroplist = new List<PcodeOp>();
         /// List of retired PcodeOps
-        private List<PcodeOp> deadandgone;
+        private List<PcodeOp> deadandgone = new List<PcodeOp>();
         /// Counter for producing unique id's for each op
         private uint uniqid;
 
@@ -40,16 +40,24 @@ namespace Sla.DECCORE
         {
             switch (op.code()) {
                 case OpCode.CPUI_STORE:
-                    op.codeiter = storelist.Add(op);
+                    // op.codeiter = storelist.Add(op);
+                    op._codePosition = storelist.Count;
+                    storelist.Add(op);
                     break;
                 case OpCode.CPUI_LOAD:
-                    op.codeiter = loadlist.Add(op);
+                    // op.codeiter = loadlist.Add(op);
+                    op._codePosition = loadlist.Count;
+                    loadlist.Add(op);
                     break;
                 case OpCode.CPUI_RETURN:
-                    op.codeiter = returnlist.Add(op);
+                    // op.codeiter = returnlist.Add(op);
+                    op._codePosition = returnlist.Count;
+                    returnlist.Add(op);
                     break;
                 case OpCode.CPUI_CALLOTHER:
-                    op.codeiter = useroplist.Add(op);
+                    // op.codeiter = useroplist.Add(op);
+                    op._codePosition = useroplist.Count;
+                    useroplist.Add(op);
                     break;
                 default:
                     break;
@@ -128,9 +136,8 @@ namespace Sla.DECCORE
         public uint getUniqId() => uniqid;
 
         /// Create a PcodeOp with at a given Address
-        /// Create a PcodeOp with a given sequence number
         /// A new PcodeOp is allocated with the indicated number of input slots, which
-        /// start out empty.  A sequence number is assigned, and the op is added to the
+        /// start out empty. A sequence number is assigned, and the op is added to the
         /// end of the \e dead list.
         /// \param inputs is the number of input slots
         /// \param pc is the Address to associate with the PcodeOp
@@ -139,11 +146,14 @@ namespace Sla.DECCORE
         {
             PcodeOp op = new PcodeOp(inputs, new SeqNum(pc, uniqid++));
             optree[op.getSeqNum()] = op;
-            op.setFlag(PcodeOp.Flags.dead);     // Start out life as dead
-            op.insertiter = deadlist.Add(op);
+            // Start out life as dead
+            op.setFlag(PcodeOp.Flags.dead);
+            // op.insertiter = deadlist.Add(op);
+            deadlist.AddLast(op._deadAliveNode = new LinkedListNode<PcodeOp>(op));
             return op;
         }
 
+        /// Create a PcodeOp with a given sequence number
         /// A new PcodeOp is allocated with the indicated number of input slots and the
         /// specific sequence number, suitable for cloning and restoring from XML.
         /// The op is added to the end of the \e dead list.
@@ -158,7 +168,8 @@ namespace Sla.DECCORE
 
             optree[op.getSeqNum()] = op;
             op.setFlag(PcodeOp.Flags.dead);     // Start out life as dead
-            op.insertiter = deadlist.Add(op);
+            // op.insertiter = deadlist.Add(op);
+            deadlist.AddLast(op._deadAliveNode = new LinkedListNode<PcodeOp>(op));
             return op;
         }
 
@@ -173,7 +184,7 @@ namespace Sla.DECCORE
             if (!op.isDead())
                 throw new LowlevelError("Deleting integrated op");
 
-            optree.erase(op.getSeqNum());
+            optree.Remove(op.getSeqNum());
             deadlist.Remove(op);
             removeFromCodeList(op);
             deadandgone.Add(op);
@@ -201,25 +212,27 @@ namespace Sla.DECCORE
         }
 
         /// Mark the given PcodeOp as \e alive
-        /// The PcodeOp is moved out of the \e dead list into the \e alive list.  The
-        /// PcodeOp::isDead() method will now return \b false.
+        /// The PcodeOp is moved out of the \e dead list into the \e alive list. The PcodeOp.isDead() method
+        /// will now return \b false.
         /// \param op is the given PcodeOp to mark
         public void markAlive(PcodeOp op)
         {
-            deadlist.Remove(op);
+            deadlist.Remove(op._deadAliveNode);
             op.clearFlag(PcodeOp.Flags.dead);
-            op.insertiter = alivelist.Add(op);
+            // op.insertiter = alivelist.Add(op);
+            alivelist.AddLast(op._deadAliveNode);
         }
 
         /// Mark the given PcodeOp as \e dead
-        /// The PcodeOp is moved out of the \e alive list into the \e dead list. The
-        /// PcodeOp::isDead() method will now return \b true.
+        /// The PcodeOp is moved out of the \e alive list into the \e dead list. The PcodeOp.isDead() method
+        /// will now return \b true.
         /// \param op is the given PcodeOp to mark
         public void markDead(PcodeOp op)
         {
-            alivelist.Remove(op);
+            alivelist.Remove(op._deadAliveNode);
             op.setFlag(PcodeOp.Flags.dead);
-            op.insertiter = deadlist.Add(op);
+            // op.insertiter = deadlist.Add(op);
+            deadlist.AddLast(op._deadAliveNode);
         }
 
         /// Insert the given PcodeOp after a point in the \e dead list
@@ -230,26 +243,32 @@ namespace Sla.DECCORE
         {
             if (!op.isDead() || !prev.isDead())
                 throw new LowlevelError("Dead move called on ops which aren't dead");
-            deadlist.Remove(op);
-            IEnumerator<PcodeOp> iter = prev.insertiter;
-            ++iter;
-            op.insertiter = deadlist.insert(iter, op);
+            deadlist.Remove(op._deadAliveNode);
+            // IEnumerator<PcodeOp> iter = prev.insertiter;
+            // ++iter;
+            // op.insertiter = deadlist.insert(iter, op);
+            deadlist.AddAfter(prev._deadAliveNode, op._deadAliveNode);
         }
 
         /// \brief Move a sequence of PcodeOps to a point in the \e dead list.
-        ///
         /// The point is right after a provided op. All ops must be in the \e dead list.
         /// \param firstop is the first PcodeOp in the sequence to be moved
         /// \param lastop is the last PcodeOp in the sequence to be moved
         /// \param prev is the provided point to move to
         public void moveSequenceDead(PcodeOp firstop, PcodeOp lastop, PcodeOp prev)
         {
-            IEnumerator<PcodeOp> enditer = lastop.insertiter;
-            ++enditer;
-            IEnumerator<PcodeOp> previter = prev.insertiter;
-            ++previter;
-            if (previter != firstop.insertiter) // Check for degenerate move
-                deadlist.splice(previter, deadlist, firstop.insertiter, enditer);
+            // IEnumerator<PcodeOp> enditer = lastop.insertiter;
+            LinkedListNode<PcodeOp>? enditer = lastop._deadAliveNode;
+            // ++enditer;
+            enditer = enditer.Next;
+            // IEnumerator<PcodeOp> previter = prev.insertiter;
+            LinkedListNode<PcodeOp>? previter = prev._deadAliveNode;
+            // ++previter;
+            previter = previter.Next;
+            // if (previter != firstop.insertiter)
+            if (!object.ReferenceEquals(previter, firstop._deadAliveNode))
+                // Check for degenerate move
+                deadlist.splice(previter, deadlist, firstop._deadAliveNode, enditer);
         }
 
         /// Mark any COPY ops in the given range as \e incidental
@@ -259,15 +278,21 @@ namespace Sla.DECCORE
         /// \param lastop is the end of the range of incidental COPY ops
         public void markIncidentalCopy(PcodeOp firstop, PcodeOp lastop)
         {
-            IEnumerator<PcodeOp> iter = firstop.insertiter;
-            IEnumerator<PcodeOp> enditer = lastop.insertiter;
-            ++enditer;
-            while (iter != enditer) {
-                PcodeOp op = iter.Current;
-                ++iter;
+            if (   (null != lastop)
+                && !object.ReferenceEquals(firstop._deadAliveNode.List, lastop._deadAliveNode.List))
+            {
+                throw new ArgumentException();
+            }
+            LinkedListNode<PcodeOp>? scannedNode = firstop._deadAliveNode;
+            do {
+                PcodeOp op = scannedNode.Value;
                 if (op.code() == OpCode.CPUI_COPY)
                     op.setAdditionalFlag(PcodeOp.AdditionalFlags.incidental_copy);
-            }
+                scannedNode = scannedNode.Next;
+                if ((null == scannedNode) && (null != lastop)) {
+                    throw new ArgumentException();
+                }
+            } while (!object.ReferenceEquals(scannedNode.Value, lastop));
         }
 
         /// Return \b true if there are no PcodeOps in \b this container
@@ -303,35 +328,37 @@ namespace Sla.DECCORE
         {
             PcodeOp retop;
             if (op.isDead()) {
-                // In this case we know an instruction is contiguous
-                // in the dead list
-                IEnumerator<PcodeOp> iter = op.insertiter;
-                ++iter;
-                if (iter != deadlist.end()) {
-                    retop = iter.Current;
+                // In this case we know an instruction is contiguous in the dead list
+                LinkedListNode<PcodeOp> iter = op._deadAliveNode;
+                //IEnumerator<PcodeOp> iter = op.insertiter;
+                //++iter;
+                if (null != iter.Next) {
+                    retop = iter.Next.Value;
                     if (!retop.isInstructionStart()) // If the next in dead list is not marked
                         return retop;       // It is in the same instruction, and is the fallthru
                 }
-                --iter;
+                // --iter;
                 SeqNum max = op.getSeqNum();
-                while (!iter.Current.isInstructionStart()) // Find start of instruction
-                    --iter;
+                // Find start of instruction
+                while (!iter.Value.isInstructionStart()) {
+                    // --iter;
+                    iter = iter.Previous ?? throw new ApplicationException();
+                }
                 // Find biggest sequence number in this instruction
                 // This is probably -op- itself because it is the
                 // last op in the instruction, but it might not be
                 // because of delay slot reordering
-                while ((iter != deadlist.end()) && (iter.Current != op)) {
-                    if (max < iter.Current.getSeqNum())
-                        max = iter.Current.getSeqNum();
-                    ++iter;
+                while ((null != iter) && (iter.Value != op)) {
+                    if (max < iter.Value.getSeqNum())
+                        max = iter.Value.getSeqNum();
+                    iter = iter.Next;
                 }
                 PcodeOpTree::const_iterator nextiter = optree.upper_bound(max);
                 if (nextiter == optree.end()) return (PcodeOp)null;
                 retop = (*nextiter).second;
                 return retop;
             }
-            else
-                return op.nextOp();
+            return op.nextOp();
         }
 
         /// \brief Start of all PcodeOps in sequence number order

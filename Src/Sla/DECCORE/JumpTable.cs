@@ -281,10 +281,10 @@ namespace Sla.DECCORE
         }
 
         /// Return \b true if a model has been recovered
-        private bool isRecovered() => !addresstable.empty();
+        internal bool isRecovered() => !addresstable.empty();
 
         /// Return \b true if \e case labels are computed
-        private bool isLabelled() => !label.empty();
+        internal bool isLabelled() => !label.empty();
 
         /// Return \b true if \b this table was manually overridden
         internal bool isOverride() => (jmodel != (JumpModel)null) && jmodel.isOverride();
@@ -313,6 +313,7 @@ namespace Sla.DECCORE
         /// Set the BRANCHIND PcodeOp
         internal void setIndirectOp(PcodeOp ind)
         {
+            ind.AssertIsIndirectBranching();
             opaddress = ind.getAddr();
             indirect = ind;
         }
@@ -644,7 +645,7 @@ namespace Sla.DECCORE
         /// Clear instance specific data for \b this jump-table
         /// Clear out any data that is specific to a Funcdata instance.
         /// Right now this is only getting called, when the jumptable is an override in order to clear out derived data.
-        private void clear()
+        internal void clear()
         {
             if (origmodel != (JumpModel)null) {
                 //delete origmodel;

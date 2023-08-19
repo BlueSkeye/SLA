@@ -164,10 +164,11 @@ namespace Sla.DECCORE
         private PcodeOp? fallthruOp(PcodeOp op)
         {
             PcodeOp retop;
-            IEnumerator<PcodeOp> iter = op.getInsertIter();
-            ++iter;
-            if (iter != obank.endDead()) {
-                retop = *iter;
+            // IEnumerator<PcodeOp> iter = op.getInsertIter();
+            LinkedListNode<PcodeOp>? iter = op.getInsertIter() ?? throw new ApplicationException();
+            iter = iter.Next;
+            if (null != iter) {
+                retop = iter.Value;
                 if (!retop.isInstructionStart()) // If within same instruction
                     return retop;       // Then this is the fall thru
             }
@@ -972,11 +973,16 @@ namespace Sla.DECCORE
             bool isfallthru = true;
             PcodeOp lastop = xrefControlFlow(iter, startbasic, isfallthru, fc);
 
-            if (startbasic) {       // If the inject code does NOT fall thru
-                iter = op.getInsertIter();
-                ++iter;         // Mark next op after the call
-                if (iter != obank.endDead())
-                    data.opMarkStartBasic(iter.Current); // as start of basic block
+            if (startbasic) {
+                // If the inject code does NOT fall thru
+                // iter = op.getInsertIter();
+                LinkedListNode<PcodeOp>? scannedNode = op.getInsertIter() ?? throw new ApplicationException();
+                // Mark next op after the call
+                // ++iter;
+                scannedNode = scannedNode.Next;
+                if (null != scannedNode)
+                    // as start of basic block
+                    data.opMarkStartBasic(scannedNode.Value);
             }
 
             if (payload.isIncidentalCopy())
@@ -1102,11 +1108,11 @@ namespace Sla.DECCORE
                     PcodeOp targ = target(addr);
                     data.opMarkStartBasic(targ);
                     // Make sure the following op starts a basic block
-                    IEnumerator<PcodeOp> oiter = op.getInsertIter();
+                    LinkedListNode<PcodeOp>? oiter = op.getInsertIter() ?? throw new ApplicationException();
                     // First item is omited
-                    if (!oiter.MoveNext()) throw new BugException();
-                    if (oiter.MoveNext()) 
-                        data.opMarkStartBasic(oiter.Current);
+                    if (null == (oiter = oiter.Next)) throw new BugException();
+                    if (null != (oiter = oiter.Next)) 
+                        data.opMarkStartBasic(oiter.Value);
                     // Restore original address
                     data.opSetInput(op, data.newCodeRef(addr), 0);
                     iter = qlst.erase(iter);    // Delete the call
@@ -1131,7 +1137,6 @@ namespace Sla.DECCORE
         }
 
         /// \brief Recover jumptables for the current set of BRANCHIND ops using existing flow
-        ///
         /// This method passes back a list of JumpTable objects, one for each BRANCHIND in the current
         /// \b tablelist where the jumptable can be recovered. If a particular BRANCHIND cannot be recovered
         /// because the current partial control flow cannot legally reach it, the BRANCHIND is passed back
@@ -1188,6 +1193,7 @@ namespace Sla.DECCORE
         /// \param failuremode is a code indicating the type of failure when trying to recover the jump table
         private void truncateIndirectJump(PcodeOp op, int failuremode)
         {
+            op.AssertIsIndirectBranching();
             data.opSetOpcode(op, OpCode.CPUI_CALLIND); // Turn jump into call
             setupCallindSpecs(op, (FuncCallSpecs)null);
             if (failuremode != 2)                   // Unless the switch was a thunk mechanism
@@ -1438,13 +1444,14 @@ namespace Sla.DECCORE
             }
 
             if (!inlinefd.getFuncProto().isNoReturn()) {
-                IEnumerator<PcodeOp> iter = op.getInsertIter();
-                ++iter;
-                if (iter == obank.endDead()) {
+                // IEnumerator<PcodeOp> iter = op.getInsertIter();
+                LinkedListNode<PcodeOp>? iter = op.getInsertIter() ?? throw new ApplicationException();
+                iter = iter.Next;
+                if (null == iter) {
                     inline_head.warning("No fallthrough prevents inlining here", op.getAddr());
                     return false;
                 }
-                PcodeOp nextop = iter.Current;
+                PcodeOp nextop = iter.Value;
                 retaddr = nextop.getAddr();
                 if (op.getAddr() == retaddr) {
                     inline_head.warning("Return address prevents inlining here", op.getAddr());

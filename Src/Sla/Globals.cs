@@ -244,7 +244,7 @@ public static bool signbit_negative(ulong val, int size)
         /// \param sizein is the size to treat that value as an input
         /// \param sizeout is the size to sign-extend the value to
         /// \return the sign-extended value
-        public static ulong sign_extend(ref ulong @in, int sizein, int sizeout)
+        public static ulong sign_extend(ulong @in, int sizein, int sizeout)
         {
             int signbit;
             ulong mask;
@@ -866,7 +866,6 @@ public static bool signbit_negative(ulong val, int size)
 
         // ------------------ OpCode related ------------------------------
         /// \brief Names of operations associated with their opcode number
-        ///
         /// Some of the names have been replaced with special placeholder
         /// ops for the sleigh compiler and interpreter these are as follows:
         ///  -  MULTIEQUAL = BUILD

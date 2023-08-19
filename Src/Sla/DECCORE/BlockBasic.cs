@@ -116,7 +116,7 @@ namespace Sla.DECCORE
         internal void removeOp(PcodeOp inst)
         {
             inst.setParent(null);
-            op.erase(inst.basiciter);
+            op.RemoveAt(inst._basicPosition);
         }
 
         /// Construct given the underlying function

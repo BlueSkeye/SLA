@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -26,29 +19,26 @@ namespace Sla.DECCORE
         /// \brief Convert BRANCHIND with only one computed destination to a BRANCH
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_BRANCHIND);
+            oplist.Add(OpCode.CPUI_BRANCHIND);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            BlockBasic* bb = op.getParent();
+            BlockBasic bb = op.getParent();
             if (bb.sizeOut() != 1) return 0;
 
-            JumpTable* jt = data.findJumpTable(op);
+            JumpTable? jt = data.findJumpTable(op);
             if (jt == (JumpTable)null) return 0;
             if (jt.numEntries() == 0) return 0;
             if (!jt.isLabelled()) return 0; // Labels must be recovered (as this discovers multistage issues)
             Address addr = jt.getAddressByIndex(0);
             bool needwarning = false;
             bool allcasesmatch = false;
-            if (jt.numEntries() != 1)
-            {
+            if (jt.numEntries() != 1) {
                 needwarning = true;
                 allcasesmatch = true;
-                for (int i = 1; i < jt.numEntries(); ++i)
-                {
-                    if (jt.getAddressByIndex(i) != addr)
-                    {
+                for (int i = 1; i < jt.numEntries(); ++i) {
+                    if (jt.getAddressByIndex(i) != addr) {
                         allcasesmatch = false;
                         break;
                     }
@@ -61,16 +51,14 @@ namespace Sla.DECCORE
             // confirmation that the switch has only one destination
             // otherwise this may indicate some other problem
 
-            if (needwarning)
-            {
-                ostringstream s;
-                s << "Switch with 1 destination removed at ";
+            if (needwarning) {
+                TextWriter s = new StringWriter();
+                s.Write("Switch with 1 destination removed at ");
                 op.getAddr().printRaw(s);
-                if (allcasesmatch)
-                {
-                    s << " : " << dec << jt.numEntries() << " cases all go to same destination";
+                if (allcasesmatch) {
+                    s.Write($" : {jt.numEntries()} cases all go to same destination");
                 }
-                data.warningHeader(s.str());
+                data.warningHeader(s.ToString());
             }
 
             // Convert the BRANCHIND to just a branch

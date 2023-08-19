@@ -721,15 +721,16 @@ namespace Sla.DECCORE
         /// \return the success/failure code
         private int stageJumpTable(Funcdata partial, JumpTable jt, PcodeOp op, FlowInfo flow)
         {
-            if (!partial.isJumptableRecoveryOn())
-            {
+            op.AssertIsIndirectBranching();
+            if (!partial.isJumptableRecoveryOn()) {
                 // Do full analysis on the table if we haven't before
-                partial.flags |= jumptablerecovery_on; // Mark that this Funcdata object is dedicated to jumptable recovery
+                // Mark that this Funcdata object is dedicated to jumptable recovery
+                partial.flags |= Flags.jumptablerecovery_on;
                 partial.truncatedFlow(this, flow);
 
-                string oldactname = glb.allacts.getCurrentName(); // Save off old action
-                try
-                {
+                // Save off old action
+                string oldactname = glb.allacts.getCurrentName();
+                try {
                     glb.allacts.setCurrent("jumptable");
 #if OPACTION_DEBUG
                     if (jtcallback != (void(*)(Funcdata & orig, Funcdata & fd))0)
@@ -738,11 +739,13 @@ namespace Sla.DECCORE
                     {
 #endif
                     glb.allacts.getCurrent().reset(partial);
-                    glb.allacts.getCurrent().perform(partial); // Simplify the partial function
+                    // Simplify the partial function
+                    glb.allacts.getCurrent().perform(partial);
 #if OPACTION_DEBUG
                     }
 #endif
-                    glb.allacts.setCurrent(oldactname); // Restore old action
+                    // Restore old action
+                    glb.allacts.setCurrent(oldactname);
                 }
                 catch (LowlevelError err) {
                     glb.allacts.setCurrent(oldactname);
@@ -758,8 +761,10 @@ namespace Sla.DECCORE
             {
                 throw new LowlevelError("Error recovering jumptable: Bad partial clone");
             }
-            if (partop.isDead())   // Indirectop we were trying to recover was eliminated as dead code (unreachable)
-                return 0;           // Return jumptable as
+            // Indirectop we were trying to recover was eliminated as dead code (unreachable)
+            if (partop.isDead())
+                // Return jumptable as
+                return 0;
 
             try {
                 jt.setLoadCollect(flow.doesJumpRecord());
@@ -767,12 +772,15 @@ namespace Sla.DECCORE
                 if (jt.getStage() > 0)
                     jt.recoverMultistage(partial);
                 else
-                    jt.recoverAddresses(partial); // Analyze partial to recover jumptable addresses
+                    // Analyze partial to recover jumptable addresses
+                    jt.recoverAddresses(partial);
             }
-            catch (JumptableNotReachableError) {   // Thrown by recoverAddresses
+            catch (JumptableNotReachableError) {
+                // Thrown by recoverAddresses
                 return 3;
             }
-            catch (JumptableThunkError) {        // Thrown by recoverAddresses
+            catch (JumptableThunkError) {
+                // Thrown by recoverAddresses
                 return 2;
             }
             catch (LowlevelError err) {
@@ -804,14 +812,15 @@ namespace Sla.DECCORE
             while (iter.MoveNext()) {
                 JumpTable jt = iter.Current;
                 if (jt.isOverride()) {
-                    jt.clear();        // Clear out any derived data
-                    remain.Add(jt);   // Keep the override itself
+                    // Clear out any derived data
+                    jt.clear();
+                    // Keep the override itself
+                    remain.Add(jt);
                 }
                 else {
                     // delete jt;
                 }
             }
-
             jumpvec = remain;
         }
 
@@ -844,11 +853,10 @@ namespace Sla.DECCORE
         private void clearCallSpecs()
         {
             // int i;
-
             //for (i = 0; i < qlst.size(); ++i)
             //    delete qlst[i];     // Delete each func_callspec
-
-            qlst.Clear();           // Delete list of pointers
+            // Delete list of pointers
+            qlst.Clear();
         }
 
         /// \brief Split given basic block b along an \e in edge
@@ -891,7 +899,6 @@ namespace Sla.DECCORE
         }
 
         /// \brief Duplicate output Varnode of the given p-code op, as part of splitting a block
-        ///
         /// Make a basic clone of the Varnode and its basic flags. The clone is created
         /// as an output of a previously cloned PcodeOp.
         /// \param op is the given op whose output should be cloned
@@ -912,7 +919,6 @@ namespace Sla.DECCORE
         }
 
         /// \brief Clone all p-code ops from a block into its copy
-        ///
         /// P-code in a basic block is cloned into the split version of the block.
         /// Only the output Varnodes are cloned, not the inputs.
         /// \param b is the original basic block
@@ -932,7 +938,6 @@ namespace Sla.DECCORE
         }
 
         /// \brief Patch Varnode inputs to p-code ops in split basic block
-        ///
         /// Map Varnodes that are inputs for PcodeOps in the original basic block to the
         /// input slots of the cloned ops in the split block. Constants and code ref Varnodes
         /// need to be duplicated, other Varnodes are shared between the ops. This routine
@@ -946,10 +951,14 @@ namespace Sla.DECCORE
             PcodeOp bop, pop;
             Varnode bvn;
             Varnode pvn;
-            Dictionary<PcodeOp, PcodeOp> btop = new Dictionary<PcodeOp, PcodeOp>(); // Map from b to bprime
-            List<PcodeOp> pind = new List<PcodeOp>();  // pop needing b input
-            List<PcodeOp> bind = new List<PcodeOp>();  // bop giving input
-            List<int> pslot = new List<int>();     // slot within pop needing b input
+            // Map from b to bprime
+            Dictionary<PcodeOp, PcodeOp> btop = new Dictionary<PcodeOp, PcodeOp>();
+            // pop needing b input
+            List<PcodeOp> pind = new List<PcodeOp>();
+            // bop giving input
+            List<PcodeOp> bind = new List<PcodeOp>();
+            // slot within pop needing b input
+            List<int> pslot = new List<int>();
 
             IEnumerator<PcodeOp> biter = b.beginOp();
             IEnumerator<PcodeOp> piter = bprime.beginOp();
@@ -957,12 +966,15 @@ namespace Sla.DECCORE
             while (piter != bprime.endOp()) {
                 bop = biter.Current;
                 pop = piter.Current;
-                btop[bop] = pop;        // Establish mapping
+                // Establish mapping
+                btop[bop] = pop;
                 if (bop.code() == OpCode.CPUI_MULTIEQUAL) {
-                    pop.setNumInputs(1);   // One edge now goes into bprime
+                    // One edge now goes into bprime
+                    pop.setNumInputs(1);
                     opSetOpcode(pop, OpCode.CPUI_COPY);
                     opSetInput(pop, bop.getIn(inedge), 0);
-                    opRemoveInput(bop, inedge); // One edge is removed from b
+                    // One edge is removed from b
+                    opRemoveInput(bop, inedge);
                     if (bop.numInput() == 1)
                         opSetOpcode(bop, OpCode.CPUI_COPY);
                 }
@@ -1010,7 +1022,6 @@ namespace Sla.DECCORE
         }
 
         /// \brief Check if given Varnode has any descendants in a dead block
-        ///
         /// Assuming a basic block is marked \e dead, return \b true if any PcodeOp reading
         /// the Varnode is in the dead block.
         /// \param vn is the given Varnode
@@ -4768,6 +4779,7 @@ namespace Sla.DECCORE
         /// \return the matching jump-table object or NULL
         public JumpTable? linkJumpTable(PcodeOp op)
         {
+            op.AssertIsIndirectBranching();
             foreach (JumpTable jt in jumpvec) {
                 if (jt.getOpAddress() == op.getAddr()) {
                     jt.setIndirectOp(op);
@@ -4783,6 +4795,7 @@ namespace Sla.DECCORE
         /// \return the matching jump-table object or NULL
         public JumpTable? findJumpTable(PcodeOp op)
         {
+            op.AssertIsIndirectBranching();
             foreach (JumpTable jt in jumpvec) {
                 if (jt.getOpAddress() == op.getAddr()) return jt;
             }
@@ -4810,7 +4823,6 @@ namespace Sla.DECCORE
         }
 
         /// \brief Recover control-flow destinations for a BRANCHIND
-        ///
         /// If an existing and complete JumpTable exists for the BRANCHIND, it is returned immediately.
         /// Otherwise an attempt is made to analyze the current partial function and recover the set of destination
         /// addresses, which if successful will be returned as a new JumpTable object.
@@ -4819,9 +4831,9 @@ namespace Sla.DECCORE
         /// \param flow is current flow information for \b this function
         /// \param failuremode will hold the final success/failure code (0=success)
         /// \return the recovered JumpTable or NULL if there was no success
-        public JumpTable? recoverJumpTable(Funcdata partial, PcodeOp op, FlowInfo flow,
-            out int failuremode)
+        public JumpTable? recoverJumpTable(Funcdata partial, PcodeOp op, FlowInfo flow, out int failuremode)
         {
+            op.AssertIsIndirectBranching();
             failuremode = 0;
             JumpTable? jt = linkJumpTable(op);     // Search for pre-existing jumptable
             if (jt != (JumpTable)null) {
@@ -4860,16 +4872,21 @@ namespace Sla.DECCORE
         /// \return \b true if jump-table analysis is guaranteed to fail
         public bool earlyJumpTableFail(PcodeOp op)
         {
+            op.AssertIsIndirectBranching();
             Varnode vn = op.getIn(0);
-            IEnumerator<PcodeOp> iter = op.insertiter;
-            IEnumerator<PcodeOp> startiter = beginOpDead();
+            // IEnumerator<PcodeOp> iter = op.insertiter;
+            LinkedListNode<PcodeOp> scannedNode = op._deadAliveNode;
+            // int index = op._deadAlivePosition;
+            // IEnumerator<PcodeOp> startiter = beginOpDead();
             int countMax = 8;
-            while (iter != startiter) {
+            // while (iter != startiter) {
+            while (null != scannedNode.Previous) {
                 if (vn.getSize() == 1) return false;
                 countMax -= 1;
-                if (countMax < 0) return false;     // Don't iterate too many times
-                --iter;
-                op = iter.Current;
+                // Don't iterate too many times
+                if (countMax < 0) return false;
+                scannedNode = scannedNode.Previous;
+                op = scannedNode.Value;
                 Varnode? outvn = op.getOut();
                 bool outhit = false;
                 if (outvn != (Varnode)null)
@@ -4881,34 +4898,41 @@ namespace Sla.DECCORE
                             int id = (int)op.getIn(0).getOffset();
                             UserPcodeOp userOp = glb.userops.getOp(id);
                             if (userOp is InjectedUserOp)
-                                return false;   // Don't try to back track through injection
+                                // Don't try to back track through injection
+                                return false;
                             if (userOp is JumpAssistOp)
                                 return false;
                             if (userOp is SegmentOp)
                                 return false;
                             if (outhit)
-                                return true;    // Address formed via uninjected CALLOTHER, analysis will fail
-                                                // Assume CALLOTHER will not interfere with address and continue backtracking
+                                // Address formed via uninjected CALLOTHER, analysis will fail
+                                // Assume CALLOTHER will not interfere with address and continue backtracking
+                                return true;
                         }
                         else {
                             // CALL or CALLIND - Output has not been established yet
-                            return false;   // Don't try to back track through CALL
+                            // Don't try to back track through CALL
+                            return false;
                         }
                     }
                     else if (op.isBranch())
-                        return false;   // Don't try to back track further
+                        // Don't try to back track further
+                        return false;
                     else {
-                        if (op.code() == OpCode.CPUI_STORE) return false; // Don't try to back track through STORE
+                        // Don't try to back track through STORE
+                        if (op.code() == OpCode.CPUI_STORE) return false;
                         if (outhit)
-                            return false;       // Some special op (CPOOLREF, NEW, etc) generates address, don't assume failure
-                                                // Assume special will not interfere with address and continue backtracking
+                            // Some special op (CPOOLREF, NEW, etc) generates address, don't assume failure
+                            // Assume special will not interfere with address and continue backtracking
+                            return false;
                     }
                 }
                 else if (op.getEvalType() == PcodeOp.Flags.unary) {
                     if (outhit) {
                         Varnode invn = op.getIn(0);
                         if (invn.getSize() != vn.getSize()) return false;
-                        vn = invn;      // Treat input as address
+                        // Treat input as address
+                        vn = invn;
                     }
                     // Continue backtracking
                 }
@@ -4921,10 +4945,11 @@ namespace Sla.DECCORE
                         {
                             return false;
                         }
-                        if (!op.getIn(1).isConstant()) return false;      // Don't back-track thru binary op, don't assume failure
+                        if (!op.getIn(1).isConstant()) return false;
                         Varnode invn = op.getIn(0);
                         if (invn.getSize() != vn.getSize()) return false;
-                        vn = invn;      // Treat input as address
+                        // Treat input as address
+                        vn = invn;
                     }
                     // Continue backtracking
                 }

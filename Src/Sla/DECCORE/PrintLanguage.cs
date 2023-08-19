@@ -1174,166 +1174,166 @@ namespace Sla.DECCORE
         ///< Emit a BRANCH operator
         public abstract void opBranch(PcodeOp op);
 
-        ///< Emit a CBRANCH operator
+        /// Emit a CBRANCH operator
         public abstract void opCbranch(PcodeOp op);
 
-        ///< Emit a BRANCHIND operator
+        /// Emit a BRANCHIND operator
         public abstract void opBranchind(PcodeOp op);
 
-        ///< Emit a CALL operator
+        /// Emit a CALL operator
         public abstract void opCall(PcodeOp op);
 
-        ///< Emit a CALLIND operator
+        /// Emit a CALLIND operator
         public abstract void opCallind(PcodeOp op);
 
-        ///< Emit a CALLOTHER operator
+        /// Emit a CALLOTHER operator
         public abstract void opCallother(PcodeOp op);
 
-        ///< Emit an operator constructing an object
+        /// Emit an operator constructing an object
         public abstract void opConstructor(PcodeOp op, bool withNew);
 
-        ///< Emit a RETURN operator
+        /// Emit a RETURN operator
         public abstract void opReturn(PcodeOp op);
 
-        ///< Emit a INT_EQUAL operator
+        /// Emit a INT_EQUAL operator
         public abstract void opIntEqual(PcodeOp op);
 
-        ///< Emit a INT_NOTEQUAL operator
+        /// Emit a INT_NOTEQUAL operator
         public abstract void opIntNotEqual(PcodeOp op);
 
-        ///< Emit a INT_SLESS operator
+        /// Emit a INT_SLESS operator
         public abstract void opIntSless(PcodeOp op);
 
-        ///< Emit a INT_SLESSEQUAL operator
+        /// Emit a INT_SLESSEQUAL operator
         public abstract void opIntSlessEqual(PcodeOp op);
 
-        ///< Emit a INT_LESS operator
+        /// Emit a INT_LESS operator
         public abstract void opIntLess(PcodeOp op);
 
-        ///< Emit a INT_LESSEQUAL operator
+        /// Emit a INT_LESSEQUAL operator
         public abstract void opIntLessEqual(PcodeOp op);
 
-        ///< Emit a INT_ZEXT operator
+        /// Emit a INT_ZEXT operator
         public abstract void opIntZext(PcodeOp op, PcodeOp readOp);
 
-        ///< Emit a INT_SEXT operator
+        /// Emit a INT_SEXT operator
         public abstract void opIntSext(PcodeOp op, PcodeOp readOp);
 
-        ///< Emit a INT_ADD operator
+        /// Emit a INT_ADD operator
         public abstract void opIntAdd(PcodeOp op);
 
-        ///< Emit a INT_SUB operator
+        /// Emit a INT_SUB operator
         public abstract void opIntSub(PcodeOp op);
 
-        ///< Emit a INT_CARRY operator
+        /// Emit a INT_CARRY operator
         public abstract void opIntCarry(PcodeOp op);
 
-        ///< Emit a INT_SCARRY operator
+        /// Emit a INT_SCARRY operator
         public abstract void opIntScarry(PcodeOp op);
 
-        ///< Emit a INT_SBORROW operator
+        /// Emit a INT_SBORROW operator
         public abstract void opIntSborrow(PcodeOp op);
 
-        ///< Emit a INT_2COMP operator
+        /// Emit a INT_2COMP operator
         public abstract void opInt2Comp(PcodeOp op);
 
-        ///< Emit a INT_NEGATE operator
+        /// Emit a INT_NEGATE operator
         public abstract void opIntNegate(PcodeOp op);
 
-        ///< Emit a INT_XOR operator
+        /// Emit a INT_XOR operator
         public abstract void opIntXor(PcodeOp op);
 
-        ///< Emit a INT_AND operator
+        /// Emit a INT_AND operator
         public abstract void opIntAnd(PcodeOp op);
 
-        ///< Emit a INT_OR operator
+        /// Emit a INT_OR operator
         public abstract void opIntOr(PcodeOp op);
 
-        ///< Emit a INT_LEFT operator
+        /// Emit a INT_LEFT operator
         public abstract void opIntLeft(PcodeOp op);
 
-        ///< Emit a INT_RIGHT operator
+        /// Emit a INT_RIGHT operator
         public abstract void opIntRight(PcodeOp op);
 
-        ///< Emit a INT_SRIGHT operator
+        /// Emit a INT_SRIGHT operator
         public abstract void opIntSright(PcodeOp op);
 
-        ///< Emit a INT_MULT operator
+        /// Emit a INT_MULT operator
         public abstract void opIntMult(PcodeOp op);
 
-        ///< Emit a INT_DIV operator
+        /// Emit a INT_DIV operator
         public abstract void opIntDiv(PcodeOp op);
 
-        ///< Emit a INT_SDIV operator
+        /// Emit a INT_SDIV operator
         public abstract void opIntSdiv(PcodeOp op);
 
-        ///< Emit a INT_REM operator
+        /// Emit a INT_REM operator
         public abstract void opIntRem(PcodeOp op);
 
-        ///< Emit a INT_SREM operator
+        /// Emit a INT_SREM operator
         public abstract void opIntSrem(PcodeOp op);
 
-        ///< Emit a BOOL_NEGATE operator
+        /// Emit a BOOL_NEGATE operator
         public abstract void opBoolNegate(PcodeOp op);
 
-        ///< Emit a BOOL_XOR operator
+        /// Emit a BOOL_XOR operator
         public abstract void opBoolXor(PcodeOp op);
 
-        ///< Emit a BOOL_AND operator
+        /// Emit a BOOL_AND operator
         public abstract void opBoolAnd(PcodeOp op);
 
-        ///< Emit a BOOL_OR operator
+        /// Emit a BOOL_OR operator
         public abstract void opBoolOr(PcodeOp op);
 
-        ///< Emit a FLOAT_EQUAL operator
+        /// Emit a FLOAT_EQUAL operator
         public abstract void opFloatEqual(PcodeOp op);
 
-        ///< Emit a FLOAT_NOTEQUAL operator
+        /// Emit a FLOAT_NOTEQUAL operator
         public abstract void opFloatNotEqual(PcodeOp op);
 
-        ///< Emit a FLOAT_LESS operator
+        /// Emit a FLOAT_LESS operator
         public abstract void opFloatLess(PcodeOp op);
 
-        ///< Emit a FLOAT_LESSEQUAL operator
+        /// Emit a FLOAT_LESSEQUAL operator
         public abstract void opFloatLessEqual(PcodeOp op);
 
-        ///< Emit a FLOAT_NAN operator
+        /// Emit a FLOAT_NAN operator
         public abstract void opFloatNan(PcodeOp op);
 
-        ///< Emit a FLOAT_ADD operator
+        /// Emit a FLOAT_ADD operator
         public abstract void opFloatAdd(PcodeOp op);
 
-        ///< Emit a FLOAT_DIV operator
+        /// Emit a FLOAT_DIV operator
         public abstract void opFloatDiv(PcodeOp op);
 
-        ///< Emit a FLOAT_MULT operator
+        /// Emit a FLOAT_MULT operator
         public abstract void opFloatMult(PcodeOp op);
 
-        ///< Emit a FLOAT_SUB operator
+        /// Emit a FLOAT_SUB operator
         public abstract void opFloatSub(PcodeOp op);
 
-        ///< Emit a FLOAT_NEG operator
+        /// Emit a FLOAT_NEG operator
         public abstract void opFloatNeg(PcodeOp op);
 
-        ///< Emit a FLOAT_ABS operator
+        /// Emit a FLOAT_ABS operator
         public abstract void opFloatAbs(PcodeOp op);
 
-        ///< Emit a FLOAT_SQRT operator
+        /// Emit a FLOAT_SQRT operator
         public abstract void opFloatSqrt(PcodeOp op);
 
-        ///< Emit a FLOAT_INT2FLOAT operator
+        /// Emit a FLOAT_INT2FLOAT operator
         public abstract void opFloatInt2Float(PcodeOp op);
 
-        ///< Emit a FLOAT_FLOAT2FLOAT operator
+        /// Emit a FLOAT_FLOAT2FLOAT operator
         public abstract void opFloatFloat2Float(PcodeOp op);
 
-        ///< Emit a FLOAT_TRUNC operator
+        /// Emit a FLOAT_TRUNC operator
         public abstract void opFloatTrunc(PcodeOp op);
 
-        ///< Emit a FLOAT_CEIL operator
+        /// Emit a FLOAT_CEIL operator
         public abstract void opFloatCeil(PcodeOp op);
 
-        ///< Emit a FLOAT_FLOOR operator
+        /// Emit a FLOAT_FLOOR operator
         public abstract void opFloatFloor(PcodeOp op);
 
         ///< Emit a FLOAT_ROUND operator

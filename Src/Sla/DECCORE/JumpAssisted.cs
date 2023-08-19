@@ -158,8 +158,7 @@ namespace Sla.DECCORE
             // Replace all outputs of jumpassist op with switchvn (including BRANCHIND)
             Varnode outvn = assistOp.getOut();
             IEnumerator<PcodeOp> iter = outvn.beginDescend();
-            while (iter.MoveNext())
-            {
+            while (iter.MoveNext()) {
                 PcodeOp op = iter.Current;
                 fd.opSetInput(op, switchvn, 0);
             }

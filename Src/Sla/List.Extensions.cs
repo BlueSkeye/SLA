@@ -1,15 +1,8 @@
-﻿using Sla.DECCORE;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static Sla.Extensions;
+﻿using System.Collections;
 
 namespace Sla
 {
-    internal static class Extensions
+    internal static partial class Extensions
     {
         internal static bool empty<T>(this List<T> from) => from.Count == 0;
 

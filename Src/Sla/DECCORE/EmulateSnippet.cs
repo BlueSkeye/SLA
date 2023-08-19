@@ -227,13 +227,11 @@ namespace Sla.DECCORE
         }
 
         /// \brief Check for p-code that is deemed illegal for a \e snippet
-        ///
         /// This method facilitates enforcement of the formal rules for snippet code.
         ///   - Branches must use p-code relative addressing.
         ///   - Snippets can only read/write from temporary registers
         ///   - Snippets cannot use BRANCHIND, CALL, CALLIND, CALLOTHER, STORE, SEGMENTOP, CPOOLREF,
         ///              NEW, MULTIEQUAL, or INDIRECT
-        ///
         /// \return \b true if the current snippet is legal
         public bool checkForLegalCode()
         {

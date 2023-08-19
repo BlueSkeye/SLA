@@ -1,12 +1,4 @@
 ﻿using Sla.CORE;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Threading.Tasks;
 
 namespace Sla.DECCORE
 {
@@ -139,17 +131,25 @@ namespace Sla.DECCORE
         /// What instruction address is this attached to
         private SeqNum start;
         /// Basic block in which this op is contained
-        private BlockBasic parent;
+        private BlockBasic? parent;
         /// Iterator within basic block
         private IEnumerator<PcodeOp> basiciter;
+        internal int _basicPosition;
         /// Position in alive/dead list
-        private IEnumerator<PcodeOp> insertiter;
+        // internal IEnumerator<PcodeOp> insertiter;
+        internal LinkedListNode<PcodeOp> _deadAliveNode;
         /// Position in opcode list
-        private IEnumerator<PcodeOp> codeiter;
+        // internal IEnumerator<PcodeOp> codeiter;
+        internal int _codePosition;
         /// The one possible output Varnode of this op
         private Varnode? output;
         /// The ordered list of input Varnodes for this op
         private List<Varnode?> inrefs;
+
+        internal void AssertIsIndirectBranching()
+        {
+            if (OpCode.CPUI_BRANCHIND != this.code()) throw new BugException();
+        }
 
         // Only used by Funcdata
         /// Set the opcode for this PcodeOp
@@ -254,7 +254,7 @@ namespace Sla.DECCORE
         }
 
         /// Set the parent basic block of this op
-        internal void setParent(BlockBasic p)
+        internal void setParent(BlockBasic? p)
         {
             parent = p;
         }
@@ -308,7 +308,7 @@ namespace Sla.DECCORE
         public SeqNum getSeqNum() => start;
 
         // Get position within alive/dead list
-        public IEnumerator<PcodeOp> getInsertIter() => insertiter;
+        public LinkedListNode<PcodeOp> getInsertIter() => _deadAliveNode;
 
         // Get position within basic block
         public IEnumerator<PcodeOp> getBasicIter() => basiciter;
@@ -371,107 +371,107 @@ namespace Sla.DECCORE
         public bool isCall() => ((flags & Flags.call) != 0);
 
         /// \brief Return \b true if this op acts as call but does not have a full specification
-        public bool isCallWithoutSpec() => ((flags&(PcodeOp::call|PcodeOp::has_callspec))== PcodeOp::call);
+        public bool isCallWithoutSpec() => ((flags & (Flags.call | Flags.has_callspec)) == Flags.call);
 
         /// Return \b true is a special SSA form op
-        public bool isMarker() => ((flags&PcodeOp::marker)!= 0);
+        public bool isMarker() => ((flags & Flags.marker) != 0);
 
         /// Return \b true if op creates a varnode indirectly
-        public bool isIndirectCreation() => ((flags&PcodeOp.Flags.indirect_creation)!= 0);
+        public bool isIndirectCreation() => ((flags & Flags.indirect_creation) != 0);
 
         /// Return \b true if \b this INDIRECT is caused by STORE
-        public bool isIndirectStore() => ((flags&PcodeOp::indirect_store)!= 0);
+        public bool isIndirectStore() => ((flags & Flags.indirect_store) != 0);
 
         /// \brief Return \b true if this op is not directly represented in C output
-        public bool notPrinted() => ((flags&(PcodeOp::marker|PcodeOp.Flags.nonprinting|PcodeOp::noreturn))!= 0);
-        
+        public bool notPrinted() => ((flags & (Flags.marker | Flags.nonprinting | Flags.noreturn)) != 0);
+
         /// \brief Return \b true if this op produces a boolean output
-        public bool isBoolOutput() => ((flags&PcodeOp.Flags.booloutput)!= 0);
+        public bool isBoolOutput() => ((flags & Flags.booloutput) != 0);
 
         /// Return \b true if this op is a branch
-        public bool isBranch() => ((flags&PcodeOp::branch)!= 0);
+        public bool isBranch() => ((flags & Flags.branch) != 0);
 
         /// \brief Return \b true if this op is a call or branch
-        public bool isCallOrBranch() => ((flags&(PcodeOp::branch|PcodeOp::call))!= 0);
+        public bool isCallOrBranch() => ((flags & (Flags.branch | Flags.call)) != 0);
 
         /// \brief Return \b true if this op breaks fall-thru flow
-        public bool isFlowBreak() => ((flags&(PcodeOp::branch|PcodeOp::returns))!= 0);
+        public bool isFlowBreak() => ((flags & (Flags.branch | Flags.returns)) != 0);
 
         /// \brief Return \b true if this op flips the true/false meaning of its control-flow branching
-        public bool isBooleanFlip() => ((flags&PcodeOp.Flags.boolean_flip)!= 0);
+        public bool isBooleanFlip() => ((flags & Flags.boolean_flip) != 0);
 
         /// \brief Return \b true if the fall-thru branch is taken when the boolean input is true
-        public bool isFallthruTrue() => ((flags&PcodeOp::fallthru_true)!= 0);
+        public bool isFallthruTrue() => ((flags & Flags.fallthru_true) != 0);
 
         /// Return \b true if the first input is a code reference
-        public bool isCodeRef() => ((flags&PcodeOp::coderef)!= 0);
+        public bool isCodeRef() => ((flags & Flags.coderef) != 0);
 
         /// Return \b true if this starts an instruction
-        public bool isInstructionStart() => ((flags&PcodeOp.Flags.startmark)!= 0);
+        public bool isInstructionStart() => ((flags & Flags.startmark) != 0);
 
         /// Return \b true if this starts a basic block
-        public bool isBlockStart() => ((flags&PcodeOp.Flags.startbasic)!= 0);
+        public bool isBlockStart() => ((flags & Flags.startbasic) != 0);
 
         /// Return \b true if this is modified by the current action
-        public bool isModified() => ((addlflags&PcodeOp::modified)!= 0);
+        public bool isModified() => ((addlflags & AdditionalFlags.modified) != 0);
 
         /// Return \b true if this op has been marked
-        public bool isMark() => ((flags&PcodeOp::mark)!= 0);
+        public bool isMark() => ((flags & Flags.mark) != 0);
 
         /// Set the mark on this op
-        public void setMark() => flags |= PcodeOp::mark;
+        public void setMark() => flags |= Flags.mark;
 
         /// Return \b true if a warning has been generated for this op
-        public bool isWarning() => ((addlflags&PcodeOp::warning)!= 0);
+        public bool isWarning() => ((addlflags & AdditionalFlags.warning) != 0);
 
         /// Clear any mark on this op
-        public void clearMark() => flags &= ~PcodeOp::mark;
+        public void clearMark() => flags &= ~Flags.mark;
 
         /// Return \b true if this causes an INDIRECT
-        public bool isIndirectSource() => ((flags&PcodeOp::indirect_source)!= 0);
+        public bool isIndirectSource() => ((flags & Flags.indirect_source) != 0);
 
         /// Mark this op as source of INDIRECT
         public void setIndirectSource()
         {
-            flags |= PcodeOp::indirect_source;
+            flags |= Flags.indirect_source;
         }
 
         /// Clear INDIRECT source flag
         public void clearIndirectSource()
         {
-            flags &= ~PcodeOp::indirect_source;
+            flags &= ~Flags.indirect_source;
         }
 
         /// Return \b true if this produces/consumes ptrs
-        public bool isPtrFlow() => ((flags&PcodeOp::ptrflow)!= 0);
+        public bool isPtrFlow() => ((flags & Flags.ptrflow) != 0);
 
         /// Mark this op as consuming/producing ptrs
         public void setPtrFlow()
         {
-            flags |= PcodeOp::ptrflow;
+            flags |= Flags.ptrflow;
         }
 
         /// Return \b true if this does datatype propagation
-        public bool doesSpecialPropagation() => ((addlflags&PcodeOp::special_prop)!= 0);
+        public bool doesSpecialPropagation() => ((addlflags & AdditionalFlags.special_prop) != 0);
 
         /// Return \b true if this needs to special printing
-        public bool doesSpecialPrinting() => ((addlflags&PcodeOp.AdditionalFlags.special_print)!= 0);
+        public bool doesSpecialPrinting() => ((addlflags & AdditionalFlags.special_print) != 0);
 
         /// Return \b true if \b this COPY is \e incidental
-        public bool isIncidentalCopy() => ((addlflags&PcodeOp::incidental_copy)!= 0);
+        public bool isIncidentalCopy() => ((addlflags & AdditionalFlags.incidental_copy) != 0);
 
         /// \brief Return \b true if output is 1-bit boolean
-        public bool isCalculatedBool() => ((flags&(PcodeOp.Flags.calculated_bool|PcodeOp.Flags.booloutput))!= 0);
-        
+        public bool isCalculatedBool() => ((flags & (Flags.calculated_bool | Flags.booloutput)) != 0);
+
         /// \brief Return \b true if we have already examined this cpool
-        public bool isCpoolTransformed() => ((addlflags&PcodeOp.AdditionalFlags.is_cpool_transformed)!= 0);
+        public bool isCpoolTransformed() => ((addlflags & AdditionalFlags.is_cpool_transformed) != 0);
 
         /// Return \b true if this can be collapsed to a COPY of a constant
         /// Can this be collapsed to a copy op, i.e. are all inputs constants
         /// \return \b true if this op can be callapsed
         public bool isCollapsible()
         {
-            if ((flags & PcodeOp.Flags.nocollapse) != 0) return false;
+            if ((flags & Flags.nocollapse) != 0) return false;
             if (!isAssignment()) return false;
             if (inrefs.size() == 0) return false;
             for (int i = 0; i < inrefs.size(); ++i)
@@ -481,58 +481,58 @@ namespace Sla.DECCORE
         }
 
         /// Is data-type propagation from below stopped
-        public bool stopsTypePropagation() => ((addlflags&stop_type_propagation)!= 0);
+        public bool stopsTypePropagation() => ((addlflags & AdditionalFlags.stop_type_propagation) != 0);
 
         /// Stop data-type propagation from below
         public void setStopTypePropagation()
         {
-            addlflags |= stop_type_propagation;
+            addlflags |= AdditionalFlags.stop_type_propagation;
         }
 
         /// Allow data-type propagation from below
         public void clearStopTypePropagation()
         {
-            addlflags &= ~stop_type_propagation;
+            addlflags &= ~AdditionalFlags.stop_type_propagation;
         }
 
         /// If \b true, do not remove output as dead code
-        public bool holdOutput() => ((addlflags&hold_output)!= 0);
+        public bool holdOutput() => ((addlflags & AdditionalFlags.hold_output) != 0);
 
         /// Prevent output from being removed as dead code
         public void setHoldOutput()
         {
-            addlflags |= hold_output;
+            addlflags |= AdditionalFlags.hold_output;
         }
 
         /// Output is root of CONCAT tree
-        public bool isPartialRoot() => ((addlflags&concat_root)!= 0);
+        public bool isPartialRoot() => ((addlflags & AdditionalFlags.concat_root) != 0);
 
         /// Mark \b this as root of CONCAT tree
         public void setPartialRoot()
         {
-            addlflags |= concat_root;
+            addlflags |= AdditionalFlags.concat_root;
         }
 
         /// Does \b this allow COPY propagation
-        public bool stopsCopyPropagation() => ((flags&no_copy_propagation)!= 0);
+        public bool stopsCopyPropagation() => ((flags & Flags.no_copy_propagation) != 0);
 
         /// Stop COPY propagation through inputs
         public void setStopCopyPropagation()
         {
-            flags |= no_copy_propagation;
+            flags |= Flags.no_copy_propagation;
         }
 
         /// Check if INDIRECT collapse is possible
-        public bool noIndirectCollapse() => ((addlflags & no_indirect_collapse)!= 0);
+        public bool noIndirectCollapse() => ((addlflags & AdditionalFlags.no_indirect_collapse)!= 0);
 
         /// Prevent collapse of INDIRECT
         public void setNoIndirectCollapse()
         {
-            addlflags |= no_indirect_collapse;
+            addlflags |= AdditionalFlags.no_indirect_collapse;
         }
 
         /// \brief Return \b true if this LOADs or STOREs from a dynamic \e spacebase pointer
-        public bool usesSpacebasePtr() => ((flags&PcodeOp.Flags.spacebase_ptr)!= 0);
+        public bool usesSpacebasePtr() => ((flags & Flags.spacebase_ptr) != 0);
 
         /// Return hash indicating possibility of common subexpression elimination
         /// Produce a hash of the following attributes: output size, the opcode, and the identity
@@ -545,14 +545,11 @@ namespace Sla.DECCORE
             if (code() == OpCode.CPUI_COPY) return ((uint)0); // Let copy propagation deal with this
 
             hash = (output.getSize() << 8) | (uint)code();
-            for (int i = 0; i < inrefs.size(); ++i)
-            {
+            for (int i = 0; i < inrefs.size(); ++i) {
                 Varnode vn = getIn(i);
                 hash = (hash << 8) | (hash >> (sizeof(uint) * 8 - 8));
-                if (vn.isConstant())
-                    hash ^= (uint)vn.getOffset();
-                else
-                    hash ^= (uint)vn.getCreateIndex(); // Hash in pointer itself as unique id
+                hash ^= (vn.isConstant()) ? (uint)vn.getOffset() : (uint)vn.getCreateIndex();
+                // Hash in pointer itself as unique id
             }
             return hash;
         }
@@ -564,14 +561,13 @@ namespace Sla.DECCORE
         /// \return \b true if the two ops are a common subexpression match
         public bool isCseMatch(PcodeOp op)
         {
-            if ((getEvalType() & (PcodeOp.Flags.unary | PcodeOp.Flags.binary)) == 0) return false;
-            if ((op.getEvalType() & (PcodeOp.Flags.unary | PcodeOp.Flags.binary)) == 0) return false;
+            if ((getEvalType() & (Flags.unary | Flags.binary)) == 0) return false;
+            if ((op.getEvalType() & (Flags.unary | Flags.binary)) == 0) return false;
             if (output.getSize() != op.output.getSize()) return false;
             if (code() != op.code()) return false;
             if (code() == OpCode.CPUI_COPY) return false; // Let copy propagation deal with this
             if (inrefs.size() != op.inrefs.size()) return false;
-            for (int i = 0; i < inrefs.size(); ++i)
-            {
+            for (int i = 0; i < inrefs.size(); ++i) {
                 Varnode vn1 = getIn(i);
                 Varnode vn2 = op.getIn(i);
                 if (vn1 == vn2) continue;
@@ -594,11 +590,14 @@ namespace Sla.DECCORE
             bool movingLoad = false;
             if (getEvalType() == PcodeOp.Flags.special) {
                 if (code() == OpCode.CPUI_LOAD)
-                    movingLoad = true;  // Allow LOAD to be moved with additional restrictions
+                    // Allow LOAD to be moved with additional restrictions
+                    movingLoad = true;
                 else
-                    return false;   // Don't move special ops
+                    // Don't move special ops
+                    return false;
             }
-            if (parent != point.parent) return false;  // Not in the same block
+            // Not in the same block
+            if (parent != point.parent) return false;
             if (output != (Varnode)null) {
                 // Output cannot be moved past an op that reads it
                 IEnumerator<PcodeOp> iter = output.beginDescend();
@@ -606,19 +605,17 @@ namespace Sla.DECCORE
                     PcodeOp readOp = iter.Current;
                     if (readOp.parent != parent) continue;
                     if (readOp.start.getOrder() <= point.start.getOrder())
-                        return false;       // Is in the block and is read before (or at) -point-
+                        // Is in the block and is read before (or at) -point-
+                        return false;
                 }
             }
             // Only allow this op to be moved across a CALL in very restrictive circumstances
             bool crossCalls = false;
-            if (getEvalType() != PcodeOp.Flags.special)
-            {
+            if (getEvalType() != PcodeOp.Flags.special) {
                 // Check for a normal op where all inputs and output are not address tied
-                if (output != (Varnode)null && !output.isAddrTied() && !output.isPersist())
-                {
+                if (output != (Varnode)null && !output.isAddrTied() && !output.isPersist()) {
                     int i;
-                    for (i = 0; i < numInput(); ++i)
-                    {
+                    for (i = 0; i < numInput(); ++i) {
                         Varnode vn = getIn(i);
                         if (vn.isAddrTied() || vn.isPersist())
                             break;
@@ -628,35 +625,30 @@ namespace Sla.DECCORE
                 }
             }
             List<Varnode> tiedList = new List<Varnode>();
-            for (int i = 0; i < numInput(); ++i)
-            {
+            for (int i = 0; i < numInput(); ++i) {
                 Varnode vn = getIn(i);
                 if (vn.isAddrTied())
                     tiedList.Add(vn);
             }
-            list<PcodeOp*>::iterator biter = basiciter;
-            do
-            {
-                ++biter;
-                PcodeOp* op = *biter;
-                if (op.getEvalType() == PcodeOp.Flags.special)
-                {
-                    switch (op.code())
-                    {
+            // IEnumerator<PcodeOp> biter = basiciter;
+            int bposition = _basicPosition;
+            do {
+                // ++biter;
+                bposition++;
+                PcodeOp op = biter.Current;
+                if (op.getEvalType() == PcodeOp.Flags.special) {
+                    switch (op.code()) {
                         case OpCode.CPUI_LOAD:
-                            if (output != (Varnode)null)
-                            {
+                            if (output != (Varnode)null) {
                                 if (output.isAddrTied()) return false;
                             }
                             break;
                         case OpCode.CPUI_STORE:
                             if (movingLoad)
                                 return false;
-                            else
-                            {
+                            else {
                                 if (!tiedList.empty()) return false;
-                                if (output != (Varnode)null)
-                                {
+                                if (output != (Varnode)null) {
                                     if (output.isAddrTied()) return false;
                                 }
                             }
@@ -674,18 +666,15 @@ namespace Sla.DECCORE
                             return false;
                     }
                 }
-                if (op.output != (Varnode)null)
-                {
-                    if (movingLoad)
-                    {
+                if (op.output != (Varnode)null) {
+                    if (movingLoad) {
                         if (op.output.isAddrTied()) return false;
                     }
-                    for (int i = 0; i < tiedList.size(); ++i)
-                    {
+                    for (int i = 0; i < tiedList.size(); ++i) {
                         Varnode vn = tiedList[i];
-                        if (vn.overlap(*op.output) >= 0)
+                        if (vn.overlap(op.output) >= 0)
                             return false;
-                        if (op.output.overlap(*vn) >= 0)
+                        if (op.output.overlap(vn) >= 0)
                             return false;
                     }
                 }
@@ -700,7 +689,7 @@ namespace Sla.DECCORE
         public OpCode code() => opcode.getOpcode();
 
         /// Return \b true if inputs commute
-        public bool isCommutative() => ((flags & PcodeOp.Flags.commutative)!= 0);
+        public bool isCommutative() => ((flags & Flags.commutative) != 0);
 
         /// Calculate the constant output produced by this op
         /// Assuming all the inputs to this op are constants, compute the constant result of evaluating
@@ -715,22 +704,18 @@ namespace Sla.DECCORE
             Varnode vn1;
 
             vn0 = getIn(0);
-            if (vn0.getSymbolEntry() != (SymbolEntry)null)
-            {
+            if (vn0.getSymbolEntry() != (SymbolEntry)null) {
                 markedInput = true;
             }
-            switch (getEvalType())
-            {
+            switch (getEvalType()) {
                 case PcodeOp.Flags.unary:
                     return opcode.evaluateUnary(output.getSize(), vn0.getSize(), vn0.getOffset());
                 case PcodeOp.Flags.binary:
                     vn1 = getIn(1);
-                    if (vn1.getSymbolEntry() != (SymbolEntry)null)
-                    {
+                    if (vn1.getSymbolEntry() != (SymbolEntry)null) {
                         markedInput = true;
                     }
-                    return opcode.evaluateBinary(output.getSize(), vn0.getSize(),
-                                  vn0.getOffset(), vn1.getOffset());
+                    return opcode.evaluateBinary(output.getSize(), vn0.getSize(), vn0.getOffset(), vn1.getOffset());
                 default:
                     break;
             }
@@ -744,8 +729,7 @@ namespace Sla.DECCORE
         public void collapseConstantSymbol(Varnode newConst)
         {
             Varnode copyVn = (Varnode)null;
-            switch (code())
-            {
+            switch (code()) {
                 case OpCode.CPUI_SUBPIECE:
                     if (getIn(1).getOffset() != 0)
                         return;             // Must be truncating high bytes
@@ -768,8 +752,7 @@ namespace Sla.DECCORE
                 case OpCode.CPUI_INT_OR:
                 case OpCode.CPUI_INT_XOR:
                     copyVn = getIn(0);
-                    if (copyVn.getSymbolEntry() == (SymbolEntry)null)
-                    {
+                    if (copyVn.getSymbolEntry() == (SymbolEntry)null) {
                         copyVn = getIn(1);
                     }
                     break;
@@ -787,20 +770,18 @@ namespace Sla.DECCORE
         // \return the next PcodeOp or \e null
         public PcodeOp nextOp()
         {
-            list<PcodeOp*>::iterator iter;
-            BlockBasic* p;
-
-            p = parent;         // Current parent
+            IEnumerator<PcodeOp> iter;
+            // Current parent
+            BlockBasic p = parent ?? throw new BugException();
             iter = basiciter;       // Current iterator
 
             iter++;
-            while (iter == p.endOp())
-            {
+            while (iter == p.endOp()) {
                 if ((p.sizeOut() != 1) && (p.sizeOut() != 2)) return (PcodeOp)null;
-                p = (BlockBasic*)p.getOut(0);
+                p = (BlockBasic)p.getOut(0);
                 iter = p.beginOp();
             }
-            return *iter;
+            return iter.Current;
         }
 
         /// Return the previous op within this op's basic block or \e null
@@ -809,7 +790,7 @@ namespace Sla.DECCORE
         /// \return the previous PcodeOp or \e null
         public PcodeOp previousOp()
         {
-            list<PcodeOp>::iterator iter;
+            IEnumerator<PcodeOp> iter;
 
             if (basiciter == parent.beginOp()) return (PcodeOp)null;
             iter = basiciter;
@@ -825,14 +806,13 @@ namespace Sla.DECCORE
         /// \return the starting PcodeOp
         public PcodeOp target()
         {
-            PcodeOp* retop;
-            list<PcodeOp*>::iterator iter;
-            iter = isDead() ? insertiter : basiciter;
-            retop = *iter;
-            while ((retop.flags & PcodeOp.Flags.startmark) == 0)
-            {
-                --iter;
-                retop = *iter;
+            // IEnumerator<PcodeOp> iter = isDead() ? insertiter : basiciter;
+            LinkedListNode<PcodeOp> scannedNode = _deadAliveNode;
+            PcodeOp retop = scannedNode.Value;
+            while ((retop.flags & Flags.startmark) == 0) {
+                if (null == scannedNode.Previous) break;
+                scannedNode = scannedNode.Previous;
+                retop = scannedNode.Value;
             }
             return retop;
         }
@@ -849,10 +829,9 @@ namespace Sla.DECCORE
             ulong resmask, val;
 
             size = output.getSize();
-            ulong fullmask = Globals.calc_mask(size);
+            ulong fullmask = Globals.calc_mask((uint)size);
 
-            switch (opcode.getOpcode())
-            {
+            switch (opcode.getOpcode()) {
                 case OpCode.CPUI_INT_EQUAL:
                 case OpCode.CPUI_INT_NOTEQUAL:
                 case OpCode.CPUI_INT_SLESS:
@@ -918,8 +897,7 @@ namespace Sla.DECCORE
                                 // Shift over remaining portion of sa
                                 resmask >>= (sa - 8 * sizeof(ulong));
                             }
-                            else
-                            {
+                            else {
                                 // Fill in one bits from part of mask not originally
                                 // calculated
                                 ulong tmp = 0;
@@ -951,8 +929,7 @@ namespace Sla.DECCORE
                 case OpCode.CPUI_INT_DIV:
                     val = getIn(0).getNZMask();
                     resmask = Globals.coveringmask(val);
-                    if (getIn(1).isConstant())
-                    {
+                    if (getIn(1).isConstant()) {
                         // Dividing by power of 2 is equiv to right shift
                         // if the denom is bigger than a power of 2, then
                         // the result still has at least that many highsig zerobits
@@ -984,10 +961,9 @@ namespace Sla.DECCORE
                         else
                             resmask = 0;
                     }
-                    else
-                    {           // Extended precision
-                        if (sz1 < sizeof(ulong))
-                        {
+                    else {
+                        // Extended precision
+                        if (sz1 < sizeof(ulong)) {
                             resmask >>= 8 * sz1;
                             if (sz1 > 0)
                                 resmask |= fullmask << (8 * (sizeof(ulong) - sz1));
@@ -1008,48 +984,42 @@ namespace Sla.DECCORE
                     sz1 = (size > sizeof(ulong)) ? 8 * size - 1 : Globals.mostsigbit_set(val);
                     if (sz1 == -1)
                         resmask = 0;
-                    else
-                    {
+                    else {
                         sz2 = (size > sizeof(ulong)) ? 8 * size - 1 : Globals.mostsigbit_set(resmask);
                         if (sz2 == -1)
                             resmask = 0;
-                        else
-                        {
+                        else {
                             if (sz1 + sz2 < 8 * size - 2)
                                 fullmask >>= (8 * size - 2 - sz1 - sz2);
                             sz1 = Globals.leastsigbit_set(val);
                             sz2 = Globals.leastsigbit_set(resmask);
-                            resmask = (~((ulong)0)) << (sz1 + sz2);
+                            resmask = ulong.MaxValue << (sz1 + sz2);
                             resmask &= fullmask;
                         }
                     }
                     break;
                 case OpCode.CPUI_INT_ADD:
                     resmask = getIn(0).getNZMask();
-                    if (resmask != fullmask)
-                    {
+                    if (resmask != fullmask) {
                         resmask |= getIn(1).getNZMask();
-                        resmask |= (resmask << 1);  // Account for possible carries
+                        // Account for possible carries
+                        resmask |= (resmask << 1);
                         resmask &= fullmask;
                     }
                     break;
                 case OpCode.CPUI_MULTIEQUAL:
                     if (inrefs.size() == 0)
                         resmask = fullmask;
-                    else
-                    {
+                    else {
                         int i = 0;
                         resmask = 0;
-                        if (cliploop)
-                        {
-                            for (; i < inrefs.size(); ++i)
-                            {
+                        if (cliploop) {
+                            for (; i < inrefs.size(); ++i) {
                                 if (parent.isLoopIn(i)) continue;
                                 resmask |= getIn(i).getNZMask();
                             }
                         }
-                        else
-                        {
+                        else {
                             for (; i < inrefs.size(); ++i)
                                 resmask |= getIn(i).getNZMask();
                         }
@@ -1059,7 +1029,8 @@ namespace Sla.DECCORE
                 case OpCode.CPUI_CALLIND:
                 case OpCode.CPUI_CPOOLREF:
                     if (isCalculatedBool())
-                        resmask = 1;        // In certain cases we know the output is strictly boolean
+                        // In certain cases we know the output is strictly boolean
+                        resmask = 1;
                     else
                         resmask = fullmask;
                     break;
@@ -1081,7 +1052,7 @@ namespace Sla.DECCORE
             if (parent == bop.parent)
                 return (start.getOrder() < bop.start.getOrder()) ? -1 : 1;
 
-            FlowBlock common = FlowBlock.findCommonBlock(parent, bop.parent);
+            FlowBlock? common = FlowBlock.findCommonBlock(parent, bop.parent);
             if (common == parent)
                 return -1;
             if (common == bop.parent)
@@ -1103,9 +1074,9 @@ namespace Sla.DECCORE
         /// \param s is the stream to print to
         public void printDebug(TextWriter s)
         {
-            s << start << ": ";
+            s.Write($"{start}: ");
             if (isDead() || (parent == (BlockBasic)null))
-                s << "**";
+                s.Write("**");
             else
                 printRaw(s);
         }
@@ -1119,57 +1090,47 @@ namespace Sla.DECCORE
             encoder.openElement(ElementId.ELEM_OP);
             encoder.writeSignedInteger(AttributeId.ATTRIB_CODE, (int)code());
             start.encode(encoder);
-            if (output == (Varnode)null)
-            {
+            if (output == (Varnode)null) {
                 encoder.openElement(ElementId.ELEM_VOID);
                 encoder.closeElement(ElementId.ELEM_VOID);
             }
-            else
-            {
+            else {
                 encoder.openElement(ElementId.ELEM_ADDR);
                 encoder.writeUnsignedInteger(AttributeId.ATTRIB_REF, output.getCreateIndex());
                 encoder.closeElement(ElementId.ELEM_ADDR);
             }
-            for (int i = 0; i < inrefs.size(); ++i)
-            {
-                Varnode* vn = getIn(i);
+            for (int i = 0; i < inrefs.size(); ++i) {
+                Varnode? vn = getIn(i);
                 if (vn == (Varnode)null) {
                     encoder.openElement(ElementId.ELEM_VOID);
                     encoder.closeElement(ElementId.ELEM_VOID);
                 }
-                else if (vn.getSpace().getType() == spacetype.IPTR_IOP)
-                {
-                    if ((i == 1) && (code() == OpCode.CPUI_INDIRECT))
-                    {
-                        PcodeOp* indop = PcodeOp.getOpFromConst(vn.getAddr());
+                else if (vn.getSpace().getType() == spacetype.IPTR_IOP) {
+                    if ((i == 1) && (code() == OpCode.CPUI_INDIRECT)) {
+                        PcodeOp indop = PcodeOp.getOpFromConst(vn.getAddr());
                         encoder.openElement(ElementId.ELEM_IOP);
                         encoder.writeUnsignedInteger(AttributeId.ATTRIB_VALUE, indop.getSeqNum().getTime());
                         encoder.closeElement(ElementId.ELEM_IOP);
                     }
-                    else
-                    {
+                    else {
                         encoder.openElement(ElementId.ELEM_VOID);
                         encoder.closeElement(ElementId.ELEM_VOID);
                     }
                 }
-                else if (vn.getSpace().getType() == spacetype.IPTR_CONSTANT)
-                {
-                    if ((i == 0) && ((code() == OpCode.CPUI_STORE) || (code() == OpCode.CPUI_LOAD)))
-                    {
-                        AddrSpace* spc = vn.getSpaceFromConst();
+                else if (vn.getSpace().getType() == spacetype.IPTR_CONSTANT) {
+                    if ((i == 0) && ((code() == OpCode.CPUI_STORE) || (code() == OpCode.CPUI_LOAD))) {
+                        AddrSpace spc = vn.getSpaceFromConst();
                         encoder.openElement(ElementId.ELEM_SPACEID);
                         encoder.writeSpace(AttributeId.ATTRIB_NAME, spc);
                         encoder.closeElement(ElementId.ELEM_SPACEID);
                     }
-                    else
-                    {
+                    else {
                         encoder.openElement(ElementId.ELEM_ADDR);
                         encoder.writeUnsignedInteger(AttributeId.ATTRIB_REF, vn.getCreateIndex());
                         encoder.closeElement(ElementId.ELEM_ADDR);
                     }
                 }
-                else
-                {
+                else {
                     encoder.openElement(ElementId.ELEM_ADDR);
                     encoder.writeUnsignedInteger(AttributeId.ATTRIB_REF, vn.getCreateIndex());
                     encoder.closeElement(ElementId.ELEM_ADDR);

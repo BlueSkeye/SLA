@@ -1,9 +1,4 @@
-﻿using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -33,10 +28,9 @@ namespace Sla.DECCORE
         {
             if (normalvn.isInput())
                 return true;
-            FlowBlock* defblock = normalvn.getDef().getParent();
-            FlowBlock* switchblock = pathMeld.getOp(0).getParent();
-            while (switchblock != (FlowBlock)null)
-            {
+            FlowBlock defblock = normalvn.getDef().getParent();
+            FlowBlock? switchblock = pathMeld.getOp(0).getParent();
+            while (switchblock != (FlowBlock)null) {
                 if (switchblock == defblock)
                     return true;
                 switchblock = switchblock.getImmedDom();
@@ -45,14 +39,15 @@ namespace Sla.DECCORE
         }
 
         protected virtual bool foldInOneGuard(Funcdata fd, GuardRecord guard, JumpTable jump)
-        { // The are two main cases here:
-          //    If we recovered a switch in a loop,
-          //       the guard is also the loop condition, so we don't want to remove it.
-          //
-          //    If the guard is just deciding whether or not to use a default switch value,
-          //       the guard will disappear anyway because the normalization foldin will make all its blocks donothings
-          //
-          // So we don't make any special mods, in case there are extra statements in these blocks
+        {
+            // The are two main cases here:
+            //    If we recovered a switch in a loop,
+            //       the guard is also the loop condition, so we don't want to remove it.
+            //
+            //    If the guard is just deciding whether or not to use a default switch value,
+            //       the guard will disappear anyway because the normalization foldin will make all its blocks donothings
+            //
+            // So we don't make any special mods, in case there are extra statements in these blocks
 
             // The final block in the table is the single value produced by the model2 guard
             jump.setLastAsMostCommon();    // It should be the default block
@@ -68,8 +63,7 @@ namespace Sla.DECCORE
         /// Pass in the prior PathMeld calculation
         public void initializeStart(PathMeld pMeld)
         {
-            if (pMeld.empty())
-            {
+            if (pMeld.empty()) {
                 extravn = (Varnode)null;
                 return;
             }
@@ -78,44 +72,42 @@ namespace Sla.DECCORE
             origPathMeld.set(pMeld);
         }
 
-        public override bool recoverModel(Funcdata fd, PcodeOp indop, uint matchsize,
-            uint maxtablesize)
-        { // Try to recover a jumptable using the second model
-          // Basically there is a guard on the main switch variable,
-          // Along one path, an intermediate value is set to a default constant.
-          // Along the other path, the intermediate value results in a straight line calculation from the switch var
-          // The two-pathed intermediate value comes together in a MULTIEQUAL, and there is a straightline
-          // calculation to the BRANCHIND
+        public override bool recoverModel(Funcdata fd, PcodeOp indop, uint matchsize, uint maxtablesize)
+        {
+            // Try to recover a jumptable using the second model
+            // Basically there is a guard on the main switch variable,
+            // Along one path, an intermediate value is set to a default constant.
+            // Along the other path, the intermediate value results in a straight line calculation from the switch var
+            // The two-pathed intermediate value comes together in a MULTIEQUAL, and there is a straightline
+            // calculation to the BRANCHIND
 
             // We piggy back on the partial calculation from the basic model to see if we have the MULTIEQUAL
-            Varnode* othervn = (Varnode)null;
-            PcodeOp* copyop = (PcodeOp)null;
+            Varnode? othervn = (Varnode)null;
+            PcodeOp? copyop = (PcodeOp)null;
             ulong extravalue = 0;
-            Varnode* joinvn = extravn;  // extravn should be set to as far back as model 1 could trace
+            Varnode joinvn = extravn;  // extravn should be set to as far back as model 1 could trace
             if (joinvn == (Varnode)null) return false;
             if (!joinvn.isWritten()) return false;
-            PcodeOp* multiop = joinvn.getDef();
+            PcodeOp multiop = joinvn.getDef();
             if (multiop.code() != OpCode.CPUI_MULTIEQUAL) return false;
             if (multiop.numInput() != 2) return false; // Must be exactly 2 paths
                                                         // Search for a constant along one of the paths
             int path;
-            for (path = 0; path < 2; ++path)
-            {
-                Varnode* vn = multiop.getIn(path);
+            for (path = 0; path < 2; ++path) {
+                Varnode vn = multiop.getIn(path);
                 if (!vn.isWritten()) continue;
                 copyop = vn.getDef();
                 if (copyop.code() != OpCode.CPUI_COPY) continue;
                 othervn = copyop.getIn(0);
-                if (othervn.isConstant())
-                {
+                if (othervn.isConstant()) {
                     extravalue = othervn.getOffset();
                     break;
                 }
             }
             if (path == 2) return false;
-            BlockBasic* rootbl = (BlockBasic*)multiop.getParent().getIn(1 - path);
+            BlockBasic rootbl = (BlockBasic)multiop.getParent().getIn(1 - path);
             int pathout = multiop.getParent().getInRevIndex(1 - path);
-            JumpValuesRangeDefault* jdef = new JumpValuesRangeDefault();
+            JumpValuesRangeDefault jdef = new JumpValuesRangeDefault();
             jrange = jdef;
             jdef.setExtraValue(extravalue);
             jdef.setDefaultVn(joinvn); // Emulate the default calculation from the join point
@@ -134,20 +126,23 @@ namespace Sla.DECCORE
 
         public override void findUnnormalized(uint maxaddsub, uint maxleftright, uint maxext)
         {
-            normalvn = pathMeld.getVarnode(varnodeIndex);   // Normalized switch variable
-            if (checkNormalDominance())
-            {   // If the normal switch variable dominates the switch itself
-                JumpBasic::findUnnormalized(maxaddsub, maxleftright, maxext);   // We can use the basic form of calculating the unnormalized
+            // Normalized switch variable
+            normalvn = pathMeld.getVarnode(varnodeIndex);
+            if (checkNormalDominance()) {
+                // If the normal switch variable dominates the switch itself
+                // We can use the basic form of calculating the unnormalized
+                base.findUnnormalized(maxaddsub, maxleftright, maxext);
                 return;
             }
 
             // We have the unusual situation that we must go BACKWARD from the unnormalized variable
             // to get to the normalized variable
             switchvn = extravn;
-            PcodeOp* multiop = extravn.getDef();   // Already tested that this is a MULTIEQUAL with 2 inputs
-            if ((multiop.getIn(0) == normalvn) || (multiop.getIn(1) == normalvn))
-            {
-                normalvn = switchvn;    // No value difference between normalized and unnormalized
+            // Already tested that this is a MULTIEQUAL with 2 inputs
+            PcodeOp multiop = extravn.getDef();
+            if ((multiop.getIn(0) == normalvn) || (multiop.getIn(1) == normalvn)) {
+                // No value difference between normalized and unnormalized
+                normalvn = switchvn;
             }
             else
                 throw new LowlevelError("Backward normalization not implemented");
@@ -155,8 +150,9 @@ namespace Sla.DECCORE
 
         public override JumpModel clone(JumpTable jt)
         {
-            JumpBasic2* res = new JumpBasic2(jt);
-            res.jrange = (JumpValuesRange*)jrange.clone();    // We only need to clone the JumpValues
+            JumpBasic2 res = new JumpBasic2(jt);
+            // We only need to clone the JumpValues
+            res.jrange = (JumpValuesRange)jrange.clone();
             return res;
         }
 
@@ -164,7 +160,7 @@ namespace Sla.DECCORE
         {
             extravn = (Varnode)null;
             origPathMeld.clear();
-            JumpBasic::clear();
+            base.clear();
         }
     }
 }
