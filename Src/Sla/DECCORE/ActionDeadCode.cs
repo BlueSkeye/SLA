@@ -51,12 +51,12 @@ namespace Sla.DECCORE
         /// \param worklist is the current stack of dirty Varnodes
         private static void propagateConsumed(List<Varnode> worklist)
         {
-            Varnode* vn = worklist.GetLastItem();
+            Varnode vn = worklist.GetLastItem();
             worklist.RemoveLastItem();
             ulong outc = vn.getConsume();
             vn.clearConsumeList();
 
-            PcodeOp* op = vn.getDef(); // Assume vn is written
+            PcodeOp op = vn.getDef(); // Assume vn is written
 
             int sz;
             ulong a, b;
@@ -132,7 +132,7 @@ namespace Sla.DECCORE
                     pushConsumed(outc, op.getIn(0), worklist);
                     if (op.getIn(1).getSpace().getType() == spacetype.IPTR_IOP)
                     {
-                        PcodeOp* indop = PcodeOp.getOpFromConst(op.getIn(1).getAddr());
+                        PcodeOp indop = PcodeOp.getOpFromConst(op.getIn(1).getAddr());
                         if (!indop.isDead())
                         {
                             if (indop.code() == OpCode.CPUI_COPY)
@@ -327,7 +327,7 @@ namespace Sla.DECCORE
         /// \param worklist will hold input Varnodes that can propagate their consume property
         private static void markConsumedParameters(FuncCallSpecs fc, List<Varnode> worklist)
         {
-            PcodeOp* callOp = fc.getOp();
+            PcodeOp callOp = fc.getOp();
             pushConsumed(~((ulong)0), callOp.getIn(0), worklist);      // In all cases the first operand is fully consumed
             if (fc.isInputLocked() || fc.isInputActive())
             {       // If the prototype is locked in, or in active recovery
@@ -337,7 +337,7 @@ namespace Sla.DECCORE
             }
             for (int i = 1; i < callOp.numInput(); ++i)
             {
-                Varnode* vn = callOp.getIn(i);
+                Varnode vn = callOp.getIn(i);
                 ulong consumeVal;
                 if (vn.isAutoLive())
                     consumeVal = ~((ulong)0);
@@ -393,7 +393,7 @@ namespace Sla.DECCORE
         {
             if (vn.isConstant()) return true;
             if (!vn.isWritten()) return false;
-            PcodeOp* op = vn.getDef();
+            PcodeOp op = vn.getDef();
             while (op.code() == OpCode.CPUI_COPY)
             {
                 vn = op.getIn(0);

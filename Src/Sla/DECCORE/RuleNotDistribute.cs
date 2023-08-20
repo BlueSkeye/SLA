@@ -29,7 +29,7 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_BOOL_NEGATE);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             PcodeOp? compop = op.getIn(0).getDef();
             PcodeOp newneg1, newneg2;

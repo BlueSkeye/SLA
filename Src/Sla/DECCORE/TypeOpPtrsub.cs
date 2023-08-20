@@ -48,7 +48,7 @@ namespace Sla.DECCORE
 
         public override Datatype getOutputToken(PcodeOp op, CastStrategy castStrategy)
         {
-            TypePointer* ptype = (TypePointer*)op.getIn(0).getHighTypeReadFacing(op);
+            TypePointer* ptype = (TypePointer)op.getIn(0).getHighTypeReadFacing(op);
             if (ptype.getMetatype() == type_metatype.TYPE_PTR)
             {
                 ulong offset = AddrSpace.addressToByte(op.getIn(1).getOffset(), ptype.getWordSize());

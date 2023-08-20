@@ -30,7 +30,7 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_FLOAT_FLOAT2FLOAT);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode invn = op.getIn(0);
             Varnode outvn = op.getOut();

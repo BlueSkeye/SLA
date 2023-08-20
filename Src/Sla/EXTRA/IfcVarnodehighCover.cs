@@ -17,7 +17,7 @@ namespace Sla.EXTRA
         /// Information about the code ranges where the HighVariable is in scope is printed.
         public override void execute(TextReader s)
         {
-            Varnode* vn;
+            Varnode vn;
 
             vn = dcp.readVarnode(s);
             if (vn == (Varnode)null)

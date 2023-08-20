@@ -23,7 +23,7 @@ namespace Sla.DECCORE
         // applies to all opcodes
         /// \class RulePropagateCopy
         /// \brief Propagate the input of a COPY to all the places that read the output
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             int i;
             PcodeOp copyop;

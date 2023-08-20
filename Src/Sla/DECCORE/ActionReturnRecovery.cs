@@ -20,7 +20,7 @@ namespace Sla.DECCORE
         /// \param data is the function being analyzed
         private static void buildReturnOutput(ParamActive active, PcodeOp retop, Funcdata data)
         {
-            List<Varnode*> newparam;
+            List<Varnode> newparam;
 
             newparam.Add(retop.getIn(0)); // Keep the first param (the return indirect reference)
             for (int i = 0; i < active.getNumTrials(); ++i)
@@ -34,16 +34,16 @@ namespace Sla.DECCORE
                 data.opSetAllInput(retop, newparam);
             else if (newparam.size() == 3)
             { // Two piece concatenation case
-                Varnode* lovn = newparam[1];
-                Varnode* hivn = newparam[2];
+                Varnode lovn = newparam[1];
+                Varnode hivn = newparam[2];
                 ParamTrial & triallo(active.getTrial(0));
                 ParamTrial & trialhi(active.getTrial(1));
                 Address joinaddr = data.getArch().constructJoinAddress(data.getArch().translate,
                                             trialhi.getAddress(), trialhi.getSize(),
                                             triallo.getAddress(), triallo.getSize());
-                PcodeOp* newop = data.newOp(2, retop.getAddr());
+                PcodeOp newop = data.newOp(2, retop.getAddr());
                 data.opSetOpcode(newop, OpCode.CPUI_PIECE);
-                Varnode* newwhole = data.newVarnodeOut(trialhi.getSize() + triallo.getSize(), joinaddr, newop);
+                Varnode newwhole = data.newVarnodeOut(trialhi.getSize() + triallo.getSize(), joinaddr, newop);
                 newwhole.setWriteMask();       // Don't let new Varnode cause additional heritage
                 data.opInsertBefore(newop, retop);
                 newparam.RemoveLastItem();
@@ -58,7 +58,7 @@ namespace Sla.DECCORE
                 newparam.clear();
                 newparam.Add(retop.getIn(0));
                 int offmatch = 0;
-                Varnode* preexist = (Varnode)null;
+                Varnode preexist = (Varnode)null;
                 for (int i = 0; i < active.getNumTrials(); ++i)
                 {
                     ParamTrial & curtrial(active.getTrial(i));
@@ -72,14 +72,14 @@ namespace Sla.DECCORE
                     else if (offmatch == curtrial.getOffset())
                     {
                         offmatch += curtrial.getSize();
-                        Varnode* vn = retop.getIn(curtrial.getSlot());
+                        Varnode vn = retop.getIn(curtrial.getSlot());
                         // Concatenate the preexisting pieces with this new piece
-                        PcodeOp* newop = data.newOp(2, retop.getAddr());
+                        PcodeOp newop = data.newOp(2, retop.getAddr());
                         data.opSetOpcode(newop, OpCode.CPUI_PIECE);
                         Address addr = preexist.getAddr();
                         if (vn.getAddr() < addr)
                             addr = vn.getAddr();
-                        Varnode* newout = data.newVarnodeOut(preexist.getSize() + vn.getSize(), addr, newop);
+                        Varnode newout = data.newVarnodeOut(preexist.getSize() + vn.getSize(), addr, newop);
                         newout.setWriteMask();     // Don't let new Varnode cause additional heritage
                         data.opSetInput(newop, vn, 0);  // Most sig part
                         data.opSetInput(newop, preexist, 1);

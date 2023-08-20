@@ -14,13 +14,9 @@ namespace Sla.EXTRA
         {
             DynamicHash dhash = new DynamicHash();
 
-            VarnodeLocSet::const_iterator iter, enditer;
-            pair<set<ulong>::iterator, bool> res;
-            iter = fd.beginLoc();
-            enditer = fd.endLoc();
-            while (iter != enditer) {
-                Varnode vn = *iter;
-                ++iter;
+            VarnodeLocSet.Enumerator iter = fd.beginLoc();
+            while (iter.MoveNext()) {
+                Varnode vn = iter.Current;
                 if (vn.isAnnotation()) continue;
                 if (vn.isConstant()) {
                     PcodeOp op = vn.loneDescend() ?? throw new BugException();
@@ -81,7 +77,7 @@ namespace Sla.EXTRA
                 dcp.conf.clearAnalysis(fd); // Clear any old analysis
                 dcp.conf.allacts.getCurrent().reset(fd);
                 start_time = DateTime.UtcNow;
-                dcp.conf.allacts.getCurrent().perform(*fd);
+                dcp.conf.allacts.getCurrent().perform(fd);
                 end_time = DateTime.UtcNow;
                 status.optr.Write($"Decompiled {fd.getName()}");
                 //	  *status.optr << ": " << hex << fd.getAddress().getOffset();
@@ -90,7 +86,7 @@ namespace Sla.EXTRA
                 status.optr.WriteLine($" time={(int)duration.TotalMilliseconds} ms");
                 check(fd, status.optr);
             }
-            catch (LowlevelError err) {
+            catch (LowlevelError) {
                 status.optr.WriteLine("Skipping {fd.getName()}: {err.ToString()}");
             }
             dcp.conf.clearAnalysis(fd);

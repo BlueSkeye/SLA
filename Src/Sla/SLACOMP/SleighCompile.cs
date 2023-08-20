@@ -182,13 +182,13 @@ namespace Sla.SLACOMP
         /// on the \b lenientconflicterrors setting.
         private void buildDecisionTrees()
         {
-            DecisionProperties props;
+            DecisionProperties props = new DecisionProperties();
             root.buildDecisionTree(props);
 
             for (int i = 0; i < tables.size(); ++i)
                 tables[i].buildDecisionTree(props);
 
-            List<pair<Constructor, Constructor>> ierrors = props.getIdentErrors();
+            List<Tuple<Constructor, Constructor>> ierrors = props.getIdentErrors();
             if (ierrors.size() != 0)
             {
                 string identMsg = "Constructor has identical pattern to constructor at ";
@@ -256,46 +256,40 @@ namespace Sla.SLACOMP
             ConsistencyChecker checker = new ConsistencyChecker(this, root, warnunnecessarypcode,
                 warndeadtemps, largetemporarywarning);
 
-            if (!checker.testSizeRestrictions())
-            {
+            if (!checker.testSizeRestrictions()) {
                 errors += 1;
                 return;
             }
-            if (!checker.testTruncations())
-            {
+            if (!checker.testTruncations()) {
                 errors += 1;
                 return;
             }
-            if ((!warnunnecessarypcode) && (checker.getNumUnnecessaryPcode() > 0))
-            {
-                ostringstream msg;
-                msg << dec << checker.getNumUnnecessaryPcode();
-                msg << " unnecessary extensions/truncations were converted to copies";
-                reportWarning(msg.str());
+            if ((!warnunnecessarypcode) && (checker.getNumUnnecessaryPcode() > 0)) {
+                TextWriter msg = new StringWriter();
+                msg.Write(checker.getNumUnnecessaryPcode());
+                msg.Write(" unnecessary extensions/truncations were converted to copies");
+                reportWarning(msg.ToString());
                 reportWarning("Use -u switch to list each individually");
             }
             checker.optimizeAll();
-            if (checker.getNumReadNoWrite() > 0)
-            {
+            if (checker.getNumReadNoWrite() > 0) {
                 errors += 1;
                 return;
             }
-            if ((!warndeadtemps) && (checker.getNumWriteNoRead() > 0))
-            {
-                ostringstream msg;
-                msg << dec << checker.getNumWriteNoRead();
-                msg << " operations wrote to temporaries that were not read";
-                reportWarning(msg.str());
+            if ((!warndeadtemps) && (checker.getNumWriteNoRead() > 0)) {
+                TextWriter msg = new StringWriter();
+                msg.Write(checker.getNumWriteNoRead());
+                msg.Write(" operations wrote to temporaries that were not read");
+                reportWarning(msg.ToString());
                 reportWarning("Use -t switch to list each individually");
             }
             checker.testLargeTemporary();
-            if ((!largetemporarywarning) && (checker.getNumLargeTemporaries() > 0))
-            {
-                ostringstream msg;
-                msg << dec << checker.getNumLargeTemporaries();
-                msg << " constructors contain temporaries larger than ";
-                msg << SleighBase::MAX_UNIQUE_SIZE << " bytes";
-                reportWarning(msg.str());
+            if ((!largetemporarywarning) && (checker.getNumLargeTemporaries() > 0)) {
+                TextWriter msg = new StringWriter();
+                msg.Write(checker.getNumLargeTemporaries());
+                msg.Write(" constructors contain temporaries larger than ");
+                msg.Write($"{SleighBase.MAX_UNIQUE_SIZE} bytes");
+                reportWarning(msg.ToString());
                 reportWarning("Use -o switch to list each individually.");
             }
         }
@@ -312,15 +306,14 @@ namespace Sla.SLACOMP
         /// \return the set index of an old matching offset or -1
         private static int findCollision(Dictionary<ulong, int> local2Operand, List<ulong> locals, int operand)
         {
-            for (int i = 0; i < locals.size(); ++i)
-            {
-                pair<Dictionary<ulong, int>::iterator, bool> res;
-                res = local2Operand.insert(pair<ulong, int>(locals[i], operand));
-                if (!res.second)
-                {
-                    int oldIndex = (*res.first).second;
+            for (int i = 0; i < locals.size(); ++i) {
+                int oldIndex;
+                if (local2Operand.TryGetValue(locals[i], out oldIndex)) {
                     if (oldIndex != operand)
                         return oldIndex;
+                }
+                else {
+                    local2Operand.Add(locals[i], operand);
                 }
             }
             return -1;
@@ -347,7 +340,7 @@ namespace Sla.SLACOMP
             bool noCollisions = true;
             Dictionary<ulong, int> collect = new Dictionary<ulong, int>();
             for (int i = 0; i < ct.getNumOperands(); ++i) {
-                List<ulong> newCollect;
+                List<ulong> newCollect = new List<ulong>();
                 ct.getOperand(i).collectLocalValues(newCollect);
                 if (newCollect.empty()) continue;
                 int collideOperand = findCollision(collect, newCollect, i);
@@ -514,14 +507,13 @@ namespace Sla.SLACOMP
         private bool expandMacros(ConstructTpl ctpl)
         {
             List<OpTpl> newvec = new List<OpTpl>();
-            IEnumerator<OpTpl> iter;
-            OpTpl op;
+            IEnumerator<OpTpl> iter = ctpl.getOpvec().GetEnumerator();
 
-            for (iter = ctpl.getOpvec().begin(); iter != ctpl.getOpvec().end(); ++iter) {
-                op = *iter;
-                if (op.getOpcode() == MACROBUILD) {
+            while (iter.MoveNext()) {
+                OpTpl op = iter.Current;
+                if (op.getOpcode() == OpCode.MACROBUILD) {
                     MacroBuilder builder = new MacroBuilder(this, newvec, ctpl.numLabels());
-                    int index = op.getIn(0).getOffset().getReal();
+                    int index = (int)op.getIn(0).getOffset().getReal();
                     if (index >= macrotable.size())
                         return false;
                     builder.setMacroOp(op);
@@ -629,7 +621,7 @@ namespace Sla.SLACOMP
         /// \param offset is the given offset
         /// \param ct is the Constructor to search
         /// \return the matchine local variable or null
-        private static VarnodeTpl findSize(ConstTpl offset, ConstructTpl ct)
+        private static VarnodeTpl? findSize(ConstTpl offset, ConstructTpl ct)
         {
             List<OpTpl> ops = ct.getOpvec();
             VarnodeTpl vn;
@@ -861,13 +853,13 @@ namespace Sla.SLACOMP
         ///< Get the source location of the given symbol's definition
         /// \param sym is the given symbol
         /// \return the filename and line number or null if location not found
-        public Location getLocation(SleighSymbol sym)
+        public Location? getLocation(SleighSymbol sym)
         {
             try {
                 return symbolLocationMap[sym];
             }
-            catch (out_of_range e) {
-                return nullptr;
+            catch (ArgumentOutOfRangeException) {
+                return null;
             }
         }
 
@@ -928,7 +920,7 @@ namespace Sla.SLACOMP
         public uint getUniqueAddr()
         {
             uint @base = getUniqueBase();
-            setUniqueBase(@base + SleighBase::MAX_UNIQUE_SIZE);
+            setUniqueBase(@base + SleighBase.MAX_UNIQUE_SIZE);
             return @base;
         }
 
@@ -1010,8 +1002,11 @@ namespace Sla.SLACOMP
             while (begin < contexttable.size())
             { // Define the context variables
                 sz = 1;
-                while ((begin + sz < contexttable.size()) && (contexttable[begin + sz].sym == contexttable[begin].sym))
+                while (   (begin + sz < contexttable.size())
+                       && (contexttable[begin + sz].sym == contexttable[begin].sym))
+                {
                     sz += 1;
+                }
                 context_offset = calcContextVarLayout(begin, sz, context_offset);
                 begin += sz;
             }
@@ -1032,8 +1027,7 @@ namespace Sla.SLACOMP
         /// \return the path string
         public string grabCurrentFilePath()
         {
-            if (relpath.empty()) return "";
-            return (relpath.GetLastItem() + filename.GetLastItem());
+            return (relpath.empty()) ? string.Empty : (relpath.GetLastItem() + filename.GetLastItem());
         }
 
         ///< Push a new source file to the current parse stack
@@ -1050,8 +1044,8 @@ namespace Sla.SLACOMP
             filename.Add(@base);
             if (relpath.empty() || FileManage.isAbsolutePath(path))
                 relpath.Add(path);
-            else
-            {           // Relative paths from successive includes, combine
+            else {
+                // Relative paths from successive includes, combine
                 string totalpath = relpath.GetLastItem();
                 totalpath += path;
                 relpath.Add(totalpath);
@@ -1126,7 +1120,7 @@ namespace Sla.SLACOMP
         /// \return the new token symbol
         public TokenSymbol defineToken(string name, ulong sz, int endian)
         {
-            uint size = sz;
+            uint size = (uint)sz;
             // delete sz;
             if ((size & 7) != 0) {
                 reportError(getCurrentLocation(), $"'{name}': token size must be multiple of 8");
@@ -1228,7 +1222,7 @@ namespace Sla.SLACOMP
                 reportError(getCurrentLocation(), err.ToString());
             }
             sections.Add(sym);
-            numSections = sections.Length;
+            numSections = (uint)sections.Count;
             return sym;
         }
 
@@ -1240,11 +1234,11 @@ namespace Sla.SLACOMP
         public void setEndian(int end)
         {
             setBigEndian((end == 1));
-            predefinedSymbols();        // Set up symbols now that we know endianess
+            // Set up symbols now that we know endianess
+            predefinedSymbols();
         }
 
         /// \brief Set instruction alignment for the SLEIGH specification
-        ///
         /// \param val is the alignment value in bytes. 1 is the default indicating no alignment
         public void setAlignment(int val)
         {
@@ -1252,7 +1246,6 @@ namespace Sla.SLACOMP
         }
 
         /// \brief Definition a set of Varnodes
-        ///
         /// Storage for each Varnode is allocated in sequence from the given address space,
         /// starting from the specified offset.
         /// \param spacesym is the given address space
@@ -1274,7 +1267,6 @@ namespace Sla.SLACOMP
         }
 
         /// \brief Define a new Varnode symbol as a subrange of bits within another symbol
-        ///
         /// If the ends of the range fall on byte boundaries, we
         /// simply define a normal VarnodeSymbol, otherwise we create
         /// a special symbol which is a place holder for the bitrange operator
@@ -1299,7 +1291,7 @@ namespace Sla.SLACOMP
                 // This can be reduced to an ordinary varnode definition
                 AddrSpace newspace = sym.getFixedVarnode().space;
                 ulong newoffset = sym.getFixedVarnode().offset;
-                int newsize = numb / 8;
+                int newsize = (int)numb / 8;
                 if (isBigEndian())
                     newoffset += (size - bitoffset - numb) / 8;
                 else

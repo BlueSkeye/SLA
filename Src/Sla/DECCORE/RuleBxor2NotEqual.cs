@@ -25,10 +25,10 @@ namespace Sla.DECCORE
         /// \brief Eliminate BOOL_XOR:  `V ^^ W  =>  V != W`
         public override getOpList(List<uint> oplist)
         {
-            oplist.Add(CPUI_BOOL_XOR);
+            oplist.Add(OpCode.CPUI_BOOL_XOR);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             data.opSetOpcode(op, OpCode.CPUI_INT_NOTEQUAL);
             return 1;

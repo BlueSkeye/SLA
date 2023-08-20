@@ -35,7 +35,7 @@ namespace Sla.DECCORE
             if (op.code() != OpCode.CPUI_INT_ZEXT) return false;
             if (!op.getIn(0).isWritten()) return false;
 
-            PcodeOp* carryop = op.getIn(0).getDef();
+            PcodeOp carryop = op.getIn(0).getDef();
             if (carryop.code() == OpCode.CPUI_INT_CARRY)
             { // Normal CARRY form
                 if (carryop.getIn(0) == lo1)
@@ -49,7 +49,7 @@ namespace Sla.DECCORE
             }
             if (carryop.code() == OpCode.CPUI_INT_LESS)
             { // Possible CARRY
-                Varnode* tmpvn = carryop.getIn(0);
+                Varnode tmpvn = carryop.getIn(0);
                 if (tmpvn.isConstant())
                 {
                     if (carryop.getIn(1) != lo1) return false;
@@ -63,9 +63,9 @@ namespace Sla.DECCORE
                 }
                 else if (tmpvn.isWritten())
                 {   // Calculate CARRY relative to result of loadd
-                    PcodeOp* loadd_op = tmpvn.getDef();    // This is the putative loadd
+                    PcodeOp loadd_op = tmpvn.getDef();    // This is the putative loadd
                     if (loadd_op.code() != OpCode.CPUI_INT_ADD) return false;
-                    Varnode* othervn;
+                    Varnode othervn;
                     if (loadd_op.getIn(0) == lo1)
                         othervn = loadd_op.getIn(1);
                     else if (loadd_op.getIn(1) == lo1)
@@ -76,7 +76,7 @@ namespace Sla.DECCORE
                     {
                         negconst = othervn.getOffset();
                         lo2 = (Varnode)null;
-                        Varnode* relvn = carryop.getIn(1);
+                        Varnode relvn = carryop.getIn(1);
                         if (relvn == lo1) return true;  // Comparison can be relative to lo1
                         if (!relvn.isConstant()) return false;
                         if (relvn.getOffset() != negconst) return false;   // Otherwise must be relative to (constant)lo2
@@ -85,7 +85,7 @@ namespace Sla.DECCORE
                     else
                     {
                         lo2 = othervn;      // Other side of putative loadd must be lo2
-                        Varnode* compvn = carryop.getIn(1);
+                        Varnode compvn = carryop.getIn(1);
                         if ((compvn == lo2) || (compvn == lo1))
                             return true;
                     }
@@ -133,7 +133,7 @@ namespace Sla.DECCORE
                 }
                 else if (i == 1)
                 {       // Assume we are at the bottom most of two adds
-                    Varnode* tmpvn = op.getIn(1 - slot1);
+                    Varnode tmpvn = op.getIn(1 - slot1);
                     if (!tmpvn.isWritten()) continue;
                     add2 = tmpvn.getDef();
                     if (add2.code() != OpCode.CPUI_INT_ADD) continue;

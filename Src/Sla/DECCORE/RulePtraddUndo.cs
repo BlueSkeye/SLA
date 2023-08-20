@@ -30,22 +30,22 @@ namespace Sla.DECCORE
         /// Once the correct type is found, the PTRADD must be converted back to an INT_ADD.
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_PTRADD);
+            oplist.Add(OpCode.CPUI_PTRADD);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* basevn;
+            Varnode basevn;
             TypePointer* tp;
 
             if (!data.hasTypeRecoveryStarted()) return 0;
             int size = (int)op.getIn(2).getOffset(); // Size the PTRADD thinks we are pointing
             basevn = op.getIn(0);
-            tp = (TypePointer*)basevn.getTypeReadFacing(op);
+            tp = (TypePointer)basevn.getTypeReadFacing(op);
             if (tp.getMetatype() == type_metatype.TYPE_PTR)                              // Make sure we are still a pointer
                 if (tp.getPtrTo().getSize() == AddrSpace.addressToByteInt(size, tp.getWordSize()))
                 {   // of the correct size
-                    Varnode* indVn = op.getIn(1);
+                    Varnode indVn = op.getIn(1);
                     if ((!indVn.isConstant()) || (indVn.getOffset() != 0))                    // and that index isn't zero
                         return 0;
                 }

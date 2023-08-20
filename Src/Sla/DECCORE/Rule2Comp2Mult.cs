@@ -26,14 +26,14 @@ namespace Sla.DECCORE
         /// \brief Eliminate INT_2COMP:  `-V  =>  V * -1`
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_INT_2COMP);
+            oplist.Add(OpCode.CPUI_INT_2COMP);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             data.opSetOpcode(op, OpCode.CPUI_INT_MULT);
             int size = op.getIn(0).getSize();
-            Varnode* negone = data.newConstant(size, Globals.calc_mask(size));
+            Varnode negone = data.newConstant(size, Globals.calc_mask(size));
             data.opInsertInput(op, negone, 1);
             return 1;
         }

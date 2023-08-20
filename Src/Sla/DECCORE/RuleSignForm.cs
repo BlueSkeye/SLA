@@ -29,7 +29,7 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_SUBPIECE);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode sextout = op.getIn(0);
             if (!sextout.isWritten()) return 0;

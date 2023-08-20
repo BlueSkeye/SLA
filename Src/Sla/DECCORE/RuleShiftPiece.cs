@@ -39,7 +39,7 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_INT_ADD);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode vn1;
             Varnode vn2;
@@ -109,7 +109,7 @@ namespace Sla.DECCORE
             }
             else
             {
-                PcodeOp* newop = data.newOp(2, op.getAddr());
+                PcodeOp newop = data.newOp(2, op.getAddr());
                 data.newUniqueOut(concatsize / 8, newop);
                 data.opSetOpcode(newop, OpCode.CPUI_PIECE);
                 data.opSetInput(newop, vn1, 0);

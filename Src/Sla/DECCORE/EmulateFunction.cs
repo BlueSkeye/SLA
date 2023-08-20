@@ -147,7 +147,7 @@ namespace Sla.DECCORE
                 setVarnodeValue(startvn, val);
             while (i > 0)
             {
-                PcodeOp* curop = pathMeld.getOp(i);
+                PcodeOp curop = pathMeld.getOp(i);
                 --i;
                 setCurrentOp(curop);
                 try
@@ -160,7 +160,7 @@ namespace Sla.DECCORE
                     throw new LowlevelError(msg.str());
                 }
             }
-            Varnode* invn = pathMeld.getOp(0).getIn(0);
+            Varnode invn = pathMeld.getOp(0).getIn(0);
             return getVarnodeValue(invn);
         }
 

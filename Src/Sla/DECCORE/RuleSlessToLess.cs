@@ -29,13 +29,13 @@ namespace Sla.DECCORE
         /// We use the non-zero mask to verify the sign bit is zero.
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_INT_SLESS);
-            oplist.Add(CPUI_INT_SLESSEQUAL);
+            oplist.Add(OpCode.CPUI_INT_SLESS);
+            oplist.Add(OpCode.CPUI_INT_SLESSEQUAL);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* vn = op.getIn(0);
+            Varnode vn = op.getIn(0);
             int sz = vn.getSize();
             if (signbit_negative(vn.getNZMask(), sz)) return 0;
             if (signbit_negative(op.getIn(1).getNZMask(), sz)) return 0;

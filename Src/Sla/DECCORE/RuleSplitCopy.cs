@@ -33,7 +33,7 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_COPY);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Datatype inType = op.getIn(0).getTypeReadFacing(op);
             Datatype outType = op.getOut().getTypeDefFacing();

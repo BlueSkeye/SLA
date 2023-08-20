@@ -3538,7 +3538,7 @@ namespace Sla.DECCORE
                         pushOp(&subscript, op);
                 }
                 if (symbol == (Symbol)null) {
-                    TypeSpacebase sb = (TypeSpacebase*)ct;
+                    TypeSpacebase sb = (TypeSpacebase)ct;
                     Address addr = sb.getAddress(in1const, in0.getSize(), op.getAddr());
                     pushUnnamedLocation(addr, (Varnode)null, op);
                 }

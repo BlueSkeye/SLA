@@ -6,9 +6,9 @@ namespace Sla.SLEIGH
     internal class SymbolScope
     {
         // friend class SymbolTable;
-        private SymbolScope parent;
-        private SymbolTree tree = new SymbolTree();
-        private uint id;
+        internal SymbolScope? parent;
+        internal SymbolTree tree = new SymbolTree();
+        internal uint id;
         
         public SymbolScope(SymbolScope p, uint i)
         {

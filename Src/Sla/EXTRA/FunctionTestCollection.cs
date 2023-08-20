@@ -1,12 +1,5 @@
 ﻿using Sla.CORE;
 using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.EXTRA
 {
@@ -21,33 +14,36 @@ namespace Sla.EXTRA
     /// does not complete properly, this is considered a special kind of failure.
     internal class FunctionTestCollection
     {
-        private IfaceDecompData dcp;       ///< Program data for the test collection
-        private string fileName;        ///< Name of the file containing test data
-        private List<FunctionTestProperty> testList = new List<FunctionTestProperty>();    ///< List of tests for this collection
-        private List<string> commands = new List<string>();    ///< Sequence of commands for current test
-        private IfaceStatus console;       ///< Decompiler console for executing scripts
-        private bool consoleOwner;      ///< Set to \b true if \b this object owns the console
-        private /*mutable*/ int numTestsApplied;       ///< Count of tests that were executed
-        private /*mutable*/ int numTestsSucceeded; ///< Count of tests that passed
+        // Program data for the test collection
+        private IfaceDecompData dcp;
+        // Name of the file containing test data
+        private string fileName;
+        // List of tests for this collection
+        private List<FunctionTestProperty> testList = new List<FunctionTestProperty>();
+        // Sequence of commands for current test
+        private List<string> commands = new List<string>();
+        // Decompiler console for executing scripts
+        private IfaceStatus console;
+        // Set to \b true if \b this object owns the console
+        private bool consoleOwner;
+        // Count of tests that were executed
+        private /*mutable*/ int numTestsApplied;
+        // Count of tests that passed
+        private /*mutable*/ int numTestsSucceeded;
 
         /// Clear any previous architecture and function
         private void clear()
         {
             dcp.clearArchitecture();
-            commands.clear();
-            testList.clear();
+            commands.Clear();
+            testList.Clear();
             console.reset();
         }
 
         /// Reconstruct commands from an XML tag
         private void restoreXmlCommands(Element el)
         {
-            List list = el.getChildren();
-            List::const_iterator iter;
-
-            for (iter = list.begin(); iter != list.end(); ++iter)
-            {
-                Element subel = *iter;
+            foreach (Element subel in el.getChildren()) {
                 commands.Add(subel.getContent());
             }
         }
@@ -55,11 +51,11 @@ namespace Sla.EXTRA
         /// Build program (Architecture) from \<binaryimage> tag
         private void buildProgram(DocumentStorage store)
         {
-            ArchitectureCapability? capa = ArchitectureCapability::getCapability("xml");
+            ArchitectureCapability? capa = ArchitectureCapability.getCapability("xml");
             if (capa == (ArchitectureCapability)null)
                 throw new IfaceExecutionError("Missing XML architecture capability");
             dcp.conf = capa.buildArchitecture("test", "", console.optr);
-            string errmsg;
+            string errmsg = string.Empty;
             bool iserror = false;
             try {
                 dcp.conf.init(docStorage);
@@ -73,17 +69,15 @@ namespace Sla.EXTRA
                 iserror = true;
             }
             if (iserror)
-                throw new IfaceExecutionError("Error during architecture initialization: " + errmsg);
+                throw new IfaceExecutionError($"Error during architecture initialization: {errmsg}");
         }
 
         /// Initialize each FunctionTestProperty
         /// Let each test initialize itself thru its startTest() method
         private void startTests()
         {
-            list<FunctionTestProperty>::const_iterator iter;
-            for (iter = testList.begin(); iter != testList.end(); ++iter)
-            {
-                (*iter).startTest();
+            foreach (FunctionTestProperty property in testList) {
+                property.startTest();
             }
         }
 
@@ -92,10 +86,8 @@ namespace Sla.EXTRA
         /// \param line is the given line of output
         private void passLineToTests(string line)
         {
-            list<FunctionTestProperty>::const_iterator iter;
-            for (iter = testList.begin(); iter != testList.end(); ++iter)
-            {
-                (*iter).processLine(line);
+            foreach (FunctionTestProperty property in testList) {
+                property.processLine(line);
             }
         }
 
@@ -107,19 +99,15 @@ namespace Sla.EXTRA
         /// \param lateStream collects failures to display as a summary
         private void evaluateTests(List<string> lateStream)
         {
-            list<FunctionTestProperty>::const_iterator iter;
-            for (iter = testList.begin(); iter != testList.end(); ++iter)
-            {
+            foreach (FunctionTestProperty property in testList) {
                 numTestsApplied += 1;
-                if ((*iter).endTest())
-                {
-                    *console.optr << "Success -- " << (*iter).getName() << endl;
+                if (property.endTest()) {
+                    console.optr.WriteLine($"Success -- {property.getName()}";
                     numTestsSucceeded += 1;
                 }
-                else
-                {
-                    *console.optr << "FAIL -- " << (*iter).getName() << endl;
-                    lateStream.Add((*iter).getName());
+                else {
+                    console.optr.WriteLine($"FAIL -- {property.getName()}");
+                    lateStream.Add(property.getName());
                 }
             }
         }
@@ -147,8 +135,8 @@ namespace Sla.EXTRA
 
         ~FunctionTestCollection()
         {
-            if (consoleOwner)
-                delete console;
+            //if (consoleOwner)
+            //    delete console;
         }
 
         /// Get the number of tests executed
@@ -178,7 +166,7 @@ namespace Sla.EXTRA
             else if (el.getName() == "binaryimage")
                 restoreXmlOldForm(docStorage, el);
             else
-                throw new IfaceParseError("Test file " + filename + " has unrecognized XML tag: " + el.getName());
+                throw new IfaceParseError($"Test file {filename} has unrecognized XML tag: {el.getName()}");
         }
 
         /// Load tests from a \<decompilertest> tag.
@@ -231,16 +219,17 @@ namespace Sla.EXTRA
             TextWriter origStream = console.optr;
             numTestsApplied = 0;
             numTestsSucceeded = 0;
-            ostringstream midBuffer;        // Collect command console output
-            console.optr = &midBuffer;
-            ostringstream bulkout;
-            console.fileoptr = &bulkout;
+            // Collect command console output
+            TextWriter midBuffer = new StringWriter();
+            console.optr = midBuffer;
+            TextWriter bulkout = new StringWriter();
+            console.fileoptr = bulkout;
             mainloop(console);
             console.optr = origStream;
             console.fileoptr = origStream;
             if (console.isInError()) {
                 console.optr.WriteLine("Error: Did not apply tests in {fileName}");
-                console.optr.WriteLine(midBuffer.str());
+                console.optr.WriteLine(midBuffer.ToString());
                 lateStream.Add($"Execution failed for {fileName}");
                 return;
             }
@@ -251,12 +240,12 @@ namespace Sla.EXTRA
             }
             startTests();
             int prevpos = 0;
-            int pos = result.find_first_of('\n');
+            int pos = result.IndexOf('\n');
             while (-1 != pos) {
                 string line = result.Substring(prevpos, pos - prevpos);
                 passLineToTests(line);
                 prevpos = pos + 1;
-                pos = result.find_first_of('\n', prevpos);
+                pos = result.IndexOf('\n', prevpos);
             }
             if (prevpos != result.Length) {
                 string line = result.Substring(prevpos);   // Process final line without a newline char

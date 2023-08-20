@@ -1,13 +1,4 @@
 ﻿using Sla.CORE;
-using Sla.SLEIGH;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.SLEIGH
 {
@@ -19,9 +10,8 @@ namespace Sla.SLEIGH
 
         private SymbolScope skipScope(int i)
         {
-            SymbolScope* res = curscope;
-            while (i > 0)
-            {
+            SymbolScope res = curscope;
+            while (i > 0) {
                 if (res.parent == (SymbolScope)null) return res;
                 res = res.parent;
                 --i;
@@ -31,11 +21,8 @@ namespace Sla.SLEIGH
 
         private SleighSymbol findSymbolInternal(SymbolScope scope, string nm)
         {
-            SleighSymbol* res;
-
-            while (scope != (SymbolScope)null)
-            {
-                res = scope.findSymbol(nm);
+            while (scope != (SymbolScope)null) {
+                SleighSymbol? res = scope.findSymbol(nm);
                 if (res != (SleighSymbol)null)
                     return res;
                 scope = scope.getParent(); // Try higher scope
@@ -44,30 +31,25 @@ namespace Sla.SLEIGH
         }
 
         private void renumber()
-        {               // Renumber all the scopes and symbols
-                        // so that there are no gaps
-            List<SymbolScope*> newtable;
-            List<SleighSymbol*> newsymbol;
+        {
+            // Renumber all the scopes and symbols
+            // so that there are no gaps
+            List<SymbolScope> newtable = new List<SymbolScope>();
+            List<SleighSymbol> newsymbol = new List<SleighSymbol>();
             // First renumber the scopes
-            SymbolScope* scope;
-            for (int i = 0; i < table.size(); ++i)
-            {
-                scope = table[i];
-                if (scope != (SymbolScope)null)
-                {
-                    scope.id = newtable.size();
+            for (int i = 0; i < table.size(); ++i) {
+                SymbolScope? scope = table[i];
+                if (scope != (SymbolScope)null) {
+                    scope.id = (uint)newtable.size();
                     newtable.Add(scope);
                 }
             }
             // Now renumber the symbols
-            SleighSymbol* sym;
-            for (int i = 0; i < symbollist.size(); ++i)
-            {
-                sym = symbollist[i];
-                if (sym != (SleighSymbol)null)
-                {
-                    sym.scopeid = table[sym.scopeid].id;
-                    sym.id = newsymbol.size();
+            for (int i = 0; i < symbollist.size(); ++i) {
+                SleighSymbol? sym = symbollist[i];
+                if (sym != (SleighSymbol)null) {
+                    sym.scopeid = table[(int)sym.scopeid].id;
+                    sym.id = (uint)newsymbol.size();
                     newsymbol.Add(sym);
                 }
             }
@@ -82,12 +64,12 @@ namespace Sla.SLEIGH
         
         ~SymbolTable()
         {
-            List<SymbolScope*>::iterator iter;
-            for (iter = table.begin(); iter != table.end(); ++iter)
-                delete* iter;
-            List<SleighSymbol*>::iterator siter;
-            for (siter = symbollist.begin(); siter != symbollist.end(); ++siter)
-                delete* siter;
+            //List<SymbolScope*>::iterator iter;
+            //for (iter = table.begin(); iter != table.end(); ++iter)
+            //    delete* iter;
+            //List<SleighSymbol*>::iterator siter;
+            //for (siter = symbollist.begin(); siter != symbollist.end(); ++siter)
+            //    delete* siter;
         }
 
         public SymbolScope getCurrentScope() => curscope;
@@ -102,7 +84,7 @@ namespace Sla.SLEIGH
         // Add new scope off of current scope, make it current
         public void addScope()
         {
-            curscope = new SymbolScope(curscope, table.size());
+            curscope = new SymbolScope(curscope, (uint)table.size());
             table.Add(curscope);
         }
 
@@ -115,21 +97,21 @@ namespace Sla.SLEIGH
 
         public void addGlobalSymbol(SleighSymbol a)
         {
-            a.id = symbollist.size();
+            a.id = (uint)symbollist.size();
             symbollist.Add(a);
-            SymbolScope* scope = getGlobalScope();
+            SymbolScope scope = getGlobalScope();
             a.scopeid = scope.getId();
-            SleighSymbol* res = scope.addSymbol(a);
+            SleighSymbol res = scope.addSymbol(a);
             if (res != a)
-                throw new SleighError("Duplicate symbol name '" + a.getName() + "'");
+                throw new SleighError($"Duplicate symbol name '{a.getName()}'");
         }
 
         public void addSymbol(SleighSymbol a)
         {
-            a.id = symbollist.size();
+            a.id = (uint)symbollist.size();
             symbollist.Add(a);
             a.scopeid = curscope.getId();
-            SleighSymbol* res = curscope.addSymbol(a);
+            SleighSymbol res = curscope.addSymbol(a);
             if (res != a)
                 throw new SleighError("Duplicate symbol name: " + a.getName());
         }
@@ -141,23 +123,22 @@ namespace Sla.SLEIGH
 
         public SleighSymbol findGlobalSymbol(string nm) => findSymbolInternal(table[0],nm);
 
-        public SleighSymbol findSymbol(uint id) => symbollist[id];
+        public SleighSymbol findSymbol(uint id) => symbollist[(int)id];
 
         public void replaceSymbol(SleighSymbol a, SleighSymbol b)
         {
             // Replace symbol a with symbol b
             // assuming a and b have the same name
-            SleighSymbol sym;
             int i = table.size() - 1;
 
             while (i >= 0) {
                 // Find the particular symbol
-                sym = table[i].findSymbol(a.getName());
+                SleighSymbol? sym = table[i].findSymbol(a.getName());
                 if (sym == a) {
                     table[i].removeSymbol(a);
                     b.id = a.id;
                     b.scopeid = a.scopeid;
-                    symbollist[b.id] = b;
+                    symbollist[(int)b.id] = b;
                     table[i].addSymbol(b);
                     // delete a;
                     return;
@@ -168,18 +149,17 @@ namespace Sla.SLEIGH
 
         public void saveXml(TextWriter s)
         {
-            s << "<symbol_table";
-            s << " scopesize=\"" << dec << table.size() << "\"";
-            s << " symbolsize=\"" << symbollist.size() << "\">\n";
-            for (int i = 0; i < table.size(); ++i)
-            {
-                s << "<scope id=\"0x" << hex << table[i].getId() << "\"";
-                s << " parent=\"0x";
+            s.Write("<symbol_table");
+            s.Write($" scopesize=\"{table.size()}\"");
+            s.WriteLine($" symbolsize=\"{symbollist.size()}\">");
+            for (int i = 0; i < table.size(); ++i) {
+                s.Write($"<scope id=\"0x{table[i].getId():X}\"");
+                s.Write(" parent=\"0x");
                 if (table[i].getParent() == (SymbolScope)null)
-                    s << "0";
+                    s.Write("0");
                 else
-                    s << hex << table[i].getParent().getId();
-                s << "\"/>\n";
+                    s.Write($"{table[i].getParent().getId():X}");
+                s.WriteLine("\"/>");
             }
 
             // First save the headers
@@ -189,77 +169,49 @@ namespace Sla.SLEIGH
             // Now save the content of each symbol
             for (int i = 0; i < symbollist.size(); ++i) // Must save IN ORDER
                 symbollist[i].saveXml(s);
-            s << "</symbol_table>\n";
+            s.WriteLine("</symbol_table>");
         }
 
         public void restoreXml(Element el, SleighBase trans)
         {
-            {
-                uint size;
-                istringstream s = new istringstream(el.getAttributeValue("scopesize"));
-                s.unsetf(ios::dec | ios::hex | ios::oct);
-                s >> size;
-                table.resize(size, (SymbolScope)null);
-            }
-            {
-                uint size;
-                istringstream s = new istringstream(el.getAttributeValue("symbolsize"));
-                s.unsetf(ios::dec | ios::hex | ios::oct);
-                s >> size;
-                symbollist.resize(size, (SleighSymbol)null);
-            }
-            List list = el.getChildren();
-            List::const_iterator iter;
-            iter = list.begin();
-            for (int i = 0; i < table.size(); ++i)
-            { // Restore the scopes
-                Element* subel = *iter;
+            uint size = uint.Parse(el.getAttributeValue("scopesize"));
+            table.resize(size, (SymbolScope)null);
+            size = uint.Parse(el.getAttributeValue("symbolsize"));
+            symbollist.resize(size, (SleighSymbol)null);
+            IEnumerator<Element> iter = el.getChildren().GetEnumerator();
+            for (int i = 0; i < table.size(); ++i) {
+                if (!iter.MoveNext()) throw new ApplicationException();
+                // Restore the scopes
+                Element subel = iter.Current;
                 if (subel.getName() != "scope")
                     throw new SleighError("Misnumbered symbol scopes");
-                uint id;
-                uint parent;
-                {
-                    istringstream s = new istringstream(subel.getAttributeValue("id"));
-                    s.unsetf(ios::dec | ios::hex | ios::oct);
-                    s >> id;
-                }
-                {
-                    istringstream s = new istringstream(subel.getAttributeValue("parent"));
-                    s.unsetf(ios::dec | ios::hex | ios::oct);
-                    s >> parent;
-                }
-                SymbolScope* parscope = (parent == id) ? (SymbolScope)null : table[parent];
-                table[id] = new SymbolScope(parscope, id);
-                ++iter;
+                uint id = uint.Parse(subel.getAttributeValue("id"));
+                uint parent = uint.Parse(subel.getAttributeValue("parent"));
+                SymbolScope? parscope = (parent == id) ? (SymbolScope)null : table[(int)parent];
+                table[(int)id] = new SymbolScope(parscope, id);
             }
-            curscope = table[0];        // Current scope is global
+            // Current scope is global
+            curscope = table[0];
 
             // Now restore the symbol shells
-            for (int i = 0; i < symbollist.size(); ++i)
-            {
-                restoreSymbolHeader(*iter);
-                ++iter;
+            for (int i = 0; i < symbollist.size(); ++i) {
+                if (!iter.MoveNext()) throw new ApplicationException();
+                restoreSymbolHeader(iter.Current);
             }
             // Now restore the symbol content
-            while (iter != list.end())
-            {
-                Element* subel = *iter;
-                uint id;
-                SleighSymbol* sym;
-                {
-                    istringstream s = new istringstream(subel.getAttributeValue("id"));
-                    s.unsetf(ios::dec | ios::hex | ios::oct);
-                    s >> id;
-                }
+            while (iter.MoveNext()) {
+                Element subel = iter.Current;
+                SleighSymbol sym;
+                uint id = uint.Parse(subel.getAttributeValue("id"));
                 sym = findSymbol(id);
                 sym.restoreXml(subel, trans);
-                ++iter;
             }
         }
 
         public void restoreSymbolHeader(Element el)
-        {               // Put the shell of a symbol in the symbol table
-                        // in order to allow recursion
+        {
+            // Put the shell of a symbol in the symbol table
+            // in order to allow recursion
             SleighSymbol sym;
             if (el.getName() == "userop_head")
                 sym = new UserOpSymbol();
@@ -294,8 +246,8 @@ namespace Sla.SLEIGH
             else
                 throw new SleighError("Bad symbol xml");
             sym.restoreXmlHeader(el);  // Restore basic elements of symbol
-            symbollist[sym.id] = sym;  // Put the basic symbol in the table
-            table[sym.scopeid].addSymbol(sym); // to allow recursion
+            symbollist[(int)sym.id] = sym;  // Put the basic symbol in the table
+            table[(int)sym.scopeid].addSymbol(sym); // to allow recursion
         }
 
         public void purge()
@@ -321,14 +273,14 @@ namespace Sla.SLEIGH
                                 MacroSymbol macro = (MacroSymbol)sym;
                                 for (int j = 0; j < macro.getNumOperands(); ++j) {
                                     SleighSymbol opersym = macro.getOperand(j);
-                                    table[opersym.scopeid].removeSymbol(opersym);
-                                    symbollist[opersym.id] = (SleighSymbol)null;
+                                    table[(int)opersym.scopeid].removeSymbol(opersym);
+                                    symbollist[(int)opersym.id] = (SleighSymbol)null;
                                     // delete opersym;
                                 }
                                 break;
                             }
-                        case SleighSymbol.symbol_type.subtable_symbol:
-                            {           // Delete unused subtables
+                        case SleighSymbol.symbol_type.subtable_symbol: {
+                                // Delete unused subtables
                                 SubtableSymbol subsym = (SubtableSymbol)sym;
                                 if (subsym.getPattern() != (TokenPattern)null) continue;
                                 for (int k = 0; k < subsym.getNumConstructors(); ++k) {
@@ -337,8 +289,8 @@ namespace Sla.SLEIGH
                                     for (int j = 0; j < con.getNumOperands(); ++j) {
                                         // Go thru each operand
                                         OperandSymbol oper = con.getOperand(j);
-                                        table[oper.scopeid].removeSymbol(oper);
-                                        symbollist[oper.id] = (SleighSymbol)null;
+                                        table[(int)oper.scopeid].removeSymbol(oper);
+                                        symbollist[(int)oper.id] = (SleighSymbol)null;
                                         // delete oper;
                                     }
                                 }
@@ -348,13 +300,13 @@ namespace Sla.SLEIGH
                             continue;
                     }
                 }
-                table[sym.scopeid].removeSymbol(sym); // Remove the symbol
+                table[(int)sym.scopeid].removeSymbol(sym); // Remove the symbol
                 symbollist[i] = (SleighSymbol)null;
                 // delete sym;
             }
             for (int i = 1; i < table.Count; ++i) {
                 // Remove any empty scopes
-                if (table[i].tree.empty()) {
+                if (0 == table[i].tree.Count) {
                     // delete table[i];
                     table[i] = (SymbolScope)null;
                 }

@@ -27,14 +27,14 @@ namespace Sla.DECCORE
         /// \brief Simplify INT_OR with full mask:  `V = W | 0xffff  =>  V = W`
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_INT_OR);
+            oplist.Add(OpCode.CPUI_INT_OR);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             int size = op.getOut().getSize();
             if (size > sizeof(ulong)) return 0; // FIXME: ulong should be arbitrary precision
-            Varnode* constvn;
+            Varnode constvn;
 
             constvn = op.getIn(1);
             if (!constvn.isConstant()) return 0;

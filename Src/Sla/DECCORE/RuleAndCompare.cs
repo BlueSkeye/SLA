@@ -35,7 +35,7 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_INT_NOTEQUAL);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             if (!op.getIn(1).isConstant()) return 0;
             if (op.getIn(1).getOffset() != 0) return 0;
@@ -79,9 +79,9 @@ namespace Sla.DECCORE
             if (baseconst == andconst)          // If no effective change in constant (except varnode size)
                 constvn.copySymbol(andop.getIn(1));   // Keep any old symbol
                                                         // New version of and with bigger inputs
-            PcodeOp* newop = data.newOp(2, andop.getAddr());
+            PcodeOp newop = data.newOp(2, andop.getAddr());
             data.opSetOpcode(newop, OpCode.CPUI_INT_AND);
-            Varnode* newout = data.newUniqueOut(basevn.getSize(), newop);
+            Varnode newout = data.newUniqueOut(basevn.getSize(), newop);
             data.opSetInput(newop, basevn, 0);
             data.opSetInput(newop, constvn, 1);
             data.opInsertBefore(newop, andop);

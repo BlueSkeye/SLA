@@ -1,12 +1,4 @@
 ﻿using Sla.EXTRA;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.EXTRA
 {
@@ -69,19 +61,17 @@ namespace Sla.EXTRA
         ///< Add words to the associated command line string
         public void addWords(List<string> wordlist)
         {
-            List<string>::const_iterator iter;
-
-            for (iter = wordlist.begin(); iter != wordlist.end(); ++iter)
-                com.Add(*iter);
+            foreach (string word in wordlist)
+                com.Add(word);
         }
 
         public int numWords() => com.size();   ///< Return the number of tokens in the command line string
 
         ///< Get the complete command line string
         /// \param res is overwritten with the full command line string
-        public void commandString(string res)
+        public void commandString(out string res)
         {
-            IfaceStatus::wordsToString(res, com);
+            IfaceStatus.wordsToString(out res, com);
         }
 
         ///< Order two commands by their command line strings
@@ -92,32 +82,25 @@ namespace Sla.EXTRA
         public int compare(IfaceCommand op2)
         {
             int res;
-            List<string>::const_iterator iter1, iter2;
+            IEnumerator<string> iter1 = com.GetEnumerator();
+            IEnumerator<string> iter2 = op2.com.GetEnumerator();
 
-            for (iter1 = com.begin(), iter2 = op2.com.begin(); ; ++iter1, ++iter2)
-            {
-                if (iter1 == com.end())
-                {
-                    if (iter2 == op2.com.end())
-                        return 0;
-                    return -1;      // This is less
+            while (true) {
+                if (!iter1.MoveNext()) {
+                    return !iter2.MoveNext() ? 0 : -1;      // This is less
                 }
-                if (iter2 == op2.com.end())
+                if (!iter2.MoveNext())
                     return 1;
-                res = (*iter1).compare(*iter2);
+                res = string.Compare(iter1.Current, iter2.Current);
                 if (res != 0)
                     return res;
             }
-            return 0;           // Never reaches here
         }
 
         /// \brief Compare to commands as pointers
-        ///
         /// \param a is a pointer to the first command
         /// \param b is a pointer to the second command
         /// \return \b true if the first pointer is ordered before the second
-        internal static bool compare_ifacecommand(IfaceCommand a, IfaceCommand b) {
-            return (0 > a.compare(*b));
-        }
+        internal static bool compare_ifacecommand(IfaceCommand a, IfaceCommand b)  => (0 > a.compare(b));
     }
 }

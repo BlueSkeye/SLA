@@ -29,16 +29,16 @@ namespace Sla.DECCORE
         /// `((V + c) + W) & 0xfff0   =>   (V + (c & 0xfff0)) + W`
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_INT_AND);
+            oplist.Add(OpCode.CPUI_INT_AND);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* xalign;
-            Varnode* cvn1 = op.getIn(1);
+            Varnode xalign;
+            Varnode cvn1 = op.getIn(1);
             if (!cvn1.isConstant()) return 0;
             if (!op.getIn(0).isWritten()) return 0;
-            PcodeOp* addop = op.getIn(0).getDef();
+            PcodeOp addop = op.getIn(0).getDef();
             if (addop.code() != OpCode.CPUI_INT_ADD) return 0;
 
             ulong val = cvn1.getOffset();
@@ -46,7 +46,7 @@ namespace Sla.DECCORE
             // Check that cvn1 is of the form    11110000
             if (((val - 1) | val) != Globals.calc_mask(size)) return 0;
 
-            Varnode* cvn2 = addop.getIn(1);
+            Varnode cvn2 = addop.getIn(1);
             if (cvn2.isConstant())
             {
                 xalign = addop.getIn(0);
@@ -66,12 +66,12 @@ namespace Sla.DECCORE
                 if (addop.getOut().loneDescend() != op) return 0;
                 for (int i = 0; i < 2; ++i)
                 {
-                    Varnode* zerovn = addop.getIn(i);
+                    Varnode zerovn = addop.getIn(i);
                     ulong mask2 = zerovn.getNZMask();
                     if ((mask2 & val) != mask2) continue; // zerovn must be unaffected by the AND operation
-                    Varnode* nonzerovn = addop.getIn(1 - i);
+                    Varnode nonzerovn = addop.getIn(1 - i);
                     if (!nonzerovn.isWritten()) continue;
-                    PcodeOp* addop2 = nonzerovn.getDef();
+                    PcodeOp addop2 = nonzerovn.getDef();
                     if (addop2.code() != OpCode.CPUI_INT_ADD) continue;
                     if (nonzerovn.loneDescend() != addop) continue;
                     cvn2 = addop2.getIn(1);

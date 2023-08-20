@@ -36,13 +36,13 @@ namespace Sla.SLEIGH
 
         ~SubtableSymbol()
         {
-            if (pattern != (TokenPattern)null)
-                delete pattern;
-            if (decisiontree != (DecisionNode)null)
-                delete decisiontree;
-            List<Constructor*>::iterator iter;
-            for (iter = construct.begin(); iter != construct.end(); ++iter)
-                delete* iter;
+            //if (pattern != (TokenPattern)null)
+            //    delete pattern;
+            //if (decisiontree != (DecisionNode)null)
+            //    delete decisiontree;
+            IEnumerator<Constructor> iter = construct.begin();
+            //while (iter.MoveNext())
+            //    delete* iter;
         }
 
         public bool isBeingBuilt() => beingbuilt;
@@ -51,7 +51,7 @@ namespace Sla.SLEIGH
 
         public void addConstructor(Constructor ct)
         {
-            ct.setId(construct.size());
+            ct.setId((uint)construct.size());
             construct.Add(ct);
         }
 
@@ -79,36 +79,32 @@ namespace Sla.SLEIGH
             errors = false;
             beingbuilt = true;
             pattern = new TokenPattern();
-            if (construct.empty())
-            {
-                s << "Error: There are no constructors in table: " + getName() << endl;
+            if (construct.empty()) {
+                s.WriteLine($"Error: There are no constructors in table: {getName()}");
                 errors = true;
                 return pattern;
             }
-            try
-            {
-                construct.front().buildPattern(s);
+            try {
+                construct.First().buildPattern(s);
             }
             catch (SleighError err) {
-                s << "Error: " << err.ToString() << ": for ";
-                construct.front().printInfo(s);
-                s << endl;
+                s.Write($"Error: {err.ToString()}: for ");
+                construct.First().printInfo(s);
+                s.WriteLine();
                 errors = true;
             }
-            *pattern = *construct.front().getPattern();
-            for (int i = 1; i < construct.size(); ++i)
-            {
-                try
-                {
+            pattern = construct.First().getPattern();
+            for (int i = 1; i < construct.size(); ++i) {
+                try {
                     construct[i].buildPattern(s);
                 }
                 catch (SleighError err) {
-                    s << "Error: " << err.ToString() << ": for ";
+                    s.Write($"Error: {err.ToString()}: for ");
                     construct[i].printInfo(s);
-                    s << endl;
+                    s.WriteLine();
                     errors = true;
                 }
-                *pattern = construct[i].getPattern().commonSubPattern(*pattern);
+                pattern = construct[i].getPattern().commonSubPattern(pattern);
             }
             beingbuilt = false;
             return pattern;
@@ -118,7 +114,7 @@ namespace Sla.SLEIGH
 
         public int getNumConstructors() => construct.size();
 
-        public Constructor getConstructor(uint id) => construct[id];
+        public Constructor getConstructor(int id) => construct[id];
 
         public override Constructor resolve(ParserWalker walker) => decisiontree.resolve(walker);
 
@@ -127,7 +123,7 @@ namespace Sla.SLEIGH
             throw new SleighError("Cannot use subtable in expression");
         }
 
-        public override void getFixedHandle(ref FixedHandle hand, ParserWalker walker)
+        public override void getFixedHandle(out FixedHandle hand, ParserWalker walker)
         {
             throw new SleighError("Cannot use subtable in expression");
         }
@@ -150,52 +146,41 @@ namespace Sla.SLEIGH
         public override void saveXml(TextWriter s)
         {
             if (decisiontree == (DecisionNode)null) return; // Not fully formed
-            s << "<subtable_sym";
-            SleighSymbol::saveXmlHeader(s);
-            s << " numct=\"" << dec << construct.size() << "\">\n";
+            s.Write("<subtable_sym");
+            base.saveXmlHeader(s);
+            s.WriteLine($" numct=\"{construct.size()}\">");
             for (int i = 0; i < construct.size(); ++i)
                 construct[i].saveXml(s);
             decisiontree.saveXml(s);
-            s << "</subtable_sym>\n";
+            s.WriteLine("</subtable_sym>");
         }
 
         public override void saveXmlHeader(TextWriter s)
         {
-            s << "<subtable_sym_head";
-            SleighSymbol::saveXmlHeader(s);
-            s << "/>\n";
+            s.Write("<subtable_sym_head");
+            base.saveXmlHeader(s);
+            s.WriteLine("/>");
         }
 
         public override void restoreXml(Element el, SleighBase trans)
         {
-            {
-                int numct;
-                istringstream s = new istringstream(el.getAttributeValue("numct"));
-                s.unsetf(ios::dec | ios::hex | ios::oct);
-                s >> numct;
-                construct.reserve(numct);
-            }
-            List list = el.getChildren();
-            List::const_iterator iter;
-            iter = list.begin();
-            while (iter != list.end())
-            {
-                if ((*iter).getName() == "constructor")
-                {
-                    Constructor* ct = new Constructor();
+            int numct = int.Parse(el.getAttributeValue("numct"));
+            construct.reserve(numct);
+            IEnumerator<Element> iter = el.getChildren().GetEnumerator();
+            while (iter.MoveNext()) {
+                if (iter.Current.getName() == "constructor") {
+                    Constructor ct = new Constructor();
                     addConstructor(ct);
-                    ct.restoreXml(*iter, trans);
+                    ct.restoreXml(iter.Current, trans);
                 }
-                else if ((*iter).getName() == "decision")
-                {
+                else if (iter.Current.getName() == "decision") {
                     decisiontree = new DecisionNode();
-                    decisiontree.restoreXml(*iter, (DecisionNode)null, this);
+                    decisiontree.restoreXml(iter.Current, (DecisionNode)null, this);
                 }
-                ++iter;
             }
             pattern = (TokenPattern)null;
             beingbuilt = false;
-            errors = 0;
+            errors = false;
         }
     }
 }

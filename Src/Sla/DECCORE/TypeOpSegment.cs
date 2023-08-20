@@ -49,7 +49,7 @@ namespace Sla.DECCORE
             type_metatype metain = alttype.getMetatype();
             if (metain != type_metatype.TYPE_PTR) return (Datatype)null;
             AddrSpace* spc = tlst.getArch().getDefaultDataSpace();
-            Datatype* btype = ((TypePointer*)alttype).getPtrTo();
+            Datatype* btype = ((TypePointer)alttype).getPtrTo();
             return tlst.getTypePointer(outvn.getSize(), btype, spc.getWordSize());
         }
 

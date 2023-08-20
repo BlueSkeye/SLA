@@ -29,7 +29,7 @@ namespace Sla.DECCORE
             int destSize;
             if (pointerType.getMetatype() == type_metatype.TYPE_PTR)
             {
-                pointedToType = ((TypePointer*)pointerType).getPtrTo();
+                pointedToType = ((TypePointer)pointerType).getPtrTo();
                 destSize = pointedToType.getSize();
             }
             else
@@ -72,7 +72,7 @@ namespace Sla.DECCORE
             }
             else if (alttype.getMetatype() == type_metatype.TYPE_PTR)
             {
-                newtype = ((TypePointer*)alttype).getPtrTo();
+                newtype = ((TypePointer)alttype).getPtrTo();
                 if (newtype.getSize() != outvn.getTempType().getSize() || newtype.isVariableLength())
                     newtype = outvn.getTempType();
             }

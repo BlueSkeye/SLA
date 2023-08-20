@@ -507,9 +507,10 @@ public static bool signbit_negative(ulong val, int size)
         /// \param q is the passed back 64-bit quotient
         /// \param r is the passed back 64-bit remainder
         /// \return 0 if successful, 1 if result is too big, 2 if divide by 0
-        public static int power2Divide(int n, ulong divisor, ref ulong q, ref ulong r)
+        public static int power2Divide(int n, ulong divisor, out ulong q, out ulong r)
         {
             if (divisor == 0) {
+                q = r = 0;
                 return 2;
             }
             ulong power = 1;
@@ -523,6 +524,7 @@ public static bool signbit_negative(ulong val, int size)
             // Most of the way on divisor
             ulong y = divisor >> (n - 64);
             if (y == 0) {
+                q = r = 0;
                 // Check if result will be too big
                 return 1;
             }
@@ -535,7 +537,8 @@ public static bool signbit_negative(ulong val, int size)
                 max -= 1;
                 // Could be maximal
                 // Check if divisor is a power of 2
-                if ((((ulong)1) << (n - 64)) == divisor) {
+                if ((1UL << (n - 64)) == divisor) {
+                    q = r = 0;
                     return 1;
                 }
             }

@@ -169,7 +169,7 @@ namespace Sla.DECCORE
             int sz = bblocks.getSize();
             for (int i = 0; i < sz; ++i)
             {
-                BlockBasic* bl = (BlockBasic*)bblocks.getBlock(i);
+                BlockBasic bl = (BlockBasic)bblocks.getBlock(i);
                 while (processBlock(data, bl))
                 {
                 }

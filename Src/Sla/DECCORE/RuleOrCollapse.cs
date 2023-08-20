@@ -29,14 +29,14 @@ namespace Sla.DECCORE
         /// is also not set in V   i.e. NZM(V) | c == c
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_INT_OR);
+            oplist.Add(OpCode.CPUI_INT_OR);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             ulong val, mask;
             int size = op.getOut().getSize();
-            Varnode* vn;
+            Varnode vn;
 
             vn = op.getIn(1);
             if (!vn.isConstant()) return 0;

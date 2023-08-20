@@ -1,10 +1,4 @@
-﻿using Sla.SLEIGH;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.SLEIGH
 {
@@ -34,31 +28,29 @@ namespace Sla.SLEIGH
         public void build(ConstructTpl construct, int secnum)
         {
             if (construct == (ConstructTpl)null)
-                throw UnimplError("", 0);   // Pcode is not implemented for this constructor
+                throw new UnimplError("", 0);   // Pcode is not implemented for this constructor
 
             uint oldbase = labelbase;  // Recursively store old labelbase
             labelbase = labelcount; // Set the newbase
             labelcount += construct.numLabels();   // Add labels from this template
 
-            List<OpTpl*>::const_iterator iter;
-            OpTpl* op;
+            OpTpl op;
             List<OpTpl> ops = construct.getOpvec();
+            IEnumerator<OpTpl> iter = ops.GetEnumerator();
 
-            for (iter = ops.begin(); iter != ops.end(); ++iter)
-            {
-                op = *iter;
-                switch (op.getOpcode())
-                {
-                    case BUILD:
+            while (iter.MoveNext()) {
+                op = iter.Current;
+                switch (op.getOpcode()) {
+                    case OpCode.BUILD:
                         appendBuild(op, secnum);
                         break;
-                    case DELAY_SLOT:
+                    case OpCode.DELAY_SLOT:
                         delaySlot(op);
                         break;
-                    case LABELBUILD:
+                    case OpCode.LABELBUILD:
                         setLabel(op);
                         break;
-                    case CROSSBUILD:
+                    case OpCode.CROSSBUILD:
                         appendCrossBuild(op, secnum);
                         break;
                     default:
@@ -66,7 +58,8 @@ namespace Sla.SLEIGH
                         break;
                 }
             }
-            labelbase = oldbase;        // Restore old labelbase
+            // Restore old labelbase
+            labelbase = oldbase;
         }
 
         public abstract void appendBuild(OpTpl bld, int secnum);

@@ -27,7 +27,7 @@ namespace Sla.DECCORE
         public void set(Varnode v)
         {
             vn = v;
-            PcodeOp* op = vn.getDef();
+            PcodeOp op = vn.getDef();
 
             if (op == (PcodeOp)null)
                 index = 0;

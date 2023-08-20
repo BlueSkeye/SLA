@@ -26,20 +26,20 @@ namespace Sla.DECCORE
         /// \brief Pull-back SUBPIECE through INDIRECT
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_SUBPIECE);
+            oplist.Add(OpCode.CPUI_SUBPIECE);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             int maxByte, minByte, newSize;
 
-            Varnode* vn = op.getIn(0);
+            Varnode vn = op.getIn(0);
             if (!vn.isWritten()) return 0;
-            PcodeOp* indir = vn.getDef();
+            PcodeOp indir = vn.getDef();
             if (indir.code() != OpCode.CPUI_INDIRECT) return 0;
             if (indir.getIn(1).getSpace().getType() != spacetype.IPTR_IOP) return 0;
 
-            PcodeOp* targ_op = PcodeOp.getOpFromConst(indir.getIn(1).getAddr());
+            PcodeOp targ_op = PcodeOp.getOpFromConst(indir.getIn(1).getAddr());
             if (targ_op.isDead()) return 0;
             if (vn.isAddrForce()) return 0;
             RulePullsubMulti::minMaxUse(vn, maxByte, minByte);
@@ -47,16 +47,16 @@ namespace Sla.DECCORE
             if (maxByte < minByte || (newSize >= vn.getSize()))
                 return 0;
             if (!RulePullsubMulti::acceptableSize(newSize)) return 0;
-            Varnode* outvn = op.getOut();
+            Varnode outvn = op.getOut();
             if (outvn.isPrecisLo() || outvn.isPrecisHi()) return 0; // Don't pull apart double precision object
 
             ulong consume = Globals.calc_mask(newSize) << 8 * minByte;
             consume = ~consume;
             if ((consume & indir.getIn(0).getConsume()) != 0) return 0;
 
-            Varnode* small2;
+            Varnode small2;
             Address smalladdr2;
-            PcodeOp* new_ind;
+            PcodeOp new_ind;
 
             if (!vn.getSpace().isBigEndian())
                 smalladdr2 = vn.getAddr() + minByte;
@@ -71,8 +71,8 @@ namespace Sla.DECCORE
             }
             else
             {
-                Varnode* basevn = indir.getIn(0);
-                Varnode* small1 = RulePullsubMulti::findSubpiece(basevn, newSize, op.getIn(1).getOffset());
+                Varnode basevn = indir.getIn(0);
+                Varnode small1 = RulePullsubMulti::findSubpiece(basevn, newSize, op.getIn(1).getOffset());
                 if (small1 == (Varnode)null)
                     small1 = RulePullsubMulti::buildSubpiece(basevn, newSize, op.getIn(1).getOffset(), data);
                 // Create new indirect near original indirect

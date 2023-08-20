@@ -83,7 +83,7 @@ namespace Sla.DECCORE
         private static void buildLocaltypes(Funcdata data)
         {
             Datatype* ct;
-            Varnode* vn;
+            Varnode vn;
             VarnodeLocSet::const_iterator iter;
             TypeFactory* typegrp = data.getArch().types;
 
@@ -121,7 +121,7 @@ namespace Sla.DECCORE
         {
             bool change = false;
             Datatype* ct;
-            Varnode* vn;
+            Varnode vn;
             VarnodeLocSet::const_iterator iter;
 
             for (iter = data.beginLoc(); iter != data.endLoc(); ++iter)
@@ -237,7 +237,7 @@ namespace Sla.DECCORE
         {
             Datatype* ct = vn.getTempType();
             if (ct.getMetatype() != type_metatype.TYPE_PTR) return;
-            ct = ((TypePointer*)ct).getPtrTo();
+            ct = ((TypePointer)ct).getPtrTo();
             if (ct.getMetatype() == type_metatype.TYPE_SPACEBASE) return;
             if (ct.getMetatype() == type_metatype.TYPE_UNKNOWN) return; // Don't bother propagating this
             VarnodeLocSet::const_iterator iter, enditer;
@@ -254,7 +254,7 @@ namespace Sla.DECCORE
             Datatype* lastct = ct;
             while (iter != enditer)
             {
-                Varnode* curvn = *iter;
+                Varnode curvn = *iter;
                 ++iter;
                 if (curvn.isAnnotation()) continue;
                 if ((!curvn.isWritten()) && curvn.hasNoDescend()) continue;
@@ -416,7 +416,7 @@ namespace Sla.DECCORE
             // Make sure spacebase is accurate or bases could get typed and then ptrarithed
             if (!data.hasTypeRecoveryStarted()) return 0;
             TypeFactory* typegrp = data.getArch().types;
-            Varnode* vn;
+            Varnode vn;
             VarnodeLocSet::const_iterator iter;
 
 #if TYPEPROP_DEBUG
@@ -444,7 +444,7 @@ namespace Sla.DECCORE
             }
             propagateAcrossReturns(data);
             AddrSpace* spcid = data.getScopeLocal().getSpaceId();
-            Varnode* spcvn = data.findSpacebaseInput(spcid);
+            Varnode spcvn = data.findSpacebaseInput(spcid);
             if (spcvn != (Varnode)null)
                 propagateSpacebaseRef(data, spcvn);
             if (writeBack(data))

@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -18,13 +11,11 @@ namespace Sla.DECCORE
 
         public override Rule? clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule)null;
-            return new RuleLzcountShiftBool(getGroup());
+            return !grouplist.contains(getGroup()) ? (Rule)null : new RuleLzcountShiftBool(getGroup());
         }
 
         /// \class RuleLzcountShiftBool
         /// \brief Simplify equality checks that use lzcount:  `lzcount(X) >> c  =>  X == 0` if X is 2^c bits wide
-        ///
         /// Some compilers check if a value is equal to zero by checking the most
         /// significant bit in lzcount; for instance on a 32-bit system,
         /// the result of lzcount on zero would have the 5th bit set.
@@ -32,16 +23,16 @@ namespace Sla.DECCORE
         ///  - `lzcount(a - 3) >> 5  =>  a - 3 == 0  =>  a == 3` (by RuleEqual2Zero)
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_LZCOUNT);
+            oplist.Add(OpCode.CPUI_LZCOUNT);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* outVn = op.getOut();
-            list<PcodeOp*>::const_iterator iter, iter2;
+            Varnode outVn = op.getOut() ?? throw new ApplicationException();
+            IEnumerator<PcodeOp> iter = outVn.beginDescend();
+            IEnumerator<PcodeOp> iter2;
             ulong max_return = 8 * op.getIn(0).getSize();
-            if (popcount(max_return) != 1)
-            {
+            if (Globals.popcount(max_return) != 1) {
                 // This rule only makes sense with sizes that are powers of 2; if the maximum value
                 // returned by lzcount was, say, 24, then both 16 >> 4 and 24 >> 4
                 // are 1, and thus the check does not make sense.  (Such processors couldn't
@@ -49,24 +40,22 @@ namespace Sla.DECCORE
                 return 0;
             }
 
-            for (iter = outVn.beginDescend(); iter != outVn.endDescend(); ++iter)
-            {
-                PcodeOp* baseOp = *iter;
+            while (iter.MoveNext()) {
+                PcodeOp baseOp = iter.Current;
                 if (baseOp.code() != OpCode.CPUI_INT_RIGHT && baseOp.code() != OpCode.CPUI_INT_SRIGHT) continue;
-                Varnode* vn1 = baseOp.getIn(1);
+                Varnode vn1 = baseOp.getIn(1);
                 if (!vn1.isConstant()) continue;
                 ulong shift = vn1.getOffset();
-                if ((max_return >> shift) == 1)
-                {
+                if ((max_return >> (int)shift) == 1) {
                     // Becomes a comparison with zero
-                    PcodeOp* newOp = data.newOp(2, baseOp.getAddr());
+                    PcodeOp newOp = data.newOp(2, baseOp.getAddr());
                     data.opSetOpcode(newOp, OpCode.CPUI_INT_EQUAL);
-                    Varnode* b = data.newConstant(op.getIn(0).getSize(), 0);
+                    Varnode b = data.newConstant(op.getIn(0).getSize(), 0);
                     data.opSetInput(newOp, op.getIn(0), 0);
                     data.opSetInput(newOp, b, 1);
 
                     // OpCode.CPUI_INT_EQUAL must produce a 1-byte boolean result
-                    Varnode* eqResVn = data.newUniqueOut(1, newOp);
+                    Varnode eqResVn = data.newUniqueOut(1, newOp);
 
                     data.opInsertBefore(newOp, baseOp);
 

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -20,7 +14,7 @@ namespace Sla.DECCORE
         /// Number of terminating nodes reachable via the root
         private int terminatorCount;
         /// The floating-point format of the logical value
-        private FloatFormat format;
+        private FloatFormat? format;
         /// Current list of placeholders that still need to be traced
         private List<TransformVar> worklist;
 
@@ -62,7 +56,7 @@ namespace Sla.DECCORE
             }
 
             vn.setMark();
-            TransformVar* res;
+            TransformVar res;
             // Check if vn already represents the logical variable being traced
             if (vn.getSize() == precision)
                 res = newPreexistingVarnode(vn);
@@ -83,18 +77,15 @@ namespace Sla.DECCORE
         /// \return \b true if tracing the logical variable forward was possible
         private bool traceForward(TransformVar rvn)
         {
-            list<PcodeOp*>::const_iterator iter, enditer;
-            Varnode* vn = rvn.getOriginal();
-            iter = vn.beginDescend();
-            enditer = vn.endDescend();
-            while (iter != enditer)
-            {
-                PcodeOp* op = *iter++;
-                Varnode* outvn = op.getOut();
+            Varnode vn = rvn.getOriginal();
+            IEnumerator<PcodeOp> iter = vn.beginDescend();
+            IEnumerator<PcodeOp> enditer = vn.endDescend();
+            while (iter.MoveNext()) {
+                PcodeOp op = iter.Current;
+                Varnode? outvn = op.getOut();
                 if ((outvn != (Varnode)null) && (outvn.isMark()))
                     continue;
-                switch (op.code())
-                {
+                switch (op.code()) {
                     case OpCode.CPUI_COPY:
                     case OpCode.CPUI_FLOAT_CEIL:
                     case OpCode.CPUI_FLOAT_FLOOR:
@@ -106,20 +97,20 @@ namespace Sla.DECCORE
                     case OpCode.CPUI_FLOAT_SUB:
                     case OpCode.CPUI_FLOAT_MULT:
                     case OpCode.CPUI_FLOAT_DIV:
-                    case OpCode.CPUI_MULTIEQUAL:
-                        {
-                            TransformOp* rop = newOpReplace(op.numInput(), op.code(), op);
-                            TransformVar* outrvn = setReplacement(outvn);
+                    case OpCode.CPUI_MULTIEQUAL: {
+                            TransformOp rop = newOpReplace(op.numInput(), op.code(), op);
+                            TransformVar outrvn = setReplacement(outvn);
                             if (outrvn == (TransformVar)null) return false;
                             opSetInput(rop, rvn, op.getSlot(vn));
                             opSetOutput(rop, outrvn);
                             break;
                         }
-                    case OpCode.CPUI_FLOAT_FLOAT2FLOAT:
-                        {
+                    case OpCode.CPUI_FLOAT_FLOAT2FLOAT: {
                             if (outvn.getSize() < precision)
                                 return false;
-                            TransformOp* rop = newPreexistingOp(1, (outvn.getSize() == precision) ? OpCode.CPUI_COPY : OpCode.CPUI_FLOAT_FLOAT2FLOAT, op);
+                            TransformOp rop = newPreexistingOp(1, (outvn.getSize() == precision)
+                                ? OpCode.CPUI_COPY
+                                : OpCode.CPUI_FLOAT_FLOAT2FLOAT, op);
                             opSetInput(rop, rvn, 0);
                             terminatorCount += 1;
                             break;
@@ -127,20 +118,17 @@ namespace Sla.DECCORE
                     case OpCode.CPUI_FLOAT_EQUAL:
                     case OpCode.CPUI_FLOAT_NOTEQUAL:
                     case OpCode.CPUI_FLOAT_LESS:
-                    case OpCode.CPUI_FLOAT_LESSEQUAL:
-                        {
+                    case OpCode.CPUI_FLOAT_LESSEQUAL: {
                             int slot = op.getSlot(vn);
-                            TransformVar* rvn2 = setReplacement(op.getIn(1 - slot));
+                            TransformVar? rvn2 = setReplacement(op.getIn(1 - slot));
                             if (rvn2 == (TransformVar)null) return false;
-                            if (rvn == rvn2)
-                            {
-                                list<PcodeOp*>::const_iterator ourIter = iter;
+                            if (rvn == rvn2) {
+                                IEnumerator<PcodeOp> ourIter = iter;
                                 --ourIter;  // Back up one to our original iterator
                                 slot = op.getRepeatSlot(vn, slot, ourIter);
                             }
-                            if (preexistingGuard(slot, rvn2))
-                            {
-                                TransformOp* rop = newPreexistingOp(2, op.code(), op);
+                            if (preexistingGuard(slot, rvn2)) {
+                                TransformOp rop = newPreexistingOp(2, op.code(), op);
                                 opSetInput(rop, rvn, 0);
                                 opSetInput(rop, rvn2, 1);
                                 terminatorCount += 1;
@@ -148,9 +136,8 @@ namespace Sla.DECCORE
                             break;
                         }
                     case OpCode.CPUI_FLOAT_TRUNC:
-                    case OpCode.CPUI_FLOAT_NAN:
-                        {
-                            TransformOp* rop = newPreexistingOp(1, op.code(), op);
+                    case OpCode.CPUI_FLOAT_NAN: {
+                            TransformOp rop = newPreexistingOp(1, op.code(), op);
                             opSetInput(rop, rvn, 0);
                             terminatorCount += 1;
                             break;
@@ -171,11 +158,10 @@ namespace Sla.DECCORE
         /// \return \b true if the logical value can be traced properly
         private bool traceBackward(TransformVar rvn)
         {
-            PcodeOp* op = rvn.getOriginal().getDef();
+            PcodeOp? op = rvn.getOriginal().getDef();
             if (op == (PcodeOp)null) return true; // If vn is input
 
-            switch (op.code())
-            {
+            switch (op.code()) {
                 case OpCode.CPUI_COPY:
                 case OpCode.CPUI_FLOAT_CEIL:
                 case OpCode.CPUI_FLOAT_FLOOR:
@@ -187,19 +173,15 @@ namespace Sla.DECCORE
                 case OpCode.CPUI_FLOAT_SUB:
                 case OpCode.CPUI_FLOAT_MULT:
                 case OpCode.CPUI_FLOAT_DIV:
-                case OpCode.CPUI_MULTIEQUAL:
-                    {
-                        TransformOp* rop = rvn.getDef();
-                        if (rop == (TransformOp)null)
-                        {
+                case OpCode.CPUI_MULTIEQUAL: {
+                        TransformOp? rop = rvn.getDef();
+                        if (rop == (TransformOp)null) {
                             rop = newOpReplace(op.numInput(), op.code(), op);
                             opSetOutput(rop, rvn);
                         }
-                        for (int i = 0; i < op.numInput(); ++i)
-                        {
-                            TransformVar* newvar = rop.getIn(i);
-                            if (newvar == (TransformVar)null)
-                            {
+                        for (int i = 0; i < op.numInput(); ++i) {
+                            TransformVar? newvar = rop.getIn(i);
+                            if (newvar == (TransformVar)null) {
                                 newvar = setReplacement(op.getIn(i));
                                 if (newvar == (TransformVar)null)
                                     return false;
@@ -208,41 +190,36 @@ namespace Sla.DECCORE
                         }
                         return true;
                     }
-                case OpCode.CPUI_FLOAT_INT2FLOAT:
-                    {
-                        Varnode* vn = op.getIn(0);
+                case OpCode.CPUI_FLOAT_INT2FLOAT: {
+                        Varnode vn = op.getIn(0) ?? throw new ApplicationException();
                         if (!vn.isConstant() && vn.isFree())
                             return false;
-                        TransformOp* rop = newOpReplace(1, OpCode.CPUI_FLOAT_INT2FLOAT, op);
+                        TransformOp rop = newOpReplace(1, OpCode.CPUI_FLOAT_INT2FLOAT, op);
                         opSetOutput(rop, rvn);
-                        TransformVar* newvar = getPreexistingVarnode(vn);
+                        TransformVar newvar = getPreexistingVarnode(vn);
                         opSetInput(rop, newvar, 0);
                         return true;
                     }
-                case OpCode.CPUI_FLOAT_FLOAT2FLOAT:
-                    {
-                        Varnode* vn = op.getIn(0);
-                        TransformVar* newvar;
+                case OpCode.CPUI_FLOAT_FLOAT2FLOAT: {
+                        Varnode vn = op.getIn(0) ?? throw new ApplicationException();
+                        TransformVar newvar;
                         OpCode opc;
-                        if (vn.isConstant())
-                        {
+                        if (vn.isConstant()) {
                             opc = OpCode.CPUI_COPY;
                             if (vn.getSize() == precision)
                                 newvar = newConstant(precision, 0, vn.getOffset());
-                            else
-                            {
+                            else {
                                 newvar = setReplacement(vn);    // Convert constant to precision size
                                 if (newvar == (TransformVar)null)
                                     return false;           // Unsupported float format
                             }
                         }
-                        else
-                        {
+                        else {
                             if (vn.isFree()) return false;
                             opc = (vn.getSize() == precision) ? OpCode.CPUI_COPY : OpCode.CPUI_FLOAT_FLOAT2FLOAT;
                             newvar = getPreexistingVarnode(vn);
                         }
-                        TransformOp* rop = newOpReplace(1, opc, op);
+                        TransformOp rop = newOpReplace(1, opc, op);
                         opSetOutput(rop, rvn);
                         opSetInput(rop, newvar, 0);
                         return true;
@@ -262,12 +239,10 @@ namespace Sla.DECCORE
         /// \return \b true if the trace is successfully pushed
         private bool processNextWork()
         {
-            TransformVar* rvn = worklist.GetLastItem();
+            TransformVar rvn = worklist.GetLastItem();
 
             worklist.RemoveLastItem();
-
-            if (!traceBackward(rvn)) return false;
-            return traceForward(rvn);
+            return traceBackward(rvn) && traceForward(rvn);
         }
 
         /// \param f is the function being transformed
@@ -285,7 +260,8 @@ namespace Sla.DECCORE
 
         public override bool preserveAddress(Varnode vn, int bitSize, int lsbOffset)
         {
-            return vn.isInput();       // Only try to preserve address for input varnodes
+            // Only try to preserve address for input varnodes
+            return vn.isInput();
         }
 
         /// Trace logical value as far as possible
@@ -300,20 +276,16 @@ namespace Sla.DECCORE
                 return false;
             terminatorCount = 0;    // Have seen no terminators
             bool retval = true;
-            while (!worklist.empty())
-            {
-                if (!processNextWork())
-                {
+            while (!worklist.empty()) {
+                if (!processNextWork()) {
                     retval = false;
                     break;
                 }
             }
-
             clearVarnodeMarks();
-
             if (!retval) return false;
-            if (terminatorCount == 0) return false; // Must see at least 1 terminator
-            return true;
+            // Must see at least 1 terminator
+            return (terminatorCount != 0);
         }
     }
 }

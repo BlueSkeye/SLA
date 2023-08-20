@@ -32,7 +32,7 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_INT_RIGHT);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode constVn = op.getIn(1);
             if (!constVn.isConstant()) return false;

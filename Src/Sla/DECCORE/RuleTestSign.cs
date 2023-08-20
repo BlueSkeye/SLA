@@ -49,24 +49,24 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_INT_SRIGHT);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             ulong val;
-            Varnode* constVn = op.getIn(1);
+            Varnode constVn = op.getIn(1);
             if (!constVn.isConstant()) return 0;
             val = constVn.getOffset();
-            Varnode* inVn = op.getIn(0);
+            Varnode inVn = op.getIn(0);
             if (val != 8 * inVn.getSize() - 1) return 0;
-            Varnode* outVn = op.getOut();
+            Varnode outVn = op.getOut();
 
             if (inVn.isFree()) return 0;
-            List<PcodeOp*> compareOps;
+            List<PcodeOp> compareOps;
             findComparisons(outVn, compareOps);
             int resultCode = 0;
             for (int i = 0; i < compareOps.size(); ++i)
             {
-                PcodeOp* compareOp = compareOps[i];
-                Varnode* compVn = compareOp.getIn(0);
+                PcodeOp compareOp = compareOps[i];
+                Varnode compVn = compareOp.getIn(0);
                 int compSize = compVn.getSize();
 
                 ulong offset = compareOp.getIn(1).getOffset();
@@ -80,7 +80,7 @@ namespace Sla.DECCORE
                 if (compareOp.code() == OpCode.CPUI_INT_NOTEQUAL)
                     sgn = -sgn; // Complement the domain
 
-                Varnode* zeroVn = data.newConstant(inVn.getSize(), 0);
+                Varnode zeroVn = data.newConstant(inVn.getSize(), 0);
                 if (sgn == 1)
                 {
                     data.opSetInput(compareOp, inVn, 1);

@@ -32,7 +32,7 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_BOOL_AND);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             PcodeOp cmp1, cmp2;
             Varnode vn1, vn2;

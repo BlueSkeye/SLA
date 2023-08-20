@@ -22,7 +22,7 @@ namespace Sla.EXTRA
 
         public override ulong getConstant(UnifyState state)
         {
-            Varnode* vn = state.data(varindex).getVarnode();
+            Varnode vn = state.data(varindex).getVarnode();
             return (ulong)vn.getSize();    // The size is the actual value
         }
 

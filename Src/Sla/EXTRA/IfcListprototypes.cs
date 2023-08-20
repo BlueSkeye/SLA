@@ -1,10 +1,4 @@
 ﻿using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.EXTRA
 {
@@ -18,21 +12,21 @@ namespace Sla.EXTRA
         /// the evaluation model for called functions.
         public override void execute(TextReader s)
         {
-            if (dcp.conf == (Architecture)null)
+            if (dcp.conf == (Architecture)null) {
                 throw new IfaceExecutionError("No load image present");
+            }
 
-            Dictionary<string, ProtoModel*>::const_iterator iter;
-            for (iter = dcp.conf.protoModels.begin(); iter != dcp.conf.protoModels.end(); ++iter)
-            {
-                ProtoModel* model = (*iter).second;
-                *status.optr << model.getName();
+            IEnumerator<KeyValuePair<string, ProtoModel>> iter = dcp.conf.protoModels.GetEnumerator();
+            while (iter.MoveNext()) {
+                ProtoModel model = iter.Current.Value;
+                status.optr.Write(model.getName());
                 if (model == dcp.conf.defaultfp)
-                    *status.optr << " default";
+                    status.optr.Write(" default");
                 else if (model == dcp.conf.evalfp_called)
-                    *status.optr << " eval called";
+                    status.optr.Write(" eval called");
                 else if (model == dcp.conf.evalfp_current)
-                    *status.optr << " eval current";
-                *status.optr << endl;
+                    status.optr.Write(" eval current");
+                status.optr.WriteLine();
             }
         }
     }

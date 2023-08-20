@@ -62,10 +62,10 @@ namespace Sla.DECCORE
             lolessbl = lobl;
             if (lolessbl.sizeIn() != 1) return false;
             if (lolessbl.sizeOut() != 2) return false;
-            hieqbl = (BlockBasic*)lolessbl.getIn(0);
+            hieqbl = (BlockBasic)lolessbl.getIn(0);
             if (hieqbl.sizeIn() != 1) return false;
             if (hieqbl.sizeOut() != 2) return false;
-            hilessbl = (BlockBasic*)hieqbl.getIn(0);
+            hilessbl = (BlockBasic)hieqbl.getIn(0);
             if (hilessbl.sizeOut() != 2) return false;
             return true;
         }
@@ -235,7 +235,7 @@ namespace Sla.DECCORE
 
         private bool normalizeMid()
         {
-            Varnode* tmpvn;
+            Varnode tmpvn;
             vnhie1 = hiequal.getIn(0);
             vnhie2 = hiequal.getIn(1);
             if (vnhie1.isConstant())
@@ -302,7 +302,7 @@ namespace Sla.DECCORE
 
         private bool normalizeLo()
         { // This is basically identical to normalizeHi
-            Varnode* tmpvn;
+            Varnode tmpvn;
             vnlo1 = loless.getIn(0);
             vnlo2 = loless.getIn(1);
             if (lolessiszerocomp)

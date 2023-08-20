@@ -54,7 +54,7 @@ namespace Sla.EXTRA
             else
                 sz = (int)sizeof(ulong);
             ourconst &= Globals.calc_mask(sz);
-            Varnode* vn = fd.newConstant(sz, ourconst);
+            Varnode vn = fd.newConstant(sz, ourconst);
             state.data(varindex).setVarnode(vn);
             return true;
         }

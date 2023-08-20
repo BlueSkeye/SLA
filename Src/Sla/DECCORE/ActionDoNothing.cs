@@ -24,11 +24,11 @@ namespace Sla.DECCORE
         {               // Remove blocks that do nothing
             int i;
             BlockGraph graph = data.getBasicBlocks();
-            BlockBasic* bb;
+            BlockBasic bb;
 
             for (i = 0; i < graph.getSize(); ++i)
             {
-                bb = (BlockBasic*)graph.getBlock(i);
+                bb = (BlockBasic)graph.getBlock(i);
                 if (bb.isDoNothing())
                 {
                     if ((bb.sizeOut() == 1) && (bb.getOut(0) == bb))

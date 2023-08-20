@@ -29,11 +29,11 @@ namespace Sla.DECCORE
         /// are zero, then convert to the unsigned form of the operation.
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_INT_SDIV);
-            oplist.Add(CPUI_INT_SREM);
+            oplist.Add(OpCode.CPUI_INT_SDIV);
+            oplist.Add(OpCode.CPUI_INT_SREM);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             int sa = op.getOut().getSize();
             if (sa > sizeof(ulong)) return 0;

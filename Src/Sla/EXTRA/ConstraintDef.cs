@@ -29,9 +29,9 @@ namespace Sla.EXTRA
         {
             TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
             if (!traverse.step()) return false;
-            Varnode* vn = state.data(varindex).getVarnode();
+            Varnode vn = state.data(varindex).getVarnode();
             if (!vn.isWritten()) return false;
-            PcodeOp* op = vn.getDef();
+            PcodeOp op = vn.getDef();
             state.data(opindex).setOp(op);
             return true;
         }

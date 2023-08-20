@@ -751,14 +751,14 @@ namespace Sla.CORE {
             try {
                 if (-1 == append) {
                     /*const*/
-                    ref VarnodeData point = ref trans.getRegister(s);
+                    VarnodeData point = trans.getRegister(s);
                     offset = point.offset;
                     size = (int)(point.size);
                 }
                 else {
                     frontpart = s.Substring(0, append);
                     /*const*/
-                    ref VarnodeData point = ref trans.getRegister(frontpart);
+                    VarnodeData point = trans.getRegister(frontpart);
                     offset = point.offset;
                     size = (int)point.size;
                 }
@@ -795,7 +795,7 @@ namespace Sla.CORE {
         /// Write a tag fully describing the details of this space
         /// suitable for later recovery via decode.
         /// \param s is the stream being written
-        public virtual void saveXml(StreamWriter s)
+        public virtual void saveXml(TextWriter s)
         {
             // This implies type=processor
             s.Write("<space");

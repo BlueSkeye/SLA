@@ -33,7 +33,7 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_INT_OR);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode vn1;
             Varnode vn2;
@@ -93,7 +93,7 @@ namespace Sla.DECCORE
                     // We get some bits, but not all.  Convert to an AND
                     data.opSetOpcode(op, OpCode.CPUI_INT_AND);
                     data.opSetInput(op, a, 0);
-                    Varnode* newconst = data.newConstant(a.getSize(), totalbits);
+                    Varnode newconst = data.newConstant(a.getSize(), totalbits);
                     data.opSetInput(op, newconst, 1);
                 }
             }
@@ -104,9 +104,9 @@ namespace Sla.DECCORE
                 ulong aMask = a.getNZMask();
                 if ((b.getNZMask() & aMask) == 0) return 0; // RuleAndDistribute would reverse us
                 if ((c.getNZMask() & aMask) == 0) return 0; // RuleAndDistribute would reverse us
-                PcodeOp* newOrOp = data.newOp(2, op.getAddr());
+                PcodeOp newOrOp = data.newOp(2, op.getAddr());
                 data.opSetOpcode(newOrOp, OpCode.CPUI_INT_OR);
-                Varnode* orVn = data.newUniqueOut(a.getSize(), newOrOp);
+                Varnode orVn = data.newUniqueOut(a.getSize(), newOrOp);
                 data.opSetInput(newOrOp, b, 0);
                 data.opSetInput(newOrOp, c, 1);
                 data.opInsertBefore(newOrOp, op);

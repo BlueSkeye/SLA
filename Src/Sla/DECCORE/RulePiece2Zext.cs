@@ -26,12 +26,12 @@ namespace Sla.DECCORE
         /// \brief Concatenation with 0 becomes an extension:  `V = concat(#0,W)  =>  V = zext(W)`
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_PIECE);
+            oplist.Add(OpCode.CPUI_PIECE);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* constvn;
+            Varnode constvn;
 
             constvn = op.getIn(0); // Constant must be most significant bits
             if (!constvn.isConstant()) return 0;   // Must append with constant

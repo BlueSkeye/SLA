@@ -25,12 +25,12 @@ namespace Sla.DECCORE
             // Remove redundant branches, i.e. a OpCode.CPUI_CBRANCH that falls thru and branches to the same place
             int i, j;
             BlockGraph graph = data.getBasicBlocks();
-            BlockBasic* bb;
-            FlowBlock* bl;
+            BlockBasic bb;
+            FlowBlock bl;
 
             for (i = 0; i < graph.getSize(); ++i)
             {
-                bb = (BlockBasic*)graph.getBlock(i);
+                bb = (BlockBasic)graph.getBlock(i);
                 if (bb.sizeOut() == 0) continue;
                 bl = bb.getOut(0);
                 if (bb.sizeOut() == 1)

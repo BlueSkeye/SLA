@@ -26,18 +26,18 @@ namespace Sla.DECCORE
         /// \brief Simplify concatenation with zero:  `concat(V,0)  =>  zext(V) << c`
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_PIECE);
+            oplist.Add(OpCode.CPUI_PIECE);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             if (!op.getIn(1).isConstant()) return 0;
             if (op.getIn(1).getOffset() != 0) return 0;
 
             int sa = 8 * op.getIn(1).getSize();
-            Varnode* highvn = op.getIn(0);
-            PcodeOp* newop = data.newOp(1, op.getAddr());
-            Varnode* outvn = data.newUniqueOut(op.getOut().getSize(), newop);
+            Varnode highvn = op.getIn(0);
+            PcodeOp newop = data.newOp(1, op.getAddr());
+            Varnode outvn = data.newUniqueOut(op.getOut().getSize(), newop);
             data.opSetOpcode(newop, OpCode.CPUI_INT_ZEXT);
             data.opSetOpcode(op, OpCode.CPUI_INT_LEFT);
             data.opSetInput(op, outvn, 0);

@@ -1684,11 +1684,11 @@ namespace Sla.DECCORE
             if (bblocks.getSize() == 0) {
                 if (obank.empty())
                     throw new RecovError("No operations to print");
-                PcodeOpTree::const_iterator iter;
+                PcodeOpTree.Enumerator iter = obank.beginAll();
                 s.WriteLine("Raw operations: ");
-                for (iter = obank.beginAll(); iter != obank.endAll(); ++iter) {
-                    s << (*iter).second.getSeqNum() << ":\t";
-                    (*iter).second.printRaw(s);
+                while (iter.MoveNext()) {
+                    s.Write($"{iter.Current.Value.getSeqNum()}:\t");
+                    iter.Current.Value.printRaw(s);
                     s.WriteLine();
                 }
             }
@@ -2223,7 +2223,7 @@ namespace Sla.DECCORE
         public FuncCallSpecs getCallSpecs(int i) => qlst[i];
 
         /// Get the call specification associated with a CALL op
-        public FuncCallSpecs getCallSpecs(PcodeOp op)
+        public FuncCallSpecs? getCallSpecs(PcodeOp op)
         {
             int i;
             Varnode vn = op.getIn(0);
@@ -2611,67 +2611,67 @@ namespace Sla.DECCORE
             => vbank.find(s, loc, pc, uniq);
 
         /// \brief Start of all Varnodes sorted by storage
-        public VarnodeLocSet::const_iterator beginLoc() => vbank.beginLoc();
+        public VarnodeLocSet.Enumerator beginLoc() => vbank.beginLoc();
 
         /// \brief End of all Varnodes sorted by storage
-        public VarnodeLocSet::const_iterator endLoc() => vbank.endLoc();
+        public VarnodeLocSet.Enumerator endLoc() => vbank.endLoc();
 
         /// \brief Start of Varnodes stored in a given address space
-        public VarnodeLocSet::const_iterator beginLoc(AddrSpace spaceid) => vbank.beginLoc(spaceid);
+        public VarnodeLocSet.Enumerator beginLoc(AddrSpace spaceid) => vbank.beginLoc(spaceid);
 
         /// \brief End of Varnodes stored in a given address space
-        public VarnodeLocSet::const_iterator endLoc(AddrSpace spaceid) => vbank.endLoc(spaceid);
+        public VarnodeLocSet.Enumerator endLoc(AddrSpace spaceid) => vbank.endLoc(spaceid);
 
         /// \brief Start of Varnodes at a storage address
-        public VarnodeLocSet::const_iterator beginLoc(Address addr) => vbank.beginLoc(addr);
+        public VarnodeLocSet.Enumerator beginLoc(Address addr) => vbank.beginLoc(addr);
 
         /// \brief End of Varnodes at a storage address
-        public VarnodeLocSet::const_iterator endLoc(Address addr) => vbank.endLoc(addr);
+        public VarnodeLocSet.Enumerator endLoc(Address addr) => vbank.endLoc(addr);
 
         /// \brief Start of Varnodes with given storage
-        public VarnodeLocSet::const_iterator beginLoc(int s, Address addr) => vbank.beginLoc(s, addr);
+        public VarnodeLocSet.Enumerator beginLoc(int s, Address addr) => vbank.beginLoc(s, addr);
 
         /// \brief End of Varnodes with given storage
-        public VarnodeLocSet::const_iterator endLoc(int s, Address addr) => vbank.endLoc(s, addr);
+        public VarnodeLocSet.Enumerator endLoc(int s, Address addr) => vbank.endLoc(s, addr);
 
         /// \brief Start of Varnodes matching storage and properties
-        public VarnodeLocSet::const_iterator beginLoc(int s, Address addr, Varnode.varnode_flags fl)
+        public VarnodeLocSet.Enumerator beginLoc(int s, Address addr, Varnode.varnode_flags fl)
             => vbank.beginLoc(s, addr, fl);
 
         /// \brief End of Varnodes matching storage and properties
-        public VarnodeLocSet::const_iterator endLoc(int s, Address addr, Varnode.varnode_flags fl)
+        public VarnodeLocSet.Enumerator endLoc(int s, Address addr, Varnode.varnode_flags fl)
             => vbank.endLoc(s, addr, fl);
 
         /// \brief Start of Varnodes matching storage and definition address
-        public VarnodeLocSet::const_iterator beginLoc(int s, Address addr, Address pc, uint uniq = uint.MaxValue)
+        public VarnodeLocSet.Enumerator beginLoc(int s, Address addr, Address pc, uint uniq = uint.MaxValue)
             => vbank.beginLoc(s, addr, pc, uniq);
 
         /// \brief End of Varnodes matching storage and definition address
-        public VarnodeLocSet::const_iterator endLoc(int s, Address addr, Address pc, uint uniq = uint.MaxValue)
+        public VarnodeLocSet.Enumerator endLoc(int s, Address addr, Address pc, uint uniq = uint.MaxValue)
             => vbank.endLoc(s, addr, pc, uniq);
 
         /// \brief Given start, return maximal range of overlapping Varnodes
-        public Varnode.varnode_flags overlapLoc(VarnodeLocSet::const_iterator iter, List<VarnodeLocSet::const_iterator> bounds)
+        public Varnode.varnode_flags overlapLoc(VarnodeLocSet.Enumerator iter, List<VarnodeLocSet.Enumerator> bounds)
             => vbank.overlapLoc(iter, bounds);
 
         /// \brief Start of all Varnodes sorted by definition address
-        public VarnodeDefSet::const_iterator beginDef() => vbank.beginDef();
+        public VarnodeDefSet.Enumerator beginDef() => vbank.beginDef();
 
         /// \brief End of all Varnodes sorted by definition address
-        public VarnodeDefSet::const_iterator endDef() => vbank.endDef();
+        public VarnodeDefSet.Enumerator endDef() => vbank.endDef();
 
         /// \brief Start of Varnodes with a given definition property
-        public VarnodeDefSet::const_iterator beginDef(Varnode.varnode_flags fl) => vbank.beginDef(fl);
+        public VarnodeDefSet.Enumerator beginDef(Varnode.varnode_flags fl) => vbank.beginDef(fl);
 
         /// \brief End of Varnodes with a given definition property
-        public VarnodeDefSet::const_iterator endDef(Varnode.varnode_flags fl) => vbank.endDef(fl);
+        public VarnodeDefSet.Enumerator endDef(Varnode.varnode_flags fl) => vbank.endDef(fl);
 
         /// \brief Start of (input or free) Varnodes at a given storage address
-        public VarnodeDefSet::const_iterator beginDef(Varnode.varnode_flags fl, Address addr)
+        public VarnodeDefSet.Enumerator beginDef(Varnode.varnode_flags fl, Address addr)
             => vbank.beginDef(fl, addr);
 
         /// \brief End of (input or free) Varnodes at a given storage address
-        public VarnodeDefSet::const_iterator endDef(Varnode.varnode_flags fl, Address addr)
+        public VarnodeDefSet.Enumerator endDef(Varnode.varnode_flags fl, Address addr)
             => vbank.endDef(fl, addr);
 
         /// Check for a potential laned register
@@ -2715,11 +2715,8 @@ namespace Sla.DECCORE
             localmap.queryByName(nm, symList);
             if (symList.empty()) return (HighVariable)null;
             Symbol sym = symList[0];
-            Varnode vn = findLinkedVarnode(sym.getFirstWholeMap());
-            if (vn != (Varnode)null)
-                return vn.getHigh();
-
-            return (HighVariable)null;
+            Varnode? vn = findLinkedVarnode(sym.getFirstWholeMap());
+            return (vn != (Varnode)null) ? vn.getHigh() : (HighVariable)null;
         }
 
         /// Make sure there is a Symbol entry for all global Varnodes
@@ -2728,17 +2725,17 @@ namespace Sla.DECCORE
         public void mapGlobals()
         {
             SymbolEntry entry;
-            VarnodeLocSet::const_iterator iter, enditer;
             Varnode vn, maxvn;
             Datatype ct;
             Varnode.varnode_flags fl;
             List<Varnode> uncoveredVarnodes = new List<Varnode>();
             bool inconsistentuse = false;
 
-            iter = vbank.beginLoc(); // Go through all varnodes for this space
-            enditer = vbank.endLoc();
-            while (iter != enditer) {
-                vn = *iter++;
+            // Go through all varnodes for this space
+            VarnodeLocSet.Enumerator iter = vbank.beginLoc();
+            VarnodeLocSet.Enumerator enditer = vbank.endLoc();
+            while (iter.MoveNext()) {
+                vn = iter.Current;
                 if (vn.isFree()) continue;
                 if (!vn.isPersist()) continue; // Could be a code ref
                 if (vn.getSymbolEntry() != (SymbolEntry)null) continue;
@@ -2746,7 +2743,7 @@ namespace Sla.DECCORE
                 Address addr = vn.getAddr();
                 Address endaddr = addr + vn.getSize();
                 uncoveredVarnodes.Clear();
-                while (iter != enditer) {
+                while (iter.MoveNext()) {
                     vn = iter.Current;
                     if (!vn.isPersist()) break;
                     if (vn.getAddr() < endaddr) {
@@ -2758,15 +2755,13 @@ namespace Sla.DECCORE
                         endaddr = vn.getAddr() + vn.getSize();
                         if (vn.getSize() > maxvn.getSize())
                             maxvn = vn;
-                        ++iter;
                     }
                     else
                         break;
                 }
-                if ((maxvn.getAddr() == addr) && (addr + maxvn.getSize() == endaddr))
-                    ct = maxvn.getHigh().getType();
-                else
-                    ct = glb.types.getBase((int)(endaddr.getOffset() - addr.getOffset()), type_metatype.TYPE_UNKNOWN);
+                ct = ((maxvn.getAddr() == addr) && (addr + maxvn.getSize() == endaddr))
+                    ? maxvn.getHigh().getType()
+                    : glb.types.getBase((int)(endaddr.getOffset() - addr.getOffset()), type_metatype.TYPE_UNKNOWN);
                 fl = 0;
                 // Assume existing symbol is addrtied, so use empty usepoint
                 Address usepoint = new Address();
@@ -5493,7 +5488,7 @@ namespace Sla.DECCORE
         /// The current state of the op is recorded for later comparison after
         /// its been modified.
         /// \param op is the given PcodeOp being recorded
-        public void debugModCheck(PcodeOp* op)
+        public void debugModCheck(PcodeOp op)
         {
             if (op.isModified()) return;
             if (!debugCheckRange(op)) return;

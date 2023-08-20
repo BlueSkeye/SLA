@@ -33,7 +33,7 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_STORE);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Datatype? outType = SplitDatatype.getValueDatatype(op, op.getIn(2).getSize(), data.getArch().types);
             if (outType == (Datatype)null)

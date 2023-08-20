@@ -47,11 +47,11 @@ namespace Sla.DECCORE
             }
             else
             {
-                PcodeOp* op = block.getStop();
+                PcodeOp op = block.getStop();
                 ustart = CoverBlock::getUIndex(block.getStart());
                 ustop = CoverBlock::getUIndex(op);
                 if ((ustop != uint.MaxValue) && (ustop >= ustart))
-                    block.setEnd((PcodeOp*)1); // Fill in to the bottom
+                    block.setEnd((PcodeOp)1); // Fill in to the bottom
 
 
                 if ((ustop == (uint)0) && (block.getStart() == (PcodeOp)null)) {
@@ -261,7 +261,7 @@ namespace Sla.DECCORE
             int blk;
 
             if (op == null) {
-                op = (PcodeOp*)2;
+                op = (PcodeOp)2;
                 blk = 0;
             }
             else
@@ -316,8 +316,8 @@ namespace Sla.DECCORE
             else if (vn.isInput())
             {
                 CoverBlock & block(cover[0]);
-                block.setBegin((PcodeOp*)2 ); // Special mark for input
-                block.setEnd((PcodeOp*)2 );
+                block.setBegin((PcodeOp)2 ); // Special mark for input
+                block.setEnd((PcodeOp)2 );
             }
         }
 

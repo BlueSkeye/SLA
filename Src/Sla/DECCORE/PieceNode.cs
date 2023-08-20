@@ -65,9 +65,9 @@ namespace Sla.DECCORE
                 return true;
             }
             if (!vn.isWritten()) return true;
-            PcodeOp* def = vn.getDef();
+            PcodeOp def = vn.getDef();
             if (def.code() != OpCode.CPUI_PIECE) return true;
-            PcodeOp* op = vn.loneDescend();
+            PcodeOp op = vn.loneDescend();
             if (op == (PcodeOp)null) return true;
             if (vn.isAddrTied())
             {

@@ -62,7 +62,7 @@ namespace Sla.DECCORE
             decoder.closeElement(elemId);
             Datatype* testType = type;
             if (testType.getMetatype() == type_metatype.TYPE_PTR)
-                testType = ((TypePointer*)testType).getPtrTo();
+                testType = ((TypePointer)testType).getPtrTo();
             if (testType.getMetatype() != type_metatype.TYPE_UNION)
                 throw new LowlevelError("<unionfacetsymbol> does not have a union type");
             if (fieldNum < -1 || fieldNum >= testType.numDepend())

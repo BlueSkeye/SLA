@@ -1,14 +1,5 @@
-﻿using ghidra;
+﻿using Sla.CORE;
 using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
-using static ghidra.ProtoModel;
 
 namespace Sla.DECCORE
 {
@@ -33,21 +24,19 @@ namespace Sla.DECCORE
         /// \param efflist is the given EffectRecord list
         private void intersectEffects(List<EffectRecord> efflist)
         {
-            List<EffectRecord> newlist;
+            List<EffectRecord> newlist = new List<EffectRecord>();
 
             int i = 0;
             int j = 0;
-            while ((i < effectlist.size()) && (j < efflist.size()))
-            {
+            while ((i < effectlist.size()) && (j < efflist.size())) {
                 EffectRecord eff1 = effectlist[i];
                 EffectRecord eff2 = efflist[j];
 
-                if (EffectRecord::compareByAddress(eff1, eff2))
+                if (EffectRecord.compareByAddress(eff1, eff2))
                     i += 1;
-                else if (EffectRecord::compareByAddress(eff2, eff1))
+                else if (EffectRecord.compareByAddress(eff2, eff1))
                     j += 1;
-                else
-                {
+                else {
                     if (eff1 == eff2)
                         newlist.Add(eff1);
                     i += 1;
@@ -63,12 +52,11 @@ namespace Sla.DECCORE
         /// \param trashlist is the given \e likely-trash list
         private void intersectLikelyTrash(List<VarnodeData> trashlist)
         {
-            List<VarnodeData> newlist;
+            List<VarnodeData> newlist = new List<VarnodeData>();
 
             int i = 0;
             int j = 0;
-            while ((i < likelytrash.size()) && (j < trashlist.size()))
-            {
+            while ((i < likelytrash.size()) && (j < trashlist.size())) {
                 VarnodeData trs1 = likelytrash[i];
                 VarnodeData trs2 = trashlist[j];
 
@@ -76,8 +64,7 @@ namespace Sla.DECCORE
                     i += 1;
                 else if (trs2 < trs1)
                     j += 1;
-                else
-                {
+                else {
                     newlist.Add(trs1);
                     i += 1;
                     j += 1;
@@ -109,11 +96,11 @@ namespace Sla.DECCORE
             if ((model.input.getType() != ParamList::p_standard) &&
                 (model.input.getType() != ParamList::p_register))
                 throw new LowlevelError("Can only resolve between standard prototype models");
-            if (input == (ParamList)null)
-            { // First fold in
+            if (input == (ParamList)null) {
+                // First fold in
                 input = new ParamListMerged();
-                output = new ParamListStandardOut(*(ParamListStandardOut*)model.output);
-                ((ParamListMerged*)input).foldIn(*(ParamListStandard*)model.input); // Fold in the parameter lists
+                output = new ParamListStandardOut((ParamListStandardOut)model.output);
+                ((ParamListMerged)input).foldIn((ParamListStandard)model.input); // Fold in the parameter lists
                 extrapop = model.extrapop;
                 effectlist = model.effectlist;
                 injectUponEntry = model.injectUponEntry;
@@ -124,7 +111,7 @@ namespace Sla.DECCORE
             }
             else
             {
-                ((ParamListMerged*)input).foldIn(*(ParamListStandard*)model.input);
+                ((ParamListMerged)input).foldIn((ParamListStandard)model.input);
                 // We assume here that the output models are the same, but we don't check
                 if (extrapop != model.extrapop)
                     extrapop = ProtoModel.extrapop_unknown;
@@ -133,7 +120,7 @@ namespace Sla.DECCORE
                 intersectEffects(model.effectlist);
                 intersectLikelyTrash(model.likelytrash);
                 // Take the union of the localrange and paramrange
-                set<Range>::const_iterator iter;
+                IEnumerator<Range> iter;
                 for (iter = model.localrange.begin(); iter != model.localrange.end(); ++iter)
                     localrange.insertRange((*iter).getSpace(), (*iter).getFirst(), (*iter).getLast());
                 for (iter = model.paramrange.begin(); iter != model.paramrange.end(); ++iter)
@@ -180,14 +167,14 @@ namespace Sla.DECCORE
 
         public override void decode(Sla.CORE.Decoder decoder)
         {
-            uint elemId = decoder.openElement(ElementId.ELEM_RESOLVEPROTOTYPE);
+            ElementId elemId = decoder.openElement(ElementId.ELEM_RESOLVEPROTOTYPE);
             name = decoder.readString(AttributeId.ATTRIB_NAME);
-            while(true)
-            { // A tag for each merged prototype
-                uint subId = decoder.openElement();
-                if (subId != ELEM_MODEL) break;
+            while(true) {
+                // A tag for each merged prototype
+                ElementId subId = decoder.openElement();
+                if (subId != ElementId.ELEM_MODEL) break;
                 string modelName = decoder.readString(AttributeId.ATTRIB_NAME);
-                ProtoModel* mymodel = glb.getModel(modelName);
+                ProtoModel mymodel = glb.getModel(modelName);
                 if (mymodel == (ProtoModel)null)
                     throw new LowlevelError("Missing prototype model: " + modelName);
                 decoder.closeElement(subId);
@@ -195,8 +182,8 @@ namespace Sla.DECCORE
                 modellist.Add(mymodel);
             }
             decoder.closeElement(elemId);
-            ((ParamListMerged*)input).finalize();
-            ((ParamListMerged*)output).finalize();
+            ((ParamListMerged)input).finalize();
+            ((ParamListMerged)output).finalize();
         }
     }
 }

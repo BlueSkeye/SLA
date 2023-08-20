@@ -47,7 +47,7 @@ namespace Sla.DECCORE
         {
             if (ct.getMetatype() != type_metatype.TYPE_PTR)  // Java arrays are always Ghidra pointer types
                 return false;
-            ct = ((TypePointer*)ct).getPtrTo();
+            ct = ((TypePointer)ct).getPtrTo();
             switch (ct.getMetatype())
             {
                 case type_metatype.TYPE_UINT:     // Pointer to unsigned is placeholder for class reference, not an array
@@ -179,7 +179,7 @@ namespace Sla.DECCORE
                 {
                     if (isArrayType(ct))
                         arrayCount += 1;
-                    ct = ((TypePointer*)ct).getPtrTo();
+                    ct = ((TypePointer)ct).getPtrTo();
                 }
                 else if (ct.getName().size() != 0)
                     break;
@@ -262,7 +262,7 @@ namespace Sla.DECCORE
         {
             pushOp(&function_call, op);
             Funcdata fd = op.getParent().getFuncdata();
-            FuncCallSpecs* fc = fd.getCallSpecs(op);
+            FuncCallSpecs fc = fd.getCallSpecs(op);
             if (fc == (FuncCallSpecs)null)
                 throw new LowlevelError("Missing indirect function callspec");
             int skip = getHiddenThisSlot(op, fc);
@@ -298,8 +298,8 @@ namespace Sla.DECCORE
 
         public override void opCpoolRefOp(PcodeOp op)
         {
-            Varnode* outvn = op.getOut();
-            Varnode* vn0 = op.getIn(0);
+            Varnode outvn = op.getOut();
+            Varnode vn0 = op.getIn(0);
             List<ulong> refs;
             for (int i = 1; i < op.numInput(); ++i)
                 refs.Add(op.getIn(i).getOffset());
@@ -336,7 +336,7 @@ namespace Sla.DECCORE
                             Datatype* dt = rec.getType();
                             while (dt.getMetatype() == type_metatype.TYPE_PTR)
                             {
-                                dt = ((TypePointer*)dt).getPtrTo();
+                                dt = ((TypePointer)dt).getPtrTo();
                             }
                             pushOp(&instanceof, op);
                             pushVn(vn0, op, mods);
@@ -354,7 +354,7 @@ namespace Sla.DECCORE
                             EmitMarkup.syntax_highlight color = EmitMarkup::var_color;
                             if (ct.getMetatype() == type_metatype.TYPE_PTR)
                             {
-                                ct = ((TypePointer*)ct).getPtrTo();
+                                ct = ((TypePointer)ct).getPtrTo();
                                 if (ct.getMetatype() == type_metatype.TYPE_CODE)
                                     color = EmitMarkup::funcname_color;
                             }

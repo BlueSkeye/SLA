@@ -30,10 +30,10 @@ namespace Sla.DECCORE
         /// a COPY of the constant.  Otherwise just append the type id of the reference to the top.
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_CPOOLREF);
+            oplist.Add(OpCode.CPUI_CPOOLREF);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             if (op.isCpoolTransformed()) return 0;     // Already visited
             data.opMarkCpoolTransformed(op);    // Mark our visit
@@ -49,7 +49,7 @@ namespace Sla.DECCORE
                 else if (rec.getTag() == CPoolRecord::primitive)
                 {
                     int sz = op.getOut().getSize();
-                    Varnode* cvn = data.newConstant(sz, rec.getValue() & Globals.calc_mask(sz));
+                    Varnode cvn = data.newConstant(sz, rec.getValue() & Globals.calc_mask(sz));
                     cvn.updateType(rec.getType(), true, true);
                     while (op.numInput() > 1)
                     {

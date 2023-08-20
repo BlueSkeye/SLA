@@ -32,7 +32,7 @@ namespace Sla.DECCORE
         {
             for (int i = 0; i < a.numInstances(); ++i)
             {
-                Varnode* vn = a.getInstance(i);
+                Varnode vn = a.getInstance(i);
                 if (1 < vn.getCover().intersectByBlock(blk, cover))
                     res.Add(vn);
             }
@@ -54,11 +54,11 @@ namespace Sla.DECCORE
         {
             for (int i = 0; i < a.numInstances(); ++i)
             {
-                Varnode* vn = a.getInstance(i);
+                Varnode vn = a.getInstance(i);
                 if (2 > vn.getCover().intersectByBlock(blk, cover)) continue;
                 for (int j = 0; j < blist.size(); ++j)
                 {
-                    Varnode* vn2 = blist[j];
+                    Varnode vn2 = blist[j];
                     if (1 < vn2.getCover().intersectByBlock(blk, *vn.getCover()))
                     {
                         if (vn.getSize() == vn2.getSize())
@@ -86,30 +86,26 @@ namespace Sla.DECCORE
         /// \return \b true if an intersection occurs in the specified block
         private bool blockIntersection(HighVariable a, HighVariable b, int blk)
         {
-            List<Varnode*> blist;
+            List<Varnode> blist = new List<Varnode>()
 
             Cover aCover = a.getCover();
             Cover bCover = b.getCover();
             gatherBlockVarnodes(b, blk, aCover, blist);
             if (testBlockIntersection(a, blk, bCover, 0, blist))
                 return true;
-            if (a.piece != (VariablePiece)null)
-            {
+            if (a.piece != (VariablePiece)null) {
                 int baseOff = a.piece.getOffset();
-                for (int i = 0; i < a.piece.numIntersection(); ++i)
-                {
+                for (int i = 0; i < a.piece.numIntersection(); ++i) {
                     VariablePiece interPiece = a.piece.getIntersection(i);
                     int off = interPiece.getOffset() - baseOff;
                     if (testBlockIntersection(interPiece.getHigh(), blk, bCover, off, blist))
                         return true;
                 }
             }
-            if (b.piece != (VariablePiece)null)
-            {
+            if (b.piece != (VariablePiece)null) {
                 int bBaseOff = b.piece.getOffset();
-                for (int i = 0; i < b.piece.numIntersection(); ++i)
-                {
-                    blist.clear();
+                for (int i = 0; i < b.piece.numIntersection(); ++i) {
+                    blist.Clear();
                     VariablePiece bPiece = b.piece.getIntersection(i);
                     int bOff = bPiece.getOffset() - bBaseOff;
                     gatherBlockVarnodes(bPiece.getHigh(), blk, aCover, blist);
@@ -139,18 +135,21 @@ namespace Sla.DECCORE
         /// \param high is the given HighVariable to purge
         private void purgeHigh(HighVariable high)
         {
-            Dictionary<HighEdge, bool>::iterator iterfirst = highedgemap.lower_bound(HighEdge(high, (HighVariable)null));
-            Dictionary<HighEdge, bool>::iterator iterlast = highedgemap.lower_bound(HighEdge(high, (HighVariable*)~((ulong)0)));
+            IEnumerator<KeyValuePair<HighEdge, bool>> iterfirst = highedgemap.lower_bound(
+                new HighEdge(high, (HighVariable)null));
+            IEnumerator<KeyValuePair<HighEdge, bool>> iterlast =
+                highedgemap.lower_bound(new HighEdge(high, (HighVariable)ulong.MaxValue));
 
             if (iterfirst == iterlast) return;
-            --iterlast;         // Move back 1 to prevent deleting under the iterator
-            Dictionary<HighEdge, bool>::iterator iter;
+            // Move back 1 to prevent deleting under the iterator
+            --iterlast;
+            IEnumerator<KeyValuePair<HighEdge, bool>> iter;
             for (iter = iterfirst; iter != iterlast; ++iter)
-                highedgemap.erase(HighEdge(iter.Current.Key.b, iter.Current.Key.a));
-            highedgemap.erase(HighEdge(iter.Current.Key.b, iter.Current.Key.a));
+                highedgemap.Remove(iter.Current.Key.b);
+            highedgemap.Remove(iter.Current.Key.b);
             ++iterlast;         // Restore original range (with possibly new open endpoint)
 
-            highedgemap.erase(iterfirst, iterlast);
+            highedgemap.Remove(iterfirst, iterlast);
         }
 
         /// \brief Translate any intersection tests for \e high2 into tests for \e high1
@@ -164,7 +163,7 @@ namespace Sla.DECCORE
             List<HighVariable> yesinter = new List<HighVariable>();     // Highs that high2 intersects
             List<HighVariable> nointer = new List<HighVariable>();      // Highs that high2 does not intersect
             Dictionary<HighEdge, bool>.Enumerator iterfirst = highedgemap.lower_bound(HighEdge(high2, (HighVariable)null));
-            Dictionary<HighEdge, bool>.Enumerator iterlast = highedgemap.lower_bound(HighEdge(high2, (HighVariable*)~((ulong)0)));
+            Dictionary<HighEdge, bool>.Enumerator iterlast = highedgemap.lower_bound(HighEdge(high2, (HighVariable)~((ulong)0)));
             Dictionary<HighEdge, bool>.Enumerator iter;
 
             for (iter = iterfirst; iter != iterlast; ++iter) {

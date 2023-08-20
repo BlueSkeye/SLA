@@ -54,7 +54,7 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_INT_ADD);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             PcodeOp? nextop = op.getOut().loneDescend();
             // Do we have the root of an ADD tree

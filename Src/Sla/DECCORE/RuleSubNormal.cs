@@ -30,19 +30,19 @@ namespace Sla.DECCORE
         ///  - `sub( V>>n, c )  =>  ext( sub( V, c+k/8 ) )  if n is big`
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_SUBPIECE);
+            oplist.Add(OpCode.CPUI_SUBPIECE);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* shiftout = op.getIn(0);
+            Varnode shiftout = op.getIn(0);
             if (!shiftout.isWritten()) return 0;
-            PcodeOp* shiftop = shiftout.getDef();
+            PcodeOp shiftop = shiftout.getDef();
             OpCode opc = shiftop.code();
             if ((opc != OpCode.CPUI_INT_RIGHT) && (opc != OpCode.CPUI_INT_SRIGHT))
                 return 0;
             if (!shiftop.getIn(1).isConstant()) return 0;
-            Varnode* a = shiftop.getIn(0);
+            Varnode a = shiftop.getIn(0);
             if (a.isFree()) return 0;
             int n = shiftop.getIn(1).getOffset();
             int c = op.getIn(1).getOffset();
@@ -61,7 +61,7 @@ namespace Sla.DECCORE
                 {
                     // We need an additional extension
                     c += k;
-                    PcodeOp* newop = data.newOp(2, op.getAddr());
+                    PcodeOp newop = data.newOp(2, op.getAddr());
                     opc = (opc == OpCode.CPUI_INT_SRIGHT) ? OpCode.CPUI_INT_SEXT : OpCode.CPUI_INT_ZEXT;
                     data.opSetOpcode(newop, OpCode.CPUI_SUBPIECE);
                     data.newUniqueOut(truncSize, newop);
@@ -94,7 +94,7 @@ namespace Sla.DECCORE
                     n -= 1;
             }
 
-            PcodeOp* newop = data.newOp(2, op.getAddr());
+            PcodeOp newop = data.newOp(2, op.getAddr());
             data.opSetOpcode(newop, OpCode.CPUI_SUBPIECE);
             data.newUniqueOut(outsize, newop);
             data.opSetInput(newop, a, 0);

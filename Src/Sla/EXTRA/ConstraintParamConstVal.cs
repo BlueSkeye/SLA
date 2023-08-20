@@ -30,8 +30,8 @@ namespace Sla.EXTRA
         {
             TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
             if (!traverse.step()) return false;
-            PcodeOp* op = state.data(opindex).getOp();
-            Varnode* vn = op.getIn(slot);
+            PcodeOp op = state.data(opindex).getOp();
+            Varnode vn = op.getIn(slot);
             if (!vn.isConstant()) return false;
             if (vn.getOffset() != (val & Globals.calc_mask(vn.getSize()))) return false;
             return true;

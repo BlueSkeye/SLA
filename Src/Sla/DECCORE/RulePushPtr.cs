@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -21,9 +13,9 @@ namespace Sla.DECCORE
         /// \return the duplicate Varnode
         private static Varnode buildVarnodeOut(Varnode vn, PcodeOp op, Funcdata data)
         {
-            if (vn.isAddrTied() || vn.getSpace().getType() == spacetype.IPTR_INTERNAL)
-                return data.newUniqueOut(vn.getSize(), op);
-            return data.newVarnodeOut(vn.getSize(), vn.getAddr(), op);
+            return (vn.isAddrTied() || vn.getSpace().getType() == spacetype.IPTR_INTERNAL)
+                ? data.newUniqueOut(vn.getSize(), op)
+                : data.newVarnodeOut(vn.getSize(), vn.getAddr(), op);
         }
 
         /// \brief Generate list of PcodeOps that need to be duplicated as part of pushing the pointer
@@ -35,17 +27,15 @@ namespace Sla.DECCORE
         /// \param vn is the offset Varnode being added to the pointer
         private static void collectDuplicateNeeds(List<PcodeOp> reslist, Varnode vn)
         {
-            while(true)
-            {
+            while(true) {
                 if (!vn.isWritten()) return;
                 if (vn.isAutoLive()) return;
                 if (vn.loneDescend() == (PcodeOp)null) return;   // Already has multiple descendants
-                PcodeOp* op = vn.getDef();
+                PcodeOp op = vn.getDef() ?? throw new ApplicationException();
                 OpCode opc = op.code();
                 if (opc == OpCode.CPUI_INT_ZEXT || opc == OpCode.CPUI_INT_SEXT || opc == OpCode.CPUI_INT_2COMP)
                     reslist.Add(op);
-                else if (opc == OpCode.CPUI_INT_MULT)
-                {
+                else if (opc == OpCode.CPUI_INT_MULT) {
                     if (op.getIn(1).isConstant())
                         reslist.Add(op);
                 }
@@ -62,8 +52,7 @@ namespace Sla.DECCORE
 
         public override Rule? clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule)null;
-            return new RulePushPtr(getGroup());
+            return !grouplist.contains(getGroup()) ? (Rule)null : new RulePushPtr(getGroup());
         }
 
         /// \class RulePushPtr
@@ -73,43 +62,42 @@ namespace Sla.DECCORE
         /// onto the expression calculating the offset into its data-type.
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_INT_ADD);
+            oplist.Add(OpCode.CPUI_INT_ADD);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             int slot;
-            Varnode* vni = (Varnode)null;
+            Varnode? vni = (Varnode)null;
 
             if (!data.hasTypeRecoveryStarted()) return 0;
-            for (slot = 0; slot < op.numInput(); ++slot)
-            { // Search for pointer type
+            for (slot = 0; slot < op.numInput(); ++slot) {
+                // Search for pointer type
                 vni = op.getIn(slot);
                 if (vni.getTypeReadFacing(op).getMetatype() == type_metatype.TYPE_PTR) break;
             }
             if (slot == op.numInput()) return 0;
 
-            if (RulePtrArith::evaluatePointerExpression(op, slot) != 1) return 0;
-            Varnode* vn = op.getOut();
-            Varnode* vnadd2 = op.getIn(1 - slot);
-            List<PcodeOp*> duplicateList;
+            if (RulePtrArith.evaluatePointerExpression(op, slot) != 1) return 0;
+            Varnode vn = op.getOut();
+            Varnode vnadd2 = op.getIn(1 - slot);
+            List<PcodeOp> duplicateList = new List<PcodeOp>();
             if (vn.loneDescend() == (PcodeOp)null)
                 collectDuplicateNeeds(duplicateList, vnadd2);
 
-            while(true)
-            {
-                list<PcodeOp*>::const_iterator iter = vn.beginDescend();
+            while(true) {
+                IEnumerator<PcodeOp> iter = vn.beginDescend();
                 if (iter == vn.endDescend()) break;
-                PcodeOp* decop = *iter;
+                PcodeOp decop = iter.Current;
                 int j = decop.getSlot(vn);
 
-                Varnode* vnadd1 = decop.getIn(1 - j);
-                Varnode* newout;
+                Varnode vnadd1 = decop.getIn(1 - j);
+                Varnode newout;
 
                 // Create new INT_ADD for the intermediate result that didn't exist in original code.
                 // We don't associate it with the address of the original INT_ADD
                 // We don't preserve the Varnode address of the original INT_ADD
-                PcodeOp* newop = data.newOp(2, decop.getAddr());       // Use the later address
+                PcodeOp newop = data.newOp(2, decop.getAddr());       // Use the later address
                 data.opSetOpcode(newop, OpCode.CPUI_INT_ADD);
                 newout = data.newUniqueOut(vnadd1.getSize(), newop);   // Use a temporary storage address
 
@@ -139,17 +127,16 @@ namespace Sla.DECCORE
         /// \param data is function to build duplicates in
         public static void duplicateNeed(PcodeOp op, Funcdata data)
         {
-            Varnode* outVn = op.getOut();
-            Varnode* inVn = op.getIn(0);
+            Varnode outVn = op.getOut();
+            Varnode inVn = op.getIn(0);
             int num = op.numInput();
             OpCode opc = op.code();
-            list<PcodeOp*>::const_iterator iter = outVn.beginDescend();
-            do
-            {
-                PcodeOp* decOp = *iter;
+            IEnumerator<PcodeOp> iter = outVn.beginDescend();
+            do {
+                PcodeOp decOp = iter.Current;
                 int slot = decOp.getSlot(outVn);
-                PcodeOp* newOp = data.newOp(num, op.getAddr());    // Duplicate op associated with original address
-                Varnode* newOut = buildVarnodeOut(outVn, newOp, data);  // Result contained in original storage
+                PcodeOp newOp = data.newOp(num, op.getAddr());    // Duplicate op associated with original address
+                Varnode newOut = buildVarnodeOut(outVn, newOp, data);  // Result contained in original storage
                 newOut.updateType(outVn.getType(), false, false);
                 data.opSetOpcode(newOp, opc);
                 data.opSetInput(newOp, inVn, 0);

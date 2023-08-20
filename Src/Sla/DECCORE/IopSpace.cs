@@ -53,7 +53,7 @@ namespace Sla.DECCORE
             // Print info about op this address refers to
             BlockBasic bs;
             BlockBasic bl;
-            PcodeOp op = (PcodeOp*)(ulong)offset; // Treat offset as op
+            PcodeOp op = (PcodeOp)(ulong)offset; // Treat offset as op
 
             if (!op.isBranch()) {   // op parameter for OpCode.CPUI_INDIRECT
                 s.Write(op.getSeqNum());

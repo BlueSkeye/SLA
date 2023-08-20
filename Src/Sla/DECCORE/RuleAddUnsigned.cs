@@ -27,12 +27,12 @@ namespace Sla.DECCORE
         /// \brief Cleanup:  Convert INT_ADD of constants to INT_SUB:  `V + 0xff...  =>  V - 0x00...`
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_INT_ADD);
+            oplist.Add(OpCode.CPUI_INT_ADD);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* constvn = op.getIn(1);
+            Varnode constvn = op.getIn(1);
 
             if (!constvn.isConstant()) return 0;
             Datatype* dt = constvn.getTypeReadFacing(op);
@@ -54,7 +54,7 @@ namespace Sla.DECCORE
                 }
             }
             data.opSetOpcode(op, OpCode.CPUI_INT_SUB);
-            Varnode* cvn = data.newConstant(constvn.getSize(), (-val) & mask);
+            Varnode cvn = data.newConstant(constvn.getSize(), (-val) & mask);
             cvn.copySymbol(constvn);
             data.opSetInput(op, cvn, 1);
             return 1;

@@ -30,11 +30,11 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_INT_AND);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             if (!op.getIn(1).isConstant()) return 0;
-            Varnode* vn = op.getIn(0);
-            Varnode* outvn = op.getOut();
+            Varnode vn = op.getIn(0);
+            Varnode outvn = op.getOut();
             //  if (vn.getSize() != 1) return 0; // Only for bitsize variables
             if (outvn.getConsume() != op.getIn(1).getOffset()) return 0;
             if ((outvn.getConsume() & 1) == 0) return 0;

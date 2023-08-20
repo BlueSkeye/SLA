@@ -50,11 +50,11 @@ namespace Sla.DECCORE
         /// \param parentMap will hold the new index map
         private void internalIntersect(List<int> parentMap)
         {
-            List<Varnode*> newVn;
+            List<Varnode> newVn;
             int lastIntersect = -1;
             for (int i = 0; i < commonVn.size(); ++i)
             {
-                Varnode* vn = commonVn[i];
+                Varnode vn = commonVn[i];
                 if (vn.isMark())
                 {       // Look for previously marked varnode, so we know it is in both lists
                     lastIntersect = newVn.size();
@@ -109,11 +109,11 @@ namespace Sla.DECCORE
             BlockBasic lastBlock = (BlockBasic)null;
             for (int i = 0; i < cutOff; ++i)
             {
-                PcodeOp* op = path[i].op;           // Current op in the new path
-                PcodeOp* curOp = (PcodeOp)null;
+                PcodeOp op = path[i].op;           // Current op in the new path
+                PcodeOp curOp = (PcodeOp)null;
                 while (meldPos < opMeld.size())
                 {
-                    PcodeOp* trialOp = opMeld[meldPos].op;  // Current op in the old opMeld
+                    PcodeOp trialOp = opMeld[meldPos].op;  // Current op in the old opMeld
                     if (trialOp == (PcodeOp)null)
                     {
                         meldPos += 1;
@@ -194,7 +194,7 @@ namespace Sla.DECCORE
             for (int i = 0; i < path.size(); ++i)
             {
                 PcodeOpNode node = path[i];
-                Varnode* vn = node.op.getIn(node.slot);
+                Varnode vn = node.op.getIn(node.slot);
                 opMeld.Add(RootedOp(node.op, i));
                 commonVn.Add(vn);
             }
@@ -252,7 +252,7 @@ namespace Sla.DECCORE
             for (int i = 0; i < path.size(); ++i)
             {
                 PcodeOpNode & node(path[i]);
-                Varnode* vn = node.op.getIn(node.slot);
+                Varnode vn = node.op.getIn(node.slot);
                 if (!vn.isMark())
                 {   // If mark already cleared, we know it is in intersection
                     cutOff = i + 1;     // Cut-off must at least be past this -vn-

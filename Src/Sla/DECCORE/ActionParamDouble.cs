@@ -48,7 +48,7 @@ namespace Sla.DECCORE
                         if (concatop.code() != OpCode.CPUI_PIECE) continue;
                         if (!fc.hasModel()) continue;
                         Varnode mostvn = concatop.getIn(0);
-                        Varnode* leastvn = concatop.getIn(1);
+                        Varnode leastvn = concatop.getIn(1);
                         int splitsize = spc.isBigEndian() ? mostvn.getSize() : leastvn.getSize();
                         if (fc.checkInputSplit(paramtrial.getAddress(), paramtrial.getSize(), splitsize)) {
                             active.splitTrial(j, splitsize);

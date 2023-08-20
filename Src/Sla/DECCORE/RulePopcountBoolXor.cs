@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -29,44 +22,42 @@ namespace Sla.DECCORE
         ///  - `popcount((b1 << 6) | (b2 << 2)) & 1  =>   b1 ^ b2`
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_POPCOUNT);
+            oplist.Add(OpCode.CPUI_POPCOUNT);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* outVn = op.getOut();
-            list<PcodeOp*>::const_iterator iter;
+            Varnode outVn = op.getOut();
+            IEnumerator<PcodeOp> iter = outVn.beginDescend();
 
-            for (iter = outVn.beginDescend(); iter != outVn.endDescend(); ++iter)
-            {
-                PcodeOp* baseOp = *iter;
+            while (iter.MoveNext()) {
+                PcodeOp baseOp = iter.Current;
                 if (baseOp.code() != OpCode.CPUI_INT_AND) continue;
-                Varnode* tmpVn = baseOp.getIn(1);
+                Varnode tmpVn = baseOp.getIn(1);
                 if (!tmpVn.isConstant()) continue;
                 if (tmpVn.getOffset() != 1) continue;  // Masking 1 bit means we are checking parity of POPCOUNT input
                 if (tmpVn.getSize() != 1) continue;    // Must be boolean sized output
-                Varnode* inVn = op.getIn(0);
+                Varnode inVn = op.getIn(0);
                 if (!inVn.isWritten()) return 0;
                 int count = Globals.popcount(inVn.getNZMask());
-                if (count == 1)
-                {
+                if (count == 1) {
                     int leastPos = Globals.leastsigbit_set(inVn.getNZMask());
                     int constRes;
-                    Varnode* b1 = getBooleanResult(inVn, leastPos, constRes);
+                    Varnode? b1 = getBooleanResult(inVn, leastPos, out constRes);
                     if (b1 == (Varnode)null) continue;
                     data.opSetOpcode(baseOp, OpCode.CPUI_COPY);    // Recognized  Globals.popcount( b1 << #pos ) & 1
                     data.opRemoveInput(baseOp, 1);      // Simplify to  COPY(b1)
                     data.opSetInput(baseOp, b1, 0);
                     return 1;
                 }
-                if (count == 2)
-                {
+                if (count == 2) {
                     int pos0 = Globals.leastsigbit_set(inVn.getNZMask());
                     int pos1 = Globals.mostsigbit_set(inVn.getNZMask());
-                    int constRes0, constRes1;
-                    Varnode* b1 = getBooleanResult(inVn, pos0, constRes0);
+                    int constRes0;
+                    Varnode? b1 = getBooleanResult(inVn, pos0, out constRes0);
                     if (b1 == (Varnode)null && constRes0 != 1) continue;
-                    Varnode* b2 = getBooleanResult(inVn, pos1, constRes1);
+                    int constRes1;
+                    Varnode? b2 = getBooleanResult(inVn, pos1, out constRes1);
                     if (b2 == (Varnode)null && constRes1 != 1) continue;
                     if (b1 == (Varnode)null && b2 == (Varnode)null) continue;
                     if (b1 == (Varnode)null)
@@ -93,27 +84,24 @@ namespace Sla.DECCORE
         /// \param bitPos is the bit position of the desired boolean value
         /// \param constRes is used to pass back a constant boolean result
         /// \return the boolean Varnode producing the desired value or null
-        public static Varnode getBooleanResult(Varnode vn, int bitPos, int constRes)
+        public static Varnode? getBooleanResult(Varnode vn, int bitPos, out int constRes)
         {
             constRes = -1;
             ulong mask = 1;
             mask <<= bitPos;
-            Varnode* vn0;
-            Varnode* vn1;
+            Varnode vn0;
+            Varnode vn1;
             int sa;
-            while(true)
-            {
-                if (vn.isConstant())
-                {
+            while(true) {
+                if (vn.isConstant()) {
                     constRes = (vn.getOffset() >> bitPos) & 1;
                     return (Varnode)null;
                 }
                 if (!vn.isWritten()) return (Varnode)null;
                 if (bitPos == 0 && vn.getSize() == 1 && vn.getNZMask() == mask)
                     return vn;
-                PcodeOp* op = vn.getDef();
-                switch (op.code())
-                {
+                PcodeOp op = vn.getDef() ?? throw new ApplicationException();
+                switch (op.code()) {
                     case OpCode.CPUI_INT_AND:
                         if (!op.getIn(1).isConstant()) return (Varnode)null;
                         vn = op.getIn(0);
@@ -122,14 +110,13 @@ namespace Sla.DECCORE
                     case OpCode.CPUI_INT_OR:
                         vn0 = op.getIn(0);
                         vn1 = op.getIn(1);
-                        if ((vn0.getNZMask() & mask) != 0)
-                        {
+                        if ((vn0.getNZMask() & mask) != 0) {
                             if ((vn1.getNZMask() & mask) != 0)
-                                return (Varnode)null;     // Don't have a unique path
+                                // Don't have a unique path
+                                return (Varnode)null;
                             vn = vn0;
                         }
-                        else if ((vn1.getNZMask() & mask) != 0)
-                        {
+                        else if ((vn1.getNZMask() & mask) != 0) {
                             vn = vn1;
                         }
                         else
@@ -150,14 +137,12 @@ namespace Sla.DECCORE
                         vn0 = op.getIn(0);
                         vn1 = op.getIn(1);
                         sa = (int)vn1.getSize() * 8;
-                        if (bitPos >= sa)
-                        {
+                        if (bitPos >= sa) {
                             vn = vn0;
                             bitPos -= sa;
                             mask >>= sa;
                         }
-                        else
-                        {
+                        else {
                             vn = vn1;
                         }
                         break;

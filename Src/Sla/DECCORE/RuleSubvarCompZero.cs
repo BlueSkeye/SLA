@@ -36,10 +36,10 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_INT_EQUAL);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             if (!op.getIn(1).isConstant()) return 0;
-            Varnode* vn = op.getIn(0);
+            Varnode vn = op.getIn(0);
             ulong mask = vn.getNZMask();
             int bitnum = Globals.leastsigbit_set(mask);
             if (bitnum == -1) return 0;
@@ -55,9 +55,9 @@ namespace Sla.DECCORE
             // the bit is getting pulled is not fully consumed
             if (vn.isWritten())
             {
-                PcodeOp* andop = vn.getDef();
+                PcodeOp andop = vn.getDef();
                 if (andop.numInput() == 0) return 0;
-                Varnode* vn0 = andop.getIn(0);
+                Varnode vn0 = andop.getIn(0);
                 switch (andop.code())
                 {
                     case OpCode.CPUI_INT_AND:

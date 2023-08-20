@@ -31,7 +31,7 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_MULTIEQUAL);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             List<Varnode> skiplist = new List<Varnode>();
             List<Varnode> matchlist = new List<Varnode>();

@@ -28,7 +28,7 @@ namespace Sla.DECCORE
             bool cachereadonly = glb.readonlypropagate;
             int pass = data.getHeritagePass();
             VarnodeLocSet::const_iterator iter;
-            Varnode* vn;
+            Varnode vn;
 
             iter = data.beginLoc();
             while (iter != data.endLoc())
@@ -42,15 +42,15 @@ namespace Sla.DECCORE
                     {
                         if (vn.isWritten())
                         {
-                            PcodeOp* loadOp = vn.getDef();
+                            PcodeOp loadOp = vn.getDef();
                             if (loadOp.code() == OpCode.CPUI_LOAD)
                             {
-                                Varnode* ptr = loadOp.getIn(1);
+                                Varnode ptr = loadOp.getIn(1);
                                 if (ptr.isConstant() || ptr.isReadOnly())
                                     continue;
                                 if (ptr.isWritten())
                                 {
-                                    PcodeOp* copyOp = ptr.getDef();
+                                    PcodeOp copyOp = ptr.getDef();
                                     if (copyOp.code() == OpCode.CPUI_COPY)
                                     {
                                         ptr = copyOp.getIn(0);

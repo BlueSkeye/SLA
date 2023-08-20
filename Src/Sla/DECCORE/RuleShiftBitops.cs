@@ -29,17 +29,17 @@ namespace Sla.DECCORE
         /// `( V + 0xf000 ) << 4   =>    V << 4`
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_INT_LEFT);
-            oplist.Add(CPUI_INT_RIGHT);
-            oplist.Add(CPUI_SUBPIECE);
-            oplist.Add(CPUI_INT_MULT);
+            oplist.Add(OpCode.CPUI_INT_LEFT);
+            oplist.Add(OpCode.CPUI_INT_RIGHT);
+            oplist.Add(OpCode.CPUI_SUBPIECE);
+            oplist.Add(OpCode.CPUI_INT_MULT);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* constvn = op.getIn(1);
+            Varnode constvn = op.getIn(1);
             if (!constvn.isConstant()) return 0;   // Must be a constant shift
-            Varnode* vn = op.getIn(0);
+            Varnode vn = op.getIn(0);
             if (!vn.isWritten()) return 0;
             if (vn.getSize() > sizeof(ulong)) return 0;    // FIXME: Can't exceed ulong precision
             int sa;
@@ -69,7 +69,7 @@ namespace Sla.DECCORE
                     return 0;           // Never reaches here
             }
 
-            PcodeOp* bitop = vn.getDef();
+            PcodeOp bitop = vn.getDef();
             switch (bitop.code())
             {
                 case OpCode.CPUI_INT_AND:

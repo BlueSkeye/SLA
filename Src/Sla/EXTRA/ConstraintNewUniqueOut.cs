@@ -37,16 +37,16 @@ namespace Sla.EXTRA
             TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
             if (!traverse.step()) return false;
             Funcdata* fd = state.getFunction();
-            PcodeOp* op = state.data(opindex).getOp();
+            PcodeOp op = state.data(opindex).getOp();
             int sz;
             if (sizevarindex < 0)
                 sz = -sizevarindex;     // A specific size
             else
             {
-                Varnode* sizevn = state.data(sizevarindex).getVarnode();
+                Varnode sizevn = state.data(sizevarindex).getVarnode();
                 sz = sizevn.getSize();
             }
-            Varnode* newvn = fd.newUniqueOut(sz, op);
+            Varnode newvn = fd.newUniqueOut(sz, op);
             state.data(newvarindex).setVarnode(newvn);
             return true;
         }

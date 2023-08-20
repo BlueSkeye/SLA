@@ -174,15 +174,16 @@ namespace Sla.DECCORE
         /// \param mask is the given mask describing the bits of the logical value
         /// \param inworklist will hold \b true if the new node should be traced further
         /// \return the new subgraph variable node
-        private ReplaceVarnode? setReplacement(Varnode vn, ulong mask, bool inworklist)
+        private ReplaceVarnode? setReplacement(Varnode vn, ulong mask, out bool inworklist)
         {
-            ReplaceVarnode res;
-            if (vn.isMark()) {       // Already seen before
-                Dictionary<Varnode, ReplaceVarnode>::iterator iter;
-                iter = varmap.find(vn);
-                res = &(*iter).second;
+            ReplaceVarnode res = new ReplaceVarnode();
+            if (vn.isMark()) {
+                // Already seen before
+                ReplaceVarnode replacer;
+                Dictionary<Varnode, ReplaceVarnode>.Enumerator iter;
+                if (!varmap.TryGetValue(vn, out replacer)) throw new ApplicationException();
                 inworklist = false;
-                return (res.mask != mask) ? (ReplaceVarnode)null : res;
+                return (res.mask != mask) ? (ReplaceVarnode)null : replacer;
             }
 
             if (vn.isConstant()) {
@@ -191,7 +192,7 @@ namespace Sla.DECCORE
                     // Check that -vn- is a sign extension
                     ulong cval = vn.getOffset();
                     ulong smallval = cval & mask; // From its logical size
-                    ulong sextval = Globals.sign_extend(ref smallval, flowsize, vn.getSize());// to its fullsize
+                    ulong sextval = Globals.sign_extend(smallval, flowsize, vn.getSize());// to its fullsize
                     if (sextval != cval)
                         return (ReplaceVarnode)null;
                 }
@@ -206,7 +207,9 @@ namespace Sla.DECCORE
 
             if (sextrestrictions) {
                 if (vn.getSize() != flowsize) {
-                    if ((!aggressive) && vn.isInput()) return (ReplaceVarnode)null; // Cannot assume input is sign extended
+                    if ((!aggressive) && vn.isInput())
+                        // Cannot assume input is sign extended
+                        return (ReplaceVarnode)null;
                     if (vn.isPersist()) return (ReplaceVarnode)null;
                 }
                 if (vn.isTypeLock() && vn.getType().getMetatype() != type_metatype.TYPE_PARTIALSTRUCT) {
@@ -219,8 +222,10 @@ namespace Sla.DECCORE
                     // Not a flag
                         // If the logical variable is not a flag, don't consider the case where multiple variables
                         // are packed into a single location, i.e. always consider it a single variable
-                    if ((!aggressive) && ((vn.getConsume() & ~mask) != 0)) // If there is any use of value outside of the logical variable
-                        return (ReplaceVarnode)null; // This probably means the whole thing is a variable, i.e. quit
+                    if ((!aggressive) && ((vn.getConsume() & ~mask) != 0))
+                        // If there is any use of value outside of the logical variable
+                        // This probably means the whole thing is a variable, i.e. quit
+                        return (ReplaceVarnode)null;
                     if (vn.isTypeLock() && vn.getType().getMetatype() != type_metatype.TYPE_PARTIALSTRUCT) {
                         int sz = vn.getType().getSize();
                         if (sz != flowsize)
@@ -232,9 +237,11 @@ namespace Sla.DECCORE
                     // Must be careful with inputs
                     // Inputs must come in from the right register/memory
                     if (bitsize < 8) return (ReplaceVarnode)null; // Dont create input flag
-                    if ((mask & 1) == 0) return (ReplaceVarnode)null; // Dont create unique input
-                                                                    // Its extremely important that the code (above) which doesn't allow packed variables be applied
-                                                                    // or the mechanisms we use for inputs will give us spurious temporary inputs
+                    if ((mask & 1) == 0)
+                        // Dont create unique input
+                        // Its extremely important that the code (above) which doesn't allow packed variables be applied
+                        // or the mechanisms we use for inputs will give us spurious temporary inputs
+                        return (ReplaceVarnode)null;
                 }
             }
 
@@ -262,7 +269,6 @@ namespace Sla.DECCORE
         }
 
         /// \brief Create a logical subgraph operator node given its output variable node
-        ///
         /// \param opc is the opcode of the new logical operator
         /// \param numparam is the number of parameters in the new operator
         /// \param outrvn is the given output variable node
@@ -283,7 +289,6 @@ namespace Sla.DECCORE
         }
 
         /// \brief Create a logical subgraph operator node given one of its input variable nodes
-        ///
         /// \param opc is the opcode of the new logical operator
         /// \param numparam is the number of parameters in the new operator
         /// \param op is the original PcodeOp being replaced
@@ -362,7 +367,7 @@ namespace Sla.DECCORE
                     if (retop.getHaltType() != 0) continue;        // Artificial halt
                     Varnode retvn = retop.getIn(slot);
                     bool inworklist;
-                    ReplaceVarnode? rep = setReplacement(retvn, rvn.mask, inworklist);
+                    ReplaceVarnode? rep = setReplacement(retvn, rvn.mask, out inworklist);
                     if (rep == (ReplaceVarnode)null)
                         return false;
                     if (inworklist)
@@ -1060,7 +1065,7 @@ namespace Sla.DECCORE
         private bool createLink(ReplaceOp rop, ulong mask, int slot, Varnode vn)
         {
             bool inworklist;
-            ReplaceVarnode? rep = setReplacement(vn, mask, inworklist);
+            ReplaceVarnode? rep = setReplacement(vn, mask, out inworklist);
             if (rep == (ReplaceVarnode)null) return false;
 
             if (rop != (ReplaceOp)null) {
@@ -1093,7 +1098,7 @@ namespace Sla.DECCORE
         private bool createCompareBridge(PcodeOp op, ReplaceVarnode inrvn, int slot, Varnode othervn)
         {
             bool inworklist;
-            ReplaceVarnode? rep = setReplacement(othervn, inrvn.mask, inworklist);
+            ReplaceVarnode? rep = setReplacement(othervn, inrvn.mask, out inworklist);
             if (rep == (ReplaceVarnode)null) return false;
 
             if (slot == 0)

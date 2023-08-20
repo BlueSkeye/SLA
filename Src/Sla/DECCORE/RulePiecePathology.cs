@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -19,43 +11,35 @@ namespace Sla.DECCORE
         /// \return \b true if the configuration is a pathology
         private static bool isPathology(Varnode vn, Funcdata data)
         {
-            List<PcodeOp*> worklist;
+            List<PcodeOp> worklist = new List<PcodeOp>();
             int pos = 0;
             int slot = 0;
             bool res = false;
-            while(true)
-            {
-                if (vn.isInput() && !vn.isPersist())
-                {
+            while(true) {
+                if (vn.isInput() && !vn.isPersist()) {
                     res = true;
                     break;
                 }
-                PcodeOp* op = vn.getDef();
-                while (!res && op != (PcodeOp)null)
-                {
-                    switch (op.code())
-                    {
+                PcodeOp? op = vn.getDef();
+                while (!res && op != (PcodeOp)null) {
+                    switch (op.code()) {
                         case OpCode.CPUI_COPY:
                             vn = op.getIn(0);
                             op = vn.getDef();
                             break;
                         case OpCode.CPUI_MULTIEQUAL:
-                            if (!op.isMark())
-                            {
+                            if (!op.isMark()) {
                                 op.setMark();
                                 worklist.Add(op);
                             }
                             op = (PcodeOp)null;
                             break;
                         case OpCode.CPUI_INDIRECT:
-                            if (op.getIn(1).getSpace().getType() == spacetype.IPTR_IOP)
-                            {
-                                PcodeOp* callOp = PcodeOp.getOpFromConst(op.getIn(1).getAddr());
-                                if (callOp.isCall())
-                                {
-                                    FuncCallSpecs* fspec = data.getCallSpecs(callOp);
-                                    if (fspec != (FuncCallSpecs)null && !fspec.isOutputActive())
-                                    {
+                            if (op.getIn(1).getSpace().getType() == spacetype.IPTR_IOP) {
+                                PcodeOp callOp = PcodeOp.getOpFromConst(op.getIn(1).getAddr());
+                                if (callOp.isCall()) {
+                                    FuncCallSpecs? fspec = data.getCallSpecs(callOp);
+                                    if (fspec != (FuncCallSpecs)null && !fspec.isOutputActive()) {
                                         res = true;
                                     }
                                 }
@@ -63,11 +47,9 @@ namespace Sla.DECCORE
                             op = (PcodeOp)null;
                             break;
                         case OpCode.CPUI_CALL:
-                        case OpCode.CPUI_CALLIND:
-                            {
-                                FuncCallSpecs* fspec = data.getCallSpecs(op);
-                                if (fspec != (FuncCallSpecs)null && !fspec.isOutputActive())
-                                {
+                        case OpCode.CPUI_CALLIND: {
+                                FuncCallSpecs? fspec = data.getCallSpecs(op);
+                                if (fspec != (FuncCallSpecs)null && !fspec.isOutputActive()) {
                                     res = true;
                                 }
                                 break;
@@ -80,13 +62,11 @@ namespace Sla.DECCORE
                 if (res) break;
                 if (pos >= worklist.size()) break;
                 op = worklist[pos];
-                if (slot < op.numInput())
-                {
+                if (slot < op.numInput()) {
                     vn = op.getIn(slot);
                     slot += 1;
                 }
-                else
-                {
+                else {
                     pos += 1;
                     if (pos >= worklist.size()) break;
                     vn = worklist[pos].getIn(0);
@@ -109,28 +89,23 @@ namespace Sla.DECCORE
         private static int tracePathologyForward(PcodeOp op, Funcdata data)
         {
             int count = 0;
-            FuncCallSpecs fProto;
+            FuncCallSpecs? fProto;
             List<PcodeOp> worklist = new List<PcodeOp>();
             int pos = 0;
             op.setMark();
             worklist.Add(op);
-            while (pos < worklist.size())
-            {
-                PcodeOp* curOp = worklist[pos];
+            while (pos < worklist.size()) {
+                PcodeOp curOp = worklist[pos];
                 pos += 1;
-                Varnode* outVn = curOp.getOut();
-                list<PcodeOp*>::const_iterator iter;
-                list<PcodeOp*>::const_iterator enditer = outVn.endDescend();
-                for (iter = outVn.beginDescend(); iter != enditer; ++iter)
-                {
-                    curOp = *iter;
-                    switch (curOp.code())
-                    {
+                Varnode outVn = curOp.getOut();
+                IEnumerator<PcodeOp> iter = outVn.beginDescend();
+                while (iter.MoveNext()) {
+                    curOp = iter.Current;
+                    switch (curOp.code()) {
                         case OpCode.CPUI_COPY:
                         case OpCode.CPUI_INDIRECT:
                         case OpCode.CPUI_MULTIEQUAL:
-                            if (!curOp.isMark())
-                            {
+                            if (!curOp.isMark()) {
                                 curOp.setMark();
                                 worklist.Add(curOp);
                             }
@@ -138,8 +113,7 @@ namespace Sla.DECCORE
                         case OpCode.CPUI_CALL:
                         case OpCode.CPUI_CALLIND:
                             fProto = data.getCallSpecs(curOp);
-                            if (fProto != (FuncProto)null && !fProto.isInputActive() && !fProto.isInputLocked())
-                            {
+                            if (fProto != (FuncProto)null && !fProto.isInputActive() && !fProto.isInputLocked()) {
                                 int bytesConsumed = op.getIn(1).getSize();
                                 for (int i = 1; i < curOp.numInput(); ++i)
                                 {
@@ -152,8 +126,7 @@ namespace Sla.DECCORE
                             }
                             break;
                         case OpCode.CPUI_RETURN:
-                            if (!data.getFuncProto().isOutputLocked())
-                            {
+                            if (!data.getFuncProto().isOutputLocked()) {
                                 if (data.getFuncProto().setReturnBytesConsumed(op.getIn(1).getSize()))
                                     count += 1;
                             }
@@ -175,13 +148,11 @@ namespace Sla.DECCORE
 
         public override Rule? clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule)null;
-            return new RulePiecePathology(getGroup());
+            return !grouplist.contains(getGroup()) ? (Rule)null : new RulePiecePathology(getGroup());
         }
 
         /// \class RulePiecePathology
         /// \brief Search for concatenations with unlikely things to inform return/parameter consumption calculation
-        ///
         /// For that can read/write part of a general purpose register, a small return value can get concatenated
         /// with unrelated data when the function writes directly to part of the return register. This searches
         /// for a characteristic pathology:
@@ -192,32 +163,30 @@ namespace Sla.DECCORE
         /// \endcode
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_PIECE);
+            oplist.Add(OpCode.CPUI_PIECE);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* vn = op.getIn(0);
+            Varnode vn = op.getIn(0) ?? throw new ApplicationException();
             if (!vn.isWritten()) return 0;
-            PcodeOp* subOp = vn.getDef();
+            PcodeOp subOp = vn.getDef() ?? throw new ApplicationException();
 
             // Make sure we are concatenating the most significant bytes of a truncation
             OpCode opc = subOp.code();
-            if (opc == OpCode.CPUI_SUBPIECE)
-            {
+            if (opc == OpCode.CPUI_SUBPIECE) {
                 if (subOp.getIn(1).getOffset() == 0) return 0;
                 if (!isPathology(subOp.getIn(0), data)) return 0;
             }
-            else if (opc == OpCode.CPUI_INDIRECT)
-            {
+            else if (opc == OpCode.CPUI_INDIRECT) {
                 if (!subOp.isIndirectCreation()) return 0;                 // Indirect concatenation
-                Varnode* lsbVn = op.getIn(1);
+                Varnode lsbVn = op.getIn(1);
                 if (!lsbVn.isWritten()) return 0;
-                PcodeOp* lsbOp = lsbVn.getDef();
-                if ((lsbOp.getEvalType() & (PcodeOp.Flags.binary | PcodeOp.Flags.unary)) == 0)
-                {   // from either a unary/binary operation
+                PcodeOp lsbOp = lsbVn.getDef() ?? throw new ApplicationException();
+                if ((lsbOp.getEvalType() & (PcodeOp.Flags.binary | PcodeOp.Flags.unary)) == 0) {
+                    // from either a unary/binary operation
                     if (!lsbOp.isCall()) return 0;                     // or a CALL
-                    FuncCallSpecs* fc = data.getCallSpecs(lsbOp);
+                    FuncCallSpecs? fc = data.getCallSpecs(lsbOp);
                     if (fc == (FuncCallSpecs)null) return 0;
                     if (!fc.isOutputLocked()) return 0;                    // with a locked output
                 }

@@ -30,18 +30,18 @@ namespace Sla.DECCORE
         /// that are modeling a CALLIND's behavior need to take this into account.
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_CALLIND);
+            oplist.Add(OpCode.CPUI_CALLIND);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             int align = data.getArch().funcptr_align;
             if (align == 0) return 0;
-            Varnode* vn = op.getIn(0);
+            Varnode vn = op.getIn(0);
             if (!vn.isWritten()) return 0;
-            PcodeOp* andop = vn.getDef();
+            PcodeOp andop = vn.getDef();
             if (andop.code() != OpCode.CPUI_INT_AND) return 0;
-            Varnode* maskvn = andop.getIn(1);
+            Varnode maskvn = andop.getIn(1);
             if (!maskvn.isConstant()) return 0;
             ulong val = maskvn.getOffset();
             ulong testmask = Globals.calc_mask(maskvn.getSize());

@@ -44,7 +44,7 @@ namespace Sla.DECCORE
                 val |= Globals.calc_mask(losize);
 
             // This rule can apply and mess up less,equal rules, so we only apply it if it directly affects a branch
-            PcodeOp* desc = op.getOut().loneDescend();
+            PcodeOp desc = op.getOut().loneDescend();
             if (desc == (PcodeOp)null) return false;
             if (desc.code() != OpCode.CPUI_CBRANCH) return false;
 

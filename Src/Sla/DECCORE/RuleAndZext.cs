@@ -28,17 +28,17 @@ namespace Sla.DECCORE
         /// Similarly `concat(Y,X) & 0xffff  =>  zext(X)`
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_INT_AND);
+            oplist.Add(OpCode.CPUI_INT_AND);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* cvn1 = op.getIn(1);
+            Varnode cvn1 = op.getIn(1);
             if (!cvn1.isConstant()) return 0;
             if (!op.getIn(0).isWritten()) return 0;
-            PcodeOp* otherop = op.getIn(0).getDef();
+            PcodeOp otherop = op.getIn(0).getDef();
             OpCode opc = otherop.code();
-            Varnode* rootvn;
+            Varnode rootvn;
             if (opc == OpCode.CPUI_INT_SEXT)
                 rootvn = otherop.getIn(0);
             else if (opc == OpCode.CPUI_PIECE)

@@ -40,8 +40,8 @@ namespace Sla.EXTRA
             TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
             if (!traverse.step()) return false;
             Funcdata* fd = state.getFunction();
-            PcodeOp* op = state.data(oldopindex).getOp();
-            PcodeOp* newop = fd.newOp(numparams, op.getAddr());
+            PcodeOp op = state.data(oldopindex).getOp();
+            PcodeOp newop = fd.newOp(numparams, op.getAddr());
             fd.opSetOpcode(newop, opc);
             if (insertafter)
                 fd.opInsertAfter(newop, op);

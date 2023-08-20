@@ -37,7 +37,7 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_INT_MULT);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode secvn, newvn;
             PcodeOp secop;

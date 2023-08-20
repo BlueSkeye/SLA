@@ -31,7 +31,7 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_INT_SDIV);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             PcodeOp multop;
             PcodeOp addop;

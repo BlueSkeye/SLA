@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -18,25 +11,23 @@ namespace Sla.DECCORE
 
         public override Rule? clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule)null;
-            return new RuleNegateIdentity(getGroup());
+            return !grouplist.contains(getGroup()) ? (Rule)null : new RuleNegateIdentity(getGroup());
         }
 
         /// \class RuleNegateIdentity
         /// \brief Apply INT_NEGATE identities:  `V & ~V  => #0,  V | ~V  .  #-1`
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_INT_NEGATE);
+            oplist.Add(OpCode.CPUI_INT_NEGATE);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* vn = op.getIn(0);
-            Varnode* outVn = op.getOut();
-            list<PcodeOp*>::const_iterator iter;
-            for (iter = outVn.beginDescend(); iter != outVn.endDescend(); ++iter)
-            {
-                PcodeOp* logicOp = *iter;
+            Varnode vn = op.getIn(0);
+            Varnode outVn = op.getOut();
+            IEnumerator<PcodeOp> iter = outVn.beginDescend();
+            while (iter.MoveNext()) {
+                PcodeOp logicOp = iter.Current;
                 OpCode opc = logicOp.code();
                 if (opc != OpCode.CPUI_INT_AND && opc != OpCode.CPUI_INT_OR && opc != OpCode.CPUI_INT_XOR)
                     continue;
@@ -44,7 +35,7 @@ namespace Sla.DECCORE
                 if (logicOp.getIn(1 - slot) != vn) continue;
                 ulong value = 0;
                 if (opc != OpCode.CPUI_INT_AND)
-                    value = Globals.calc_mask(vn.getSize());
+                    value = Globals.calc_mask((uint)vn.getSize());
                 data.opSetInput(logicOp, data.newConstant(vn.getSize(), value), 0);
                 data.opRemoveInput(logicOp, 1);
                 data.opSetOpcode(logicOp, OpCode.CPUI_COPY);

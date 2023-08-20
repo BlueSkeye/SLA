@@ -29,13 +29,13 @@ namespace Sla.DECCORE
         /// the op can be collapsed to a COPY of a \b true or \b false.
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_INT_EQUAL);
-            oplist.Add(CPUI_INT_NOTEQUAL);
+            oplist.Add(OpCode.CPUI_INT_EQUAL);
+            oplist.Add(OpCode.CPUI_INT_NOTEQUAL);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* vn;
+            Varnode vn;
             if (!functionalEquality(op.getIn(0), op.getIn(1)))
                 return 0;
 

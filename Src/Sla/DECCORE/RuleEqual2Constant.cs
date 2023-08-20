@@ -35,7 +35,7 @@ namespace Sla.DECCORE
             oplist.AddRange(list);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode cvn = op.getIn(1);
             if (!cvn.isConstant()) return 0;

@@ -26,17 +26,17 @@ namespace Sla.DECCORE
         /// \brief Simplify multiple INT_ZEXT operations: `zext( zext(V) << c )  => zext(V) << c`
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_INT_ZEXT);
+            oplist.Add(OpCode.CPUI_INT_ZEXT);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* invn = op.getIn(0);
+            Varnode invn = op.getIn(0);
             if (!invn.isWritten()) return 0;
-            PcodeOp* shiftop = invn.getDef();
+            PcodeOp shiftop = invn.getDef();
             if (shiftop.code() == OpCode.CPUI_INT_ZEXT)
             {   // Check for ZEXT( ZEXT( a ) )
-                Varnode* vn = shiftop.getIn(0);
+                Varnode vn = shiftop.getIn(0);
                 if (vn.isFree()) return 0;
                 if (invn.loneDescend() != op)      // Only propagate if -op- is only use of -invn-
                     return 0;
@@ -46,17 +46,17 @@ namespace Sla.DECCORE
             if (shiftop.code() != OpCode.CPUI_INT_LEFT) return 0;
             if (!shiftop.getIn(1).isConstant()) return 0;
             if (!shiftop.getIn(0).isWritten()) return 0;
-            PcodeOp* zext2op = shiftop.getIn(0).getDef();
+            PcodeOp zext2op = shiftop.getIn(0).getDef();
             if (zext2op.code() != OpCode.CPUI_INT_ZEXT) return 0;
-            Varnode* rootvn = zext2op.getIn(0);
+            Varnode rootvn = zext2op.getIn(0);
             if (rootvn.isFree()) return 0;
 
             ulong sa = shiftop.getIn(1).getOffset();
             if (sa > 8 * (ulong)(zext2op.getOut().getSize() - rootvn.getSize()))
                 return 0; // Shift might lose bits off the top
-            PcodeOp* newop = data.newOp(1, op.getAddr());
+            PcodeOp newop = data.newOp(1, op.getAddr());
             data.opSetOpcode(newop, OpCode.CPUI_INT_ZEXT);
-            Varnode* outvn = data.newUniqueOut(op.getOut().getSize(), newop);
+            Varnode outvn = data.newUniqueOut(op.getOut().getSize(), newop);
             data.opSetInput(newop, rootvn, 0);
             data.opSetOpcode(op, OpCode.CPUI_INT_LEFT);
             data.opSetInput(op, outvn, 0);

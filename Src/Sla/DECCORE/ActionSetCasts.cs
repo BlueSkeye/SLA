@@ -44,7 +44,7 @@ namespace Sla.DECCORE
         {
             Datatype* ptrtype = op.getIn(1).getHighTypeReadFacing(op);
             int valsize = vn.getSize();
-            if ((ptrtype.getMetatype() != type_metatype.TYPE_PTR) || (((TypePointer*)ptrtype).getPtrTo().getSize() != valsize))
+            if ((ptrtype.getMetatype() != type_metatype.TYPE_PTR) || (((TypePointer)ptrtype).getPtrTo().getSize() != valsize))
             {
                 string name = op.getOpcode().getName();
                 name[0] = toupper(name[0]);
@@ -52,7 +52,7 @@ namespace Sla.DECCORE
             }
             if (ptrtype.getMetatype() == type_metatype.TYPE_PTR)
             {
-                AddrSpace* spc = ((TypePointer*)ptrtype).getSpace();
+                AddrSpace* spc = ((TypePointer)ptrtype).getSpace();
                 if (spc != (AddrSpace)null)
                 {
                     AddrSpace* opSpc = op.getIn(0).getSpaceFromConst();
@@ -111,7 +111,7 @@ namespace Sla.DECCORE
         /// \return \b true if an adjustment is made so that a CAST is no longer needed
         private static bool tryResolutionAdjustment(PcodeOp op, int slot, Funcdata data)
         {
-            Varnode* outvn = op.getOut();
+            Varnode outvn = op.getOut();
             if (outvn == (Varnode)null)
                 return false;
             Datatype* outType = outvn.getHigh().getType();
@@ -178,7 +178,7 @@ namespace Sla.DECCORE
         /// \return 1 if a PTRSUB is inserted, 0 otherwise
         private static int resolveUnion(PcodeOp op, int slot, Funcdata data)
         {
-            Varnode* vn = op.getIn(slot);
+            Varnode vn = op.getIn(slot);
             if (vn.isAnnotation()) return 0;
             Datatype* dt = vn.getHigh().getType();
             if (!dt.needsResolution())
@@ -191,7 +191,7 @@ namespace Sla.DECCORE
                 // Insert specific placeholder indicating which field is accessed
                 if (dt.getMetatype() == type_metatype.TYPE_PTR)
                 {
-                    PcodeOp* ptrsub = insertPtrsubZero(op, slot, resUnion.getDatatype(), data);
+                    PcodeOp ptrsub = insertPtrsubZero(op, slot, resUnion.getDatatype(), data);
                     data.setUnionField(dt, ptrsub, -1, *resUnion);          // Attach the resolution to the PTRSUB
                 }
                 else if (vn.isImplied())
@@ -254,7 +254,7 @@ namespace Sla.DECCORE
                 // implied varnode must have parse type
                 if (outvn.isTypeLock())
                 {
-                    PcodeOp* outOp = outvn.loneDescend();
+                    PcodeOp outOp = outvn.loneDescend();
                     // The Varnode input to a OpCode.CPUI_RETURN is marked as implied but
                     // casting should act as if it were explicit
                     if (outOp == (PcodeOp)null || outOp.code() != OpCode.CPUI_RETURN)
@@ -269,7 +269,7 @@ namespace Sla.DECCORE
                 }
                 else if (tokenct.getMetatype() == type_metatype.TYPE_PTR)
                 { // If the token is a pointer AND implied varnode is pointer
-                    outct = ((TypePointer*)outHighResolve).getPtrTo();
+                    outct = ((TypePointer)outHighResolve).getPtrTo();
                     type_metatype meta = outct.getMetatype();
                     // Preserve implied pointer if it points to a composite
                     if ((meta != type_metatype.TYPE_ARRAY) && (meta != type_metatype.TYPE_STRUCT) && (meta != type_metatype.TYPE_UNION))
@@ -393,9 +393,9 @@ namespace Sla.DECCORE
         /// \return the new PTRSUB op
         private static PcodeOp insertPtrsubZero(PcodeOp op, int slot, Datatype ct, Funcdata data)
         {
-            Varnode* vn = op.getIn(slot);
-            PcodeOp* newop = data.newOp(2, op.getAddr());
-            Varnode* vnout = data.newUniqueOut(vn.getSize(), newop);
+            Varnode vn = op.getIn(slot);
+            PcodeOp newop = data.newOp(2, op.getAddr());
+            Varnode vnout = data.newUniqueOut(vn.getSize(), newop);
             vnout.updateType(ct, false, false);
             vnout.setImplied();
             data.opSetOpcode(newop, OpCode.CPUI_PTRSUB);

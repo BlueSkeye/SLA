@@ -29,10 +29,10 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_INT_ZEXT);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* vn = op.getOut();
-            Varnode* invn = op.getIn(0);
+            Varnode vn = op.getOut();
+            Varnode invn = op.getIn(0);
             ulong mask = Globals.calc_mask(invn.getSize());
 
             SubvariableFlow subflow = new SubvariableFlow(&data,vn,mask,invn.isPtrFlow(),false,false);

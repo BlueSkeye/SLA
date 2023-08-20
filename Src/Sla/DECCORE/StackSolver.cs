@@ -1,4 +1,5 @@
-﻿using Sla.DECCORE;
+﻿using Sla.CORE;
+using Sla.DECCORE;
 
 using VarnodeLocSet = System.Collections.Generic.HashSet<Sla.DECCORE.Varnode>; // VarnodeCompareLocDef : A set of Varnodes sorted by location (then by definition)
 
@@ -12,13 +13,13 @@ namespace Sla.DECCORE
         /// Guessed equations for underdetermined systems
         private List<StackEqn> guess = new List<StackEqn>();
         /// The indexed set of variables, one for each reference to the stack-pointer
-        private List<Varnode> vnlist;
+        private List<Varnode> vnlist = new List<Varnode>();
         /// Index of companion input for variable produced by OpCode.CPUI_INDIRECT
-        private List<int> companion;
+        private List<int> companion = new List<int>();
         /// Starting address of the stack-pointer
         private Address spacebase;
         /// Collected solutions (corresponding to array of variables)
-        private List<int> soln;
+        private List<int> soln = new List<int>();
         /// Number of variables for which we are missing an equation
         private int missedvariables;
 
@@ -35,7 +36,7 @@ namespace Sla.DECCORE
                 eqn.rhs = -eqs[i].rhs;
                 eqs.Add(eqn);
             }
-            stable_sort(eqs.begin(), eqs.end(), StackEqn::compare);
+            stable_sort(eqs.begin(), eqs.end(), StackEqn.compare);
         }
 
         /// Propagate solution for one variable to other variables
@@ -57,7 +58,7 @@ namespace Sla.DECCORE
             List<int> workstack = new List<int>();
             workstack.reserve(soln.Count);
             workstack.Add(varnum);
-            IEnumerator<StackEqn>::iterator top;
+            IEnumerator<StackEqn> top;
 
             while (0 != workstack.Count) {
                 varnum = workstack[workstack.Count - 1];
@@ -123,7 +124,7 @@ namespace Sla.DECCORE
         {
             VarnodeData spacebasedata = id.getSpacebase(spcbase);
             spacebase = new Address(spacebasedata.space, spacebasedata.offset);
-            VarnodeLocSet::const_iterator begiter, enditer;
+            VarnodeLocSet.Enumerator begiter, enditer;
 
             begiter = data.beginLoc(spacebasedata.size, spacebase);
             enditer = data.endLoc(spacebasedata.size, spacebase);
@@ -145,20 +146,20 @@ namespace Sla.DECCORE
                 throw new LowlevelError("Input value of stackpointer is not used");
             }
 
-            List<Varnode*>::iterator iter;
+            IEnumerator<Varnode> iter;
             StackEqn eqn;
             for (int i = 1; i < vnlist.Count; ++i) {
                 Varnode vn = vnlist[i];
                 Varnode othervn;
                 Varnode constvn;
-                PcodeOp op = vn.getDef();
+                PcodeOp op = vn.getDef() ?? throw new ApplicationException();
 
                 if (op.code() == OpCode.CPUI_INT_ADD) {
-                    othervn = op.getIn(0);
-                    constvn = op.getIn(1);
+                    othervn = op.getIn(0) ?? throw new ApplicationException();
+                    constvn = op.getIn(1) ?? throw new ApplicationException();
                     if (othervn.isConstant()) {
                         constvn = othervn;
-                        othervn = op.getIn(1);
+                        othervn = op.getIn(1) ?? throw new ApplicationException();
                     }
                     if (!constvn.isConstant()) {
                         missedvariables += 1;
@@ -184,7 +185,7 @@ namespace Sla.DECCORE
                     eqs.Add(eqn);
                 }
                 else if (op.code() == OpCode.CPUI_INDIRECT) {
-                    othervn = op.getIn(0);
+                    othervn = op.getIn(0) ?? throw new ApplicationException();
                     if (othervn.getAddr() != spacebase) {
                         missedvariables += 1;
                         continue;
@@ -193,11 +194,12 @@ namespace Sla.DECCORE
                     eqn.var1 = i;
                     eqn.var2 = iter - vnlist.begin();
                     companion[i] = eqn.var2;
-                    Varnode iopvn = op.getIn(1);
+                    Varnode iopvn = op.getIn(1) ?? throw new ApplicationException();
                     if (iopvn.getSpace().getType() == spacetype.IPTR_IOP) {
                         // If INDIRECT is due call
                         PcodeOp iop = PcodeOp.getOpFromConst(iopvn.getAddr());
-                        FuncCallSpecs fc = data.getCallSpecs(iop); // Look up function proto
+                        // Look up function proto
+                        FuncCallSpecs fc = data.getCallSpecs(iop) ?? throw new ApplicationException();
                         if (fc != null) {
                             if (fc.getExtraPop() != ProtoModel.extrapop_unknown) {
                                 // Double check that extrapop is unknown
@@ -213,7 +215,7 @@ namespace Sla.DECCORE
                 }
                 else if (op.code() == OpCode.CPUI_MULTIEQUAL) {
                     for (int j = 0; j < op.numInput(); ++j) {
-                        othervn = op.getIn(j);
+                        othervn = op.getIn(j) ?? throw new ApplicationException();
                         if (othervn.getAddr() != spacebase) {
                             missedvariables += 1;
                             continue;
@@ -227,11 +229,11 @@ namespace Sla.DECCORE
                 }
                 else if (op.code() == OpCode.CPUI_INT_AND) {
                     // This can occur if a function aligns its stack pointer
-                    othervn = op.getIn(0);
-                    constvn = op.getIn(1);
+                    othervn = op.getIn(0) ?? throw new ApplicationException();
+                    constvn = op.getIn(1) ?? throw new ApplicationException();
                     if (othervn.isConstant()) {
                         constvn = othervn;
-                        othervn = op.getIn(1);
+                        othervn = op.getIn(1) ?? throw new ApplicationException();
                     }
                     if (!constvn.isConstant()) {
                         missedvariables += 1;

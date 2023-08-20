@@ -29,10 +29,10 @@ namespace Sla.DECCORE
         /// give valid results (not NaN).
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_FLOAT_NAN);
+            oplist.Add(OpCode.CPUI_FLOAT_NAN);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             if (op.numInput() == 2)
                 data.opRemoveInput(op, 1);

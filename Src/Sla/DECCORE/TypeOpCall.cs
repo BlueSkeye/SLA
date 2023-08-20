@@ -71,7 +71,7 @@ namespace Sla.DECCORE
                 {
                     // Known "this" pointer is effectively typelocked even if the prototype as a whole isn't
                     ct = param.getType();
-                    if (ct.getMetatype() == type_metatype.TYPE_PTR && ((TypePointer*)ct).getPtrTo().getMetatype() == type_metatype.TYPE_STRUCT)
+                    if (ct.getMetatype() == type_metatype.TYPE_PTR && ((TypePointer)ct).getPtrTo().getMetatype() == type_metatype.TYPE_STRUCT)
                         return ct;
                 }
             }

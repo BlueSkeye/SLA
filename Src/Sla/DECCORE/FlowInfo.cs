@@ -206,16 +206,14 @@ namespace Sla.DECCORE
         }
 
         /// \brief Delete any remaining ops at the end of the instruction
-        ///
         /// (because they have been predetermined to be dead)
         /// \param oiter is the point within the raw p-code list where deletion should start
         private void deleteRemainingOps(IEnumerator<PcodeOp> oiter)
         {
-            while (oiter != obank.endDead()) {
+            do {
                 PcodeOp op = oiter.Current;
-                ++oiter;
                 data.opDestroyRaw(op);
-            }
+            } while (oiter.MoveNext());
         }
 
         /// \brief Analyze control-flow within p-code for a single instruction
@@ -315,7 +313,7 @@ namespace Sla.DECCORE
                         break;
                     case OpCode.CPUI_CALLOTHER:
                         {
-                            InjectedUserOp? userop = (glb.userops.getOp(op.getIn(0).getOffset())) as InjectedUserOp;
+                            InjectedUserOp? userop = (glb.userops.getOp((int)op.getIn(0).getOffset())) as InjectedUserOp;
                             if (userop != (InjectedUserOp)null)
                                 injectlist.Add(op);
                             break;
@@ -463,7 +461,7 @@ namespace Sla.DECCORE
         /// one no longer has fall-thru flow (or some other error occurs).
         private void fallthru()
         {
-            Address bound;
+            Address bound = new Address();
 
             if (!setFallthruBound(bound)) return;
 
@@ -1191,7 +1189,6 @@ namespace Sla.DECCORE
 
             // delete fc;
             qlst.Remove(qlst.GetEnumerator() + i);
-            Varnode
         }
 
         /// Treat indirect jump as indirect call that never returns

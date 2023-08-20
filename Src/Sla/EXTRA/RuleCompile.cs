@@ -26,13 +26,13 @@ namespace Sla.EXTRA
             DummyTranslate dummy;
             error_stream = (ostream*)0;
             errors = 0;
-            finalrule = (ConstraintGroup*)0;
+            finalrule = (ConstraintGroup)null;
             OpBehavior::registerInstructions(inst, &dummy);
         }
 
         ~RuleCompile()
         {
-            if (finalrule != (ConstraintGroup*)0)
+            if (finalrule != (ConstraintGroup)null)
                 delete finalrule;
             for (int i = 0; i < inst.size(); ++i)
             {
@@ -66,7 +66,7 @@ namespace Sla.EXTRA
         public ConstraintGroup releaseRule()
         {
             ConstraintGroup res = finalrule;
-            finalrule = (ConstraintGroup*)0;
+            finalrule = (ConstraintGroup)null;
             return res;
         }
 
@@ -395,10 +395,10 @@ namespace Sla.EXTRA
                 return;
             }
             errors = 0;
-            if (finalrule != (ConstraintGroup*)0)
+            if (finalrule != (ConstraintGroup)null)
             {
                 delete finalrule;
-                finalrule = (ConstraintGroup*)0;
+                finalrule = (ConstraintGroup)null;
             }
             lexer.initialize(s);
 

@@ -32,7 +32,7 @@ namespace Sla.EXTRA
         {
             TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
             if (!traverse.step()) return false;
-            PcodeOp* op = state.data(opindex).getOp();
+            PcodeOp op = state.data(opindex).getOp();
             for (int i = 0; i < opcodes.size(); ++i)
                 if (op.code() == opcodes[i]) return true;
             return false;

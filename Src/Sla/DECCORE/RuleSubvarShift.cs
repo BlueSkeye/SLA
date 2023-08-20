@@ -34,9 +34,9 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_INT_RIGHT);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* vn = op.getIn(0);
+            Varnode vn = op.getIn(0);
             if (vn.getSize() != 1) return 0;
             if (!op.getIn(1).isConstant()) return 0;
             int sa = (int)op.getIn(1).getOffset();

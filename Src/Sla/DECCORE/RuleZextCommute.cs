@@ -26,24 +26,24 @@ namespace Sla.DECCORE
         /// \brief Commute INT_ZEXT with INT_RIGHT: `zext(V) >> W  =>  zext(V >> W)`
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_INT_RIGHT);
+            oplist.Add(OpCode.CPUI_INT_RIGHT);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* zextvn = op.getIn(0);
+            Varnode zextvn = op.getIn(0);
             if (!zextvn.isWritten()) return 0;
-            PcodeOp* zextop = zextvn.getDef();
+            PcodeOp zextop = zextvn.getDef();
             if (zextop.code() != OpCode.CPUI_INT_ZEXT) return 0;
-            Varnode* zextin = zextop.getIn(0);
+            Varnode zextin = zextop.getIn(0);
             if (zextin.isFree()) return 0;
-            Varnode* savn = op.getIn(1);
+            Varnode savn = op.getIn(1);
             if ((!savn.isConstant()) && (savn.isFree()))
                 return 0;
 
-            PcodeOp* newop = data.newOp(2, op.getAddr());
+            PcodeOp newop = data.newOp(2, op.getAddr());
             data.opSetOpcode(newop, OpCode.CPUI_INT_RIGHT);
-            Varnode* newout = data.newUniqueOut(zextin.getSize(), newop);
+            Varnode newout = data.newUniqueOut(zextin.getSize(), newop);
             data.opRemoveInput(op, 1);
             data.opSetInput(op, newout, 0);
             data.opSetOpcode(op, OpCode.CPUI_INT_ZEXT);

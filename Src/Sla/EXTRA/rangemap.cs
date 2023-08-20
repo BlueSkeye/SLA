@@ -66,7 +66,7 @@ namespace Sla.EXTRA
             private /*mutable*/ linetype a;     ///< Start of full range occupied by the entire \b recordtype
             private /*mutable*/ linetype b;     ///< End of full range occupied by the entire \b recordtype
             private /*mutable*/ subsorttype subsort;    ///< How \b this should be sub-sorted
-            private /*mutable*/ typename std::list<_recordtype>::iterator value;    ///< Iterator pointing at the actual \b recordtype
+            private /*mutable*/ typename IEnumerator<_recordtype> value;    ///< Iterator pointing at the actual \b recordtype
 
             /// (Partial) constructor
             private AddrRange(linetype l)
@@ -90,7 +90,7 @@ namespace Sla.EXTRA
             }
 
             /// Retrieve the \b recordtype
-            public typename std::list<_recordtype>::iterator getValue() => value; 
+            public typename IEnumerator<_recordtype> getValue() => value; 
         }
 
         /// \brief An iterator into the interval map container
@@ -102,14 +102,14 @@ namespace Sla.EXTRA
         public class PartIterator
         {
             /// The underlying multiset iterator
-            private typename std::multiset<AddrRange>::const_iterator iter;
+            private typename IEnumerator<AddrRange> iter;
 
             public PartIterator()
             {
             }
 
             /// Construct given iterator
-            public PartIterator(typename std::multiset<AddrRange>::const_iterator i)
+            public PartIterator(typename IEnumerator<AddrRange> i)
             {
                 iter = i;
             }
@@ -179,7 +179,7 @@ namespace Sla.EXTRA
         /// This should run in O(k).
         /// \param i is the given boundary point
         /// \param iter points to the first sub-range that ends with the given boundary point
-        private void zip(linetype i, typename std::multiset<AddrRange>::iterator iter)
+        private void zip(linetype i, typename IEnumerator<AddrRange> iter)
         {
             linetype f = iter.Current.Key;
             while ((*iter).last == i)
@@ -198,23 +198,22 @@ namespace Sla.EXTRA
         /// This should run in O(k), where k is the number of intervals intersecting the boundary point.
         /// \param i is the given boundary point
         /// \param iter points to the first sub-range containing the boundary point
-        private void unzip(linetype i, typename std::multiset<AddrRange>::iterator iter)
+        private void unzip(linetype i, typename IEnumerator<AddrRange> iter)
         {
-            typename std::multiset<AddrRange>::iterator hint = iter;
-            if ((*iter).last == i) return; // Can't split size 1 (i.e. split already present)
+            typename IEnumerator<AddrRange> hint = iter;
+            if (iter.Current.last == i) return; // Can't split size 1 (i.e. split already present)
             linetype f;
             linetype plus1 = i + 1;
-            while ((iter != tree.end()) && (iter.Current.Key <= i))
-            {
+            while ((iter != tree.end()) && (iter.Current.Key <= i)) {
                 f = iter.Current.Key;
                 iter.Current.Key = plus1;
-                typename std::multiset<AddrRange>::iterator newiter;
-                newiter = tree.insert(hint, AddrRange(i, (*iter).subsort));
-                AddrRange newrange = *newiter;
+                typename IEnumerator<AddrRange> newiter;
+                newiter = tree.insert(hint, new AddrRange(i, iter.Current.subsort));
+                AddrRange newrange = newiter.Current;
                 newrange.first = f;
-                newrange.a = (*iter).a;
-                newrange.b = (*iter).b;
-                newrange.value = (*iter).value;
+                newrange.a = iter.Current.a;
+                newrange.b = iter.Current.b;
+                newrange.value = iter.Current.value;
                 ++iter;
             }
         }
@@ -230,16 +229,16 @@ namespace Sla.EXTRA
         }
 
         /// Beginning of records
-        public typename std::list<_recordtype>::const_iterator begin_list() => record.begin();
+        public typename IEnumerator<_recordtype> begin_list() => record.begin();
 
         /// End of records
-        public typename std::list<_recordtype>::const_iterator end_list() => record.end();
+        public typename IEnumerator<_recordtype> end_list() => record.end();
 
         /// Beginning of records
-        public typename std::list<_recordtype>::iterator begin_list() => record.begin();
+        public typename IEnumerator<_recordtype> begin_list() => record.begin();
 
         /// End of records
-        public typename std::list<_recordtype>::iterator end_list() => record.end();
+        public typename IEnumerator<_recordtype> end_list() => record.end();
 
         /// Beginning of sub-ranges
         public const_iterator begin() => PartIterator(tree.begin());
@@ -250,20 +249,20 @@ namespace Sla.EXTRA
         /// \brief Find sub-ranges intersecting the given boundary point
         /// \param point is the given boundary point
         /// \return begin/end iterators over all intersecting sub-ranges
-        public std::pair<const_iterator, const_iterator> find(linetype a)
+        public Tuple<const_iterator, const_iterator> find(linetype point)
         {
-            AddrRange addrrange(point);
-            typename std::multiset<AddrRange>::const_iterator iter1, iter2;
+            AddrRange addrrange = new AddrRange(point);
+            typename IEnumerator<AddrRange> iter1, iter2;
 
             iter1 = tree.lower_bound(addrrange);
             // Check for no intersection
             if ((iter1 == tree.end()) || (point < (*iter1).first))
-                return std::pair<PartIterator, PartIterator>(PartIterator(iter1), PartIterator(iter1));
+                return new Tuple<PartIterator, PartIterator>(new PartIterator(iter1), new PartIterator(iter1));
 
-            AddrRange addrend = new AddrRange((* iter1).last, subsorttype(true));
+            AddrRange addrend = new AddrRange(iter1.Current.last, subsorttype(true));
             iter2 = tree.upper_bound(addrend);
 
-            return std::pair<PartIterator, PartIterator>(PartIterator(iter1), PartIterator(iter2));
+            return new Tuple<PartIterator, PartIterator>(new PartIterator(iter1), new PartIterator(iter2));
         }
 
         /// \brief Find sub-ranges intersecting given boundary point, and between given \e subsorts
@@ -271,20 +270,19 @@ namespace Sla.EXTRA
         /// \param sub1 is the starting subsort
         /// \param sub2 is the ending subsort
         /// \return begin/end iterators over all intersecting and bounded sub-ranges
-        public std::pair<const_iterator, const_iterator> find(linetype a, subsorttype subsort1,
-            subsorttype subsort2)
+        public Tuple<const_iterator, const_iterator> find(linetype a, subsorttype subsort1, subsorttype subsort2)
         {
             AddrRange addrrange = new AddrRange(point, sub1);
-            typename std::multiset<AddrRange>::const_iterator iter1, iter2;
+            typename IEnumerator<AddrRange> iter1, iter2;
 
             iter1 = tree.lower_bound(addrrange);
-            if ((iter1 == tree.end()) || (point < (*iter1).first))
-                return std::pair<PartIterator, PartIterator>(new PartIterator(iter1), new PartIterator(iter1));
+            if ((iter1 == tree.end()) || (point < iter1.Current.first))
+                return new Tuple<PartIterator, PartIterator>(new PartIterator(iter1), new PartIterator(iter1));
 
             AddrRange addrend = new AddrRange(iter1.last, sub2);
             iter2 = tree.upper_bound(addrend);
 
-            return std::pair<PartIterator, PartIterator>(new PartIterator(iter1), new PartIterator(iter2));
+            return new Tuple<PartIterator, PartIterator>(new PartIterator(iter1), new PartIterator(iter2));
         }
 
         /// \brief Find beginning of sub-ranges that contain the given boundary point
@@ -293,7 +291,7 @@ namespace Sla.EXTRA
         public const_iterator find_begin(linetype point)
         {
             AddrRange addrrange(point);
-            typename std::multiset<AddrRange>::const_iterator iter;
+            typename IEnumerator<AddrRange> iter;
 
             iter = tree.lower_bound(addrrange);
             return iter;
@@ -305,7 +303,7 @@ namespace Sla.EXTRA
         public const_iterator find_end(linetype point)
         {
             AddrRange addrend = new AddrRange(point, subsorttype(true));
-            typename std::multiset<AddrRange>::const_iterator iter;
+            typename IEnumerator<AddrRange> iter;
 
             iter = tree.upper_bound(addrend);
             if ((iter == tree.end()) || (point < iter.Current.Key))
@@ -314,7 +312,7 @@ namespace Sla.EXTRA
             // If we reach here, (*iter).last is bigger than point (as per upper_bound) but
             // point >= than iter.Current.Key, i.e. point is contained in the sub-range.
             // So we have to do one more search for first sub-range after the containing sub-range.
-            AddrRange addrbeyond = new AddrRange((* iter).last, subsorttype(true));
+            AddrRange addrbeyond = new AddrRange(iter.Current.last, subsorttype(true));
             return tree.upper_bound(addrbeyond);
         }
 
@@ -325,7 +323,7 @@ namespace Sla.EXTRA
         public const_iterator find_overlap(linetype point, linetype end)
         {
             AddrRange addrrange(point);
-            typename std::multiset<AddrRange>::const_iterator iter;
+            typename IEnumerator<AddrRange> iter;
 
             // First range where right boundary is equal to or past point
             iter = tree.lower_bound(addrrange);
@@ -340,15 +338,14 @@ namespace Sla.EXTRA
         /// \param a is the start of the range occupied by the new record
         /// \param b is the (inclusive) end of the range
         /// \return an iterator to the new record
-        public typename std::list<_recordtype>::iterator insert(inittype data, linetype a, linetype b)
+        public typename IEnumerator<_recordtype> insert(inittype data, linetype a, linetype b)
         {
             linetype f = a;
-            typename std::list<_recordtype>::iterator liter;
-            typename std::multiset<AddrRange>::iterator low = tree.lower_bound(AddrRange(f));
+            typename IEnumerator<_recordtype> liter;
+            typename IEnumerator<AddrRange> low = tree.lower_bound(new AddrRange(f));
 
-            if (low != tree.end())
-            {
-                if ((*low).first < f)   // Check if left boundary refines existing partition
+            if (low != tree.end()) {
+                if (low.Current.first < f)   // Check if left boundary refines existing partition
                     unzip(f - 1, low);      // If so do the refinement
             }
 
@@ -359,99 +356,88 @@ namespace Sla.EXTRA
             addrrange.a = a;
             addrrange.b = b;
             addrrange.value = liter;
-            typename std::multiset<AddrRange>::iterator spot = tree.lower_bound(addrrange);
+            typename IEnumerator<AddrRange> spot = tree.lower_bound(addrrange);
             // Where does the new record go in full list, insert it
-            record.splice((spot == tree.end()) ? record.end() : (*spot).value,
-                   record, liter);
+            record.splice((spot == tree.end()) ? record.end() : (*spot).value, record, liter);
 
-            while ((low != tree.end()) && ((*low).first <= b))
-            {
-                if (f <= (*low).last)
-                {   // Do we overlap at all
-                    if (f < (*low).first)
-                    {
+            while ((low != tree.end()) && (low.Current.Item1 <= b)) {
+                if (f <= low.Current.Item2) {   // Do we overlap at all
+                    if (f < low.Current.Item1) {
                         // Assume the hint makes this insert an O(1) op
                         addrrange.first = f;
-                        addrrange.last = (*low).first - 1;
+                        addrrange.last = low.Current.Item1 - 1;
                         tree.insert(low, addrrange);
-                        f = (*low).first;
+                        f = low.Current.Item1;
                     }
-                    if ((*low).last <= b)
-                    {   // Insert as much of interval as we can
+                    if (low.Current.Item2 <= b) {
+                        // Insert as much of interval as we can
                         addrrange.first = f;
-                        addrrange.last = (*low).last;
+                        addrrange.last = low.Current.Item2;
                         tree.insert(low, addrrange);
-                        if ((*low).last == b) break; // Did we manage to insert it all
-                        f = (*low).last + 1;
+                        if (low.Current.Item2 == b) break; // Did we manage to insert it all
+                        f = low.Current.Item2 + 1;
                     }
-                    else if (b < (*low).last)
-                    { // We can insert everything left, but must refine
+                    else if (b < low.Current.Item2) {
+                        // We can insert everything left, but must refine
                         unzip(b, low);
                         break;
                     }
                 }
                 ++low;
             }
-            if (f <= b)
-            {
+            if (f <= b) {
                 addrrange.first = f;
                 addrrange.last = b;
                 tree.insert(addrrange);
             }
-
             return liter;
         }
 
         /// \brief Erase a given record from the container
         /// \param v is the iterator to the record to be erased
-        public void erase(typename std::list<_recordtype>::iterator v)
+        public void erase(typename IEnumerator<_recordtype> v)
         {
-            linetype a = (*v).getFirst();
-            linetype b = (*v).getLast();
+            linetype a = v.Current.getFirst();
+            linetype b = v.Current.getLast();
             bool leftsew = true;
             bool rightsew = true;
             bool rightoverlap = false;
             bool leftoverlap = false;
-            typename std::multiset<AddrRange>::iterator low = tree.lower_bound(AddrRange(a));
-            typename std::multiset<AddrRange>::iterator uplow = low;
+            typename IEnumerator<AddrRange> low = tree.lower_bound(AddrRange(a));
+            typename IEnumerator<AddrRange> uplow = low;
 
             linetype aminus1 = a - 1;
-            while (uplow != tree.begin())
-            {
+            while (uplow != tree.begin()) {
                 --uplow;
-                if ((*uplow).last != aminus1) break;
-                if ((*uplow).b == aminus1)
-                {
+                if (uplow.Current.last != aminus1) break;
+                if (uplow.Current.b == aminus1) {
                     leftsew = false;        // Still a split between a-1 and a
                     break;
                 }
             }
-            do
-            {
-                if ((*low).value == v)
+            do {
+                if (low.Current.value == v)
                     tree.erase(low++);
-                else
-                {
-                    if ((*low).a < a)
+                else {
+                    if (low.Current.a < a)
                         leftoverlap = true; // a splits somebody else
-                    else if ((*low).a == a)
+                    else if (low.Current.a == a)
                         leftsew = false;    // Somebody else splits at a (in addition to v)
-                    if (b < (*low).b)
+                    if (b < low.Current.b)
                         rightoverlap = true;    // b splits somebody else
-                    else if ((*low).b == b)
+                    else if (low.Current.b == b)
                         rightsew = false;   // Somebody else splits at b (in addition to v)
                     low++;
                 }
-            } while ((low != tree.end()) && ((*low).first <= b));
-            if (low != tree.end())
-            {
-                if ((*low).a - 1 == b)
+            } while ((low != tree.end()) && (low.Current.first <= b));
+            if (low != tree.end()) {
+                if (low.Current.a - 1 == b)
                     rightsew = false;
             }
             if (leftsew && leftoverlap)
-                zip(a - 1, tree.lower_bound(AddrRange(a - 1)));
+                zip(a - 1, tree.lower_bound(new AddrRange(a - 1)));
             if (rightsew && rightoverlap)
-                zip(b, tree.lower_bound(AddrRange(b)));
+                zip(b, tree.lower_bound(new AddrRange(b)));
             record.Remove(v);
         }
 

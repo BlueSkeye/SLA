@@ -1,14 +1,4 @@
 ﻿using Sla.CORE;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Diagnostics.SymbolStore;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
 
 using SymbolTree = System.Collections.Generic.HashSet<Sla.SLEIGH.SleighSymbol>; // SymbolCompare
 
@@ -49,12 +39,11 @@ namespace Sla.SLEIGH
             while (iter.MoveNext()) {
                 SleighSymbol sym = iter.Current;
                 if (sym.getType() == SleighSymbol.symbol_type.varnode_symbol) {
-                    Tuple<VarnodeData, string> ins = 
-                        new Tuple<VarnodeData, string>(((VarnodeSymbol) sym).getFixedVarnode(), sym.getName());
-                    pair<Dictionary<VarnodeData, string>::iterator, bool> res = varnode_xref.insert(ins);
-                    if (!res.second) {
+                    string existingName;
+                    if (!varnode_xref.TryGetValue(((VarnodeSymbol)sym).getFixedVarnode(), out existingName)) {
+                        varnode_xref.Add(((VarnodeSymbol)sym).getFixedVarnode(), sym.getName());
                         errorPairs.Add(sym.getName());
-                        errorPairs.Add((*(res.first)).second);
+                        errorPairs.Add(sym.getName());
                     }
                 }
                 else if (sym.getType() == SleighSymbol.symbol_type.userop_symbol) {
@@ -174,14 +163,15 @@ namespace Sla.SLEIGH
             sym.space = @base;
             sym.offset = off;
             sym.size = (uint)size;
-            Dictionary<VarnodeData, string>::const_iterator iter = varnode_xref.upper_bound(sym); // First point greater than offset
+            // First point greater than offset
+            IEnumerator<KeyValuePair<VarnodeData, string>> iter = varnode_xref.upper_bound(sym);
             if (iter == varnode_xref.begin()) return "";
             iter--;
             VarnodeData point = iter.Current.Key;
             if (point.space != @base) return "";
             ulong offbase = point.offset;
             if (point.offset + point.size >= off + size)
-                return (*iter).second;
+                return iter.Current.Value;
 
             while (iter != varnode_xref.begin()) {
                 --iter;

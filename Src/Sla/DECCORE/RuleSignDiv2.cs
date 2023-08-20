@@ -29,7 +29,7 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_INT_SRIGHT);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode addout;
             Varnode multout;

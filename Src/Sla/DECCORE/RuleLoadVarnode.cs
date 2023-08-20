@@ -127,7 +127,7 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_LOAD);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             int size;
             Varnode newvn;

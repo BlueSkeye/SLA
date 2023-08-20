@@ -56,7 +56,7 @@ namespace Sla.DECCORE
             if (!midhi.isWritten()) return false;
             if (midhi.getDef().code() != OpCode.CPUI_INT_LEFT)
             {
-                Varnode* tmpvn = midhi;
+                Varnode tmpvn = midhi;
                 midhi = midlo;
                 midlo = tmpvn;
             }
@@ -90,7 +90,7 @@ namespace Sla.DECCORE
             if (!midhi.isWritten()) return false;
             if (midlo.getDef().code() != OpCode.CPUI_INT_RIGHT)
             { // Must be unsigned RIGHT
-                Varnode* tmpvn = midhi;
+                Varnode tmpvn = midhi;
                 midhi = midlo;
                 midlo = tmpvn;
             }

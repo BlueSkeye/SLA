@@ -18,7 +18,7 @@ namespace Sla.EXTRA
         /// it and all its Varnodes are printed as well.
         public override void execute(TextReader s)
         {
-            Varnode* vn;
+            Varnode vn;
 
             vn = dcp.readVarnode(s);
             if (vn.isAnnotation() || (!dcp.fd.isHighOn()))

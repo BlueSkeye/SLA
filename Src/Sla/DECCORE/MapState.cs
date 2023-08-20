@@ -226,7 +226,7 @@ namespace Sla.DECCORE
         {
             Symbol? sym;
             if (rangemap == (EntryMap)null) return;
-            IEnumerator<SymbolEntry> riter = = rangemap.begin_list();
+            IEnumerator<SymbolEntry> riter = rangemap.begin_list();
             while (riter.MoveNext()) {
                 sym = riter.Current.getSymbol();
                 if (sym == (Symbol)null) continue;

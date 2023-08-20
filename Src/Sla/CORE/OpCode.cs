@@ -115,14 +115,26 @@ namespace Sla.CORE {
         // typically generated in a direct translation.
 
         // Data-flow operations
-        CPUI_MULTIEQUAL = 60,       ///< Phi-node operator
-        CPUI_INDIRECT = 61,     ///< Copy with an indirect effect
-        CPUI_PIECE = 62,        ///< Concatenate
-        CPUI_SUBPIECE = 63,     ///< Truncate
+        // Phi-node operator
+        CPUI_MULTIEQUAL = 60,
+        BUILD = 60, // Homonym
+        // Copy with an indirect effect
+        CPUI_INDIRECT = 61,
+        DELAY_SLOT = 61, // Homonym
+        // Concatenate
+        CPUI_PIECE = 62,
+        // Truncate
+        CPUI_SUBPIECE = 63,
 
-        CPUI_CAST = 64,     ///< Cast from one data-type to another
-        CPUI_PTRADD = 65,       ///< Index into an array ([])
-        CPUI_PTRSUB = 66,       ///< Drill down to a sub-field  (.)
+        // Cast from one data-type to another
+        CPUI_CAST = 64,
+        MACROBUILD = 64, // Homonym
+        // Index into an array ([])
+        CPUI_PTRADD = 65,
+        LABELBUILD = 65, // Homonym
+        // Drill down to a sub-field  (.)
+        CPUI_PTRSUB = 66,
+        CROSSBUILD = 66, // Homonym
         CPUI_SEGMENTOP = 67,        ///< Look-up a \e segmented address
         CPUI_CPOOLREF = 68,     ///< Recover a value from the \e constant \e pool
         CPUI_NEW = 69,      ///< Allocate a new object (new)

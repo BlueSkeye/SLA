@@ -43,11 +43,11 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_INT_NOTEQUAL);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             int constSlot = 0;
             int form;
-            Varnode* tmpvn = op.getIn(constSlot);
+            Varnode tmpvn = op.getIn(constSlot);
             if (!tmpvn.isConstant())
             {       // One of the two inputs must be a constant
                 constSlot = 1;
@@ -66,7 +66,7 @@ namespace Sla.DECCORE
             if (!tmpvn.isWritten()) return 0;
             if (tmpvn.getDef().code() != OpCode.CPUI_INT_ADD) return 0;
             bool isPartial = false;
-            PcodeOp* lessop = detectThreeWay(tmpvn.getDef(), isPartial);
+            PcodeOp lessop = detectThreeWay(tmpvn.getDef(), isPartial);
             if (lessop == (PcodeOp)null)
                 return 0;
             if (isPartial)
@@ -88,8 +88,8 @@ namespace Sla.DECCORE
                 form += 3;
             // Encode base op (SLESS, SLESSEQUAL, EQUAL, NOTEQUAL) as final 2 bits
 
-            Varnode* bvn = lessop.getIn(0);    // First parameter to LESSTHAN is second parameter to cmp3way function
-            Varnode* avn = lessop.getIn(1);    // Second parameter to LESSTHAN is first parameter to cmp3way function
+            Varnode bvn = lessop.getIn(0);    // First parameter to LESSTHAN is second parameter to cmp3way function
+            Varnode avn = lessop.getIn(1);    // Second parameter to LESSTHAN is first parameter to cmp3way function
             if ((!avn.isConstant()) && (avn.isFree())) return 0;
             if ((!bvn.isConstant()) && (bvn.isFree())) return 0;
             switch (form)
@@ -204,7 +204,7 @@ namespace Sla.DECCORE
             }
             else if (vn2.isWritten())
             {
-                PcodeOp* tmpop = vn2.getDef();
+                PcodeOp tmpop = vn2.getDef();
                 if (tmpop.code() == OpCode.CPUI_INT_ZEXT)
                 {   // Form 2 : (z - 1) + z
                     zext2 = tmpop;                  // Second zext is already matched
@@ -260,7 +260,7 @@ namespace Sla.DECCORE
             OpCode opc = lessop.code();
             if ((opc != OpCode.CPUI_INT_LESS) && (opc != OpCode.CPUI_INT_SLESS) && (opc != OpCode.CPUI_FLOAT_LESS))
             {   // Make sure first zext is less
-                PcodeOp* tmpop = lessop;
+                PcodeOp tmpop = lessop;
                 lessop = lessequalop;
                 lessequalop = tmpop;
             }
@@ -269,7 +269,7 @@ namespace Sla.DECCORE
                 return (PcodeOp)null;
             if (form == 1)
             {
-                PcodeOp* tmpop = lessop;
+                PcodeOp tmpop = lessop;
                 lessop = lessequalop;
                 lessequalop = tmpop;
             }
@@ -317,10 +317,10 @@ namespace Sla.DECCORE
             }
             else
                 return -1;
-            Varnode* a1 = lessop.getIn(0);
-            Varnode* a2 = lessequalop.getIn(0);
-            Varnode* b1 = lessop.getIn(1);
-            Varnode* b2 = lessequalop.getIn(1);
+            Varnode a1 = lessop.getIn(0);
+            Varnode a2 = lessequalop.getIn(0);
+            Varnode b1 = lessop.getIn(1);
+            Varnode b2 = lessequalop.getIn(1);
             int res = 0;
             if (a1 != a2)
             {   // Make sure a1 and a2 are equivalent

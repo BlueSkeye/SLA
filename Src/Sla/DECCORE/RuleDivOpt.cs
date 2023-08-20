@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -32,15 +24,14 @@ namespace Sla.DECCORE
 
             ulong d, r;
             ulong power;
-            if (n < 64)
-            {
-                power = ((ulong)1) << n;
+            if (n < 64) {
+                power = 1UL << (int)n;
                 d = power / (y - 1);
                 r = power % (y - 1);
             }
-            else
-            {
-                if (0 != Globals.power2Divide(n, y - 1, d, r))
+            else {
+                power = 0; // Prevent compilation error.
+                if (0 != Globals.power2Divide((int)n, y - 1, out d, out r))
                     return 0;           // Result is bigger than 64-bits
             }
             if (d >= y) return 0;
@@ -57,7 +48,7 @@ namespace Sla.DECCORE
             else
             {
                 ulong unused;
-                if (0 != Globals.power2Divide(n, d - r, tmp, unused))
+                if (0 != Globals.power2Divide(n, d - r, out tmp, out unused))
                     return (ulong)d;        // tmp is bigger than 2^64 > maxx
             }
             if (tmp <= maxx) return 0;
@@ -65,7 +56,6 @@ namespace Sla.DECCORE
         }
 
         /// \brief Replace sign-bit extractions from the first given Varnode with the second Varnode
-        ///
         /// Look for either:
         ///  - `V >> 0x1f`
         ///  - `V s>> 0x1f`
@@ -76,53 +66,43 @@ namespace Sla.DECCORE
         /// \param data is the function holding the Varnodes
         private static void moveSignBitExtraction(Varnode firstVn, Varnode replaceVn, Funcdata data)
         {
-            List<Varnode*> testList;
+            List<Varnode> testList = new List<Varnode>();
             testList.Add(firstVn);
-            if (firstVn.isWritten())
-            {
-                PcodeOp* op = firstVn.getDef();
-                if (op.code() == OpCode.CPUI_INT_SRIGHT)
-                {
+            if (firstVn.isWritten()) {
+                PcodeOp op = firstVn.getDef() ?? throw new ApplicationException();
+                if (op.code() == OpCode.CPUI_INT_SRIGHT) {
                     // Same sign bit could be extracted from previous shifted version
                     testList.Add(op.getIn(0));
                 }
             }
-            for (int i = 0; i < testList.size(); ++i)
-            {
-                Varnode* vn = testList[i];
-                list<PcodeOp*>::const_iterator iter = vn.beginDescend();
-                while (iter != vn.endDescend())
-                {
-                    PcodeOp* op = *iter;
-                    ++iter;     // Increment before modifying the op
+            for (int i = 0; i < testList.size(); ++i) {
+                Varnode vn = testList[i];
+                IEnumerator<PcodeOp> iter = vn.beginDescend();
+                while (iter.MoveNext()) {
+                    PcodeOp op = iter.Current;
+                    // ++iter;     // Increment before modifying the op
                     OpCode opc = op.code();
-                    if (opc == OpCode.CPUI_INT_RIGHT || opc == OpCode.CPUI_INT_SRIGHT)
-                    {
-                        Varnode* constVn = op.getIn(1);
-                        if (constVn.isWritten())
-                        {
-                            PcodeOp* constOp = constVn.getDef();
+                    if (opc == OpCode.CPUI_INT_RIGHT || opc == OpCode.CPUI_INT_SRIGHT) {
+                        Varnode constVn = op.getIn(1) ?? throw new ApplicationException();
+                        if (constVn.isWritten()) {
+                            PcodeOp constOp = constVn.getDef() ?? throw new ApplicationException();
                             if (constOp.code() == OpCode.CPUI_COPY)
                                 constVn = constOp.getIn(0);
-                            else if (constOp.code() == OpCode.CPUI_INT_AND)
-                            {
+                            else if (constOp.code() == OpCode.CPUI_INT_AND) {
                                 constVn = constOp.getIn(0);
-                                Varnode* otherVn = constOp.getIn(1);
+                                Varnode otherVn = constOp.getIn(1);
                                 if (!otherVn.isConstant()) continue;
                                 if (constVn.getOffset() != (constVn.getOffset() & otherVn.getOffset())) continue;
                             }
                         }
-                        if (constVn.isConstant())
-                        {
+                        if (constVn.isConstant()) {
                             int sa = firstVn.getSize() * 8 - 1;
-                            if (sa == (int)constVn.getOffset())
-                            {
+                            if (sa == (int)constVn.getOffset()) {
                                 data.opSetInput(op, replaceVn, 0);
                             }
                         }
                     }
-                    else if (opc == OpCode.CPUI_COPY)
-                    {
+                    else if (opc == OpCode.CPUI_COPY) {
                         testList.Add(op.getOut());
                     }
                 }
@@ -137,19 +117,18 @@ namespace Sla.DECCORE
         private static bool checkFormOverlap(PcodeOp op)
         {
             if (op.code() != OpCode.CPUI_SUBPIECE) return false;
-            Varnode* vn = op.getOut();
-            list<PcodeOp*>::const_iterator iter;
-            for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter)
-            {
-                PcodeOp* superOp = *iter;
+            Varnode vn = op.getOut();
+            IEnumerator<PcodeOp> iter = vn.beginDescend();
+            while (iter.MoveNext()) {
+                PcodeOp superOp = iter.Current;
                 OpCode opc = superOp.code();
                 if (opc != OpCode.CPUI_INT_RIGHT && opc != OpCode.CPUI_INT_SRIGHT) continue;
-                Varnode* cvn = superOp.getIn(1);
+                Varnode cvn = superOp.getIn(1);
                 if (!cvn.isConstant()) return true;    // Might be a form where constant has propagated yet
                 int n, xsize;
                 ulong y;
                 OpCode extopc;
-                Varnode* inVn = findForm(superOp, n, y, xsize, extopc);
+                Varnode? inVn = findForm(superOp, out n, out y, out xsize, out extopc);
                 if (inVn != (Varnode)null) return true;
             }
             return false;
@@ -162,8 +141,7 @@ namespace Sla.DECCORE
 
         public override Rule? clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule)null;
-            return new RuleDivOpt(getGroup());
+            return !grouplist.contains(getGroup()) ? (Rule)null : new RuleDivOpt(getGroup());
         }
 
         /// \class RuleDivOpt
@@ -174,17 +152,17 @@ namespace Sla.DECCORE
         ///   - `sub( (sext(V)*c)s>>n, 0)  =>  V s/ (2^n/(c-1))`
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_SUBPIECE);
-            oplist.Add(CPUI_INT_RIGHT);
-            oplist.Add(CPUI_INT_SRIGHT);
+            oplist.Add(OpCode.CPUI_SUBPIECE);
+            oplist.Add(OpCode.CPUI_INT_RIGHT);
+            oplist.Add(OpCode.CPUI_INT_SRIGHT);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             int n, xsize;
             ulong y;
             OpCode extOpc;
-            Varnode* inVn = findForm(op, n, y, xsize, extOpc);
+            Varnode inVn = findForm(op, out n, out y, out xsize, out extOpc);
             if (inVn == (Varnode)null) return 0;
             if (checkFormOverlap(op)) return 0;
             if (extOpc == OpCode.CPUI_INT_SEXT)
@@ -193,46 +171,50 @@ namespace Sla.DECCORE
             if (divisor == 0) return 0;
             int outSize = op.getOut().getSize();
 
-            if (inVn.getSize() < outSize)
-            {   // Do we need an extension to get to final size
-                PcodeOp* inExt = data.newOp(1, op.getAddr());
+            if (inVn.getSize() < outSize) {
+                // Do we need an extension to get to final size
+                PcodeOp inExt = data.newOp(1, op.getAddr());
                 data.opSetOpcode(inExt, extOpc);
-                Varnode* extOut = data.newUniqueOut(outSize, inExt);
+                Varnode extOut = data.newUniqueOut(outSize, inExt);
                 data.opSetInput(inExt, inVn, 0);
                 inVn = extOut;
                 data.opInsertBefore(inExt, op);
             }
-            else if (inVn.getSize() > outSize)
-            {   // Do we need a truncation to get to final size
-                PcodeOp* newop = data.newOp(2, op.getAddr());  // Create new op to hold the INT_DIV or INT_SDIV:INT_ADD
-                data.opSetOpcode(newop, OpCode.CPUI_INT_ADD);      // This gets changed immediately, but need it for opInsert
-                Varnode* resVn = data.newUniqueOut(inVn.getSize(), newop);
+            else if (inVn.getSize() > outSize) {
+                // Do we need a truncation to get to final size
+                // Create new op to hold the INT_DIV or INT_SDIV:INT_ADD
+                PcodeOp newop = data.newOp(2, op.getAddr());
+                // This gets changed immediately, but need it for opInsert
+                data.opSetOpcode(newop, OpCode.CPUI_INT_ADD);
+                Varnode resVn = data.newUniqueOut(inVn.getSize(), newop);
                 data.opInsertBefore(newop, op);
-                data.opSetOpcode(op, OpCode.CPUI_SUBPIECE);    // Original op becomes a truncation
+                // Original op becomes a truncation
+                data.opSetOpcode(op, OpCode.CPUI_SUBPIECE);
                 data.opSetInput(op, resVn, 0);
                 data.opSetInput(op, data.newConstant(4, 0), 1);
-                op = newop;                 // Main transform now changes newop
+                // Main transform now changes newop
+                op = newop;
                 outSize = inVn.getSize();
             }
-            if (extOpc == OpCode.CPUI_INT_ZEXT)
-            { // Unsigned division
+            if (extOpc == OpCode.CPUI_INT_ZEXT) {
+                // Unsigned division
                 data.opSetInput(op, inVn, 0);
                 data.opSetInput(op, data.newConstant(outSize, divisor), 1);
                 data.opSetOpcode(op, OpCode.CPUI_INT_DIV);
             }
-            else
-            {           // Sign division
+            else {
+                // Sign division
                 moveSignBitExtraction(op.getOut(), inVn, data);
-                PcodeOp* divop = data.newOp(2, op.getAddr());
+                PcodeOp divop = data.newOp(2, op.getAddr());
                 data.opSetOpcode(divop, OpCode.CPUI_INT_SDIV);
-                Varnode* newout = data.newUniqueOut(outSize, divop);
+                Varnode newout = data.newUniqueOut(outSize, divop);
                 data.opSetInput(divop, inVn, 0);
                 data.opSetInput(divop, data.newConstant(outSize, divisor), 1);
                 data.opInsertBefore(divop, op);
                 // Build the sign value correction
-                PcodeOp* sgnop = data.newOp(2, op.getAddr());
+                PcodeOp sgnop = data.newOp(2, op.getAddr());
                 data.opSetOpcode(sgnop, OpCode.CPUI_INT_SRIGHT);
-                Varnode* sgnvn = data.newUniqueOut(outSize, sgnop);
+                Varnode sgnvn = data.newUniqueOut(outSize, sgnop);
                 data.opSetInput(sgnop, inVn, 0);
                 data.opSetInput(sgnop, data.newConstant(outSize, outSize * 8 - 1), 1);
                 data.opInsertBefore(sgnop, op);
@@ -265,29 +247,27 @@ namespace Sla.DECCORE
         /// \param xsize will hold the number of (non-zero) bits in the numerand
         /// \param extopc holds whether the extension is INT_ZEXT or INT_SEXT
         /// \return the extended numerand if possible, or the unextended numerand, or NULL
-        public static Varnode findForm(PcodeOp op, int n, ulong y, int xsize, OpCode extopc)
+        public static Varnode? findForm(PcodeOp op, out int n, out ulong y, out int xsize, out OpCode extopc)
         {
-            PcodeOp* curOp = op;
+            PcodeOp curOp = op;
             OpCode shiftopc = curOp.code();
-            if (shiftopc == OpCode.CPUI_INT_RIGHT || shiftopc == OpCode.CPUI_INT_SRIGHT)
-            {
-                Varnode* vn = curOp.getIn(0);
+            if (shiftopc == OpCode.CPUI_INT_RIGHT || shiftopc == OpCode.CPUI_INT_SRIGHT) {
+                Varnode vn = curOp.getIn(0) ?? throw new ApplicationException();
                 if (!vn.isWritten()) return (Varnode)null;
-                Varnode* cvn = curOp.getIn(1);
+                Varnode cvn = curOp.getIn(1) ?? throw new ApplicationException();
                 if (!cvn.isConstant()) return (Varnode)null;
                 n = cvn.getOffset();
                 curOp = vn.getDef();
             }
-            else
-            {
+            else {
                 n = 0;  // No initial shift
                 if (shiftopc != OpCode.CPUI_SUBPIECE) return (Varnode)null;  // In this case SUBPIECE is not optional
                 shiftopc = OpCode.CPUI_MAX;
             }
-            if (curOp.code() == OpCode.CPUI_SUBPIECE)
-            {       // Optional SUBPIECE
+            if (curOp.code() == OpCode.CPUI_SUBPIECE) {
+                // Optional SUBPIECE
                 int c = curOp.getIn(1).getOffset();
-                Varnode* inVn = curOp.getIn(0);
+                Varnode inVn = curOp.getIn(0);
                 if (!inVn.isWritten()) return (Varnode)null;
                 if (curOp.getOut().getSize() + c != inVn.getSize())
                     return (Varnode)null;         // Must keep high bits
@@ -295,21 +275,19 @@ namespace Sla.DECCORE
                 curOp = inVn.getDef();
             }
             if (curOp.code() != OpCode.CPUI_INT_MULT) return (Varnode)null; // There MUST be an INT_MULT
-            Varnode* inVn = curOp.getIn(0);
+            Varnode inVn = curOp.getIn(0);
             if (!inVn.isWritten()) return (Varnode)null;
-            if (inVn.isConstantExtended(y) >= 0)
-            {
+            if (inVn.isConstantExtended(y) >= 0) {
                 inVn = curOp.getIn(1);
                 if (!inVn.isWritten()) return (Varnode)null;
             }
             else if (curOp.getIn(1).isConstantExtended(y) < 0)
                 return (Varnode)null; // There MUST be a constant
 
-            Varnode* resVn;
-            PcodeOp* extOp = inVn.getDef();
+            Varnode resVn;
+            PcodeOp extOp = inVn.getDef();
             extopc = extOp.code();
-            if (extopc != OpCode.CPUI_INT_SEXT)
-            {
+            if (extopc != OpCode.CPUI_INT_SEXT) {
                 ulong nzMask = inVn.getNZMask();
                 xsize = 8 * sizeof(ulong) - Globals.count_leading_zeros(nzMask);
                 if (xsize == 0) return (Varnode)null;
@@ -318,17 +296,15 @@ namespace Sla.DECCORE
             else
                 xsize = extOp.getIn(0).getSize() * 8;
 
-            if (extopc == OpCode.CPUI_INT_ZEXT || extopc == OpCode.CPUI_INT_SEXT)
-            {
-                Varnode* extVn = extOp.getIn(0);
+            if (extopc == OpCode.CPUI_INT_ZEXT || extopc == OpCode.CPUI_INT_SEXT) {
+                Varnode extVn = extOp.getIn(0);
                 if (extVn.isFree()) return (Varnode)null;
                 if (inVn.getSize() == op.getOut().getSize())
                     resVn = inVn;
                 else
                     resVn = extVn;
             }
-            else
-            {
+            else {
                 extopc = OpCode.CPUI_INT_ZEXT; // Treat as unsigned extension
                 resVn = inVn;
             }

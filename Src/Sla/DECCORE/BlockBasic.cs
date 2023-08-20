@@ -454,9 +454,9 @@ namespace Sla.DECCORE
         /// <summary>Return an enumerator in reverse order</summary>
         public IEnumerator<PcodeOp> reverseEnumerator() => op.GetBiDirectionalEnumerator(true);
 
-        // list<PcodeOp*>::iterator endOp(void) { return op.end(); }       ///< Return an iterator to the end of the PcodeOps
-        // list<PcodeOp*>::const_iterator beginOp(void) { return op.begin(); }	///< Return an iterator to the beginning of the PcodeOps
-        // list<PcodeOp*>::const_iterator endOp(void) { return op.end(); }	///< Return an iterator to the end of the PcodeOps
+        // list<PcodeOp>::iterator endOp(void) { return op.end(); }       ///< Return an iterator to the end of the PcodeOps
+        // IEnumerator<PcodeOp> beginOp(void) { return op.begin(); }	///< Return an iterator to the beginning of the PcodeOps
+        // IEnumerator<PcodeOp> endOp(void) { return op.end(); }	///< Return an iterator to the end of the PcodeOps
 
         /// Return \b true if \b block contains no operations
         public bool emptyOp() => (0 == op.Count);

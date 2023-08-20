@@ -153,19 +153,19 @@ namespace Sla.DECCORE
         /// \return the number Varnodes that were marked as explicit
         private static int multipleInteraction(List<Varnode> multlist)
         {
-            List<Varnode*> purgelist;
+            List<Varnode> purgelist;
 
             for (int i = 0; i < multlist.size(); ++i)
             {
-                Varnode* vn = multlist[i];  // All elements in this list should have a defining op
-                PcodeOp* op = vn.getDef();
+                Varnode vn = multlist[i];  // All elements in this list should have a defining op
+                PcodeOp op = vn.getDef();
                 OpCode opc = op.code();
                 if (op.isBoolOutput() || (opc == OpCode.CPUI_INT_ZEXT) || (opc == OpCode.CPUI_INT_SEXT) || (opc == OpCode.CPUI_PTRADD))
                 {
                     int maxparam = 2;
                     if (op.numInput() < maxparam)
                         maxparam = op.numInput();
-                    Varnode* topvn = (Varnode)null;
+                    Varnode topvn = (Varnode)null;
                     for (int j = 0; j < maxparam; ++j)
                     {
                         topvn = op.getIn(j);
@@ -192,7 +192,7 @@ namespace Sla.DECCORE
 
             for (int i = 0; i < purgelist.size(); ++i)
             {
-                Varnode* vn = purgelist[i];
+                Varnode vn = purgelist[i];
                 vn.setExplicit();
                 vn.clearImplied();
                 vn.clearMark();
@@ -211,7 +211,7 @@ namespace Sla.DECCORE
         private static void processMultiplier(Varnode vn, int max)
         {
             List<OpStackElement> opstack;
-            Varnode* vncur;
+            Varnode vncur;
             int finalcount = 0;
 
             opstack.Add(vn);
@@ -236,8 +236,8 @@ namespace Sla.DECCORE
                 }
                 else
                 {
-                    PcodeOp* op = vncur.getDef();
-                    Varnode* newvn = op.getIn(opstack.GetLastItem().slot++);
+                    PcodeOp op = vncur.getDef();
+                    Varnode newvn = op.getIn(opstack.GetLastItem().slot++);
                     if (newvn.isMark())
                     {   // If an ancestor is marked(also possible implied with multiple descendants)
                         vn.setExplicit();  // then automatically consider this to be explicit
@@ -298,14 +298,14 @@ namespace Sla.DECCORE
         public override int apply(Funcdata data)
         {
             VarnodeDefSet::const_iterator viter, enditer;
-            List<Varnode*> multlist;      // implied varnodes with >1 descendants
+            List<Varnode> multlist;      // implied varnodes with >1 descendants
             int maxref;
 
             maxref = data.getArch().max_implied_ref;
             enditer = data.beginDef(0); // Cut out free varnodes
             for (viter = data.beginDef(); viter != enditer; ++viter)
             {
-                Varnode* vn = *viter;
+                Varnode vn = *viter;
 
                 int desccount = baseExplicit(vn, maxref);
                 if (desccount < 0)
@@ -326,7 +326,7 @@ namespace Sla.DECCORE
             int maxdup = data.getArch().max_term_duplication;
             for (int i = 0; i < multlist.size(); ++i)
             {
-                Varnode* vn = multlist[i];
+                Varnode vn = multlist[i];
                 if (vn.isMark())       // Mark may have been cleared by multipleInteraction
                     processMultiplier(vn, maxdup);
             }

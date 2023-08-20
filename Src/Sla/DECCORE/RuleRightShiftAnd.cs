@@ -29,24 +29,24 @@ namespace Sla.DECCORE
         /// - `( V & 0xf000 ) s>> 24  =>   V s>> 24`
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_INT_RIGHT);
-            oplist.Add(CPUI_INT_SRIGHT);
+            oplist.Add(OpCode.CPUI_INT_RIGHT);
+            oplist.Add(OpCode.CPUI_INT_SRIGHT);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* constVn = op.getIn(1);
+            Varnode constVn = op.getIn(1);
             if (!constVn.isConstant()) return 0;
-            Varnode* inVn = op.getIn(0);
+            Varnode inVn = op.getIn(0);
             if (!inVn.isWritten()) return 0;
-            PcodeOp* andOp = inVn.getDef();
+            PcodeOp andOp = inVn.getDef();
             if (andOp.code() != OpCode.CPUI_INT_AND) return 0;
-            Varnode* maskVn = andOp.getIn(1);
+            Varnode maskVn = andOp.getIn(1);
             if (!maskVn.isConstant()) return 0;
 
             int sa = (int)constVn.getOffset();
             ulong mask = maskVn.getOffset() >> sa;
-            Varnode* rootVn = andOp.getIn(0);
+            Varnode rootVn = andOp.getIn(0);
             ulong full = Globals.calc_mask(rootVn.getSize()) >> sa;
             if (full != mask) return 0;
             if (rootVn.isFree()) return 0;

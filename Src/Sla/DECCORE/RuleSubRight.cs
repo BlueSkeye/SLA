@@ -32,10 +32,10 @@ namespace Sla.DECCORE
         /// we lump that into the shift as well.
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_SUBPIECE);
+            oplist.Add(OpCode.CPUI_SUBPIECE);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             if (op.doesSpecialPrinting())
                 return 0;
@@ -47,8 +47,8 @@ namespace Sla.DECCORE
 
             int c = op.getIn(1).getOffset();
             if (c == 0) return 0;       // SUBPIECE is not least sig
-            Varnode* a = op.getIn(0);
-            Varnode* outvn = op.getOut();
+            Varnode a = op.getIn(0);
+            Varnode outvn = op.getOut();
             if (outvn.isAddrTied() && a.isAddrTied())
             {
                 if (outvn.overlap(*a) == c) // This SUBPIECE should get converted to a marker by ActionCopyMarker
@@ -57,7 +57,7 @@ namespace Sla.DECCORE
             OpCode opc = OpCode.CPUI_INT_RIGHT; // Default shift type
             int d = c * 8;         // Convert to bit shift
                                     // Search for lone right shift descendant
-            PcodeOp* lone = outvn.loneDescend();
+            PcodeOp lone = outvn.loneDescend();
             if (lone != (PcodeOp)null)
             {
                 OpCode opc2 = lone.code();
@@ -89,9 +89,9 @@ namespace Sla.DECCORE
                 ct = data.getArch().types.getBase(a.getSize(), type_metatype.TYPE_UINT);
             else
                 ct = data.getArch().types.getBase(a.getSize(), type_metatype.TYPE_INT);
-            PcodeOp* shiftop = data.newOp(2, op.getAddr());
+            PcodeOp shiftop = data.newOp(2, op.getAddr());
             data.opSetOpcode(shiftop, opc);
-            Varnode* newout = data.newUnique(a.getSize(), ct);
+            Varnode newout = data.newUnique(a.getSize(), ct);
             data.opSetOutput(shiftop, newout);
             data.opSetInput(shiftop, a, 0);
             data.opSetInput(shiftop, data.newConstant(4, d), 1);

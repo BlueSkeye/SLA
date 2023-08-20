@@ -31,7 +31,7 @@ namespace Sla.DECCORE
 
         private bool zextOf(Varnode big, Varnode small)
         { // Verify that big is (some form of) a zero extension of small
-            PcodeOp* op;
+            PcodeOp op;
             if (small.isConstant())
             {
                 if (!big.isConstant()) return false;
@@ -46,9 +46,9 @@ namespace Sla.DECCORE
             {
                 if (!op.getIn(1).isConstant()) return false;
                 if (op.getIn(1).getOffset() != Globals.calc_mask(small.getSize())) return false;
-                Varnode* whole = op.getIn(0);
+                Varnode whole = op.getIn(0);
                 if (!small.isWritten()) return false;
-                PcodeOp* sub = small.getDef();
+                PcodeOp sub = small.getDef();
                 if (sub.code() != OpCode.CPUI_SUBPIECE) return false;
                 return (sub.getIn(0) == whole);
             }

@@ -34,23 +34,23 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_SUBPIECE);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             int loSize = (int)op.getIn(1).getOffset();
             if (loSize == 0)            // Make sure SUBPIECE doesn't take least significant part
                 return 0;
-            Varnode* vn = op.getIn(0);
+            Varnode vn = op.getIn(0);
             if (!vn.isWritten())
                 return 0;
             if (vn.isPrecisLo() || vn.isPrecisHi())
                 return 0;
             if (op.getOut().getSize() + loSize != vn.getSize())
                 return 0;               // Make sure SUBPIECE is taking most significant part
-            PcodeOp* concatOp = (PcodeOp)null;
-            PcodeOp* multiOp = vn.getDef();
+            PcodeOp concatOp = (PcodeOp)null;
+            PcodeOp multiOp = vn.getDef();
             while (multiOp.code() == OpCode.CPUI_INDIRECT)
             {   // PIECE may come through INDIRECT
-                Varnode* tmpvn = multiOp.getIn(0);
+                Varnode tmpvn = multiOp.getIn(0);
                 if (!tmpvn.isWritten()) return 0;
                 multiOp = tmpvn.getDef();
             }
@@ -63,9 +63,9 @@ namespace Sla.DECCORE
             {   // Otherwise PIECE comes through MULTIEQUAL
                 for (int i = 0; i < multiOp.numInput(); ++i)
                 {
-                    Varnode* invn = multiOp.getIn(i);
+                    Varnode invn = multiOp.getIn(i);
                     if (!invn.isWritten()) continue;
-                    PcodeOp* tmpOp = invn.getDef();
+                    PcodeOp tmpOp = invn.getDef();
                     if (tmpOp.code() == OpCode.CPUI_PIECE)
                     {
                         concatOp = tmpOp;

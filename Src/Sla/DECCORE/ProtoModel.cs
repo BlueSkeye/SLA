@@ -42,37 +42,37 @@ namespace Sla.DECCORE
 
         // friend class ProtoModelMerged;
         /// The Architecture owning this prototype model
-        private Architecture glb;
+        internal Architecture glb;
         /// Name of the model
-        private string name;
+        internal string name;
         /// Extra bytes popped from stack
-        private int extrapop;
+        internal int extrapop;
         /// Resource model for input parameters
-        private ParamList input;
+        internal ParamList? input;
         /// Resource model for output parameters
-        private ParamList output;
+        internal ParamList? output;
         /// The model \b this is a copy of
-        private ProtoModel compatModel;
+        internal ProtoModel? compatModel;
         /// List of side-effects
-        private List<EffectRecord> effectlist = new List<EffectRecord>();
+        internal List<EffectRecord> effectlist = new List<EffectRecord>();
         /// Storage locations potentially carrying \e trash values
-        private List<VarnodeData> likelytrash = new List<VarnodeData>();
+        internal List<VarnodeData> likelytrash = new List<VarnodeData>();
         /// Id of injection to perform at beginning of function (-1 means not used)
-        private int injectUponEntry;
+        internal int injectUponEntry;
         /// Id of injection to perform after a call to this function (-1 means not used)
-        private int injectUponReturn;
+        internal int injectUponReturn;
         /// Memory range(s) of space-based locals
-        private RangeList localrange;
+        internal RangeList localrange;
         /// Memory range(s) of space-based parameters
-        private RangeList paramrange;
+        internal RangeList paramrange;
         /// True if stack parameters have (normal) low address to high address ordering
-        private bool stackgrowsnegative;
+        internal bool stackgrowsnegative;
         /// True if this model has a \b this parameter (auto-parameter)
-        private bool hasThis;
+        internal bool hasThis;
         /// True if this model is a constructor for a particular object
-        private bool isConstruct;
+        internal bool isConstruct;
         /// True if this model should be printed as part of function declarations
-        private bool isPrinted;
+        internal bool isPrinted;
 
         /// Set the default stack range used for local variables
         private void defaultLocalRange()
@@ -221,7 +221,7 @@ namespace Sla.DECCORE
         public Architecture getArch() => glb;
 
         /// Return \e model \b this is an alias of (or null)
-        public ProtoModel getAliasParent() => compatModel;
+        public ProtoModel? getAliasParent() => compatModel;
 
         /// Determine side-effect of \b this on the given memory range
         /// The model is searched for an EffectRecord matching the given range

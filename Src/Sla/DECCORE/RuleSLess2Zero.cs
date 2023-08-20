@@ -23,8 +23,8 @@ namespace Sla.DECCORE
             if ((opc != OpCode.CPUI_INT_ADD) && (opc != OpCode.CPUI_INT_OR) && (opc != OpCode.CPUI_INT_XOR))
                 return (Varnode)null;
 
-            Varnode* vn1 = op.getIn(0);
-            Varnode* vn2 = op.getIn(1);
+            Varnode vn1 = op.getIn(0);
+            Varnode vn2 = op.getIn(1);
             ulong mask = Globals.calc_mask(vn1.getSize());
             mask = (mask ^ (mask >> 1));    // Only high-bit is set
             ulong nzmask1 = vn1.getNZMask();
@@ -78,7 +78,7 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_INT_SLESS);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode lvn;
             Varnode rvn;
@@ -112,7 +112,7 @@ namespace Sla.DECCORE
                 {
                     feedOp = rvn.getDef();
                     feedOpCode = feedOp.code();
-                    Varnode* hibit = getHiBit(feedOp);
+                    Varnode hibit = getHiBit(feedOp);
                     if (hibit != (Varnode)null)
                     { // Test for -1 s<  (hi ^ lo)
                         if (hibit.isConstant())
@@ -152,7 +152,7 @@ namespace Sla.DECCORE
                         if (avn.isFree() || rvn.loneDescend() == (PcodeOp)null)
                             return 0;
 
-                        Varnode* maskVn = feedOp.getIn(1);
+                        Varnode maskVn = feedOp.getIn(1);
                         if (maskVn.isConstant())
                         {
                             ulong mask = maskVn.getOffset();
@@ -197,7 +197,7 @@ namespace Sla.DECCORE
                     }
                     else
                     {
-                        Varnode* hibit = getHiBit(feedOp);
+                        Varnode hibit = getHiBit(feedOp);
                         if (hibit != (Varnode)null)
                         { // Test for (hi ^ lo) s< 0
                             if (hibit.isConstant())
@@ -234,7 +234,7 @@ namespace Sla.DECCORE
                             avn = feedOp.getIn(0);
                             if (avn.isFree() || lvn.loneDescend() == (PcodeOp)null)
                                 return 0;
-                            Varnode* maskVn = feedOp.getIn(1);
+                            Varnode maskVn = feedOp.getIn(1);
                             if (maskVn.isConstant())
                             {
                                 ulong mask = maskVn.getOffset();

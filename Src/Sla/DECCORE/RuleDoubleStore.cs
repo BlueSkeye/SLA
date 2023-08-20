@@ -27,7 +27,7 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_STORE);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             PcodeOp? storelo;
             PcodeOp? storehi;

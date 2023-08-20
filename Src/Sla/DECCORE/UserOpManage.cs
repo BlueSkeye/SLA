@@ -1,14 +1,5 @@
-﻿using ghidra;
-using Sla.CORE;
+﻿using Sla.CORE;
 using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace Sla.DECCORE
 {
@@ -42,19 +33,15 @@ namespace Sla.DECCORE
             int ind = op.getIndex();
             if (ind < 0) throw new LowlevelError("UserOp not assigned an index");
 
-            Dictionary<string, UserPcodeOp*>::iterator iter;
-            iter = useropmap.find(op.getName());
-            if (iter != useropmap.end())
-            {
-                UserPcodeOp* other = (*iter).second;
+            UserPcodeOp other;
+            if (useropmap.TryGetValue(op.getName(), out other)) {
                 if (other.getIndex() != ind)
                     throw new LowlevelError("Conflicting indices for userop name " + op.getName());
             }
 
             while (useroplist.size() <= ind)
                 useroplist.Add((UserPcodeOp)null);
-            if (useroplist[ind] != (UserPcodeOp)null)
-            {
+            if (useroplist[ind] != (UserPcodeOp)null) {
                 if (useroplist[ind].getName() != op.getName())
                     throw new LowlevelError("User op " + op.getName() + " has same index as " + useroplist[ind].getName());
                 // We assume this registration customizes an existing userop
@@ -66,10 +53,8 @@ namespace Sla.DECCORE
             SegmentOp? s_op = op as SegmentOp;
             if (s_op != (SegmentOp)null) {
                 int index = s_op.getSpace().getIndex();
-
                 while (segmentop.size() <= index)
                     segmentop.Add((SegmentOp)null);
-
                 if (segmentop[index] != (SegmentOp)null)
                     throw new LowlevelError("Multiple segmentops defined for same space");
                 segmentop[index] = s_op;
@@ -83,8 +68,7 @@ namespace Sla.DECCORE
                 return;
             }
             VolatileWriteOp? tmpVolWrite = op as VolatileWriteOp;
-            if (tmpVolWrite != (VolatileWriteOp)null)
-            {
+            if (tmpVolWrite != (VolatileWriteOp)null) {
                 if (vol_write != (VolatileWriteOp)null)
                     throw new LowlevelError("Multiple volatile writes registered");
                 vol_write = tmpVolWrite;
@@ -100,13 +84,9 @@ namespace Sla.DECCORE
 
         ~UserOpManage()
         {
-            List<UserPcodeOp*>::iterator iter;
-
-            for (iter = useroplist.begin(); iter != useroplist.end(); ++iter)
-            {
-                UserPcodeOp* userop = *iter;
-                if (userop != (UserPcodeOp)null)
-                    delete userop;
+            foreach (UserPcodeOp userop in useroplist) {
+                //if (userop != (UserPcodeOp)null)
+                //    delete userop;
             }
         }
 
@@ -116,12 +96,11 @@ namespace Sla.DECCORE
         /// \param glb is the Architecture from which to draw user defined operations
         public void initialize(Architecture glb)
         {
-            List<string> basicops;
+            List<string> basicops = new List<string>();
             glb.translate.getUserOpNames(basicops);
-            for (uint i = 0; i < basicops.size(); ++i)
-            {
+            for (uint i = 0; i < basicops.size(); ++i) {
                 if (basicops[i].size() == 0) continue;
-                UserPcodeOp* userop = new UnspecializedPcodeOp(glb, basicops[i], i);
+                UserPcodeOp userop = new UnspecializedPcodeOp(glb, basicops[i], i);
                 registerOp(userop);
             }
         }
@@ -132,14 +111,12 @@ namespace Sla.DECCORE
         /// \param glb is the owning Architecture
         public void setDefaults(Architecture glb)
         {
-            if (vol_read == (VolatileReadOp)null)
-            {
-                VolatileReadOp* volread = new VolatileReadOp(glb, "read_volatile", useroplist.size(), false);
+            if (vol_read == (VolatileReadOp)null) {
+                VolatileReadOp volread = new VolatileReadOp(glb, "read_volatile", useroplist.size(), false);
                 registerOp(volread);
             }
-            if (vol_write == (VolatileWriteOp)null)
-            {
-                VolatileWriteOp* volwrite = new VolatileWriteOp(glb, "write_volatile", useroplist.size(), false);
+            if (vol_write == (VolatileWriteOp)null) {
+                VolatileWriteOp volwrite = new VolatileWriteOp(glb, "write_volatile", useroplist.size(), false);
                 registerOp(volwrite);
             }
         }
@@ -161,10 +138,8 @@ namespace Sla.DECCORE
         /// \return the matching description object or NULL
         public UserPcodeOp getOp(string nm)
         {
-            Dictionary<string, UserPcodeOp*>::const_iterator iter;
-            iter = useropmap.find(nm);
-            if (iter == useropmap.end()) return (UserPcodeOp)null;
-            return (*iter).second;
+            UserPcodeOp result;
+            return useropmap.TryGetValue(nm, out result) ? result : (UserPcodeOp)null;
         }
 
         /// Retrieve a segment-op description object by index
@@ -172,8 +147,7 @@ namespace Sla.DECCORE
         /// \return the indicated segment-op description
         public SegmentOp getSegmentOp(int i)
         {
-            if (i >= segmentop.size()) return (SegmentOp)null;
-            return segmentop[i];
+            return (i >= segmentop.size()) ? (SegmentOp)null : segmentop[i];
         }
 
         /// Get (the) volatile read description
@@ -194,7 +168,7 @@ namespace Sla.DECCORE
                 s_op.decode(decoder);
                 registerOp(s_op);
             }
-            catch (LowlevelError err) {
+            catch (LowlevelError) {
                 // delete s_op;
                 throw;
             }
@@ -207,8 +181,8 @@ namespace Sla.DECCORE
         /// \param glb is the owning Architecture
         public void decodeVolatile(Sla.CORE.Decoder decoder, Architecture glb)
         {
-            string readOpName;
-            string writeOpName;
+            string readOpName = string.Empty;
+            string writeOpName = string.Empty;
             bool functionalDisplay = false;
             while (true) {
                 AttributeId attribId = decoder.getNextAttributeId();
@@ -225,7 +199,7 @@ namespace Sla.DECCORE
                         functionalDisplay = true;
                 }
             }
-            if (readOpName.size() == 0 || writeOpName.size() == 0)
+            if (readOpName.Length == 0 || writeOpName.Length == 0)
                 throw new LowlevelError("Missing inputop/outputop attributes in <volatile> element");
             VolatileReadOp vr_op = new VolatileReadOp(glb, readOpName, useroplist.size(), functionalDisplay);
             try {

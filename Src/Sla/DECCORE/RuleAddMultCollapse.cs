@@ -37,7 +37,7 @@ namespace Sla.DECCORE
             oplist.AddRange(list);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode[] c = new Varnode[2];           // Constant varnodes
             Varnode sub;
@@ -63,8 +63,8 @@ namespace Sla.DECCORE
                 //    another term getting added in AND
                 //    the result of the intermediate sum is used more than once  (otherwise collectterms should pick it up)
                 if (opc != OpCode.CPUI_INT_ADD) return 0;
-                Varnode* othervn,*basevn;
-                PcodeOp* baseop;
+                Varnode othervn,*basevn;
+                PcodeOp baseop;
                 for (int i = 0; i < 2; ++i)
                 {
                     othervn = subop.getIn(i);
@@ -86,9 +86,9 @@ namespace Sla.DECCORE
                         newvn.copySymbolIfValid(c[0]);
                     else if (c[1].getSymbolEntry() != (SymbolEntry)null)
                         newvn.copySymbolIfValid(c[1]);
-                    PcodeOp* newop = data.newOp(2, op.getAddr());
+                    PcodeOp newop = data.newOp(2, op.getAddr());
                     data.opSetOpcode(newop, OpCode.CPUI_INT_ADD);
-                    Varnode* newout = data.newUniqueOut(c[0].getSize(), newop);
+                    Varnode newout = data.newUniqueOut(c[0].getSize(), newop);
                     data.opSetInput(newop, basevn, 0);
                     data.opSetInput(newop, newvn, 1);
                     data.opInsertBefore(newop, op);

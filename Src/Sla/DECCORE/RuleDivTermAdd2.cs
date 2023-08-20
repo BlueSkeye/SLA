@@ -35,7 +35,7 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_INT_RIGHT);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             if (!op.getIn(1).isConstant()) return 0;
             if (op.getIn(1).getOffset() != 1) return 0;

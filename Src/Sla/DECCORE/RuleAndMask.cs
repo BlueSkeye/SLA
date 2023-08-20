@@ -26,14 +26,14 @@ namespace Sla.DECCORE
         /// \brief Collapse unnecessary INT_AND
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_INT_AND);
+            oplist.Add(OpCode.CPUI_INT_AND);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             ulong mask1, mask2, andmask;
             int size = op.getOut().getSize();
-            Varnode* vn;
+            Varnode vn;
 
             if (size > sizeof(ulong)) return 0; // FIXME: ulong should be arbitrary precision
             mask1 = op.getIn(0).getNZMask();

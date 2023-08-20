@@ -27,7 +27,7 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_PIECE);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             // Load from lowest address, highest (NOT significance)
             PcodeOp? loadlo;

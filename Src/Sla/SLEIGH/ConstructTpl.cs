@@ -21,12 +21,12 @@ namespace Sla.SLEIGH
         protected List<OpTpl> vec;
         protected HandleTpl? result;
 
-        protected void setOpvec(List<OpTpl> opvec)
+        internal void setOpvec(List<OpTpl> opvec)
         {
             vec = opvec;
         }
 
-        protected void setNumLabels(uint val)
+        internal void setNumLabels(uint val)
         {
             numlabels = val;
         }

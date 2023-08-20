@@ -33,7 +33,7 @@ namespace Sla.DECCORE
                 fc.initActiveInput();
             if (inputlocked)
             {
-                PcodeOp* op = fc.getOp();
+                PcodeOp op = fc.getOp();
                 int numparam = fc.numParams();
                 bool setplaceholder = varargs;
                 for (int i = 0; i < numparam; ++i)
@@ -50,7 +50,7 @@ namespace Sla.DECCORE
                     int sz = param.getSize();
                     if (spc.getType() == spacetype.IPTR_SPACEBASE)
                     { // Param is stack relative
-                        Varnode* loadval = data.opStackLoad(spc, off, sz, op, (Varnode)null, false);
+                        Varnode loadval = data.opStackLoad(spc, off, sz, op, (Varnode)null, false);
                         data.opInsertInput(op, loadval, op.numInput());
                         if (!setplaceholder)
                         {
@@ -75,7 +75,7 @@ namespace Sla.DECCORE
         /// \param data is the function being analyzed
         private static void funcLinkOutput(FuncCallSpecs fc, Funcdata data)
         {
-            PcodeOp* callop = fc.getOp();
+            PcodeOp callop = fc.getOp();
             if (callop.getOut() != (Varnode)null)
             {
                 // CALL ops are expected to have no output, but its possible an override has produced one
@@ -114,9 +114,9 @@ namespace Sla.DECCORE
                     if (res != OpCode.CPUI_COPY)
                     { // We assume the (smallsize) output is extended to a full register
                       // Create the extension operation to eliminate artifact
-                        PcodeOp* op = data.newOp(1, callop.getAddr());
+                        PcodeOp op = data.newOp(1, callop.getAddr());
                         data.newVarnodeOut(vdata.size, vdata.getAddr(), op);
-                        Varnode* invn = data.newVarnode(sz, addr);
+                        Varnode invn = data.newVarnode(sz, addr);
                         data.opSetInput(op, invn, 0);
                         data.opSetOpcode(op, res);
                         data.opInsertAfter(op, callop); // Insert immediately after the call

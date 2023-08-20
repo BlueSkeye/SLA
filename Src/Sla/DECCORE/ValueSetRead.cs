@@ -73,7 +73,7 @@ namespace Sla.DECCORE
         /// be modified due to additional control-flow constraints
         public void compute()
         {
-            Varnode* vn = op.getIn(slot);
+            Varnode vn = op.getIn(slot);
             ValueSet* valueSet = vn.getValueSet();
             typeCode = valueSet.getTypeCode();
             range = valueSet.getRange();

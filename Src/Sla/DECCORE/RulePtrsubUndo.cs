@@ -31,14 +31,14 @@ namespace Sla.DECCORE
         /// when the mistake is discovered.
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_PTRSUB);
+            oplist.Add(OpCode.CPUI_PTRSUB);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             if (!data.hasTypeRecoveryStarted()) return 0;
 
-            Varnode* basevn = op.getIn(0);
+            Varnode basevn = op.getIn(0);
             if (basevn.getTypeReadFacing(op).isPtrsubMatching(op.getIn(1).getOffset()))
                 return 0;
 

@@ -193,7 +193,7 @@ namespace Sla.DECCORE
 
             while (iter != enditer)
             {
-                Varnode* vn = *iter++;
+                Varnode vn = *iter++;
                 bool locked = vn.isTypeLock();
                 Address addr = vn.getAddr();
                 if (addr.getSpace() != space) continue;

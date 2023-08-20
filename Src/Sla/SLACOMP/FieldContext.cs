@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.SLEIGH;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,11 +19,11 @@ namespace Sla.SLACOMP
         /// Sort based on the containing Varnode, then on the bit boundary
         /// \param op2 is a field to compare with \b this
         /// \return \b true if \b this should be sorted before the other field
-        internal static bool operator <(FieldContext op2)
+        public static bool operator <(FieldContext op1, FieldContext op2)
         {
-            if (sym.getName() != op2.sym.getName())
-                return (sym.getName() < op2.sym.getName());
-            return (qual.low < op2.qual.low);
+            return (op1.sym.getName() != op2.sym.getName())
+                ? (0 > string.Compare(op1.sym.getName(), op2.sym.getName()))
+                : (op1.qual.low < op2.qual.low);
         }
 
         internal FieldContext(VarnodeSymbol s, FieldQuality q)

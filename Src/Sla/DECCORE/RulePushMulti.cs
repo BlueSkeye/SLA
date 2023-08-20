@@ -70,7 +70,7 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_MULTIEQUAL);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             if (op.numInput() != 2) return 0;
 

@@ -29,7 +29,7 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_INT_SUB);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode vn = op.getIn(1);      // Parameter being subtracted
             PcodeOp newop = data.newOp(2, op.getAddr());

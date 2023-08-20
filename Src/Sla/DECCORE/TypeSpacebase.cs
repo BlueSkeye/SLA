@@ -184,7 +184,7 @@ namespace Sla.DECCORE
         {
             int res = Datatype::compareDependency(op);
             if (res != 0) return res;
-            TypeSpacebase* tsb = (TypeSpacebase*)&op;
+            TypeSpacebase* tsb = (TypeSpacebase)&op;
             if (spaceid != tsb.spaceid) return (spaceid < tsb.spaceid) ? -1 : 1;
             if (localframe.isInvalid()) return 0; // Global space base
             if (localframe != tsb.localframe) return (localframe < tsb.localframe) ? -1 : 1;

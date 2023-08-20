@@ -221,7 +221,7 @@ namespace Sla.DECCORE
             Architecture* glb = data.getArch();
             AddrSpace* cspc = glb.getConstantSpace();
             SymbolEntry* entry;
-            Varnode* vn;
+            Varnode vn;
 
             begiter = data.beginLoc(cspc);
             enditer = data.endLoc(cspc);
@@ -236,7 +236,7 @@ namespace Sla.DECCORE
                 if (vn.isSpacebase()) continue; // Don't use constant 0 which is already spacebase
                                                  //    if (vn.getSize() != rspc.getAddrSize()) continue; // Must be size of pointer
 
-                PcodeOp* op = vn.loneDescend();
+                PcodeOp op = vn.loneDescend();
                 if (op == (PcodeOp)null) continue;
                 AddrSpace* rspc = selectInferSpace(vn, op, glb.inferPtrSpaces);
                 if (rspc == (AddrSpace)null) continue;

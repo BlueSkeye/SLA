@@ -31,7 +31,7 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_BOOL_AND);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {               // Convert [(s)lessequal AND notequal] to (s)less
             Varnode compvn1;
             Varnode compvn2;

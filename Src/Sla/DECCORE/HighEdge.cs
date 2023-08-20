@@ -14,9 +14,9 @@ namespace Sla.DECCORE
     {
         // friend class HighIntersectTest;
         /// First HighVariable of the pair
-        private HighVariable a;
+        internal HighVariable a;
         /// Second HighVariable of the pair
-        private HighVariable b;
+        internal HighVariable b;
 
         /// \brief Comparator
         public static bool operator <(HighEdge op1, HighEdge op2)

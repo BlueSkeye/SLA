@@ -35,7 +35,7 @@ namespace Sla.DECCORE
             Datatype* ct = param.getType();
             if (vn.isImplied() && vn.isWritten())
             { // Skip any cast into the function
-                PcodeOp* castop = vn.getDef();
+                PcodeOp castop = vn.getDef();
                 if (castop.code() == OpCode.CPUI_CAST)
                 {
                     vn = castop.getIn(0);
@@ -77,14 +77,14 @@ namespace Sla.DECCORE
             ScopeLocal* localmap = data.getScopeLocal();
             for (int i = 0; i < numfunc; ++i)
             {
-                FuncCallSpecs* fc = data.getCallSpecs(i);
+                FuncCallSpecs fc = data.getCallSpecs(i);
                 if (fc.isBadJumpTable())
                 {
-                    PcodeOp* op = fc.getOp();
-                    Varnode* vn = op.getIn(0);
+                    PcodeOp op = fc.getOp();
+                    Varnode vn = op.getIn(0);
                     if (vn.isImplied() && vn.isWritten())
                     { // Skip any cast into the function
-                        PcodeOp* castop = vn.getDef();
+                        PcodeOp castop = vn.getDef();
                         if (castop.code() == OpCode.CPUI_CAST)
                             vn = castop.getIn(0);
                     }
@@ -116,9 +116,9 @@ namespace Sla.DECCORE
             ScopeLocal* localmap = data.getScopeLocal();
             for (int i = 0; i < numfunc; ++i)
             {   // Run through all calls to functions
-                FuncCallSpecs* fc = data.getCallSpecs(i);
+                FuncCallSpecs fc = data.getCallSpecs(i);
                 if (!fc.isInputLocked()) continue;
-                PcodeOp* op = fc.getOp();
+                PcodeOp op = fc.getOp();
                 int numparam = fc.numParams();
                 if (numparam >= op.numInput())
                     numparam = op.numInput() - 1;
@@ -202,14 +202,14 @@ namespace Sla.DECCORE
                 enditer = data.endLoc(spc);
                 for (iter = data.beginLoc(spc); iter != enditer; ++iter)
                 {
-                    Varnode* curvn = *iter;
+                    Varnode curvn = *iter;
                     if (curvn.isFree())
                     {
                         continue;
                     }
                     if (curvn.isSpacebase())
                         linkSpacebaseSymbol(curvn, data, namerec);
-                    Varnode* vn = curvn.getHigh().getNameRepresentative();
+                    Varnode vn = curvn.getHigh().getNameRepresentative();
                     if (vn != curvn) continue; // Hit each high only once
                     HighVariable* high = vn.getHigh();
                     if (!high.hasName()) continue;

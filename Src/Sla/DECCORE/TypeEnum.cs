@@ -211,20 +211,19 @@ namespace Sla.DECCORE
             if (res != 0) return res;
 
             TypeEnum te = (TypeEnum) op;
-            Dictionary<ulong, string>::const_iterator iter1, iter2;
 
             if (namemap.Count != te.namemap.Count) {
                 return (namemap.Count < te.namemap.Count) ? -1 : 1;
             }
-            iter1 = namemap.begin();
-            iter2 = te.namemap.begin();
-            while (iter1 != namemap.end()) {
-                if ((*iter1).first != (*iter2).first)
-                    return ((*iter1).first < (*iter2).first) ? -1 : 1;
-                if ((*iter1).second != (*iter2).second)
-                    return ((*iter1).second < (*iter2).second) ? -1 : 1;
-                ++iter1;
-                ++iter2;
+            IEnumerator<KeyValuePair<ulong, string>> iter1 = namemap.GetEnumerator();
+            IEnumerator<KeyValuePair<ulong, string>> iter2 = te.namemap.GetEnumerator();
+            if (!iter2.MoveNext()) throw new ApplicationException();
+            while (iter1.MoveNext()) {
+                if (iter1.Current.Key != iter2.Current.Key)
+                    return (iter1.Current.Key < iter2.Current.Key) ? -1 : 1;
+                if (iter1.Current.Value != iter2.Current.Value)
+                    return (0 > string.Compare(iter1.Current.Value, iter2.Current.Value) ? -1 : 1);
+                if (!iter2.MoveNext()) throw new ApplicationException();
             }
             return 0;
         }

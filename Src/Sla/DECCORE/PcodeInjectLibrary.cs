@@ -1,12 +1,4 @@
-﻿using ghidra;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -53,10 +45,10 @@ namespace Sla.DECCORE
         /// \param injectid is the integer id
         protected void registerCallFixup(string fixupName, int injectid/* , List<string> targets */)
         {
-            pair<Dictionary<string, int>::iterator, bool> check;
-            check = callFixupMap.insert(pair<string, int>(fixupName, injectid));
-            if (!check.second)      // This symbol is already mapped
-                throw new LowlevelError("Duplicate <callfixup>: " + fixupName);
+            int id;
+            if (callFixupMap.TryGetValue(fixupName, out id))
+                throw new LowlevelError($"Duplicate <callfixup>: {fixupName}");
+            callFixupMap.Add(fixupName, injectid);
             while (callFixupNames.size() <= injectid)
                 callFixupNames.Add("");
             callFixupNames[injectid] = fixupName;
@@ -68,10 +60,10 @@ namespace Sla.DECCORE
         /// \param injectid is the integer id
         protected void registerCallOtherFixup(string fixupName, int injectid)
         {
-            pair<Dictionary<string, int>::iterator, bool> check;
-            check = callOtherFixupMap.insert(pair<string, int>(fixupName, injectid));
-            if (!check.second)      // This symbol is already mapped
-                throw new LowlevelError("Duplicate <callotherfixup>: " + fixupName);
+            int id;
+            if (callOtherFixupMap.TryGetValue(fixupName, out id))
+                throw new LowlevelError($"Duplicate <callotherfixup>: {fixupName}");
+            callOtherFixupMap.Add(fixupName, injectid);
             while (callOtherTarget.size() <= injectid)
                 callOtherTarget.Add("");
             callOtherTarget[injectid] = fixupName;
@@ -83,25 +75,26 @@ namespace Sla.DECCORE
         /// \param injectid is the integer id
         protected void registerCallMechanism(string fixupName,int injectid)
         {
-            pair<Dictionary<string, int>::iterator, bool> check;
-            check = callMechFixupMap.insert(pair<string, int>(fixupName, injectid));
-            if (!check.second)      // This symbol is already mapped
-                throw new LowlevelError("Duplicate <callmechanism>: " + fixupName);
+            int id;
+            if (callMechFixupMap.TryGetValue(fixupName, out id))
+                throw new LowlevelError($"Duplicate <callmechanism>: {fixupName}");
+            callMechFixupMap.Add(fixupName, injectid);
             while (callMechTarget.size() <= injectid)
                 callMechTarget.Add("");
             callMechTarget[injectid] = fixupName;
         }
 
         /// \brief Map a \e p-code \e script name to a payload id
-        ///
         /// \param scriptName is the formal name of the p-code script
         /// \param injectid is the integer id
         protected void registerExeScript(string scriptName,int injectid)
         {
-            pair<Dictionary<string, int>::iterator, bool> check;
-            check = scriptMap.insert(pair<string, int>(scriptName, injectid));
-            if (!check.second)      // This symbol is already mapped
-                throw new LowlevelError("Duplicate <script>: " + scriptName);
+            int result;
+            if (scriptMap.TryGetValue(scriptName, out result)) {
+                // This symbol is already mapped
+                throw new LowlevelError($"Duplicate <script>: {scriptName}");
+            }
+            scriptMap.Add(scriptName, injectid);
             while (scriptNames.size() <= injectid)
                 scriptNames.Add("");
             scriptNames[injectid] = scriptName;
@@ -133,9 +126,9 @@ namespace Sla.DECCORE
 
         ~PcodeInjectLibrary()
         {
-            List<InjectPayload*>::iterator iter;
-            for (iter = injection.begin(); iter != injection.end(); ++iter)
-                delete* iter;
+            //List<InjectPayload*>::iterator iter;
+            //for (iter = injection.begin(); iter != injection.end(); ++iter)
+            //    delete* iter;
         }
 
         /// Get the (current) offset for building temporary registers
@@ -147,34 +140,19 @@ namespace Sla.DECCORE
         /// \param type is the payload type
         /// \param nm is the formal name of the payload
         /// \return the payload id or -1 if there is no matching payload
-        public int getPayloadId(int type, string nm)
+        public int getPayloadId(InjectPayload.InjectionType type, string nm)
         {
-            Dictionary<string, int>::const_iterator iter;
-            if (type == InjectPayload.InjectionType.CALLFIXUP_TYPE)
-            {
-                iter = callFixupMap.find(nm);
-                if (iter == callFixupMap.end())
-                    return -1;
+            int result;
+            if (type == InjectPayload.InjectionType.CALLFIXUP_TYPE) {
+                return callFixupMap.TryGetValue(nm, out result) ? result : -1;
             }
-            else if (type == InjectPayload.InjectionType.CALLOTHERFIXUP_TYPE)
-            {
-                iter = callOtherFixupMap.find(nm);
-                if (iter == callOtherFixupMap.end())
-                    return -1;
+            else if (type == InjectPayload.InjectionType.CALLOTHERFIXUP_TYPE) {
+                return callOtherFixupMap.TryGetValue(nm, out result) ? result : -1;
             }
-            else if (type == InjectPayload.InjectionType.CALLMECHANISM_TYPE)
-            {
-                iter = callMechFixupMap.find(nm);
-                if (iter == callMechFixupMap.end())
-                    return -1;
+            else if (type == InjectPayload.InjectionType.CALLMECHANISM_TYPE) {
+                return callMechFixupMap.TryGetValue(nm, out result) ? result : -1;
             }
-            else
-            {
-                iter = scriptMap.find(nm);
-                if (iter == scriptMap.end())
-                    return -1;
-            }
-            return (*iter).second;
+            return scriptMap.TryGetValue(nm, out result) ? result : -1;
         }
 
         /// Get the InjectPayload by id

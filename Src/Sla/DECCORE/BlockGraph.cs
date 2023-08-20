@@ -774,7 +774,7 @@ namespace Sla.DECCORE
                 throw new LowlevelError("Bad block remove");
             }
 #endif
-            //List<FlowBlock*>::iterator iter;
+            //List<FlowBlock>::iterator iter;
             while (bl.sizeIn() > 0) {
                 // Rip the block out of the graph
                 removeEdge(bl.getIn(0), bl);

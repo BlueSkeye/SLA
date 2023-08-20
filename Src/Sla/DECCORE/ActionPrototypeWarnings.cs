@@ -50,7 +50,7 @@ namespace Sla.DECCORE
             int numcalls = data.numCalls();
             for (int i = 0; i < numcalls; ++i)
             {
-                FuncCallSpecs* fc = data.getCallSpecs(i);
+                FuncCallSpecs fc = data.getCallSpecs(i);
                 Funcdata* fd = fc.getFuncdata();
                 if (fc.hasInputErrors())
                 {

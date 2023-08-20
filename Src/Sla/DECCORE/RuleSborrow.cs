@@ -38,7 +38,7 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_INT_SBORROW);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode svn = op.getOut();
             Varnode cvn;

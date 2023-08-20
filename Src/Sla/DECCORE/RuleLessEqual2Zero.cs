@@ -35,7 +35,7 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_INT_LESSEQUAL);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode lvn, rvn;
             lvn = op.getIn(0);

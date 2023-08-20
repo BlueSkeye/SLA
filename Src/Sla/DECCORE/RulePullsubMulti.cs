@@ -32,13 +32,13 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_SUBPIECE);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             int maxByte, minByte, newSize;
 
-            Varnode* vn = op.getIn(0);
+            Varnode vn = op.getIn(0);
             if (!vn.isWritten()) return 0;
-            PcodeOp* mult = vn.getDef();
+            PcodeOp mult = vn.getDef();
             if (mult.code() != OpCode.CPUI_MULTIEQUAL) return 0;
             // We only pull up, do not pull "down" to bottom of loop
             if (mult.getParent().hasLoopIn()) return 0;
@@ -47,7 +47,7 @@ namespace Sla.DECCORE
             if (maxByte < minByte || (newSize >= vn.getSize()))
                 return 0;   // If all or none is getting used, nothing to do
             if (!acceptableSize(newSize)) return 0;
-            Varnode* outvn = op.getOut();
+            Varnode outvn = op.getOut();
             if (outvn.isPrecisLo() || outvn.isPrecisHi()) return 0; // Don't pull apart a double precision object
 
             // Make sure we don't new add SUBPIECE ops that aren't going to cancel in some way
@@ -56,13 +56,13 @@ namespace Sla.DECCORE
             consume = ~consume;         // Check for use of bits outside of what gets truncated later
             for (int i = 0; i < branches; ++i)
             {
-                Varnode* inVn = mult.getIn(i);
+                Varnode inVn = mult.getIn(i);
                 if ((consume & inVn.getConsume()) != 0)
                 {   // Check if bits not truncated are still used
                     // Check if there's an extension that matches the truncation
                     if (minByte == 0 && inVn.isWritten())
                     {
-                        PcodeOp* defOp = inVn.getDef();
+                        PcodeOp defOp = inVn.getDef();
                         OpCode opc = defOp.code();
                         if (opc == OpCode.CPUI_INT_ZEXT || opc == OpCode.CPUI_INT_SEXT)
                         {
@@ -84,19 +84,19 @@ namespace Sla.DECCORE
 
             for (int i = 0; i < branches; ++i)
             {
-                Varnode* vn_piece = mult.getIn(i);
+                Varnode vn_piece = mult.getIn(i);
                 // We have to be wary of exponential splittings here, do not pull the SUBPIECE
                 // up the MULTIEQUAL if another related SUBPIECE has already been pulled
                 // Search for a previous SUBPIECE
-                Varnode* vn_sub = findSubpiece(vn_piece, newSize, minByte);
+                Varnode vn_sub = findSubpiece(vn_piece, newSize, minByte);
                 if (vn_sub == (Varnode)null) // Couldn't find previous subpieceing
                     vn_sub = buildSubpiece(vn_piece, newSize, minByte, data);
                     @params.Add(vn_sub);
             }
             // Build new multiequal near original multiequal
-            PcodeOp* new_multi = data.newOp (@params.size(), mult.getAddr());
+            PcodeOp new_multi = data.newOp (@params.size(), mult.getAddr());
             smalladdr2.renormalize(newSize);
-            Varnode* new_vn = data.newVarnodeOut(newSize, smalladdr2, new_multi);
+            Varnode new_vn = data.newVarnodeOut(newSize, smalladdr2, new_multi);
             data.opSetOpcode(new_multi, OpCode.CPUI_MULTIEQUAL);
             data.opSetAllInput(new_multi,@params);
             data.opInsertBegin(new_multi, mult.getParent());
@@ -203,12 +203,12 @@ namespace Sla.DECCORE
         public static Varnode buildSubpiece(Varnode basevn, uint outsize, uint shift, Funcdata data)
         {
             Address newaddr;
-            PcodeOp* new_op;
-            Varnode* outvn;
+            PcodeOp new_op;
+            Varnode outvn;
 
             if (basevn.isInput())
             {
-                BlockBasic* bb = (BlockBasic*)data.getBasicBlocks().getBlock(0);
+                BlockBasic bb = (BlockBasic)data.getBasicBlocks().getBlock(0);
                 newaddr = bb.getStart();
             }
             else
@@ -267,7 +267,7 @@ namespace Sla.DECCORE
             data.opSetInput(new_op, data.newConstant(4, shift), 1);
 
             if (basevn.isInput())
-                data.opInsertBegin(new_op, (BlockBasic*)data.getBasicBlocks().getBlock(0));
+                data.opInsertBegin(new_op, (BlockBasic)data.getBasicBlocks().getBlock(0));
             else
                 data.opInsertAfter(new_op, basevn.getDef());
             return outvn;

@@ -30,7 +30,7 @@ namespace Sla.DECCORE
 
             while (iter != enditer)
             {
-                Varnode* vn = *iter++;
+                Varnode vn = *iter++;
                 VarnodeData vdata;
                 if (!proto.unjustifiedInputParam(vn.getAddr(), vn.getSize(), vdata)) continue;
 

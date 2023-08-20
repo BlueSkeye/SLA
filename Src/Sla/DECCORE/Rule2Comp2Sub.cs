@@ -26,12 +26,12 @@ namespace Sla.DECCORE
         /// \brief Cleanup: Convert INT_ADD back to INT_SUB: `V + -W  ==> V - W`
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_INT_2COMP);
+            oplist.Add(OpCode.CPUI_INT_2COMP);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            PcodeOp* addop = op.getOut().loneDescend();
+            PcodeOp addop = op.getOut().loneDescend();
             if (addop == (PcodeOp)null) return 0;
             if (addop.code() != OpCode.CPUI_INT_ADD) return 0;
             if (addop.getIn(0) == op.getOut())

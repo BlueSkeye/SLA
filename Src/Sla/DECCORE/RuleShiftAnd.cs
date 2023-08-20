@@ -28,24 +28,24 @@ namespace Sla.DECCORE
         /// This also allows for bits that aren't discarded but are already zero.
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_INT_RIGHT);
-            oplist.Add(CPUI_INT_LEFT);
-            oplist.Add(CPUI_INT_MULT);
+            oplist.Add(OpCode.CPUI_INT_RIGHT);
+            oplist.Add(OpCode.CPUI_INT_LEFT);
+            oplist.Add(OpCode.CPUI_INT_MULT);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* cvn = op.getIn(1);
+            Varnode cvn = op.getIn(1);
             if (!cvn.isConstant()) return 0;
-            Varnode* shiftin = op.getIn(0);
+            Varnode shiftin = op.getIn(0);
             if (!shiftin.isWritten()) return 0;
-            PcodeOp* andop = shiftin.getDef();
+            PcodeOp andop = shiftin.getDef();
             if (andop.code() != OpCode.CPUI_INT_AND) return 0;
             if (shiftin.loneDescend() != op) return 0;
-            Varnode* maskvn = andop.getIn(1);
+            Varnode maskvn = andop.getIn(1);
             if (!maskvn.isConstant()) return 0;
             ulong mask = maskvn.getOffset();
-            Varnode* invn = andop.getIn(0);
+            Varnode invn = andop.getIn(0);
             if (invn.isFree()) return 0;
 
             OpCode opc = op.code();

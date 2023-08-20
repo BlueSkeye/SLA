@@ -36,7 +36,7 @@ namespace Sla.EXTRA
         public override void initialize(UnifyState state)
         {
             TraverseDescendState* traverse = (TraverseDescendState*)state.getTraverse(uniqid);
-            Varnode* vn = state.data(varindex).getVarnode();
+            Varnode vn = state.data(varindex).getVarnode();
             traverse.initialize(vn);
         }
 
@@ -44,7 +44,7 @@ namespace Sla.EXTRA
         {
             TraverseDescendState* traverse = (TraverseDescendState*)state.getTraverse(uniqid);
             if (!traverse.step()) return false;
-            PcodeOp* op = traverse.getCurrentOp();
+            PcodeOp op = traverse.getCurrentOp();
             state.data(opindex).setOp(op);
             return true;
         }

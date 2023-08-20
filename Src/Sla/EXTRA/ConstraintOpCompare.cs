@@ -31,8 +31,8 @@ namespace Sla.EXTRA
         {
             TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
             if (!traverse.step()) return false;
-            PcodeOp* op1 = state.data(op1index).getOp();
-            PcodeOp* op2 = state.data(op2index).getOp();
+            PcodeOp op1 = state.data(op1index).getOp();
+            PcodeOp op2 = state.data(op2index).getOp();
             return ((op1 == op2) == istrue);
         }
 

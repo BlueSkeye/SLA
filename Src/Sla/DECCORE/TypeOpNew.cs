@@ -28,7 +28,7 @@ namespace Sla.DECCORE
             int inslot, int outslot)
         {
             if ((inslot != 0) || (outslot != -1)) return (Datatype)null;
-            Varnode* vn0 = op.getIn(0);
+            Varnode vn0 = op.getIn(0);
             if (!vn0.isWritten()) return (Datatype)null;     // Don't propagate
             if (vn0.getDef().code() != OpCode.CPUI_CPOOLREF) return (Datatype)null;
             return alttype;     // Propagate cpool result as result of new operator

@@ -111,7 +111,7 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_SUBPIECE);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             // Try to push double precision object "down" one level from input
             Varnode outvn = op.getOut();

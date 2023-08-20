@@ -1,11 +1,4 @@
 ﻿using Sla.CORE;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.SLEIGH
 {
@@ -148,15 +141,14 @@ namespace Sla.SLEIGH
         /// patch their value(s) into the PcodeData
         public void resolveRelatives()
         {
-            list<RelativeRecord>::const_iterator iter;
-            for (iter = label_refs.begin(); iter != label_refs.end(); ++iter)
-            {
-                VarnodeData* ptr = (*iter).dataptr;
-                uint id = ptr.offset;
+            IEnumerator<RelativeRecord> iter = label_refs.GetEnumerator();
+            while (iter.MoveNext()) {
+                VarnodeData ptr = iter.Current.dataptr;
+                int id = ptr.offset;
                 if ((id >= labels.size()) || (labels[id] == 0xbadbeef))
                     throw new LowlevelError("Reference to non-existant sleigh label");
                 // Calculate the relative index given the two absolute indices
-                ulong res = labels[id] - (*iter).calling_index;
+                ulong res = labels[id] - iter.Current.calling_index;
                 res &= Globals.calc_mask(ptr.size);
                 ptr.offset = res;
             }
@@ -168,10 +160,10 @@ namespace Sla.SLEIGH
         /// \param emt is the emitter
         public void emit(Address addr,PcodeEmit emt)
         {
-            List<PcodeData>::const_iterator iter;
+            IEnumerator<PcodeData> iter = issued.GetEnumerator();
 
-            for (iter = issued.begin(); iter != issued.end(); ++iter)
-                emt.dump(addr, (*iter).opc, (*iter).outvar, (*iter).invar, (*iter).isize);
+            while (iter.MoveNext())
+                emt.dump(addr, iter.Current.opc, iter.Current.outvar, iter.Current.invar, iter.Current.isize);
         }
     }
 }

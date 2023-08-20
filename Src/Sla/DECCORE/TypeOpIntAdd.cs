@@ -65,7 +65,7 @@ namespace Sla.DECCORE
         public static Datatype propagateAddIn2Out(Datatype alttype, TypeFactory typegrp, PcodeOp op,
             int inslot)
         {
-            TypePointer* pointer = (TypePointer*)alttype;
+            TypePointer* pointer = (TypePointer)alttype;
             ulong uoffset;
             int command = propagateAddPointer(uoffset, op, inslot, pointer.getPtrTo().getSize());
             if (command == 2) return op.getOut().getTempType(); // Doesn't look like a good pointer add
@@ -125,7 +125,7 @@ namespace Sla.DECCORE
             if (op.code() == OpCode.CPUI_PTRADD)
             {
                 if (slot != 0) return 2;
-                Varnode* constvn = op.getIn(1);
+                Varnode constvn = op.getIn(1);
                 ulong mult = op.getIn(2).getOffset();
                 if (constvn.isConstant())
                 {
@@ -144,16 +144,16 @@ namespace Sla.DECCORE
             }
             if (op.code() == OpCode.CPUI_INT_ADD)
             {
-                Varnode* othervn = op.getIn(1 - slot);
+                Varnode othervn = op.getIn(1 - slot);
                 // Check if othervn is an offset
                 if (!othervn.isConstant())
                 {
                     if (othervn.isWritten())
                     {
-                        PcodeOp* multop = othervn.getDef();
+                        PcodeOp multop = othervn.getDef();
                         if (multop.code() == OpCode.CPUI_INT_MULT)
                         {
-                            Varnode* constvn = multop.getIn(1);
+                            Varnode constvn = multop.getIn(1);
                             if (constvn.isConstant())
                             {
                                 ulong mult = constvn.getOffset();

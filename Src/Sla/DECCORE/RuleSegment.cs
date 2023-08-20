@@ -27,17 +27,17 @@ namespace Sla.DECCORE
         /// \brief Propagate constants through a SEGMENTOP
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_SEGMENTOP);
+            oplist.Add(OpCode.CPUI_SEGMENTOP);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             SegmentOp* segdef = data.getArch().userops.getSegmentOp(op.getIn(0).getSpaceFromConst().getIndex());
             if (segdef == (SegmentOp)null)
                 throw new LowlevelError("Segment operand missing definition");
 
-            Varnode* vn1 = op.getIn(1);
-            Varnode* vn2 = op.getIn(2);
+            Varnode vn1 = op.getIn(1);
+            Varnode vn2 = op.getIn(2);
 
             if (vn1.isConstant() && vn2.isConstant())
             {
@@ -55,7 +55,7 @@ namespace Sla.DECCORE
             {
                 // If the hi and lo pieces come from a contigouous source
                 if (!contiguous_test(vn1, vn2)) return 0;
-                Varnode* whole = Globals.findContiguousWhole(data, vn1, vn2);
+                Varnode whole = Globals.findContiguousWhole(data, vn1, vn2);
                 if (whole == (Varnode)null) return 0;
                 if (whole.isFree()) return 0;
                 // Use the contiguous source as the whole pointer

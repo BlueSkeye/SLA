@@ -55,7 +55,7 @@ namespace Sla.DECCORE
         /// \return the highest priority block
         public FlowBlock extract()
         {
-            FlowBlock* res = queue[curdepth].GetLastItem();
+            FlowBlock res = queue[curdepth].GetLastItem();
             queue[curdepth].RemoveLastItem();
             while (queue[curdepth].empty())
             {

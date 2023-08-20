@@ -38,7 +38,7 @@ namespace Sla.EXTRA
             TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
             if (!traverse.step()) return false;
             Funcdata* fd = state.getFunction();
-            PcodeOp* op = state.data(opindex).getOp();
+            PcodeOp op = state.data(opindex).getOp();
             int slt = (int)slot.getConstant(state);
             fd.opRemoveInput(op, slt);
             return true;

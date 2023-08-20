@@ -31,7 +31,7 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_INT_XOR);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             OpCode opc = op.code();
             if (!op.getIn(1).isConstant()) return 0;

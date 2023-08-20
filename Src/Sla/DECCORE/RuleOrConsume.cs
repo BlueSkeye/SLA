@@ -26,13 +26,13 @@ namespace Sla.DECCORE
         /// \brief Simply OR with unconsumed input:  `V = A | B  =>  V = B  if  nzm(A) & consume(V) == 0
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_INT_OR);
-            oplist.Add(CPUI_INT_XOR);
+            oplist.Add(OpCode.CPUI_INT_OR);
+            oplist.Add(OpCode.CPUI_INT_XOR);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* outvn = op.getOut();
+            Varnode outvn = op.getOut();
             int size = outvn.getSize();
             if (size > sizeof(ulong)) return 0; // FIXME: ulong should be arbitrary precision
             ulong consume = outvn.getConsume();

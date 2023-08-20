@@ -28,7 +28,7 @@ namespace Sla.EXTRA
                     int num = dcp.fd.numCalls();
                     for (int i = 0; i < num; ++i)
                     {
-                        FuncCallSpecs* fc = dcp.fd.getCallSpecs(i);
+                        FuncCallSpecs fc = dcp.fd.getCallSpecs(i);
                         *status.optr << "ExtraPop for " << fc.getName() << '(';
                         *status.optr << fc.getOp().getAddr() << ')';
                         int expop = fc.getEffectiveExtraPop();
@@ -73,7 +73,7 @@ namespace Sla.EXTRA
                     int num = dcp.fd.numCalls();
                     for (int i = 0; i < num; ++i)
                     {
-                        FuncCallSpecs* fc = dcp.fd.getCallSpecs(i);
+                        FuncCallSpecs fc = dcp.fd.getCallSpecs(i);
                         if (fc.getName() == fd.getName())
                         {
                             expop = fc.getEffectiveExtraPop();

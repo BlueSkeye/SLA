@@ -88,12 +88,12 @@ namespace Sla.DECCORE
         /// \return the pass number of -1
         public int findPass(Address addr)
         {
-            Dictionary<Address, SizePass>::const_iterator iter = themap.upper_bound(addr); // First range after address
+            // First range after address
+            IEnumerator<KeyValuePair<Address, SizePass>> iter = themap.upper_bound(addr);
             if (iter == themap.begin()) return -1;
-            --iter;         // First range before or equal to address
-            if (-1 != addr.overlap(0, iter.Current.Key, (*iter).second.size))
-                return (*iter).second.pass;
-            return -1;
+            // First range before or equal to address
+            --iter;
+            return (-1 != addr.overlap(0, iter.Current.Key, iter.Current.Value.size)) ? iter.Current.Value.pass : -1;
         }
 
         /// Remove a particular entry from the map

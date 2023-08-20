@@ -29,7 +29,7 @@ namespace Sla.EXTRA
         public override void initialize(UnifyState state)
         {               // Default initialization (with only 1 state)
             TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
-            PcodeOp* op = state.data(opindex).getOp();
+            PcodeOp op = state.data(opindex).getOp();
             traverse.initialize(op.numInput());   // Initialize total number of inputs
         }
 
@@ -37,8 +37,8 @@ namespace Sla.EXTRA
         {
             TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
             if (!traverse.step()) return false;
-            PcodeOp* op = state.data(opindex).getOp();
-            Varnode* vn = op.getIn(traverse.getState());
+            PcodeOp op = state.data(opindex).getOp();
+            Varnode vn = op.getIn(traverse.getState());
             state.data(varnodeindex).setVarnode(vn);
             return true;
         }

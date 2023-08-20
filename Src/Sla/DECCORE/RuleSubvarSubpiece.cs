@@ -29,10 +29,10 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_SUBPIECE);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* vn = op.getIn(0);
-            Varnode* outvn = op.getOut();
+            Varnode vn = op.getIn(0);
+            Varnode outvn = op.getOut();
             int flowsize = outvn.getSize();
             ulong mask = Globals.calc_mask(flowsize);
             mask <<= 8 * ((int)op.getIn(1).getOffset());

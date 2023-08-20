@@ -270,11 +270,11 @@ namespace Sla.DECCORE
     
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_INT_OR);
-            oplist.Add(CPUI_INT_XOR);
+            oplist.Add(OpCode.CPUI_INT_OR);
+            oplist.Add(OpCode.CPUI_INT_XOR);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             MultiPredicate branch0;
             MultiPredicate branch1;

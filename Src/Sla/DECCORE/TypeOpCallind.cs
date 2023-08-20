@@ -70,7 +70,7 @@ namespace Sla.DECCORE
                 else if (param.isThisPointer())
                 {
                     ct = param.getType();
-                    if (ct.getMetatype() == type_metatype.TYPE_PTR && ((TypePointer*)ct).getPtrTo().getMetatype() == type_metatype.TYPE_STRUCT)
+                    if (ct.getMetatype() == type_metatype.TYPE_PTR && ((TypePointer)ct).getPtrTo().getMetatype() == type_metatype.TYPE_STRUCT)
                         return ct;
                 }
             }
@@ -79,7 +79,7 @@ namespace Sla.DECCORE
 
         public override Datatype getOutputLocal(PcodeOp op)
         {
-            FuncCallSpecs* fc;
+            FuncCallSpecs fc;
             Datatype* ct;
 
             fc = op.getParent().getFuncdata().getCallSpecs(op);

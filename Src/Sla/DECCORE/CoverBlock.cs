@@ -78,15 +78,15 @@ namespace Sla.DECCORE
         /// Mark whole block as covered
         public void setAll()
         {
-            start = null; stop = (PcodeOp*)1;
+            start = null; stop = (PcodeOp)1;
         }
 
         /// Reset start of range
-        public void setBegin(PcodeOp* begin)
+        public void setBegin(PcodeOp begin)
         {
             start = begin;
             if (stop == null) {
-                stop = (PcodeOp*)1;
+                stop = (PcodeOp)1;
             }
         }
 
@@ -223,10 +223,10 @@ namespace Sla.DECCORE
             ustart = getUIndex(start);
             u2start = getUIndex(op2.start);
             // Is start contained in op2
-            internal4 = ((ustart == (uint)0) && (op2.stop == (PcodeOp*)1));
+            internal4 = ((ustart == (uint)0) && (op2.stop == (PcodeOp)1));
             internal1 = internal4 || op2.contain(start);
             // Is op2.start contained in this
-            internal3 = ((u2start == 0) && (stop == (PcodeOp*)1));
+            internal3 = ((u2start == 0) && (stop == (PcodeOp)1));
             internal2 = internal3 || contain(op2.start);
 
             if (internal1 && internal2)

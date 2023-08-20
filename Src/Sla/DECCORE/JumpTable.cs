@@ -354,7 +354,7 @@ namespace Sla.DECCORE
         {
             IndexPair val = new IndexPair(block2Position(bl),0);
             pair<List<IndexPair>::const_iterator, List<IndexPair>::const_iterator> range;
-            range = equal_range(block2addr.begin(), block2addr.end(), val, IndexPair::compareByPosition);
+            range = equal_range(block2addr.begin(), block2addr.end(), val, IndexPair.compareByPosition);
             return range.second - range.first;
         }
 

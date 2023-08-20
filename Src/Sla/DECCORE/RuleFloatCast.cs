@@ -26,20 +26,20 @@ namespace Sla.DECCORE
         /// \brief Replace (casttosmall)(casttobig)V with identity or with single cast
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_FLOAT_FLOAT2FLOAT);
-            oplist.Add(CPUI_FLOAT_TRUNC);
+            oplist.Add(OpCode.CPUI_FLOAT_FLOAT2FLOAT);
+            oplist.Add(OpCode.CPUI_FLOAT_TRUNC);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* vn1 = op.getIn(0);
+            Varnode vn1 = op.getIn(0);
             if (!vn1.isWritten()) return 0;
-            PcodeOp* castop = vn1.getDef();
+            PcodeOp castop = vn1.getDef();
             OpCode opc2 = castop.code();
             if ((opc2 != OpCode.CPUI_FLOAT_FLOAT2FLOAT) && (opc2 != OpCode.CPUI_FLOAT_INT2FLOAT))
                 return 0;
             OpCode opc1 = op.code();
-            Varnode* vn2 = castop.getIn(0);
+            Varnode vn2 = castop.getIn(0);
             int insize1 = vn1.getSize();
             int insize2 = vn2.getSize();
             int outsize = op.getOut().getSize();

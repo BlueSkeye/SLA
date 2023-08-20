@@ -38,7 +38,7 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_SUBPIECE);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {               // A SUBPIECE of an extension may cancel
             Varnode @base;
             Varnode thruvn;

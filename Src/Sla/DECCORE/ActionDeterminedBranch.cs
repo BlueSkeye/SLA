@@ -24,12 +24,12 @@ namespace Sla.DECCORE
         {
             int i;
             BlockGraph graph = data.getBasicBlocks();
-            BlockBasic* bb;
-            PcodeOp* cbranch;
+            BlockBasic bb;
+            PcodeOp cbranch;
 
             for (i = 0; i < graph.getSize(); ++i)
             {
-                bb = (BlockBasic*)graph.getBlock(i);
+                bb = (BlockBasic)graph.getBlock(i);
                 cbranch = bb.lastOp();
                 if ((cbranch == (PcodeOp)null) || (cbranch.code() != OpCode.CPUI_CBRANCH)) continue;
                 if (!cbranch.getIn(1).isConstant()) continue;

@@ -56,7 +56,7 @@ namespace Sla.DECCORE
                 madeChange = true;
             }
             if (!vn.isWritten()) return madeChange;
-            PcodeOp* op = vn.getDef();
+            PcodeOp op = vn.getDef();
             if (trialSetPtrFlow(op))
                 madeChange = true;
             return madeChange;
@@ -94,8 +94,8 @@ namespace Sla.DECCORE
         /// \return the new truncated Varnode
         private Varnode truncatePointer(AddrSpace spc, PcodeOp op, Varnode vn, int slot, Funcdata data)
         {
-            Varnode* newvn;
-            PcodeOp* truncop = data.newOp(2, op.getAddr());
+            Varnode newvn;
+            PcodeOp truncop = data.newOp(2, op.getAddr());
             data.opSetOpcode(truncop, OpCode.CPUI_SUBPIECE);
             data.opSetInput(truncop, data.newConstant(vn.getSize(), 0), 1);
             if (vn.getSpace().getType() == spacetype.IPTR_INTERNAL)
@@ -152,7 +152,7 @@ namespace Sla.DECCORE
 
         private int applyOp(PcodeOp op, Funcdata data)
         { // Push pointer-ness 
-            Varnode* vn;
+            Varnode vn;
             AddrSpace* spc;
             int madeChange = 0;
 

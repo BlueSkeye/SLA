@@ -29,21 +29,21 @@ namespace Sla.DECCORE
         ///   - `(V ^ c) == d  => V == (c^d)`
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_INT_EQUAL);
-            oplist.Add(CPUI_INT_NOTEQUAL);
+            oplist.Add(OpCode.CPUI_INT_EQUAL);
+            oplist.Add(OpCode.CPUI_INT_NOTEQUAL);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             ulong coeff1, coeff2;
 
             if (!op.getIn(1).isConstant()) return 0;
-            PcodeOp* xorop = op.getIn(0).getDef();
+            PcodeOp xorop = op.getIn(0).getDef();
             if (xorop == (PcodeOp)null) return 0;
             if (xorop.code() != OpCode.CPUI_INT_XOR) return 0;
             if (op.getIn(0).loneDescend() == (PcodeOp)null) return 0;
             coeff1 = op.getIn(1).getOffset();
-            Varnode* xorvn = xorop.getIn(1);
+            Varnode xorvn = xorop.getIn(1);
             if (xorop.getIn(0).isFree()) return 0; // This will be propagated
             if (!xorvn.isConstant())
             {
@@ -55,7 +55,7 @@ namespace Sla.DECCORE
             }
             coeff2 = xorvn.getOffset();
             if (coeff2 == 0) return 0;
-            Varnode* constvn = data.newConstant(op.getIn(1).getSize(), coeff1 ^ coeff2);
+            Varnode constvn = data.newConstant(op.getIn(1).getSize(), coeff1 ^ coeff2);
             constvn.copySymbolIfValid(xorvn);
             data.opSetInput(op, constvn, 1);
             data.opSetInput(op, xorop.getIn(0), 0);

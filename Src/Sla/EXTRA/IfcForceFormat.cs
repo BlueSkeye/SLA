@@ -17,7 +17,7 @@ namespace Sla.EXTRA
         /// to print in one of the formats: \b hex, \b dec, \b oct, \b bin, \b char.
         public override void execute(TextReader s)
         {
-            Varnode* vn = dcp.readVarnode(s);
+            Varnode vn = dcp.readVarnode(s);
             if (!vn.isConstant())
                 throw new IfaceExecutionError("Can only force format on a constant");
             type_metatype mt = vn.getType().getMetatype();

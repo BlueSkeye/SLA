@@ -173,7 +173,7 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_INT_ZEXT);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             if (op.isPartialRoot()) return 0;      // Check if CONCAT tree already been visited
             Varnode outvn = op.getOut();

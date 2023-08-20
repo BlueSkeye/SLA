@@ -82,15 +82,15 @@ namespace Sla.DECCORE
             uint res = 0;
             for (int i = 0; i < nonmult.size(); ++i)
             {
-                Varnode* vn = nonmult[i];
+                Varnode vn = nonmult[i];
                 if (vn.isConstant()) continue;
                 uint vncoeff = 1;
                 if (vn.isWritten())
                 {
-                    PcodeOp* op = vn.getDef();
+                    PcodeOp op = vn.getDef();
                     if (op.code() == OpCode.CPUI_INT_MULT)
                     {
-                        Varnode* vnconst = op.getIn(1);
+                        Varnode vnconst = op.getIn(1);
                         if (vnconst.isConstant())
                         {
                             long sval = vnconst.getOffset();
@@ -178,8 +178,8 @@ namespace Sla.DECCORE
         /// \return \b true if there are no multiples of the base data-type size discovered
         private bool checkMultTerm(Varnode vn, PcodeOp op, ulong treeCoeff)
         {
-            Varnode* vnconst = op.getIn(1);
-            Varnode* vnterm = op.getIn(0);
+            Varnode vnconst = op.getIn(1);
+            Varnode vnterm = op.getIn(0);
             ulong val;
 
             if (vnterm.isFree())
@@ -232,7 +232,7 @@ namespace Sla.DECCORE
         private bool checkTerm(Varnode vn, ulong treeCoeff)
         {
             ulong val;
-            PcodeOp* def;
+            PcodeOp def;
 
             if (vn == ptr) return false;
             if (vn.isConstant())
@@ -419,7 +419,7 @@ namespace Sla.DECCORE
         /// \return the output Varnode of the multiple tree or null
         private Varnode buildMultiples()
         {
-            Varnode* resNode;
+            Varnode resNode;
 
             // Be sure to preserve sign in division below
             // Calc size-relative constant PTR addition
@@ -433,17 +433,17 @@ namespace Sla.DECCORE
             for (int i = 0; i < multiple.size(); ++i)
             {
                 ulong finalCoeff = (size == 0) ? (ulong)0 : (coeff[i] / size) & ptrmask;
-                Varnode* vn = multiple[i];
+                Varnode vn = multiple[i];
                 if (finalCoeff != 1)
                 {
-                    PcodeOp* op = data.newOpBefore(baseOp, OpCode.CPUI_INT_MULT, vn, data.newConstant(ptrsize, finalCoeff));
+                    PcodeOp op = data.newOpBefore(baseOp, OpCode.CPUI_INT_MULT, vn, data.newConstant(ptrsize, finalCoeff));
                     vn = op.getOut();
                 }
                 if (resNode == (Varnode)null)
                     resNode = vn;
                 else
                 {
-                    PcodeOp* op = data.newOpBefore(baseOp, OpCode.CPUI_INT_ADD, vn, resNode);
+                    PcodeOp op = data.newOpBefore(baseOp, OpCode.CPUI_INT_ADD, vn, resNode);
                     resNode = op.getOut();
                 }
             }
@@ -458,10 +458,10 @@ namespace Sla.DECCORE
         private Varnode buildExtra()
         {
             correct = correct + offset; // Total correction that needs to be made
-            Varnode* resNode = (Varnode)null;
+            Varnode resNode = (Varnode)null;
             for (int i = 0; i < nonmult.size(); ++i)
             {
-                Varnode* vn = nonmult[i];
+                Varnode vn = nonmult[i];
                 if (vn.isConstant())
                 {
                     correct -= vn.getOffset();
@@ -471,19 +471,19 @@ namespace Sla.DECCORE
                     resNode = vn;
                 else
                 {
-                    PcodeOp* op = data.newOpBefore(baseOp, OpCode.CPUI_INT_ADD, vn, resNode);
+                    PcodeOp op = data.newOpBefore(baseOp, OpCode.CPUI_INT_ADD, vn, resNode);
                     resNode = op.getOut();
                 }
             }
             correct &= ptrmask;
             if (correct != 0)
             {
-                Varnode* vn = data.newConstant(ptrsize, Globals.uintb_negate(correct - 1, ptrsize));
+                Varnode vn = data.newConstant(ptrsize, Globals.uintb_negate(correct - 1, ptrsize));
                 if (resNode == (Varnode)null)
                     resNode = vn;
                 else
                 {
-                    PcodeOp* op = data.newOpBefore(baseOp, OpCode.CPUI_INT_ADD, vn, resNode);
+                    PcodeOp op = data.newOpBefore(baseOp, OpCode.CPUI_INT_ADD, vn, resNode);
                     resNode = op.getOut();
                 }
             }
@@ -502,7 +502,7 @@ namespace Sla.DECCORE
                 return false;   // Don't transform at all
             if (baseOp.getOut().getTypeDefFacing().getMetatype() != type_metatype.TYPE_PTR)    // Make sure pointer propagates thru INT_ADD
                 return false;
-            List<Varnode*> newparams;
+            List<Varnode> newparams;
             int slot = baseOp.getSlot(ptr);
             newparams.Add(ptr);
             newparams.Add(baseOp.getIn(1 - slot));
@@ -524,9 +524,9 @@ namespace Sla.DECCORE
                 offset -= ptrOff;
                 offset &= ptrmask;
             }
-            Varnode* multNode = buildMultiples();
-            Varnode* extraNode = buildExtra();
-            PcodeOp* newop = (PcodeOp)null;
+            Varnode multNode = buildMultiples();
+            Varnode extraNode = buildExtra();
+            PcodeOp newop = (PcodeOp)null;
 
             // Create PTRADD portion of operation
             if (multNode != (Varnode)null)
@@ -591,7 +591,7 @@ namespace Sla.DECCORE
             baseOp = op;
             baseSlot = slot;
             ptr = op.getIn(slot);
-            ct = (TypePointer*)ptr.getTypeReadFacing(op);
+            ct = (TypePointer)ptr.getTypeReadFacing(op);
             ptrsize = ptr.getSize();
             ptrmask = Globals.calc_mask(ptrsize);
             baseType = ct.getPtrTo();

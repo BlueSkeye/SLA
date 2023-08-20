@@ -26,8 +26,8 @@ namespace Sla.DECCORE
             ProtoParameter* outparam = data.getFuncProto().getOutput();
             if ((!outparam.isTypeLocked()) || outparam.isSizeTypeLocked())
             {
-                PcodeOp* op = data.getFirstReturnOp();
-                List<Varnode*> vnlist;
+                PcodeOp op = data.getFirstReturnOp();
+                List<Varnode> vnlist;
                 if (op != (PcodeOp)null)
                 {
                     for (int i = 1; i < op.numInput(); ++i)

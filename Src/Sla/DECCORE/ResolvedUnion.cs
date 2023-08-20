@@ -43,7 +43,7 @@ namespace Sla.DECCORE
         {
             baseType = parent;
             if (baseType.getMetatype() == type_metatype.TYPE_PTR)
-                baseType = ((TypePointer*)baseType).getPtrTo();
+                baseType = ((TypePointer)baseType).getPtrTo();
             resolve = parent;
             fieldNum = -1;
             @lock = false;

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -32,7 +26,7 @@ namespace Sla.DECCORE
             /// \return \b true if \b this should be ordered before the other PEntry
             public static bool operator <(PEntry op1, PEntry op2)
             {
-                return (slot<op2.slot);
+                return (op1.slot < op2.slot);
             }
         }
 
@@ -90,7 +84,8 @@ namespace Sla.DECCORE
             // Sort our entries via slot
             entry.Sort();
 
-            int nextfree = 0;      // Next slot we expect to see
+            // Next slot we expect to see
+            int nextfree = 0;
             int basescore = 0;
             int[] penalty = new int[4] { 16, 10, 7, 5 };
             int penaltyfinal = 3;

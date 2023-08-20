@@ -28,7 +28,7 @@ namespace Sla.DECCORE
             // Its possible that the input type is not a pointer to the output type
             // (or even a pointer) due to cycle trimming in the type propagation algorithms
             if (curtype.getMetatype() == type_metatype.TYPE_PTR)
-                curtype = ((TypePointer*)curtype).getPtrTo();
+                curtype = ((TypePointer)curtype).getPtrTo();
             else
                 return tlst.getTypePointer(invn.getSize(), reqtype, spc.getWordSize());
             if ((curtype != reqtype) && (curtype.getSize() == reqtype.getSize()))
@@ -54,8 +54,8 @@ namespace Sla.DECCORE
         public override Datatype getOutputToken(PcodeOp op, CastStrategy castStrategy)
         {
             Datatype* ct = op.getIn(1).getHighTypeReadFacing(op);
-            if ((ct.getMetatype() == type_metatype.TYPE_PTR) && (((TypePointer*)ct).getPtrTo().getSize() == op.getOut().getSize()))
-                return ((TypePointer*)ct).getPtrTo();
+            if ((ct.getMetatype() == type_metatype.TYPE_PTR) && (((TypePointer)ct).getPtrTo().getSize() == op.getOut().getSize()))
+                return ((TypePointer)ct).getPtrTo();
             //  return TypeOp::getOutputToken(op);
             // The input to the load is not a pointer or (more likely)
             // points to something of a different size than the output
@@ -78,7 +78,7 @@ namespace Sla.DECCORE
             }
             else if (alttype.getMetatype() == type_metatype.TYPE_PTR)
             {
-                newtype = ((TypePointer*)alttype).getPtrTo();
+                newtype = ((TypePointer)alttype).getPtrTo();
                 if (newtype.getSize() != outvn.getTempType().getSize() || newtype.isVariableLength()) // Size must be appropriate
                     newtype = outvn.getTempType();
             }

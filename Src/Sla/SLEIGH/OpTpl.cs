@@ -1,19 +1,10 @@
 ﻿using Sla.CORE;
-using Sla.SLEIGH;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.SLEIGH
 {
     internal class OpTpl
     {
-        private VarnodeTpl output;
+        private VarnodeTpl? output;
         private OpCode opc;
         private List<VarnodeTpl> input;
         
@@ -29,11 +20,10 @@ namespace Sla.SLEIGH
         
         ~OpTpl()
         {               // An OpTpl owns its varnode_tpls
-            if (output != (VarnodeTpl)null)
-                delete output;
-            List<VarnodeTpl*>::iterator iter;
-            for (iter = input.begin(); iter != input.end(); ++iter)
-                delete* iter;
+            //if (output != (VarnodeTpl)null)
+            //    delete output;
+            //foreach (VarnodeTpl template in input)
+            //    delete* iter;
         }
 
         public VarnodeTpl getOut() => output;
@@ -45,13 +35,13 @@ namespace Sla.SLEIGH
         public OpCode getOpcode() => opc;
 
         public bool isZeroSize()
-        {               // Return if any input or output has zero size
-            List<VarnodeTpl*>::const_iterator iter;
-
+        {
+            // Return if any input or output has zero size
             if (output != (VarnodeTpl)null)
                 if (output.isZeroSize()) return true;
-            for (iter = input.begin(); iter != input.end(); ++iter)
-                if ((*iter).isZeroSize()) return true;
+            IEnumerator<VarnodeTpl> iter = input.begin();
+            while (iter.MoveNext())
+                if (iter.Current.isZeroSize()) return true;
             return false;
         }
 
@@ -67,7 +57,7 @@ namespace Sla.SLEIGH
 
         public void clearOutput()
         {
-            delete output;
+            // delete output;
             output = (VarnodeTpl)null;
         }
 
@@ -94,44 +84,37 @@ namespace Sla.SLEIGH
         {
             if (output != (VarnodeTpl)null)
                 output.changeHandleIndex(handmap);
-            List<VarnodeTpl*>::const_iterator iter;
-
-            for (iter = input.begin(); iter != input.end(); ++iter)
-                (*iter).changeHandleIndex(handmap);
+            foreach (VarnodeTpl template in input)
+                template.changeHandleIndex(handmap);
         }
 
         public void saveXml(TextWriter s)
         {
-            s << "<op_tpl code=\"" << Globals.get_opname(opc) << "\">";
+            s.Write($"<op_tpl code=\"{Globals.get_opname(opc)}\">");
             if (output == (VarnodeTpl)null)
-                s << "<null/>\n";
+                s.WriteLine("<null/>");
             else
                 output.saveXml(s);
             for (int i = 0; i < input.size(); ++i)
                 input[i].saveXml(s);
-            s << "</op_tpl>\n";
+            s.WriteLine("</op_tpl>");
         }
 
         public void restoreXml(Element el, AddrSpaceManager manage)
         {
             opc = get_opcode(el.getAttributeValue("code"));
-            List list = el.getChildren();
-            List::const_iterator iter;
-            iter = list.begin();
-            if ((*iter).getName() == "null")
+            IEnumerator<Element> iter = el.getChildren().GetEnumerator();
+            if (!iter.MoveNext()) throw new ApplicationException();
+            if (iter.Current.getName() == "null")
                 output = (VarnodeTpl)null;
-            else
-            {
+            else {
                 output = new VarnodeTpl();
-                output.restoreXml(*iter, manage);
+                output.restoreXml(iter.Current, manage);
             }
-            ++iter;
-            while (iter != list.end())
-            {
-                VarnodeTpl* vn = new VarnodeTpl();
-                vn.restoreXml(*iter, manage);
+            while (iter.MoveNext()) {
+                VarnodeTpl vn = new VarnodeTpl();
+                vn.restoreXml(iter.Current, manage);
                 input.Add(vn);
-                ++iter;
             }
         }
     }

@@ -26,13 +26,13 @@ namespace Sla.DECCORE
         /// \brief Transform INT_LESS of 0 or 1:  `V < 1  =>  V == 0,  V <= 0  =>  V == 0`
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_INT_LESS);
-            oplist.Add(CPUI_INT_LESSEQUAL);
+            oplist.Add(OpCode.CPUI_INT_LESS);
+            oplist.Add(OpCode.CPUI_INT_LESSEQUAL);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* constvn = op.getIn(1);
+            Varnode constvn = op.getIn(1);
 
             if (!constvn.isConstant()) return 0;
             ulong val = constvn.getOffset();

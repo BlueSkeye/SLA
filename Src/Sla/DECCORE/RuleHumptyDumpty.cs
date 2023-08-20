@@ -33,7 +33,7 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_PIECE);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             ulong pos1, pos2;
             int size1, size2;

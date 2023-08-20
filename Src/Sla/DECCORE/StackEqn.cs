@@ -10,11 +10,11 @@ namespace Sla.DECCORE
     internal struct StackEqn
     {
         /// Variable with 1 coefficient
-        private int var1;
+        internal int var1;
         /// Variable with -1 coefficient
-        private int var2;
+        internal int var2;
         /// Right hand side of the equation
-        private int rhs;
+        internal int rhs;
 
         ///< Order two equations
         /// \param a is the first equation to compare

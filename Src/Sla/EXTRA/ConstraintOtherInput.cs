@@ -32,9 +32,9 @@ namespace Sla.EXTRA
         {
             TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
             if (!traverse.step()) return false;
-            PcodeOp* op = state.data(opindex).getOp();
-            Varnode* vn = state.data(varindex_in).getVarnode();
-            Varnode* res = op.getIn(1 - op.getSlot(vn)); // Get the "other" input
+            PcodeOp op = state.data(opindex).getOp();
+            Varnode vn = state.data(varindex_in).getVarnode();
+            Varnode res = op.getIn(1 - op.getSlot(vn)); // Get the "other" input
             state.data(varindex_out).setVarnode(res);
             return true;
         }

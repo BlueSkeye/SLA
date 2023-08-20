@@ -34,7 +34,7 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_INT_AND);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode orvn;
             Varnode shiftvn;

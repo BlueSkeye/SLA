@@ -26,11 +26,11 @@ namespace Sla.DECCORE
         /// \brief Convert LESSEQUAL to LESS:  `V <= c  =>  V < (c+1)`
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_INT_LESSEQUAL);
-            oplist.Add(CPUI_INT_SLESSEQUAL);
+            oplist.Add(OpCode.CPUI_INT_LESSEQUAL);
+            oplist.Add(OpCode.CPUI_INT_SLESSEQUAL);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             if (data.replaceLessequal(op))
                 return 1;

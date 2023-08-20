@@ -127,7 +127,7 @@ namespace Sla.SLEIGH
             ParserWalker walker = new ParserWalker(this);
             walker.baseState();
 
-            List<ContextSet>::iterator iter;
+            IEnumerator<ContextSet> iter;
 
             foreach (ContextSet set in contextcommit) {
                 TripleSymbol sym = set.sym;
@@ -156,8 +156,8 @@ namespace Sla.SLEIGH
                 // Commit context change
                 if (set.flow)       // The context flows
                     contcache.setContext(commitaddr, set.num, set.mask, set.value);
-                else
-                {  // Set the context so that is doesn't flow
+                else {
+                    // Set the context so that is doesn't flow
                     Address nextaddr = commitaddr + 1;
                     if (nextaddr.getOffset() < commitaddr.getOffset())
                         contcache.setContext(commitaddr, set.num, set.mask, set.value);

@@ -30,20 +30,20 @@ namespace Sla.DECCORE
         /// The shift amounts add up to the point where the sign bit has saturated the entire result.
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_INT_SRIGHT);
+            oplist.Add(OpCode.CPUI_INT_SRIGHT);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* constD = op.getIn(1);
+            Varnode constD = op.getIn(1);
             if (!constD.isConstant()) return 0;
-            Varnode* shiftin = op.getIn(0);
+            Varnode shiftin = op.getIn(0);
             if (!shiftin.isWritten()) return 0;
-            PcodeOp* shift2op = shiftin.getDef();
+            PcodeOp shift2op = shiftin.getDef();
             if (shift2op.code() != OpCode.CPUI_INT_SRIGHT) return 0;
-            Varnode* constC = shift2op.getIn(1);
+            Varnode constC = shift2op.getIn(1);
             if (!constC.isConstant()) return 0;
-            Varnode* inVn = shift2op.getIn(0);
+            Varnode inVn = shift2op.getIn(0);
             if (inVn.isFree()) return 0;
             int max = op.getOut().getSize() * 8 - 1; // This is maximum possible shift.
             int sa = (int)constC.getOffset() + (int)constD.getOffset();

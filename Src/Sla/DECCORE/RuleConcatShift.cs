@@ -30,23 +30,23 @@ namespace Sla.DECCORE
         /// Depending on the original shift amount, the extension may still need to be shifted.
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_INT_RIGHT);
-            oplist.Add(CPUI_INT_SRIGHT);
+            oplist.Add(OpCode.CPUI_INT_RIGHT);
+            oplist.Add(OpCode.CPUI_INT_SRIGHT);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             if (!op.getIn(1).isConstant()) return 0;
 
-            Varnode* shiftin = op.getIn(0);
+            Varnode shiftin = op.getIn(0);
             if (!shiftin.isWritten()) return 0;
-            PcodeOp* concat = shiftin.getDef();
+            PcodeOp concat = shiftin.getDef();
             if (concat.code() != OpCode.CPUI_PIECE) return 0;
 
             int sa = op.getIn(1).getOffset();
             int leastsize = concat.getIn(1).getSize() * 8;
             if (sa < leastsize) return 0;   // Does shift throw away least sig part
-            Varnode* mainin = concat.getIn(0);
+            Varnode mainin = concat.getIn(0);
             if (mainin.isFree()) return 0;
             sa -= leastsize;
             OpCode extcode = (op.code() == OpCode.CPUI_INT_RIGHT) ? OpCode.CPUI_INT_ZEXT : OpCode.CPUI_INT_SEXT;
@@ -59,9 +59,9 @@ namespace Sla.DECCORE
             else
             {
                 // Create a new extension op
-                PcodeOp* extop = data.newOp(1, op.getAddr());
+                PcodeOp extop = data.newOp(1, op.getAddr());
                 data.opSetOpcode(extop, extcode);
-                Varnode* newvn = data.newUniqueOut(shiftin.getSize(), extop);
+                Varnode newvn = data.newUniqueOut(shiftin.getSize(), extop);
                 data.opSetInput(extop, mainin, 0);
 
                 // Adjust the shift amount

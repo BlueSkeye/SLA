@@ -38,7 +38,7 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_INT_ZEXT);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode subvn;
             Varnode basevn;
@@ -59,7 +59,7 @@ namespace Sla.DECCORE
                 if (subop.getIn(1).getOffset() != 0)
                 { // If truncating from middle
                     if (subvn.loneDescend() != op) return 0; // and there is no other use of the truncated value
-                    Varnode* newvn = data.newUnique(basevn.getSize(), (Datatype)null);
+                    Varnode newvn = data.newUnique(basevn.getSize(), (Datatype)null);
                     constvn = subop.getIn(1);
                     ulong rightVal = constvn.getOffset() * 8;
                     data.opSetInput(op, newvn, 0);
@@ -77,9 +77,9 @@ namespace Sla.DECCORE
             }
             else if (subop.code() == OpCode.CPUI_INT_RIGHT)
             {
-                PcodeOp* shiftop = subop;
+                PcodeOp shiftop = subop;
                 if (!shiftop.getIn(1).isConstant()) return 0;
-                Varnode* midvn = shiftop.getIn(0);
+                Varnode midvn = shiftop.getIn(0);
                 if (!midvn.isWritten()) return 0;
                 subop = midvn.getDef();
                 if (subop.code() != OpCode.CPUI_SUBPIECE) return 0;
@@ -92,7 +92,7 @@ namespace Sla.DECCORE
                 ulong sa = shiftop.getIn(1).getOffset(); // The shift shrinks the mask even further
                 val >>= sa;
                 sa += subop.getIn(1).getOffset() * 8; // The total shift = truncation + small shift
-                Varnode* newvn = data.newUnique(basevn.getSize(), (Datatype)null);
+                Varnode newvn = data.newUnique(basevn.getSize(), (Datatype)null);
                 data.opSetInput(op, newvn, 0);
                 data.opSetInput(shiftop, basevn, 0); // Shift the full value, instead of the truncated value
                 data.opSetInput(shiftop, data.newConstant(shiftop.getIn(1).getSize(), sa), 1);    // by the combined amount

@@ -38,7 +38,7 @@ namespace Sla.DECCORE
         ///
         /// Try to union or intersect the ranges to produce
         /// a more concise expression.
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode vn1, vn2;
             int restype;

@@ -120,10 +120,10 @@ namespace Sla.DECCORE
             /// \return the Varnode representing the boolean expression
             public Varnode constructBool(PcodeOp insertop, Funcdata data)
             {
-                Varnode* resvn;
+                Varnode resvn;
                 if (mustreconstruct)
                 {
-                    PcodeOp* newop = data.newOp(optype, op.getAddr()); // Keep the original address
+                    PcodeOp newop = data.newOp(optype, op.getAddr()); // Keep the original address
                     data.opSetOpcode(newop, opc);
                     resvn = data.newUniqueOut(1, newop);
                     if (in0.isConstant())
@@ -156,9 +156,9 @@ namespace Sla.DECCORE
         /// \return the output of the new op
         private static Varnode constructNegate(Varnode vn, PcodeOp op, Funcdata data)
         {
-            PcodeOp* negateop = data.newOp(1, op.getAddr());
+            PcodeOp negateop = data.newOp(1, op.getAddr());
             data.opSetOpcode(negateop, OpCode.CPUI_BOOL_NEGATE);
-            Varnode* resvn = data.newUniqueOut(1, negateop);
+            Varnode resvn = data.newUniqueOut(1, negateop);
             data.opSetInput(negateop, vn, 0);
             data.opInsertBefore(negateop, op);
             return resvn;
@@ -200,10 +200,10 @@ namespace Sla.DECCORE
         /// which gets simplified to `res = boolcond || differentcond`
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_MULTIEQUAL);
+            oplist.Add(OpCode.CPUI_MULTIEQUAL);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             BoolExpress bool0 = new BoolExpress();
             BoolExpress bool1 = new BoolExpress();

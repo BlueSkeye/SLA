@@ -127,8 +127,8 @@ namespace Sla.DECCORE
         {
             int highLanes, highSkip;
             int lowLanes, lowSkip;
-            Varnode* highVn = op.getIn(0);
-            Varnode* lowVn = op.getIn(1);
+            Varnode highVn = op.getIn(0);
+            Varnode lowVn = op.getIn(1);
 
             if (!description.restriction(numLanes, skipLanes, lowVn.getSize(), highVn.getSize(), highLanes, highSkip))
                 return false;
@@ -218,14 +218,14 @@ namespace Sla.DECCORE
             ulong spaceConst = op.getIn(0).getOffset();
             int spaceConstSize = op.getIn(0).getSize();
             AddrSpace* spc = op.getIn(0).getSpaceFromConst(); // Address space being stored to
-            Varnode* origPtr = op.getIn(1);
+            Varnode origPtr = op.getIn(1);
             if (origPtr.isFree())
             {
                 if (!origPtr.isConstant()) return false;
             }
             TransformVar* basePtr = getPreexistingVarnode(origPtr);
             int ptrSize = origPtr.getSize();
-            Varnode* valueVn = op.getIn(2);
+            Varnode valueVn = op.getIn(2);
             for (int i = 0; i < numLanes; ++i)
             {
                 TransformOp* ropStore = newOpReplace(3, OpCode.CPUI_STORE, op);
@@ -268,7 +268,7 @@ namespace Sla.DECCORE
             ulong spaceConst = op.getIn(0).getOffset();
             int spaceConstSize = op.getIn(0).getSize();
             AddrSpace* spc = op.getIn(0).getSpaceFromConst(); // Address space being stored to
-            Varnode* origPtr = op.getIn(1);
+            Varnode origPtr = op.getIn(1);
             if (origPtr.isFree())
             {
                 if (!origPtr.isConstant()) return false;

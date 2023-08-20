@@ -41,7 +41,7 @@ namespace Sla.DECCORE
             List<LoadTable> loadpoints)
         {
             addresstable.clear();
-            BlockBasic* bl = indop.getParent();
+            BlockBasic bl = indop.getParent();
             for (int i = 0; i < bl.sizeOut(); ++i)
             {
                 BlockBasic outbl = (BlockBasic)bl.getOut(i);

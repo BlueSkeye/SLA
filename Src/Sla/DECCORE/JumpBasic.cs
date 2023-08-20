@@ -30,7 +30,7 @@ namespace Sla.DECCORE
         protected static bool isprune(Varnode vn)
         {
             if (!vn.isWritten()) return true;
-            PcodeOp* op = vn.getDef();
+            PcodeOp op = vn.getDef();
             if (op.isCall() || op.isMarker()) return true;
             if (op.numInput() == 0) return true;
             return false;
@@ -76,8 +76,8 @@ namespace Sla.DECCORE
         /// \return the recovered value associated with the input Varnode
         protected static ulong backup2Switch(Funcdata fd, ulong output, Varnode outvn, Varnode invn)
         {
-            Varnode* curvn = outvn;
-            PcodeOp* op;
+            Varnode curvn = outvn;
+            PcodeOp op;
             TypeOp* top;
             int slot;
 
@@ -123,10 +123,10 @@ namespace Sla.DECCORE
             ulong maxValue = 0;     // 0 indicates maximum possible value
             if (!vn.isWritten())
                 return maxValue;
-            PcodeOp* op = vn.getDef();
+            PcodeOp op = vn.getDef();
             if (op.code() == OpCode.CPUI_INT_AND)
             {
-                Varnode* constvn = op.getIn(1);
+                Varnode constvn = op.getIn(1);
                 if (constvn.isConstant())
                 {
                     maxValue = Globals.coveringmask(constvn.getOffset());
@@ -138,11 +138,11 @@ namespace Sla.DECCORE
                 int i;
                 for (i = 0; i < op.numInput(); ++i)
                 {
-                    Varnode* subvn = op.getIn(i);
+                    Varnode subvn = op.getIn(i);
                     if (!subvn.isWritten()) break;
-                    PcodeOp* andOp = subvn.getDef();
+                    PcodeOp andOp = subvn.getDef();
                     if (andOp.code() != OpCode.CPUI_INT_AND) break;
-                    Varnode* constvn = andOp.getIn(1);
+                    Varnode constvn = andOp.getIn(1);
                     if (!constvn.isConstant()) break;
                     if (maxValue < constvn.getOffset())
                         maxValue = constvn.getOffset();
@@ -174,7 +174,7 @@ namespace Sla.DECCORE
             do
             {   // Traverse through tree of inputs to final address
                 PcodeOpNode & node(path.GetLastItem());
-                Varnode* curvn = node.op.getIn(node.slot);
+                Varnode curvn = node.op.getIn(node.slot);
                 if (isprune(curvn))
                 {   // Here is a node of the tree
                     if (ispoint(curvn))
@@ -230,15 +230,15 @@ namespace Sla.DECCORE
             bool usenzmask = (jumptable.getStage() == 0);
 
             selectguards.clear();
-            BlockBasic* prevbl;
-            Varnode* vn;
+            BlockBasic prevbl;
+            Varnode vn;
 
             for (i = 0; i < maxbranch; ++i)
             {
                 if ((pathout >= 0) && (bl.sizeOut() == 2))
                 {
                     prevbl = bl;
-                    bl = (BlockBasic*)prevbl.getOut(pathout);
+                    bl = (BlockBasic)prevbl.getOut(pathout);
                     indpath = pathout;
                     pathout = -1;
                 }
@@ -254,20 +254,20 @@ namespace Sla.DECCORE
                             return;
                         }
                         // Only 1 flow path to the switch
-                        prevbl = (BlockBasic*)bl.getIn(0);
+                        prevbl = (BlockBasic)bl.getIn(0);
                         if (prevbl.sizeOut() != 1) break; // Is it possible to deviate from switch path in this block
                         bl = prevbl;        // If not, back up to next block
                     }
                     indpath = bl.getInRevIndex(0);
                 }
-                PcodeOp* cbranch = prevbl.lastOp();
+                PcodeOp cbranch = prevbl.lastOp();
                 if ((cbranch == (PcodeOp)null) || (cbranch.code() != OpCode.CPUI_CBRANCH))
                     break;
                 if (i != 0)
                 {
                     // Check that this CBRANCH isn't protecting some other switch
-                    BlockBasic* otherbl = (BlockBasic*)prevbl.getOut(1 - indpath);
-                    PcodeOp* otherop = otherbl.lastOp();
+                    BlockBasic otherbl = (BlockBasic)prevbl.getOut(1 - indpath);
+                    PcodeOp otherop = otherbl.lastOp();
                     if (otherop != (PcodeOp)null && otherop.code() == OpCode.CPUI_BRANCHIND)
                     {
                         if (otherop != jumptable.getIndirectOp())

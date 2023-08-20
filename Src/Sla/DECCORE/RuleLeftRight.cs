@@ -31,17 +31,17 @@ namespace Sla.DECCORE
         /// `(V << c) s>> c  =>  sext( sub(V, #0) )`
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_INT_RIGHT);
-            oplist.Add(CPUI_INT_SRIGHT);
+            oplist.Add(OpCode.CPUI_INT_RIGHT);
+            oplist.Add(OpCode.CPUI_INT_SRIGHT);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             if (!op.getIn(1).isConstant()) return 0;
 
-            Varnode* shiftin = op.getIn(0);
+            Varnode shiftin = op.getIn(0);
             if (!shiftin.isWritten()) return 0;
-            PcodeOp* leftshift = shiftin.getDef();
+            PcodeOp leftshift = shiftin.getDef();
             if (leftshift.code() != OpCode.CPUI_INT_LEFT) return 0;
             if (!leftshift.getIn(1).isConstant()) return 0;
             ulong sa = op.getIn(1).getOffset();
@@ -59,7 +59,7 @@ namespace Sla.DECCORE
             data.opUnsetInput(op, 0);
             data.opUnsetOutput(leftshift);
             addr.renormalize(tsz);
-            Varnode* newvn = data.newVarnodeOut(tsz, addr, leftshift);
+            Varnode newvn = data.newVarnodeOut(tsz, addr, leftshift);
             data.opSetOpcode(leftshift, OpCode.CPUI_SUBPIECE);
             data.opSetInput(leftshift, data.newConstant(leftshift.getIn(1).getSize(), 0), 1);
             data.opSetInput(op, newvn, 0);

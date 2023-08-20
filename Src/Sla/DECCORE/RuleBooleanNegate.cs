@@ -33,7 +33,7 @@ namespace Sla.DECCORE
             oplist.AddRange(list);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             OpCode opc;
             Varnode constvn;

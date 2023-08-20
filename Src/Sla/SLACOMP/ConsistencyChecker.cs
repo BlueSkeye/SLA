@@ -26,7 +26,7 @@ namespace Sla.SLACOMP
         /// This counts reads and writes of the register.  If the register is read only once, the
         /// particular p-code op and input slot reading it is recorded.  If the register is written
         /// only once, the particular p-code op writing it is recorded.
-        private struct OptimizeRecord
+        private class OptimizeRecord
         {
             internal int writeop;       ///< Index of the (last) p-code op writing to register (or -1)
             internal int readop;        ///< Index of the (last) p-code op reading the register (or -1)
@@ -980,30 +980,32 @@ namespace Sla.SLACOMP
         /// \param i is the index of the operator using the Varnode (within its p-code section)
         /// \param inslot is the \e slot index of the Varnode within its operator
         /// \param secnum is the section number containing the operator
-        private static void examineVn(Dictionary<ulong, OptimizeRecord> recs, VarnodeTpl vn, uint i,int inslot, int secnum)
+        private static void examineVn(Dictionary<ulong, OptimizeRecord> recs, VarnodeTpl? vn, uint i,int inslot,
+            int secnum)
         {
             if (vn == (VarnodeTpl)null) return;
             if (!vn.getSpace().isUniqueSpace()) return;
             if (vn.getOffset().getType() != ConstTpl.const_type.real) return;
 
-            Dictionary<ulong, OptimizeRecord>::iterator iter;
-            OptimizeRecord newRecord = new OptimizeRecord();
-            iter = recs.insert(pair<uint, OptimizeRecord>(vn.getOffset().getReal(), newRecord)).first;
+            OptimizeRecord record = new OptimizeRecord();
+            if (!recs.TryGetValue(vn.getOffset().getReal(), out record)) {
+                record = new OptimizeRecord();
+                recs.Add(vn.getOffset().getReal(), record);
+            }
             if (inslot >= 0) {
-                (*iter).second.readop = i;
-                (*iter).second.readcount += 1;
-                (*iter).second.inslot = inslot;
-                (*iter).second.readsection = secnum;
+                record.readop = (int)i;
+                record.readcount += 1;
+                record.inslot = inslot;
+                record.readsection = secnum;
             }
             else {
-                (*iter).second.writeop = i;
-                (*iter).second.writecount += 1;
-                (*iter).second.writesection = secnum;
+                record.writeop = (int)i;
+                record.writecount += 1;
+                record.writesection = secnum;
             }
         }
 
         /// \brief Test whether two given Varnodes intersect
-        ///
         /// This test must be conservative.  If it can't explicitly prove that the
         /// Varnodes don't intersect, it returns \b true (a possible intersection).
         /// \param vn1 is the first Varnode to check
@@ -1054,10 +1056,10 @@ namespace Sla.SLACOMP
         private bool readWriteInterference(VarnodeTpl vn, OpTpl op,bool checkread)
         {
             switch (op.getOpcode()) {
-                case BUILD:
-                case CROSSBUILD:
-                case DELAY_SLOT:
-                case MACROBUILD:
+                case OpCode.BUILD:
+                case OpCode.CROSSBUILD:
+                case OpCode.DELAY_SLOT:
+                case OpCode.MACROBUILD:
                 case OpCode.CPUI_LOAD:
                 case OpCode.CPUI_STORE:
                 case OpCode.CPUI_BRANCH:
@@ -1067,7 +1069,8 @@ namespace Sla.SLACOMP
                 case OpCode.CPUI_CALLIND:
                 case OpCode.CPUI_CALLOTHER:
                 case OpCode.CPUI_RETURN:
-                case LABELBUILD:        // Another value might jump in here
+                case OpCode.LABELBUILD:
+                    // Another value might jump in here
                     return true;
                 default:
                     break;
@@ -1102,14 +1105,14 @@ namespace Sla.SLACOMP
             if (tpl == (ConstructTpl)null)
                 return;
             List<OpTpl> ops = tpl.getOpvec();
-            for (uint i = 0; i < ops.size(); ++i) {
+            for (int i = 0; i < ops.size(); ++i) {
                 OpTpl op = ops[i];
                 for (int j = 0; j < op.numInput(); ++j) {
                     VarnodeTpl vnin = op.getIn(j);
-                    examineVn(recs, vnin, i, j, secnum);
+                    examineVn(recs, vnin, (uint)i, j, secnum);
                 }
                 VarnodeTpl vn = op.getOut();
-                examineVn(recs, vn, i, -1, secnum);
+                examineVn(recs, vn, (uint)i, -1, secnum);
             }
         }
 
@@ -1130,36 +1133,41 @@ namespace Sla.SLACOMP
             if (hand == (HandleTpl)null) return;
             if (hand.getPtrSpace().isUniqueSpace()) {
                 if (hand.getPtrOffset().getType() == ConstTpl.const_type.real) {
-                    pair<Dictionary<ulong, OptimizeRecord>::iterator, bool> res;
+                    OptimizeRecord record;
                     ulong offset = hand.getPtrOffset().getReal();
-                    res = recs.insert(pair<ulong, OptimizeRecord>(offset, OptimizeRecord()));
-                    (*res.first).second.writeop = 0;
-                    (*res.first).second.readop = 0;
-                    (*res.first).second.writecount = 2;
-                    (*res.first).second.readcount = 2;
-                    (*res.first).second.readsection = -2;
-                    (*res.first).second.writesection = -2;
+                    if (!recs.TryGetValue(offset, out record)) {
+                        record = new OptimizeRecord();
+                        recs.Add(offset, record);
+                    }
+                    record.writeop = 0;
+                    record.readop = 0;
+                    record.writecount = 2;
+                    record.readcount = 2;
+                    record.readsection = -2;
+                    record.writesection = -2;
                 }
             }
             if (hand.getSpace().isUniqueSpace()) {
                 if (   (hand.getPtrSpace().getType() == ConstTpl.const_type.real)
                     && (hand.getPtrOffset().getType() == ConstTpl.const_type.real))
                 {
-                    pair<Dictionary<ulong, OptimizeRecord>::iterator, bool> res;
+                    OptimizeRecord record;
                     ulong offset = hand.getPtrOffset().getReal();
-                    res = recs.insert(pair<ulong, OptimizeRecord>(offset, OptimizeRecord()));
-                    (*res.first).second.writeop = 0;
-                    (*res.first).second.readop = 0;
-                    (*res.first).second.writecount = 2;
-                    (*res.first).second.readcount = 2;
-                    (*res.first).second.readsection = -2;
-                    (*res.first).second.writesection = -2;
+                    if (!recs.TryGetValue(offset, out record)) {
+                        record = new OptimizeRecord();
+                        recs.Add(offset, record);
+                    }
+                    record.writeop = 0;
+                    record.readop = 0;
+                    record.writecount = 2;
+                    record.readcount = 2;
+                    record.readsection = -2;
+                    record.writesection = -2;
                 }
             }
         }
 
         /// \brief Search for an OptimizeRecord indicating a temporary Varnode that can be optimized away
-        ///
         /// OptimizeRecords for all temporary Varnodes must already be calculated.
         /// Find a record indicating a temporary Varnode that is written once and read once through a COPY.
         /// Test propagation of the other Varnode associated with the COPY, making sure:
@@ -1186,7 +1194,10 @@ namespace Sla.SLACOMP
                         throw new SleighError("Read of temporary before write");
                     if (op.getOpcode() == OpCode.CPUI_COPY) {
                         bool saverecord = true;
-                        currec.opttype = 0; // Read op is a COPY
+                        // Read op is a COPY
+                        // TRICK : Prevent CS1654 error
+                        OptimizeRecord modifiedRecord = currec;
+                        modifiedRecord.opttype = 0;
                         VarnodeTpl vn = op.getOut();
                         for (int i = currec.writeop + 1; i < currec.readop; ++i) {
                             // Check for interference between write and read
@@ -1201,7 +1212,10 @@ namespace Sla.SLACOMP
                     op = ops[currec.writeop];
                     if (op.getOpcode() == OpCode.CPUI_COPY) {
                         bool saverecord = true;
-                        currec.opttype = 1; // Write op is a COPY
+                        // TRICK : Prevent CS1654 error
+                        OptimizeRecord modifiedRecord = currec;
+                        // Write op is a COPY
+                        modifiedRecord.opttype = 1;
                         VarnodeTpl vn = op.getIn(0);
                         for (int i = currec.writeop + 1; i < currec.readop; ++i) {
                             // Check for interference between write and read
@@ -1314,7 +1328,7 @@ namespace Sla.SLACOMP
                 }
                 currec = findValidRule(ct, recs);
                 if (currec != (OptimizeRecord)null)
-                    applyOptimization(ct, currec.Value);
+                    applyOptimization(ct, currec);
             } while (currec != (OptimizeRecord)null);
             checkUnusedTemps(ct, recs);
         }

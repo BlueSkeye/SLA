@@ -35,17 +35,17 @@ namespace Sla.DECCORE
         /// This rule also works with INT_SEXT.
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_SUBPIECE);
+            oplist.Add(OpCode.CPUI_SUBPIECE);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode * base = op.getIn(0);
             if (!@base.isWritten()) return 0;
-            PcodeOp* extop = @base.getDef();
+            PcodeOp extop = @base.getDef();
             if ((extop.code() != OpCode.CPUI_INT_ZEXT) && (extop.code() != OpCode.CPUI_INT_SEXT))
                 return 0;
-            Varnode* invn = extop.getIn(0);
+            Varnode invn = extop.getIn(0);
             if (invn.isFree()) return 0;
             int subcut = (int)op.getIn(1).getOffset();
             if (op.getOut().getSize() + subcut <= invn.getSize())
@@ -62,10 +62,10 @@ namespace Sla.DECCORE
 
             if (subcut >= invn.getSize()) return 0;
 
-            Varnode* newvn;
+            Varnode newvn;
             if (subcut != 0)
             {
-                PcodeOp* newop = data.newOp(2, op.getAddr());
+                PcodeOp newop = data.newOp(2, op.getAddr());
                 data.opSetOpcode(newop, OpCode.CPUI_SUBPIECE);
                 newvn = data.newUniqueOut(invn.getSize() - subcut, newop);
                 data.opSetInput(newop, data.newConstant(op.getIn(1).getSize(), (ulong)subcut), 1);

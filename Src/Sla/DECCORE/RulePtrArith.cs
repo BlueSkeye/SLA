@@ -68,7 +68,7 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_INT_ADD);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             int slot;
             Datatype? ct = (Datatype)null; // Unnecessary initialization

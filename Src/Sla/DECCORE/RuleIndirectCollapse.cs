@@ -27,12 +27,12 @@ namespace Sla.DECCORE
         /// \brief Remove a OpCode.CPUI_INDIRECT if its blocking PcodeOp is dead
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_INDIRECT);
+            oplist.Add(OpCode.CPUI_INDIRECT);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            PcodeOp* indop;
+            PcodeOp indop;
 
             if (op.getIn(1).getSpace().getType() != spacetype.IPTR_IOP) return 0;
             indop = PcodeOp.getOpFromConst(op.getIn(1).getAddr());
@@ -42,8 +42,8 @@ namespace Sla.DECCORE
             {
                 if (indop.code() == OpCode.CPUI_COPY)
                 { // STORE resolved to a COPY
-                    Varnode* vn1 = indop.getOut();
-                    Varnode* vn2 = op.getOut();
+                    Varnode vn1 = indop.getOut();
+                    Varnode vn2 = op.getOut();
                     int res = vn1.characterizeOverlap(*vn2);
                     if (res > 0)
                     { // Copy has an effect of some sort

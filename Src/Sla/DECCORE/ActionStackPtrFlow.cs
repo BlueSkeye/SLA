@@ -237,7 +237,7 @@ namespace Sla.DECCORE
                 if (addop.code() != OpCode.CPUI_INT_ADD) {
                     continue;
                 }
-                Varnode* y = addop.getIn(1);
+                Varnode y = addop.getIn(1);
                 if (!y.isWritten()) {
                     // y must not be a constant
                     continue;

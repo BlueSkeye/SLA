@@ -49,7 +49,7 @@ namespace Sla.EXTRA
                 oplist.Add((uint)starterops[i]);
         }
 
-        public override bool applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             state.setFunction(&data);
             state.initialize(opinit, op);
