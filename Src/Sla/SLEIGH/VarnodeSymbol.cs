@@ -1,15 +1,5 @@
 ﻿using Sla.CORE;
 using Sla.SLEIGH;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static Sla.DECCORE.FuncCallSpecs;
-using static Sla.SLEIGH.SleighSymbol;
 
 namespace Sla.SLEIGH
 {
@@ -40,7 +30,8 @@ namespace Sla.SLEIGH
 
         public override VarnodeTpl getVarnode()
         {
-            return new VarnodeTpl(ConstTpl(fix.space), ConstTpl(ConstTpl.const_type.real, fix.offset), ConstTpl(ConstTpl.const_type.real, fix.size));
+            return new VarnodeTpl(new ConstTpl(fix.space), new ConstTpl(ConstTpl.const_type.real, fix.offset),
+                new ConstTpl(ConstTpl.const_type.real, fix.size));
         }
 
         public override void getFixedHandle(FixedHandle hand, ParserWalker walker)
@@ -55,7 +46,7 @@ namespace Sla.SLEIGH
 
         public override void print(TextWriter s, ParserWalker walker)
         {
-            s << getName();
+            s.Write(getName());
         }
 
         public override void collectLocalValues(List<ulong> results)
@@ -68,36 +59,25 @@ namespace Sla.SLEIGH
 
         public override void saveXml(TextWriter s)
         {
-            s << "<varnode_sym";
-            SleighSymbol::saveXmlHeader(s);
-            s << " space=\"" << fix.space.getName() << "\"";
-            s << " offset=\"0x" << hex << fix.offset << "\"";
-            s << " size=\"" << dec << fix.size << "\"";
-            s << ">\n";
-            PatternlessSymbol::saveXml(s);
-            s << "</varnode_sym>\n";
+            s.Write("<varnode_sym");
+            base.saveXmlHeader(s);
+            s.WriteLine($" space=\"{fix.space.getName()}\" offset=\"0x{fix.offset:X}\" size=\"{fix.size}\">");
+            base.saveXml(s);
+            s.WriteLine("</varnode_sym>");
         }
 
         public override void saveXmlHeader(TextWriter s)
         {
-            s << "<varnode_sym_head";
-            SleighSymbol::saveXmlHeader(s);
-            s << "/>\n";
+            s.Write("<varnode_sym_head");
+            base.saveXmlHeader(s);
+            s.WriteLine("/>");
         }
 
         public override void restoreXml(Element el, SleighBase trans)
         {
             fix.space = trans.getSpaceByName(el.getAttributeValue("space"));
-            {
-                istringstream s = new istringstream(el.getAttributeValue("offset"));
-                s.unsetf(ios::dec | ios::hex | ios::oct);
-                s >> fix.offset;
-            }
-            {
-                istringstream s = new istringstream(el.getAttributeValue("size"));
-                s.unsetf(ios::dec | ios::hex | ios::oct);
-                s >> fix.size;
-            }
+            fix.offset = ulong.Parse(el.getAttributeValue("offset"));
+            fix.size = uint.Parse(el.getAttributeValue("size"));
             // PatternlessSymbol does not need restoring
         }
     }

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Sla.SLACOMP
 {
     internal class SlghScan
@@ -25,7 +20,7 @@ namespace Sla.SLACOMP
         //#define yypop_buffer_state sleighpop_buffer_state
         //#define yyensure_buffer_stack sleighensure_buffer_stack
         //#define yy_flex_debug sleigh_flex_debug
-        //#define yyin sleighin
+        //#define yyin Globals.sleighin
         //#define yyleng sleighleng
         //#define yylex sleighlex
         //#define yylineno sleighlineno
@@ -258,7 +253,7 @@ namespace Sla.SLACOMP
         //# ifdef yyin
         //#define sleighin_ALREADY_DEFINED
         //#else
-        //#define yyin sleighin
+        //#define yyin Globals.sleighin
         //#endif
 
         //# ifdef yyout
@@ -1153,7 +1148,7 @@ namespace Sla.SLACOMP
         //        FILE* file;                   // The NEW file stream
         //    };
 
-        //extern SleighCompile * slgh;
+        //extern SleighCompile * Parsing.slgh;
         //    int last_preproc;   // lex state before last preprocessing erasure
         //    int actionon;       // whether '&' '|' and '^' are treated as actionon in pattern section
         //    int withsection = 0; // whether we are between the 'with' keyword and its open brace '{'
@@ -1164,7 +1159,7 @@ namespace Sla.SLACOMP
         //    void preproc_error(string &err)
 
         //    {
-        //        slgh.reportError((Location)null, err);
+        //        Parsing.slgh.reportError((Location)null, err);
         //        cerr << "Terminating due to error in preprocessing" << endl;
         //        exit(1);
         //    }
@@ -1229,7 +1224,7 @@ namespace Sla.SLACOMP
         //        if (tok != '(')
         //            preproc_error("Badly formed \"defined\" operator");
         //        macroname = read_identifier(s);
-        //        int res = slgh.getPreprocValue(macroname, macroname) ? 1 : 0;
+        //        int res = Parsing.slgh.getPreprocValue(macroname, macroname) ? 1 : 0;
         //        s >> ws >> tok;
         //        if (tok != ')')
         //            preproc_error("Badly formed \"defined\" operator");
@@ -1261,7 +1256,7 @@ namespace Sla.SLACOMP
         //            lhs = read_identifier(s);
         //            if (lhs == "defined")
         //                return read_defined_operator(s);
-        //            if (!slgh.getPreprocValue(lhs, lhs))
+        //            if (!Parsing.slgh.getPreprocValue(lhs, lhs))
         //                preproc_error("Could not find preprocessor macro " + lhs);
         //        }
 
@@ -1277,7 +1272,7 @@ namespace Sla.SLACOMP
         //        else
         //        {
         //            rhs = read_identifier(s);
-        //            if (!slgh.getPreprocValue(rhs, rhs))
+        //            if (!Parsing.slgh.getPreprocValue(rhs, rhs))
         //                preproc_error("Could not find preprocessor macro " + rhs);
         //        }
 
@@ -1345,7 +1340,7 @@ namespace Sla.SLACOMP
         //                }
         //                string macro = str.Substring(pos + 2, endpos - (pos + 2));
         //                string value;
-        //                if (!slgh.getPreprocValue(macro, value))
+        //                if (!Parsing.slgh.getPreprocValue(macro, value))
         //                {
         //                    preproc_error("Unknown preprocessing macro " + macro);
         //                    break;
@@ -1383,13 +1378,13 @@ namespace Sla.SLACOMP
         //                string fname;
         //                preprocess_string(s, fname);
         //                expand_preprocmacros(fname);
-        //                slgh.parseFromNewFile(fname);
-        //                fname = slgh.grabCurrentFilePath();
-        //                sleighin = fopen(fname.c_str(), "r");
-        //                if (sleighin == (FILE*)0)
+        //                Parsing.slgh.parseFromNewFile(fname);
+        //                fname = Parsing.slgh.grabCurrentFilePath();
+        //                Globals.sleighin = fopen(fname.c_str(), "r");
+        //                if (Globals.sleighin == null)
         //                    preproc_error("Could not open included file " + fname);
-        //                filebuffers.GetLastItem().file = sleighin;
-        //                sleigh_switch_to_buffer(sleigh_create_buffer(sleighin, YY_BUF_SIZE));
+        //                filebuffers.GetLastItem().file = Globals.sleighin;
+        //                sleigh_switch_to_buffer(sleigh_create_buffer(Globals.sleighin, YY_BUF_SIZE));
         //                check_to_endofline(s);
         //            }
         //        }
@@ -1407,7 +1402,7 @@ namespace Sla.SLACOMP
         //                    value = read_identifier(s);
         //                if (varname.size() == 0)
         //                    preproc_error("Error in preprocessor definition");
-        //                slgh.setPreprocValue(varname, value);
+        //                Parsing.slgh.setPreprocValue(varname, value);
         //                check_to_endofline(s);
         //            }
         //        }
@@ -1419,7 +1414,7 @@ namespace Sla.SLACOMP
         //                varname = read_identifier(s);       // Name of variable to undefine
         //                if (varname.size() == 0)
         //                    preproc_error("Error in preprocessor undef");
-        //                slgh.undefinePreprocValue(varname);
+        //                Parsing.slgh.undefinePreprocValue(varname);
         //                check_to_endofline(s);
         //            }
         //        }
@@ -1430,7 +1425,7 @@ namespace Sla.SLACOMP
         //            if (varname.size() == 0)
         //                preproc_error("Error in preprocessor ifdef");
         //            string value;
-        //            int truth = (slgh.getPreprocValue(varname, value)) ? 1 : 0;
+        //            int truth = (Parsing.slgh.getPreprocValue(varname, value)) ? 1 : 0;
         //            ifstack.Add(truth);
         //            check_to_endofline(s);
         //        }
@@ -1441,7 +1436,7 @@ namespace Sla.SLACOMP
         //            if (varname.size() == 0)
         //                preproc_error("Error in preprocessor ifndef");
         //            string value;
-        //            int truth = (slgh.getPreprocValue(varname, value)) ? 0 : 1;   // flipped from ifdef
+        //            int truth = (Parsing.slgh.getPreprocValue(varname, value)) ? 0 : 1;   // flipped from ifdef
         //            ifstack.Add(truth);
         //            check_to_endofline(s);
         //        }
@@ -1523,16 +1518,16 @@ namespace Sla.SLACOMP
         //        macro.erase(0, 2);
         //        macro.erase(macro.size() - 1, 1);
         //        string value;
-        //        if (!slgh.getPreprocValue(macro, value))
+        //        if (!Parsing.slgh.getPreprocValue(macro, value))
         //            preproc_error("Unknown preprocessing macro " + macro);
         //        sleigh_switch_to_buffer(sleigh_scan_string(value.c_str()));
-        //        slgh.parsePreprocMacro();
+        //        Parsing.slgh.parsePreprocMacro();
         //    }
 
         //    int find_symbol(void)
         //    {
         //        string* newstring = new string(sleightext);
-        //        SleighSymbol* sym = slgh.findSymbol(*newstring);
+        //        SleighSymbol* sym = Parsing.slgh.findSymbol(*newstring);
         //        if (sym == (SleighSymbol)null)
         //        {
         //            sleighlval.str = newstring;
@@ -1932,7 +1927,7 @@ namespace Sla.SLACOMP
         //                case 1:
         //                    /* rule 1 can match eol */
         //                    YY_RULE_SETUP
-        //                { slgh.nextLine(); BEGIN(preprocess(INITIAL, preproc)); }
+        //                { Parsing.slgh.nextLine(); BEGIN(preprocess(INITIAL, preproc)); }
         //                    YY_BREAK
         //    case 2:
         //                    YY_RULE_SETUP
@@ -1944,7 +1939,7 @@ namespace Sla.SLACOMP
         //                    YY_BREAK
         //    case 4:
         //                    YY_RULE_SETUP
-        //    { BEGIN(print); slgh.calcContextLayout(); sleighlval.ch = sleightext[0]; return sleightext[0]; }
+        //    { BEGIN(print); Parsing.slgh.calcContextLayout(); sleighlval.ch = sleightext[0]; return sleightext[0]; }
         //                    YY_BREAK
         //    case 5:
         //                    YY_RULE_SETUP
@@ -1961,7 +1956,7 @@ namespace Sla.SLACOMP
         //    case 8:
         //                    /* rule 8 can match eol */
         //                    YY_RULE_SETUP
-        //    { slgh.nextLine(); }
+        //    { Parsing.slgh.nextLine(); }
         //                    YY_BREAK
         //    case 9:
         //                    YY_RULE_SETUP
@@ -1973,11 +1968,11 @@ namespace Sla.SLACOMP
         //                    YY_BREAK
         //    case 11:
         //                    YY_RULE_SETUP
-        //    { BEGIN(defblock); slgh.calcContextLayout(); return ATTACH_KEY; }
+        //    { BEGIN(defblock); Parsing.slgh.calcContextLayout(); return ATTACH_KEY; }
         //                    YY_BREAK
         //    case 12:
         //                    YY_RULE_SETUP
-        //    { BEGIN(pattern); withsection = 1; slgh.calcContextLayout(); return WITH_KEY; }
+        //    { BEGIN(pattern); withsection = 1; Parsing.slgh.calcContextLayout(); return WITH_KEY; }
         //                    YY_BREAK
         //    case 13:
         //                    YY_RULE_SETUP
@@ -1990,7 +1985,7 @@ namespace Sla.SLACOMP
         //    case 15:
         //                    /* rule 15 can match eol */
         //                    YY_RULE_SETUP
-        //    { slgh.nextLine(); BEGIN(preprocess(macroblock, preproc)); }
+        //    { Parsing.slgh.nextLine(); BEGIN(preprocess(macroblock, preproc)); }
         //                    YY_BREAK
         //    case 16:
         //                    YY_RULE_SETUP
@@ -2015,7 +2010,7 @@ namespace Sla.SLACOMP
         //    case 21:
         //                    /* rule 21 can match eol */
         //                    YY_RULE_SETUP
-        //    { slgh.nextLine(); }
+        //    { Parsing.slgh.nextLine(); }
         //                    YY_BREAK
         //    case 22:
         //                    YY_RULE_SETUP
@@ -2024,7 +2019,7 @@ namespace Sla.SLACOMP
         //    case 23:
         //                    /* rule 23 can match eol */
         //                    YY_RULE_SETUP
-        //    { slgh.nextLine(); BEGIN(preprocess(defblock, preproc)); }
+        //    { Parsing.slgh.nextLine(); BEGIN(preprocess(defblock, preproc)); }
         //                    YY_BREAK
         //    case 24:
         //                    YY_RULE_SETUP
@@ -2161,7 +2156,7 @@ namespace Sla.SLACOMP
         //    case 57:
         //                    /* rule 57 can match eol */
         //                    YY_RULE_SETUP
-        //    { slgh.nextLine(); }
+        //    { Parsing.slgh.nextLine(); }
         //                    YY_BREAK
         //    case 58:
         //                    YY_RULE_SETUP
@@ -2170,7 +2165,7 @@ namespace Sla.SLACOMP
         //    case 59:
         //                    /* rule 59 can match eol */
         //                    YY_RULE_SETUP
-        //    { slgh.nextLine(); BEGIN(preprocess(print, preproc)); }
+        //    { Parsing.slgh.nextLine(); BEGIN(preprocess(print, preproc)); }
         //                    YY_BREAK
         //    case 60:
         //                    YY_RULE_SETUP
@@ -2203,7 +2198,7 @@ namespace Sla.SLACOMP
         //    case 67:
         //                    /* rule 67 can match eol */
         //                    YY_RULE_SETUP
-        //    { slgh.nextLine(); return ' '; }
+        //    { Parsing.slgh.nextLine(); return ' '; }
         //                    YY_BREAK
         //    case 68:
         //                    YY_RULE_SETUP
@@ -2212,7 +2207,7 @@ namespace Sla.SLACOMP
         //    case 69:
         //                    /* rule 69 can match eol */
         //                    YY_RULE_SETUP
-        //    { slgh.nextLine(); BEGIN(preprocess(pattern, preproc)); }
+        //    { Parsing.slgh.nextLine(); BEGIN(preprocess(pattern, preproc)); }
         //                    YY_BREAK
         //    case 70:
         //                    YY_RULE_SETUP
@@ -2317,7 +2312,7 @@ namespace Sla.SLACOMP
         //    case 95:
         //                    /* rule 95 can match eol */
         //                    YY_RULE_SETUP
-        //    { slgh.nextLine(); }
+        //    { Parsing.slgh.nextLine(); }
         //                    YY_BREAK
         //    case 96:
         //                    YY_RULE_SETUP
@@ -2326,7 +2321,7 @@ namespace Sla.SLACOMP
         //    case 97:
         //                    /* rule 97 can match eol */
         //                    YY_RULE_SETUP
-        //    { slgh.nextLine(); BEGIN(preprocess(sem, preproc)); }
+        //    { Parsing.slgh.nextLine(); BEGIN(preprocess(sem, preproc)); }
         //                    YY_BREAK
         //    case 98:
         //                    YY_RULE_SETUP
@@ -2583,7 +2578,7 @@ namespace Sla.SLACOMP
         //    case 161:
         //                    /* rule 161 can match eol */
         //                    YY_RULE_SETUP
-        //    { slgh.nextLine(); }
+        //    { Parsing.slgh.nextLine(); }
         //                    YY_BREAK
         //    case 162:
         //                    YY_RULE_SETUP
@@ -2592,12 +2587,12 @@ namespace Sla.SLACOMP
         //    case 163:
         //                    /* rule 163 can match eol */
         //                    YY_RULE_SETUP
-        //    { slgh.nextLine(); BEGIN(preprocess(preproc, preproc)); }
+        //    { Parsing.slgh.nextLine(); BEGIN(preprocess(preproc, preproc)); }
         //                    YY_BREAK
         //    case 164:
         //                    /* rule 164 can match eol */
         //                    YY_RULE_SETUP
-        //    { slgh.nextLine(); }
+        //    { Parsing.slgh.nextLine(); }
         //                    YY_BREAK
         //    case YY_STATE_EOF(INITIAL):
         //                case YY_STATE_EOF(defblock):
@@ -2615,7 +2610,7 @@ namespace Sla.SLACOMP
         //                        if (curfile != (FILE*)0)
         //                            fclose(curfile);
         //                        filebuffers.RemoveLastItem();
-        //                        slgh.parseFileFinished();
+        //                        Parsing.slgh.parseFileFinished();
         //                    }
         //                    YY_BREAK
         //    case 165:

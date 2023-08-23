@@ -1,17 +1,8 @@
 ﻿using Sla.CORE;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.IO;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.EXTRA
 {
- #if CPUI_RULECOMPILE
+#if CPUI_RULECOMPILE
    internal class RuleCompile
     {
         private TextWriter error_stream;
@@ -46,8 +37,8 @@ namespace Sla.EXTRA
         {
             if (error_stream != (ostream*)0)
             {
-                *error_stream << "Error at line " << dec << lexer.getLineNo() << endl;
-                *error_stream << "   " << s << endl;
+                error_stream.WriteLine($"Error at line {lexer.getLineNo()}");
+                error_stream.WriteLine("   {s}");
             }
             errors += 1;
         }

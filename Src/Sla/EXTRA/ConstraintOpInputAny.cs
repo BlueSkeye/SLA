@@ -1,12 +1,5 @@
-﻿using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
+using Sla.DECCORE;
 
 namespace Sla.EXTRA
 {
@@ -27,15 +20,16 @@ namespace Sla.EXTRA
             => (new ConstraintOpInputAny(opindex, varnodeindex)).copyid(this);
 
         public override void initialize(UnifyState state)
-        {               // Default initialization (with only 1 state)
-            TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
+        {
+            // Default initialization (with only 1 state)
+            TraverseCountState traverse = (TraverseCountState)state.getTraverse(uniqid);
             PcodeOp op = state.data(opindex).getOp();
             traverse.initialize(op.numInput());   // Initialize total number of inputs
         }
 
         public override bool step(UnifyState state)
         {
-            TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
+            TraverseCountState traverse = (TraverseCountState)state.getTraverse(uniqid);
             if (!traverse.step()) return false;
             PcodeOp op = state.data(opindex).getOp();
             Varnode vn = op.getIn(traverse.getState());
@@ -45,8 +39,8 @@ namespace Sla.EXTRA
 
         public override void collectTypes(List<UnifyDatatype> typelist)
         {
-            typelist[opindex] = UnifyDatatype(UnifyDatatype.TypeKind.op_type);
-            typelist[varnodeindex] = UnifyDatatype(UnifyDatatype.TypeKind.var_type);
+            typelist[opindex] = new UnifyDatatype(UnifyDatatype.TypeKind.op_type);
+            typelist[varnodeindex] = new UnifyDatatype(UnifyDatatype.TypeKind.var_type);
         }
 
         public override int getBaseIndex() => varnodeindex;
@@ -54,12 +48,12 @@ namespace Sla.EXTRA
         public override void print(TextWriter s, UnifyCPrinter printstate)
         {
             printstate.printIndent(s);
-            s << "for(int i" << dec << printstate.getDepth() << "=0;i" << printstate.getDepth() << '<';
-            s << printstate.getName(opindex) << ".numInput();++i" << printstate.getDepth() << ") {" << endl;
+            s.Write($"for(int i{printstate.getDepth()}=0;i{printstate.getDepth()}<");
+            s.WriteLine($"{printstate.getName(opindex)}.numInput();++i{printstate.getDepth()}) {{");
             printstate.incDepth();  // A permanent increase in depth
             printstate.printIndent(s);
-            s << printstate.getName(varnodeindex) << " = " << printstate.getName(opindex) << ".getIn(i";
-            s << (printstate.getDepth() - 1) << ");" << endl;
+            s.Write($"{printstate.getName(varnodeindex)} = {printstate.getName(opindex)}.getIn(i");
+            s.WriteLine($"{printstate.getDepth() - 1)});");
         }
     }
 }

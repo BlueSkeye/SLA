@@ -48,7 +48,7 @@ namespace Sla.CORE
         /// The element id is returned, which can be compared to ElementId labels.
         /// If there are no remaining child elements to traverse, 0 is returned.
         /// \return the element id or 0
-        public abstract uint peekElement();
+        public abstract ElementId peekElement();
 
         /// \brief Open (traverse into) the next child element of the current parent.
         /// The child becomes the current parent.  The list of attributes is initialized for use with getNextAttributeId.

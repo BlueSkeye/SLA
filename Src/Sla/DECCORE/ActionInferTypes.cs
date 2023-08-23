@@ -52,24 +52,24 @@ namespace Sla.DECCORE
         private static void propagationDebug(Architecture glb, Varnode vn, Datatype newtype,
             PcodeOp op, int slot, Varnode ptralias);
         {
-          ostringstream s;
+          TextWriter s = new StringWriter();
 
           vn.printRaw(s);
-          s << " : ";
+          s.Write(" : ");
           newtype.printRaw(s);
-          if ((op == (PcodeOp *)0)&&(ptralias == (Varnode *)0)) {
-            s << " init";
+          if ((op == (PcodeOp)null)&&(ptralias == (Varnode)null)) {
+            s.Write(" init");
           }
-          else if (ptralias != (Varnode *)0) {
-            s << " alias ";
+          else if (ptralias != (Varnode)null) {
+            s.Write(" alias ");
             ptralias.printRaw(s);
           }
           else {
-            s << " from ";
+            s.Write(" from ");
             op.printRaw(s);
-            s << " slot=" << dec << slot;
+            s.Write($" slot={slot}");
           }
-          glb.printDebug(s.str());
+          glb.printDebug(s.ToString());
         }
 #endif
 
@@ -82,19 +82,20 @@ namespace Sla.DECCORE
         /// \param data is the function being analyzed
         private static void buildLocaltypes(Funcdata data)
         {
-            Datatype* ct;
+            Datatype ct;
             Varnode vn;
             VarnodeLocSet::const_iterator iter;
-            TypeFactory* typegrp = data.getArch().types;
+            TypeFactory typegrp = data.getArch().types;
 
-            for (iter = data.beginLoc(); iter != data.endLoc(); ++iter)
-            {
-                vn = *iter;
+            for (iter = data.beginLoc(); iter != data.endLoc(); ++iter) {
+                vn = iter.Current;
                 if (vn.isAnnotation()) continue;
                 if ((!vn.isWritten()) && (vn.hasNoDescend())) continue;
                 bool needsBlock = false;
-                SymbolEntry* entry = vn.getSymbolEntry();
-                if (entry != (SymbolEntry)null && !vn.isTypeLock() && entry.getSymbol().isTypeLocked())
+                SymbolEntry entry = vn.getSymbolEntry();
+                if (entry != (SymbolEntry)null
+                    && !vn.isTypeLock()
+                    && entry.getSymbol().isTypeLocked())
                 {
                     int curOff = (vn.getAddr().getOffset() - entry.getAddr().getOffset()) + entry.getOffset();
                     ct = typegrp.getExactPiece(entry.getSymbol().getType(), curOff, vn.getSize());
@@ -120,13 +121,12 @@ namespace Sla.DECCORE
         private static bool writeBack(Funcdata data)
         {
             bool change = false;
-            Datatype* ct;
+            Datatype ct;
             Varnode vn;
-            VarnodeLocSet::const_iterator iter;
+            VarnodeLocSet::const_iterator iter = data.beginLoc();
 
-            for (iter = data.beginLoc(); iter != data.endLoc(); ++iter)
-            {
-                vn = *iter;
+            while (iter.MoveNext()) {
+                vn = iter.Current;
                 if (vn.isAnnotation()) continue;
                 if ((!vn.isWritten()) && (vn.hasNoDescend())) continue;
                 ct = vn.getTempType();
@@ -206,7 +206,7 @@ namespace Sla.DECCORE
             vn.setMark();
 
             while (!state.empty()) {
-                ptr = &state.GetLastItem();
+                ptr = state.GetLastItem();
                 if (!ptr.valid()) {
                     // If we are out of edges to traverse
                     ptr.vn.clearMark();
@@ -235,14 +235,14 @@ namespace Sla.DECCORE
         /// \param addr is the aliased address
         private static void propagateRef(Funcdata data, Varnode vn, Address addr)
         {
-            Datatype* ct = vn.getTempType();
+            Datatype ct = vn.getTempType();
             if (ct.getMetatype() != type_metatype.TYPE_PTR) return;
             ct = ((TypePointer)ct).getPtrTo();
             if (ct.getMetatype() == type_metatype.TYPE_SPACEBASE) return;
             if (ct.getMetatype() == type_metatype.TYPE_UNKNOWN) return; // Don't bother propagating this
             VarnodeLocSet::const_iterator iter, enditer;
             ulong off = addr.getOffset();
-            TypeFactory* typegrp = data.getArch().types;
+            TypeFactory typegrp = data.getArch().types;
             Address endaddr = addr + ct.getSize();
             if (endaddr.getOffset() < off) // If the address wrapped
                 enditer = data.endLoc(addr.getSpace()); // Go to end of space
@@ -251,9 +251,8 @@ namespace Sla.DECCORE
             iter = data.beginLoc(addr);
             ulong lastoff = 0;
             int lastsize = ct.getSize();
-            Datatype* lastct = ct;
-            while (iter != enditer)
-            {
+            Datatype lastct = ct;
+            while (iter != enditer) {
                 Varnode curvn = *iter;
                 ++iter;
                 if (curvn.isAnnotation()) continue;
@@ -263,15 +262,15 @@ namespace Sla.DECCORE
                 ulong curoff = curvn.getOffset() - off;
                 int cursize = curvn.getSize();
                 if (curoff + cursize > ct.getSize()) continue;
-                if ((cursize != lastsize) || (curoff != lastoff))
-                {
+                if ((cursize != lastsize) || (curoff != lastoff)) {
                     lastoff = curoff;
                     lastsize = cursize;
                     lastct = typegrp.getExactPiece(ct, curoff, cursize);
                 }
                 if (lastct == (Datatype)null) continue;
 
-                // Try to propagate the reference type into a varnode that is pointed to by that reference
+                // Try to propagate the reference type into a varnode that is pointed
+                // to by that reference
                 if (0 > lastct.typeOrder(*curvn.getTempType()))
                 {
 #if TYPEPROP_DEBUG
@@ -315,7 +314,8 @@ namespace Sla.DECCORE
                     case OpCode.CPUI_PTRSUB:
                         vn = op.getIn(1);
                         if (vn.isConstant()) {
-                            addr = sbtype.getAddress(vn.getOffset(), vn.getSize(), op.getAddr());
+                            addr = sbtype.getAddress(vn.getOffset(), vn.getSize(),
+                                op.getAddr());
                             propagateRef(data, op.getOut(), addr);
                         }
                         break;
@@ -333,8 +333,8 @@ namespace Sla.DECCORE
             }
         }
 
-        /// Return the OpCode.CPUI_RETURN op with the most specialized data-type, which is not
-        /// dead and is not a special halt.
+        /// Return the OpCode.CPUI_RETURN op with the most specialized data-type, which
+        /// is not dead and is not a special halt.
         /// \param data is the function
         /// \return the representative OpCode.CPUI_RETURN op or NULL
         private static PcodeOp? canonicalReturnOp(Funcdata data)
@@ -415,19 +415,18 @@ namespace Sla.DECCORE
         {
             // Make sure spacebase is accurate or bases could get typed and then ptrarithed
             if (!data.hasTypeRecoveryStarted()) return 0;
-            TypeFactory* typegrp = data.getArch().types;
+            TypeFactory typegrp = data.getArch().types;
             Varnode vn;
             VarnodeLocSet::const_iterator iter;
 
 #if TYPEPROP_DEBUG
-            ostringstream s;
-            s << "Type propagation pass - " << dec << localcount;
-            data.getArch().printDebug(s.str());
+            TextWriter s = new StringWriter();
+            s.Write($"Type propagation pass - {localcount}");
+            data.getArch().printDebug(s.ToString());
 #endif
-            if (localcount >= 7)
-            {       // This constant arrived at empirically
-                if (localcount == 7)
-                {
+            if (localcount >= 7) {
+                // This constant arrived at empirically
+                if (localcount == 7) {
                     data.warningHeader("Type propagation algorithm not settling");
                     localcount += 1;
                 }
@@ -435,21 +434,20 @@ namespace Sla.DECCORE
             }
             data.getScopeLocal().applyTypeRecommendations();
             buildLocaltypes(data);  // Set up initial types (based on local info)
-            for (iter = data.beginLoc(); iter != data.endLoc(); ++iter)
-            {
-                vn = *iter;
+            for (iter = data.beginLoc(); iter != data.endLoc(); ++iter) {
+                vn = iter.Current;
                 if (vn.isAnnotation()) continue;
                 if ((!vn.isWritten()) && (vn.hasNoDescend())) continue;
                 propagateOneType(typegrp, vn);
             }
             propagateAcrossReturns(data);
-            AddrSpace* spcid = data.getScopeLocal().getSpaceId();
+            AddrSpace spcid = data.getScopeLocal().getSpaceId();
             Varnode spcvn = data.findSpacebaseInput(spcid);
             if (spcvn != (Varnode)null)
                 propagateSpacebaseRef(data, spcvn);
-            if (writeBack(data))
-            {
-                // count += 1;			// Do not consider this a data-flow change
+            if (writeBack(data)) {
+                // count += 1;
+                // Do not consider this a data-flow change
                 localcount += 1;
             }
             return 0;

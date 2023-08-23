@@ -38,16 +38,16 @@ namespace Sla.SLEIGH
 
         public PcodeSnippet(SleighBase slgh)
         {
-            sleigh = slgh;
+            sleigh = Parsing.slgh;
             tempbase = 0;
             errorcount = 0;
             result = (ConstructTpl)null;
-            setDefaultSpace(slgh.getDefaultCodeSpace());
-            setConstantSpace(slgh.getConstantSpace());
-            setUniqueSpace(slgh.getUniqueSpace());
-            int num = slgh.numSpaces();
+            setDefaultSpace(Parsing.slgh.getDefaultCodeSpace());
+            setConstantSpace(Parsing.slgh.getConstantSpace());
+            setUniqueSpace(Parsing.slgh.getUniqueSpace());
+            int num = Parsing.slgh.numSpaces();
             for (int i = 0; i < num; ++i) {
-                AddrSpace spc = slgh.getSpace(i);
+                AddrSpace spc = Parsing.slgh.getSpace(i);
                 spacetype type = spc.getType();
                 if (   (type == spacetype.IPTR_CONSTANT)
                     || (type == spacetype.IPTR_PROCESSOR)
@@ -57,8 +57,8 @@ namespace Sla.SLEIGH
                     tree.Add(new SpaceSymbol(spc));
                 }
             }
-            addSymbol(new FlowDestSymbol("inst_dest", slgh.getConstantSpace()));
-            addSymbol(new FlowRefSymbol("inst_ref", slgh.getConstantSpace()));
+            addSymbol(new FlowDestSymbol("inst_dest", Parsing.slgh.getConstantSpace()));
+            addSymbol(new FlowRefSymbol("inst_ref", Parsing.slgh.getConstantSpace()));
         }
 
         public void setResult(ConstructTpl res)
@@ -146,29 +146,29 @@ namespace Sla.SLEIGH
                 if (sym != (SleighSymbol)null) {
                     switch (sym.getType()) {
                         case SleighSymbol.symbol_type.space_symbol:
-                            yylval.spacesym = (SpaceSymbol)sym;
-                            return SPACESYM;
+                            Parsing.yylval.spacesym = (SpaceSymbol)sym;
+                            return (int)sleightokentype.SPACESYM;
                         case SleighSymbol.symbol_type.userop_symbol:
-                            yylval.useropsym = (UserOpSymbol)sym;
-                            return USEROPSYM;
+                            Parsing.yylval.useropsym = (UserOpSymbol)sym;
+                            return (int)sleightokentype.USEROPSYM;
                         case SleighSymbol.symbol_type.varnode_symbol:
-                            yylval.varsym = (VarnodeSymbol)sym;
-                            return VARSYM;
+                            Parsing.yylval.varsym = (VarnodeSymbol)sym;
+                            return (int)sleightokentype.VARSYM;
                         case SleighSymbol.symbol_type.operand_symbol:
-                            yylval.operandsym = (OperandSymbol)sym;
-                            return OPERANDSYM;
+                            Parsing.yylval.operandsym = (OperandSymbol)sym;
+                            return (int)sleightokentype.OPERANDSYM;
                         case SleighSymbol.symbol_type.start_symbol:
-                            yylval.startsym = (StartSymbol)sym;
-                            return STARTSYM;
+                            Parsing.yylval.startsym = (StartSymbol)sym;
+                            return (int)sleightokentype.STARTSYM;
                         case SleighSymbol.symbol_type.end_symbol:
-                            yylval.endsym = (EndSymbol)sym;
-                            return ENDSYM;
+                            Parsing.yylval.endsym = (EndSymbol)sym;
+                            return (int)sleightokentype.ENDSYM;
                         case SleighSymbol.symbol_type.next2_symbol:
-                            yylval.next2sym = (Next2Symbol)sym;
-                            return NEXT2SYM;
+                            Parsing.yylval.next2sym = (Next2Symbol)sym;
+                            return (int)sleightokentype.NEXT2SYM;
                         case SleighSymbol.symbol_type.label_symbol:
-                            yylval.labelsym = (LabelSymbol)sym;
-                            return LABELSYM;
+                            Parsing.yylval.labelsym = (LabelSymbol)sym;
+                            return (int)sleightokentype.LABELSYM;
                         case SleighSymbol.symbol_type.dummy_symbol:
                             break;
                         default:
@@ -176,12 +176,12 @@ namespace Sla.SLEIGH
                             break;
                     }
                 }
-                yylval.str = lexer.getIdentifier();
-                return STRING;
+                Parsing.yylval.str = lexer.getIdentifier();
+                return (int)sleightokentype.STRING;
             }
-            if (tok == INTEGER) {
-                yylval.i = lexer.getNumber();
-                return INTEGER;
+            if (tok == (int)sleightokentype.INTEGER) {
+                Parsing.yylval.i = lexer.getNumber();
+                return (int)sleightokentype.INTEGER;
             }
             return tok;
         }
@@ -196,7 +196,7 @@ namespace Sla.SLEIGH
                 return false;
             }
             if (!PcodeCompile.propagateSize(result)) {
-                reportError((Location)null,"Could not resolve at least 1 variable size");
+                reportError((Location)null, "Could not resolve at least 1 variable size");
                 return false;
             }
             return true;

@@ -1379,7 +1379,7 @@ namespace Sla.SLACOMP
         public bool testTruncations()
         {
             bool testresult = true;
-            bool isbigendian = slgh.isBigEndian();
+            bool isbigendian = Parsing.slgh.isBigEndian();
             for (int i = 0; i < postorder.size(); ++i) {
                 SubtableSymbol sym = postorder[i];
                 int numconstruct = sym.getNumConstructors();

@@ -34,7 +34,7 @@ namespace Sla.SLEIGH
         {
         }
   
-        public abstract Location getLocation(SleighSymbol sym);
+        public abstract Location? getLocation(SleighSymbol sym);
 
         public abstract void reportError(Location loc, string msg);
 

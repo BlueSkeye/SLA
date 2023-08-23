@@ -1,16 +1,13 @@
-﻿using ghidra;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
+﻿
 namespace Sla.DECCORE
 {
     /// \brief Class for storing ParamEntry objects in an interval range (rangemap)
     internal class ParamEntryRange
     {
+        //typedef ulong linetype;		///< The linear element for a rangemap
+        //typedef SubsortPosition subsorttype;	///< The sub-sort object for a rangemap
+        //typedef InitData inittype;		///< Initialization data for a ScopeMapper
+
         /// Starting offset of the ParamEntry's range
         private ulong first;
         /// Ending offset of the ParamEntry's range
@@ -63,10 +60,6 @@ namespace Sla.DECCORE
                 return op1.position<op2.position;
             }
         }
-
-        //typedef ulong linetype;		///< The linear element for a rangemap
-        //typedef SubsortPosition subsorttype;	///< The sub-sort object for a rangemap
-        //typedef InitData inittype;		///< Initialization data for a ScopeMapper
 
         /// Initialize the range
         public ParamEntryRange(inittype data, ulong f, ulong l)

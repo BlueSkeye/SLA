@@ -1,10 +1,4 @@
-﻿using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -23,7 +17,7 @@ namespace Sla.DECCORE
 
         {
             opflags = PcodeOp.Flags.special | PcodeOp.Flags.nocollapse;
-            behave = new OpBehavior(CPUI_SEGMENTOP, false, true); // Dummy behavior
+            behave = new OpBehavior(OpCode.CPUI_SEGMENTOP, false, true); // Dummy behavior
         }
 
         //  virtual Datatype *getOutputLocal(PcodeOp *op) const;
@@ -48,8 +42,8 @@ namespace Sla.DECCORE
             if (invn.isSpacebase()) return (Datatype)null;
             type_metatype metain = alttype.getMetatype();
             if (metain != type_metatype.TYPE_PTR) return (Datatype)null;
-            AddrSpace* spc = tlst.getArch().getDefaultDataSpace();
-            Datatype* btype = ((TypePointer)alttype).getPtrTo();
+            AddrSpace spc = tlst.getArch().getDefaultDataSpace();
+            Datatype btype = ((TypePointer)alttype).getPtrTo();
             return tlst.getTypePointer(outvn.getSize(), btype, spc.getWordSize());
         }
 
@@ -60,19 +54,18 @@ namespace Sla.DECCORE
 
         public override void printRaw(TextWriter s, PcodeOp op)
         {
-            if (op.getOut() != (Varnode)null)
-            {
-                Varnode::printRaw(s, op.getOut());
-                s << " = ";
+            if (op.getOut() != (Varnode)null) {
+                Varnode.printRaw(s, op.getOut());
+                s.Write(" = ");
             }
-            s << getOperatorName(op);
-            s << '(';
-            AddrSpace* spc = op.getIn(0).getSpaceFromConst();
-            s << spc.getName() << ',';
-            Varnode::printRaw(s, op.getIn(1));
-            s << ',';
-            Varnode::printRaw(s, op.getIn(2));
-            s << ')';
+            s.Write(getOperatorName(op));
+            s.Write('(');
+            AddrSpace spc = op.getIn(0).getSpaceFromConst();
+            s.Write($"{spc.getName()},");
+            Varnode.printRaw(s, op.getIn(1));
+            s.Write(',');
+            Varnode.printRaw(s, op.getIn(2));
+            s.Write(')');
         }
     }
 }

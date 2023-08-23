@@ -32,9 +32,9 @@ namespace Sla.DECCORE
         /// Number of parameters shifted in the original call
         protected int paramshift;
         /// List of input parameters to this payload
-        protected List<InjectParameter> inputlist;
+        internal List<InjectParameter> inputlist = new List<InjectParameter>();
         /// List of output parameters
-        protected List<InjectParameter> output;
+        internal List<InjectParameter> output = new List<InjectParameter>();
 
         /// \brief Parse an \<input> or \<output> element describing an injection parameter
         ///
@@ -62,7 +62,7 @@ namespace Sla.DECCORE
 
         /// Assign an index to parameters
         /// Input and output parameters are assigned a unique index
-        protected void orderParameters()
+        internal void orderParameters()
         {
             int id = 0;
             for (int i = 0; i < inputlist.Count; ++i) {

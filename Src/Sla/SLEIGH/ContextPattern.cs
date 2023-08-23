@@ -1,20 +1,13 @@
 ﻿using Sla.CORE;
-using Sla.SLEIGH;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.SLEIGH
 {
     internal class ContextPattern : DisjointPattern
     {
         // Matches the context bitstream
-        private PatternBlock maskvalue;
+        private PatternBlock? maskvalue;
         
-        protected override PatternBlock getBlock(bool context)
+        protected override PatternBlock? getBlock(bool context)
             => context? maskvalue : (PatternBlock)null;
 
         public ContextPattern()
@@ -27,11 +20,11 @@ namespace Sla.SLEIGH
             maskvalue = mv;
         }
 
-        public PatternBlock getBlock() => maskvalue;
+        public PatternBlock? getBlock() => maskvalue;
 
         ~ContextPattern()
         {
-            if (maskvalue != (PatternBlock)null) delete maskvalue;
+            /// if (maskvalue != (PatternBlock)null) delete maskvalue;
         }
 
         public override Pattern simplifyClone() => new ContextPattern(maskvalue.clone());
@@ -42,30 +35,30 @@ namespace Sla.SLEIGH
 
         public override Pattern doOr(Pattern b, int sa)
         {
-            ContextPattern* b2 = dynamic_cast <ContextPattern*> (b);
+            ContextPattern? b2 = b as ContextPattern;
             if (b2 == (ContextPattern)null)
                 return b.doOr(this, -sa);
 
-            return new OrPattern((DisjointPattern*)simplifyClone(), (DisjointPattern*)b2.simplifyClone());
+            return new OrPattern((DisjointPattern)simplifyClone(), (DisjointPattern)b2.simplifyClone());
         }
 
         public override Pattern doAnd(Pattern b, int sa)
         {
-            ContextPattern* b2 = dynamic_cast <ContextPattern*> (b);
+            ContextPattern? b2 = b as ContextPattern;
             if (b2 == (ContextPattern)null)
                 return b.doAnd(this, -sa);
 
-            PatternBlock* resblock = maskvalue.intersect(b2.maskvalue);
+            PatternBlock resblock = maskvalue.intersect(b2.maskvalue);
             return new ContextPattern(resblock);
         }
 
         public override Pattern commonSubPattern(Pattern b, int sa)
         {
-            ContextPattern* b2 = dynamic_cast <ContextPattern*> (b);
+            ContextPattern? b2 = b as ContextPattern;
             if (b2 == (ContextPattern)null)
                 return b.commonSubPattern(this, -sa);
 
-            PatternBlock* resblock = maskvalue.commonSubPattern(b2.maskvalue);
+            PatternBlock resblock = maskvalue.commonSubPattern(b2.maskvalue);
             return new ContextPattern(resblock);
         }
 
@@ -79,18 +72,17 @@ namespace Sla.SLEIGH
 
         public override void saveXml(TextWriter s)
         {
-            s << "<context_pat>\n";
+            s.WriteLine("<context_pat>");
             maskvalue.saveXml(s);
-            s << "</context_pat>\n";
+            s.WriteLine("</context_pat>");
         }
 
         public override void restoreXml(Element el)
         {
-            List list = el.getChildren();
-            List::const_iterator iter;
-            iter = list.begin();
+            IEnumerator<Element> iter = el.getChildren().GetEnumerator();
+            if (!iter.MoveNext()) throw new ApplicationException();
             maskvalue = new PatternBlock(true);
-            maskvalue.restoreXml(*iter);
+            maskvalue.restoreXml(iter.Current);
         }
     }
 }

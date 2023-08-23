@@ -1,26 +1,19 @@
 ﻿using Sla.CORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.SLEIGH
 {
     internal class ValueMapSymbol : ValueSymbol
     {
-        private List<long> valuetable;
+        private List<long> valuetable= new List<long>();
         private bool tableisfilled;
 
         private void checkTableFill()
-        { // Check if all possible entries in the table have been filled
+        {
+            // Check if all possible entries in the table have been filled
             long min = patval.minValue();
             long max = patval.maxValue();
             tableisfilled = (min >= 0) && (max < valuetable.size());
-            for (uint i = 0; i < valuetable.size(); ++i)
-            {
+            for (int i = 0; i < valuetable.size(); ++i) {
                 if (valuetable[i] == 0xBADBEEF)
                     tableisfilled = false;
             }
@@ -38,16 +31,14 @@ namespace Sla.SLEIGH
         
         public override Constructor resolve(ParserWalker walker)
         {
-            if (!tableisfilled)
-            {
+            if (!tableisfilled) {
                 long ind = patval.getValue(walker);
-                if ((ind >= valuetable.size()) || (ind < 0) || (valuetable[ind] == 0xBADBEEF))
-                {
-                    ostringstream s;
-                    s << walker.getAddr().getShortcut();
+                if ((ind >= valuetable.size()) || (ind < 0) || (valuetable[(int)ind] == 0xBADBEEF)) {
+                    TextWriter s = new StringWriter();
+                    s.Write(walker.getAddr().getShortcut());
                     walker.getAddr().printRaw(s);
-                    s << ": No corresponding entry in valuetable";
-                    throw BadDataError(s.str());
+                    s.Write(": No corresponding entry in valuetable");
+                    throw new BadDataError(s.ToString());
                 }
             }
             return (Constructor)null;
@@ -67,49 +58,42 @@ namespace Sla.SLEIGH
         {
             uint ind = (uint)patval.getValue(walker);
             // ind is already checked to be in range by the resolve routine
-            long val = valuetable[ind];
+            long val = valuetable[(int)ind];
             if (val >= 0)
-                s << "0x" << hex << val;
+                s.Write($"0x{val:X}");
             else
-                s << "-0x" << hex << -val;
+                s.Write($"-0x{-val:X}");
         }
 
         public override symbol_type getType() => SleighSymbol.symbol_type.valuemap_symbol;
 
         public override void saveXml(TextWriter s)
         {
-            s << "<valuemap_sym";
-            SleighSymbol::saveXmlHeader(s);
-            s << ">\n";
+            s.Write("<valuemap_sym");
+            base.saveXmlHeader(s);
+            s.WriteLine(">");
             patval.saveXml(s);
-            for (uint i = 0; i < valuetable.size(); ++i)
-                s << "<valuetab val=\"" << dec << valuetable[i] << "\"/>\n";
-            s << "</valuemap_sym>\n";
+            for (int i = 0; i < valuetable.size(); ++i)
+                s.WriteLine($"<valuetab val=\"{valuetable[i]}\"/>");
+            s.WriteLine("</valuemap_sym>");
         }
 
         public override void saveXmlHeader(TextWriter s)
         {
-            s << "<valuemap_sym_head";
-            SleighSymbol::saveXmlHeader(s);
-            s << "/>\n";
+            s.Write("<valuemap_sym_head");
+            base.saveXmlHeader(s);
+            s.Write("/>");
         }
 
         public override void restoreXml(Element el, SleighBase trans)
         {
-            List list = el.getChildren();
-            List::const_iterator iter;
-            iter = list.begin();
-            patval = (PatternValue)PatternExpression::restoreExpression(*iter, trans);
+            IEnumerator<Element> iter = el.getChildren().GetEnumerator();
+            if (!iter.MoveNext()) throw new ApplicationException();
+            patval = (PatternValue)PatternExpression.restoreExpression(iter.Current, trans);
             patval.layClaim();
-            ++iter;
-            while (iter != list.end())
-            {
-                istringstream s = new istringstream((* iter).getAttributeValue("val"));
-                s.unsetf(ios::dec | ios::hex | ios::oct);
-                long val;
-                s >> val;
+            while (iter.MoveNext()) {
+                long val = long.Parse(iter.Current.getAttributeValue("val"));
                 valuetable.Add(val);
-                ++iter;
             }
             checkTableFill();
         }

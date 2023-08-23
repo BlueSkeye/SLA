@@ -1,12 +1,5 @@
 ﻿using Sla.CORE;
 using Sla.SLEIGH;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static Sla.SLEIGH.SleighSymbol;
 
 namespace Sla.SLEIGH
 {
@@ -20,8 +13,7 @@ namespace Sla.SLEIGH
         {
         }
 
-        public ContextSymbol(string nm,ContextField pate, VarnodeSymbol v,uint l, uint h,
-            bool flow);
+        public ContextSymbol(string nm,ContextField pate, VarnodeSymbol v,uint l, uint h, bool flow);
 
         public VarnodeSymbol getVarnode() => vn;
 
@@ -35,15 +27,13 @@ namespace Sla.SLEIGH
 
         public override void saveXml(TextWriter s)
         {
-            s << "<context_sym";
-            SleighSymbol::saveXmlHeader(s);
-            s << " varnode=\"0x" << hex << vn.getId() << "\"";
-            s << " low=\"" << dec << low << "\"";
-            s << " high=\"" << high << "\"";
+            s.Write("<context_sym");
+            base.saveXmlHeader(s);
+            s.Write($" varnode=\"0x{vn.getId():X}\" low=\"{low}\" high=\"{high}\"");
             a_v_b(s, "flow", flow);
-            s << ">\n";
+            s.WriteLine();
             patval.saveXml(s);
-            s << "</context_sym>\n";
+            s.WriteLine("</context_sym>");
         }
 
         public override void saveXmlHeader(TextWriter s)

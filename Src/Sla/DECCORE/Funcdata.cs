@@ -681,7 +681,7 @@ namespace Sla.DECCORE
                 PcodeOp indop = jt.getIndirectOp();
                 if (indop.isDead()) {
                     warningHeader("Recovered jumptable eliminated as dead code");
-                    delete jt;
+                    // delete jt;
                     continue;
                 }
                 alivejumps.Add(jt);
@@ -5517,21 +5517,21 @@ namespace Sla.DECCORE
           opactdbg_active = false;
           if (modify_list.empty()) return;
           PcodeOp *op;
-          ostringstream s;
+          TextWriter s = new StringWriter();
           opactdbg_breakon |= (opactdbg_count == opactdbg_breakcount);
 
-          s << "DEBUG " << dec << opactdbg_count++ << ": " << actionname << endl;
+          s.WriteLine($"DEBUG {opactdbg_count++}: {actionname}");
           for(int i=0;i<modify_list.size();++i) {
             op = modify_list[i];
-            s << modify_before[i] << endl;
-            s << "   ";
+            s.WriteLine(modify_before[i]);
+            s.Write("   ");
             op.printDebug(s);
-            s << endl;
+            s.WriteLine();
             op.clearAdditionalFlag(PcodeOp::modified);
           }
           modify_list.clear();
           modify_before.clear();
-          glb.printDebug(s.str());
+          glb.printDebug(s.ToString());
         }
 
         /// Has a breakpoint been hit
@@ -5600,21 +5600,21 @@ namespace Sla.DECCORE
         /// Print the i-th debug trace range
         public void debugPrintRange(int i)
         {
-          ostringstream s;
+          TextWriter s = new StringWriter();
           if (!opactdbg_pclow[i].isInvalid()) {
-            s << "PC = (";
+            s.Write("PC = (");
             opactdbg_pclow[i].printRaw(s);
-            s << ',';
+            s.Write(',');
             opactdbg_pchigh[i].printRaw(s);
-            s << ")  ";
+            s.Write(")  ");
           }
           else
-            s << "entire function ";
+            s.Write("entire function ");
           if (opactdbg_uqlow[i] != uint.MaxValue) {
-            s << "unique = (" << hex << opactdbg_uqlow[i] << ',';
-            s << opactdbg_uqhigh[i] << ')';
+            s.Write($"unique = ({opactdbg_uqlow[i]:X},");
+            s.Write($"{opactdbg_uqhigh[i]})");
           }
-          glb.printDebug(s.str());
+          glb.printDebug(s.ToString());
         }
 #endif
 

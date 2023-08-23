@@ -1,13 +1,5 @@
-﻿using Sla.DECCORE;
-using Sla.EXTRA;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
+using Sla.DECCORE;
 
 namespace Sla.EXTRA
 {
@@ -34,15 +26,14 @@ namespace Sla.EXTRA
 
         public override bool step(UnifyState state)
         {
-            TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
+            TraverseCountState traverse = (TraverseCountState)state.getTraverse(uniqid);
             if (!traverse.step()) return false;
-            Funcdata* fd = state.getFunction();
+            Funcdata fd = state.getFunction();
             PcodeOp op = state.data(opindex).getOp();
             int sz;
             if (sizevarindex < 0)
                 sz = -sizevarindex;     // A specific size
-            else
-            {
+            else {
                 Varnode sizevn = state.data(sizevarindex).getVarnode();
                 sz = sizevn.getSize();
             }
@@ -53,21 +44,21 @@ namespace Sla.EXTRA
 
         public override void collectTypes(List<UnifyDatatype> typelist)
         {
-            typelist[opindex] = UnifyDatatype(UnifyDatatype.TypeKind.op_type);
-            typelist[newvarindex] = UnifyDatatype(UnifyDatatype.TypeKind.var_type);
+            typelist[opindex] = new UnifyDatatype(UnifyDatatype.TypeKind.op_type);
+            typelist[newvarindex] = new UnifyDatatype(UnifyDatatype.TypeKind.var_type);
             if (sizevarindex >= 0)
-                typelist[sizevarindex] = UnifyDatatype(UnifyDatatype.TypeKind.var_type);
+                typelist[sizevarindex] = new UnifyDatatype(UnifyDatatype.TypeKind.var_type);
         }
 
         public override void print(TextWriter s, UnifyCPrinter printstate)
         {
             printstate.printIndent(s);
-            s << printstate.getName(newvarindex) << " = data.newUniqueOut(";
+            s.Write($"{printstate.getName(newvarindex)} = data.newUniqueOut(");
             if (sizevarindex < 0)
-                s << dec << -sizevarindex;
+                s.Write(-sizevarindex);
             else
-                s << printstate.getName(sizevarindex) << ".getSize()";
-            s << ',' << printstate.getName(opindex) << ");" << endl;
+                s.Write($"{printstate.getName(sizevarindex)}.getSize()");
+            s.WriteLine($",{printstate.getName(opindex)});");
         }
     }
 }

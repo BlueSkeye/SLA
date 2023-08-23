@@ -1,19 +1,13 @@
 ﻿using Sla.CORE;
 using Sla.DECCORE;
 using Sla.SLEIGH;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.EXTRA
 {
     internal class PcodeInjectLibrarySleigh : PcodeInjectLibrary
     {
-        private SleighBase slgh;
+        private SleighBase? slgh;
         private List<OpBehavior> inst;
         private InjectContextSleigh contextCache;
 
@@ -33,9 +27,10 @@ namespace Sla.EXTRA
         /// \return the new dynamic payload object
         private InjectPayloadDynamic forceDebugDynamic(int injectid)
         {
-            InjectPayload* oldPayload = injection[injectid];
-            InjectPayloadDynamic* newPayload = new InjectPayloadDynamic(glb, oldPayload.getName(), oldPayload.getType());
-            delete oldPayload;
+            InjectPayload oldPayload = injection[injectid];
+            InjectPayloadDynamic newPayload = new InjectPayloadDynamic(glb, oldPayload.getName(),
+                oldPayload.getType());
+            // delete oldPayload;
             injection[injectid] = newPayload;
             return newPayload;
         }
@@ -44,17 +39,17 @@ namespace Sla.EXTRA
         {
             if (payload.isDynamic())
                 return;
-            if (slgh == (SleighBase*)0) { // Make sure we have the sleigh AddrSpaceManager
-                slgh = (SleighBase*)glb.translate;
-                if (slgh == (SleighBase*)0)
+            if (slgh == (SleighBase)null) { // Make sure we have the sleigh AddrSpaceManager
+                Parsing.slgh = (SleighBase)glb.translate;
+                if (Parsing.slgh == (SleighBase)null)
                     throw new CORE.LowlevelError("Registering pcode snippet before language is instantiated");
             }
-            if (contextCache.pos == (ParserContext)null)
-            {   // Make sure we have a context
+            if (contextCache.pos == (ParserContext)null) {
+                // Make sure we have a context
                 contextCache.pos = new ParserContext((ContextCache)null, (Translate)null);
-                contextCache.pos.initialize(8, 8, slgh.getConstantSpace());
+                contextCache.pos.initialize(8, 8, Parsing.slgh.getConstantSpace());
             }
-            PcodeSnippet compiler = new PcodeSnippet(slgh);
+            PcodeSnippet compiler = new PcodeSnippet(Parsing.slgh);
             //  compiler.clear();			// Not necessary unless we reuse
             for (int i = 0; i < payload.sizeInput(); ++i) {
                 InjectParameter param = payload.getInput(i);
@@ -67,21 +62,24 @@ namespace Sla.EXTRA
             if (payload.getType() == InjectPayload.InjectionType.EXECUTABLEPCODE_TYPE) {
                 compiler.setUniqueBase(0x2000); // Don't need to deconflict with anything other injects
                 ExecutablePcodeSleigh sleighpayload = (ExecutablePcodeSleigh)payload;
-                istringstream s = new istringstream(sleighpayload.parsestring);
+                TextReader s = new StringReader(sleighpayload.parsestring);
                 if (!compiler.parseStream(s))
-                    throw new CORE.LowlevelError(payload.getSource() + ": Unable to compile pcode: " + compiler.getErrorMessage());
+                    throw new CORE.LowlevelError(
+                        $"{payload.getSource()}: Unable to compile pcode: {compiler.getErrorMessage()}");
                 sleighpayload.tpl = compiler.releaseResult();
                 sleighpayload.parsestring = "";        // No longer need the memory
             }
             else {
                 compiler.setUniqueBase(tempbase);
                 InjectPayloadSleigh sleighpayload = (InjectPayloadSleigh)payload;
-                istringstream s = new istringstream(sleighpayload.parsestring);
+                TextReader s = new StringReader(sleighpayload.parsestring);
                 if (!compiler.parseStream(s))
-                    throw new CORE.LowlevelError(payload.getSource() + ": Unable to compile pcode: " + compiler.getErrorMessage());
+                    throw new CORE.LowlevelError(
+                        $"{payload.getSource()}: Unable to compile pcode: {compiler.getErrorMessage()}");
                 tempbase = compiler.getUniqueBase();
                 sleighpayload.tpl = compiler.releaseResult();
-                sleighpayload.parsestring = "";        // No longer need the memory
+                // No longer need the memory
+                sleighpayload.parsestring = string.Empty;
             }
         }
 
@@ -132,25 +130,23 @@ namespace Sla.EXTRA
         }
 
         public PcodeInjectLibrarySleigh(Architecture g)
-            : base(g, g.translate.getUniqueStart(Translate::INJECT))
+            : base(g, g.translate.getUniqueStart(Translate.UniqueLayout.INJECT))
         {
-            slgh = (SleighBase*)g.translate;
+            slgh = (SleighBase)g.translate;
             contextCache.glb = g;
         }
 
-        public override void decodeDebug(Decoder decoder)
+        public override void decodeDebug(Sla.CORE.Decoder decoder)
         {
-            uint elemId = decoder.openElement(ElementId.ELEM_INJECTDEBUG);
-            while(true)
-            {
-                uint subId = decoder.openElement();
-                if (subId != ELEM_INJECT) break;
+            ElementId elemId = decoder.openElement(ElementId.ELEM_INJECTDEBUG);
+            while(true) {
+                ElementId subId = decoder.openElement();
+                if (subId != ElementId.ELEM_INJECT) break;
                 string name = decoder.readString(AttributeId.ATTRIB_NAME);
-                int type = decoder.readSignedInteger(AttributeId.ATTRIB_TYPE);
+                int type = (int)decoder.readSignedInteger(AttributeId.ATTRIB_TYPE);
                 int id = getPayloadId(type, name);
-                InjectPayloadDynamic* payload = dynamic_cast<InjectPayloadDynamic*>(getPayload(id));
-                if (payload == (InjectPayloadDynamic*)0)
-                {
+                InjectPayloadDynamic? payload = getPayload(id) as InjectPayloadDynamic;
+                if (payload == (InjectPayloadDynamic)null) {
                     payload = forceDebugDynamic(id);
                 }
                 payload.decodeEntry(decoder);
@@ -174,11 +170,11 @@ namespace Sla.EXTRA
         {
             string sourceName = "<manual callotherfixup name=\"" + name + "\")";
             int injectid = allocateInject(sourceName, name, InjectPayload.InjectionType.CALLOTHERFIXUP_TYPE);
-            InjectPayloadSleigh* payload = (InjectPayloadSleigh*)getPayload(injectid);
+            InjectPayloadSleigh payload = (InjectPayloadSleigh)getPayload(injectid);
             for (int i = 0; i < inname.size(); ++i)
-                payload.inputlist.Add(InjectParameter(inname[i], 0));
-            if (outname.size() != 0)
-                payload.output.Add(InjectParameter(outname, 0));
+                payload.inputlist.Add(new InjectParameter(inname[i], 0));
+            if (outname.Length != 0)
+                payload.output.Add(new InjectParameter(outname, 0));
             payload.orderParameters();
             payload.parsestring = snippet;
             registerInject(injectid);

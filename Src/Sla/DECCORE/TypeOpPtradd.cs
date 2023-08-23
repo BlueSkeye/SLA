@@ -1,10 +1,4 @@
-﻿using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -14,9 +8,9 @@ namespace Sla.DECCORE
             : base(t, OpCode.CPUI_PTRADD,"+")
 
         {
-            opflags = PcodeOp::ternary | PcodeOp.Flags.nocollapse;
-            addlflags = arithmetic_op;
-            behave = new OpBehavior(CPUI_PTRADD, false); // Dummy behavior
+            opflags = PcodeOp.Flags.ternary | PcodeOp.Flags.nocollapse;
+            addlflags = OperationType.arithmetic_op;
+            behave = new OpBehavior(OpCode.CPUI_PTRADD, false); // Dummy behavior
         }
 
         public override Datatype getInputLocal(PcodeOp op, int slot)
@@ -36,14 +30,14 @@ namespace Sla.DECCORE
 
         public override Datatype getInputCast(PcodeOp op, int slot, CastStrategy castStrategy)
         {
-            if (slot == 0)
-            {       // The operation expects the type of the VARNODE
-                    // not the (possibly different) type of the HIGH
-                Datatype* reqtype = op.getIn(0).getTypeReadFacing(op);
-                Datatype* curtype = op.getIn(0).getHighTypeReadFacing(op);
+            if (slot == 0) {
+                // The operation expects the type of the VARNODE
+                // not the (possibly different) type of the HIGH
+                Datatype reqtype = op.getIn(0).getTypeReadFacing(op);
+                Datatype curtype = op.getIn(0).getHighTypeReadFacing(op);
                 return castStrategy.castStandard(reqtype, curtype, false, false);
             }
-            return TypeOp::getInputCast(op, slot, castStrategy);
+            return base.getInputCast(op, slot, castStrategy);
         }
 
         public override Datatype propagateType(Datatype alttype, PcodeOp op, Varnode invn, Varnode outvn,
@@ -53,11 +47,11 @@ namespace Sla.DECCORE
             if ((inslot != -1) && (outslot != -1)) return (Datatype)null; // Must propagate input <. output
             type_metatype metain = alttype.getMetatype();
             if (metain != type_metatype.TYPE_PTR) return (Datatype)null;
-            Datatype* newtype;
+            Datatype newtype;
             if (inslot == -1)       // Propagating output to input
                 newtype = op.getIn(outslot).getTempType();    // Don't propagate pointer types this direction
             else
-                newtype = TypeOpIntAdd::propagateAddIn2Out(alttype, tlst, op, inslot);
+                newtype = TypeOpIntAdd.propagateAddIn2Out(alttype, tlst, op, inslot);
             return newtype;
         }
 
@@ -68,14 +62,14 @@ namespace Sla.DECCORE
 
         public override void printRaw(TextWriter s, PcodeOp op)
         {
-            Varnode::printRaw(s, op.getOut());
-            s << " = ";
-            Varnode::printRaw(s, op.getIn(0));
-            s << ' ' << name << ' ';
-            Varnode::printRaw(s, op.getIn(1));
-            s << "(*";
-            Varnode::printRaw(s, op.getIn(2));
-            s << ')';
+            Varnode.printRaw(s, op.getOut());
+            s.Write(" = ");
+            Varnode.printRaw(s, op.getIn(0));
+            s.Write($" {name} ");
+            Varnode.printRaw(s, op.getIn(1));
+            s.Write("(*");
+            Varnode.printRaw(s, op.getIn(2));
+            s.Write(')');
         }
     }
 }

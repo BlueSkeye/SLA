@@ -1,11 +1,4 @@
 ﻿using Sla.CORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.SLEIGH
 {
@@ -96,7 +89,7 @@ namespace Sla.SLEIGH
 
         public override void saveXml(TextWriter s)
         {
-            s.Write("<operand_exp";
+            s.Write("<operand_exp");
             s.Write($" index=\"{index}\"");
             s.Write(" table=\"0x{ct.getParent().getId():X}\"");
             // Save id of our constructor
@@ -111,7 +104,7 @@ namespace Sla.SLEIGH
             ctid = uint.Parse(el.getAttributeValue("ct"));
             SleighBase sleigh = (SleighBase)trans;
             SubtableSymbol? tab = (sleigh.findSymbol(tabid) as SubtableSymbol) ?? throw new BugException();
-            ct = tab.getConstructor(ctid);
+            ct = tab.getConstructor((int)ctid);
         }
     }
 }

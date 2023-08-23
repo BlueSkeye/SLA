@@ -1,10 +1,4 @@
-﻿using ghidra;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -14,8 +8,8 @@ namespace Sla.DECCORE
         public TypeOpNew(TypeFactory t)
             : base(t, OpCode.CPUI_NEW,"new")
         {
-            opflags = PcodeOp.Flags.special | PcodeOp::call | PcodeOp.Flags.nocollapse;
-            behave = new OpBehavior(CPUI_NEW, false, true);     // Dummy behavior
+            opflags = PcodeOp.Flags.special | PcodeOp.Flags.call | PcodeOp.Flags.nocollapse;
+            behave = new OpBehavior(OpCode.CPUI_NEW, false, true);     // Dummy behavior
         }
 
         // Never needs casting
@@ -41,20 +35,18 @@ namespace Sla.DECCORE
 
         public override void printRaw(TextWriter s, PcodeOp op)
         {
-            if (op.getOut() != (Varnode)null)
-            {
-                Varnode::printRaw(s, op.getOut());
-                s << " = ";
+            if (op.getOut() != (Varnode)null) {
+                Varnode.printRaw(s, op.getOut());
+                s.Write(" = ");
             }
-            s << getOperatorName(op);
-            s << '(';
-            Varnode::printRaw(s, op.getIn(0));
-            for (int i = 1; i < op.numInput(); ++i)
-            {
-                s << ',';
-                Varnode::printRaw(s, op.getIn(i));
+            s.Write(getOperatorName(op));
+            s.Write('(');
+            Varnode.printRaw(s, op.getIn(0));
+            for (int i = 1; i < op.numInput(); ++i) {
+                s.Write(',');
+                Varnode.printRaw(s, op.getIn(i));
             }
-            s << ')';
+            s.Write(')');
         }
     }
 }

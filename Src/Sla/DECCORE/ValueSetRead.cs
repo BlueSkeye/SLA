@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -74,15 +69,13 @@ namespace Sla.DECCORE
         public void compute()
         {
             Varnode vn = op.getIn(slot);
-            ValueSet* valueSet = vn.getValueSet();
+            ValueSet valueSet = vn.getValueSet();
             typeCode = valueSet.getTypeCode();
             range = valueSet.getRange();
             leftIsStable = valueSet.isLeftStable();
             rightIsStable = valueSet.isRightStable();
-            if (typeCode == equationTypeCode)
-            {
-                if (0 != range.intersect(equationConstraint))
-                {
+            if (typeCode == equationTypeCode) {
+                if (0 != range.intersect(equationConstraint)) {
                     range = equationConstraint;
                 }
             }
@@ -92,12 +85,12 @@ namespace Sla.DECCORE
         /// \param s is the stream to print to
         public void printRaw(TextWriter s)
         {
-            s << "Read: " << Globals.get_opname(op.code());
-            s << '(' << op.getSeqNum() << ')';
+            s.Write($"Read: {Globals.get_opname(op.code())}");
+            s.Write($"({op.getSeqNum()})");
             if (typeCode == 0)
-                s << " absolute ";
+                s.Write(" absolute ");
             else
-                s << " stackptr ";
+                s.Write(" stackptr ");
             range.printRaw(s);
         }
     }

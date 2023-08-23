@@ -23,21 +23,18 @@ namespace Sla.DECCORE
 
         public override void printRaw(TextWriter s, PcodeOp op)
         {
-            s << name;
-            if (op.numInput() >= 1)
-            {
-                s << '(';
-                Varnode::printRaw(s, op.getIn(0));
-                s << ')';
+            s.Write(name);
+            if (op.numInput() >= 1) {
+                s.Write('(');
+                Varnode.printRaw(s, op.getIn(0));
+                s.Write(')');
             }
-            if (op.numInput() > 1)
-            {
-                s << ' ';
-                Varnode::printRaw(s, op.getIn(1));
-                for (int i = 2; i < op.numInput(); ++i)
-                {
-                    s << ',';
-                    Varnode::printRaw(s, op.getIn(i));
+            if (op.numInput() > 1) {
+                s.Write(' ');
+                Varnode.printRaw(s, op.getIn(1));
+                for (int i = 2; i < op.numInput(); ++i) {
+                    s.Write(',');
+                    Varnode.printRaw(s, op.getIn(i));
                 }
             }
         }
@@ -45,22 +42,22 @@ namespace Sla.DECCORE
         public override Datatype getInputLocal(PcodeOp op, int slot)
         {
             FuncProto fp;
-            Datatype* ct;
+            Datatype ct;
 
             if (slot == 0)
-                return TypeOp::getInputLocal(op, slot);
+                return base.getInputLocal(op, slot);
 
             // Get data-types of return input parameters
             BlockBasic bb = op.getParent();
             if (bb == (BlockBasic)null)
-                return TypeOp::getInputLocal(op, slot);
+                return base.getInputLocal(op, slot);
 
-            fp = &bb.getFuncdata().getFuncProto();    // Prototype of function we are in
+            fp = bb.getFuncdata().getFuncProto();    // Prototype of function we are in
 
             //  if (!fp.isOutputLocked()) return TypeOp::getInputLocal(op,slot);
             ct = fp.getOutputType();
             if (ct.getMetatype() == type_metatype.TYPE_VOID || (ct.getSize() != op.getIn(slot).getSize()))
-                return TypeOp::getInputLocal(op, slot);
+                return base.getInputLocal(op, slot);
             return ct;
         }
     }

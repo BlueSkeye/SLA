@@ -92,12 +92,12 @@ namespace Sla.DECCORE
             maplist.Add(newRange);
 #if OPACTION_DEBUG
             if (debugon) {
-                ostringstream s;
-                s << "Add Range: " << hex << st << ":" << dec << sz;
-                s << " ";
+                TextWriter s = new StringWriter();
+                s.Write($"Add Range: {st:X}:{sz}");
+                s.Write(" ");
                 ct.printRaw(s);
-                s << endl;
-                glb.printDebug(s.str());
+                s.WriteLine();
+                glb.printDebug(s.ToString());
             }
 #endif
         }

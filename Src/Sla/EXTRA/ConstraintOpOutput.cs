@@ -1,12 +1,5 @@
-﻿using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
+using Sla.DECCORE;
 
 namespace Sla.EXTRA
 {
@@ -28,7 +21,7 @@ namespace Sla.EXTRA
 
         public override bool step(UnifyState state)
         {
-            TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
+            TraverseCountState traverse = (TraverseCountState)state.getTraverse(uniqid);
             if (!traverse.step()) return false;
             PcodeOp op = state.data(opindex).getOp();
             Varnode vn = op.getOut();
@@ -38,8 +31,8 @@ namespace Sla.EXTRA
 
         public override void collectTypes(List<UnifyDatatype> typelist)
         {
-            typelist[opindex] = UnifyDatatype(UnifyDatatype.TypeKind.op_type);
-            typelist[varnodeindex] = UnifyDatatype(UnifyDatatype.TypeKind.var_type);
+            typelist[opindex] = new UnifyDatatype(UnifyDatatype.TypeKind.op_type);
+            typelist[varnodeindex] = new UnifyDatatype(UnifyDatatype.TypeKind.var_type);
         }
 
         public override int getBaseIndex() => varnodeindex;
@@ -47,7 +40,7 @@ namespace Sla.EXTRA
         public override void print(TextWriter s, UnifyCPrinter printstate)
         {
             printstate.printIndent(s);
-            s << printstate.getName(varnodeindex) << " = " << printstate.getName(opindex) << ".getOut();" << endl;
+            s.WriteLine($"{printstate.getName(varnodeindex)} = {printstate.getName(opindex)}.getOut();");
         }
     }
 }

@@ -1,10 +1,4 @@
 ﻿using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.EXTRA
 {
@@ -27,7 +21,7 @@ namespace Sla.EXTRA
 
         public override void writeExpression(TextWriter s, UnifyCPrinter printstate)
         {
-            s << "(ulong)" << printstate.getName(varindex) << ".isConstant()";
+            s.Write($"(ulong){printstate.getName(varindex)}.isConstant()");
         }
     }
 }

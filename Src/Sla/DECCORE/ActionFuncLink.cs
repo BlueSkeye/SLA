@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -26,34 +20,31 @@ namespace Sla.DECCORE
         {
             bool inputlocked = fc.isInputLocked();
             bool varargs = fc.isDotdotdot();
-            AddrSpace* spacebase = fc.getSpacebase();  // Non-zero spacebase indicates we need a stackplaceholder
-            ParamActive* active = fc.getActiveInput();
+            AddrSpace spacebase = fc.getSpacebase();  // Non-zero spacebase indicates we need a stackplaceholder
+            ParamActive active = fc.getActiveInput();
 
             if ((!inputlocked) || varargs)
                 fc.initActiveInput();
-            if (inputlocked)
-            {
+            if (inputlocked) {
                 PcodeOp op = fc.getOp();
                 int numparam = fc.numParams();
                 bool setplaceholder = varargs;
-                for (int i = 0; i < numparam; ++i)
-                {
-                    ProtoParameter* param = fc.getParam(i);
+                for (int i = 0; i < numparam; ++i) {
+                    ProtoParameter param = fc.getParam(i);
                     active.registerTrial(param.getAddress(), param.getSize());
                     active.getTrial(i).markActive(); // Parameter is not optional
-                    if (varargs)
-                    {
+                    if (varargs) {
                         active.getTrial(i).setFixedPosition(i);
                     }
-                    AddrSpace* spc = param.getAddress().getSpace();
+                    AddrSpace spc = param.getAddress().getSpace();
                     ulong off = param.getAddress().getOffset();
                     int sz = param.getSize();
-                    if (spc.getType() == spacetype.IPTR_SPACEBASE)
-                    { // Param is stack relative
-                        Varnode loadval = data.opStackLoad(spc, off, sz, op, (Varnode)null, false);
+                    if (spc.getType() == spacetype.IPTR_SPACEBASE) {
+                        // Param is stack relative
+                        Varnode loadval = data.opStackLoad(spc, off, sz, op, (Varnode)null,
+                            false);
                         data.opInsertInput(op, loadval, op.numInput());
-                        if (!setplaceholder)
-                        {
+                        if (!setplaceholder) {
                             setplaceholder = true;
                             loadval.setSpacebasePlaceholder();
                             spacebase = (AddrSpace)null;  // With a locked stack parameter, we don't need a stackplaceholder
@@ -63,7 +54,8 @@ namespace Sla.DECCORE
                         data.opInsertInput(op, data.newVarnode(param.getSize(), param.getAddress()), op.numInput());
                 }
             }
-            if (spacebase != (AddrSpace)null) // If we need it, create the stackplaceholder
+            if (spacebase != (AddrSpace)null)
+                // If we need it, create the stackplaceholder
                 fc.createPlaceholder(data, spacebase);
         }
 
@@ -76,44 +68,43 @@ namespace Sla.DECCORE
         private static void funcLinkOutput(FuncCallSpecs fc, Funcdata data)
         {
             PcodeOp callop = fc.getOp();
-            if (callop.getOut() != (Varnode)null)
-            {
+            if (callop.getOut() != (Varnode)null) {
                 // CALL ops are expected to have no output, but its possible an override has produced one
-                if (callop.getOut().getSpace().getType() == spacetype.IPTR_INTERNAL)
-                {
+                if (callop.getOut().getSpace().getType() == spacetype.IPTR_INTERNAL) {
                     // Removing a varnode in the unique space will likely produce an input varnode in the unique space
-                    ostringstream s;
-                    s << "CALL op at ";
+                    TextWriter s = new StringWriter();
+                    s.Write("CALL op at ");
                     callop.getAddr().printRaw(s);
-                    s << " has an unexpected output varnode";
-                    throw new LowlevelError(s.str());
+                    s.Write(" has an unexpected output varnode");
+                    throw new LowlevelError(s.ToString());
                 }
                 // Otherwise just remove the Varnode and assume return recovery will reintroduce it if necessary
                 data.opUnsetOutput(callop);
             }
-            if (fc.isOutputLocked())
-            {
-                ProtoParameter* outparam = fc.getOutput();
-                Datatype* outtype = outparam.getType();
-                if (outtype.getMetatype() != type_metatype.TYPE_VOID)
-                {
+            if (fc.isOutputLocked()) {
+                ProtoParameter outparam = fc.getOutput();
+                Datatype outtype = outparam.getType();
+                if (outtype.getMetatype() != type_metatype.TYPE_VOID) {
                     int sz = outparam.getSize();
-                    if (sz == 1 && outtype.getMetatype() == type_metatype.TYPE_BOOL && data.isTypeRecoveryOn())
+                    if (sz == 1 && outtype.getMetatype() == type_metatype.TYPE_BOOL
+                        && data.isTypeRecoveryOn())
+                    {
                         data.opMarkCalculatedBool(callop);
+                    }
                     Address addr = outparam.getAddress();
                     data.newVarnodeOut(sz, addr, callop);
                     VarnodeData vdata;
                     OpCode res = fc.assumedOutputExtension(addr, sz, vdata);
-                    if (res == OpCode.CPUI_PIECE)
-                    {       // Pick an extension based on type
+                    if (res == OpCode.CPUI_PIECE) {
+                        // Pick an extension based on type
                         if (outtype.getMetatype() == type_metatype.TYPE_INT)
                             res = OpCode.CPUI_INT_SEXT;
                         else
                             res = OpCode.CPUI_INT_ZEXT;
                     }
-                    if (res != OpCode.CPUI_COPY)
-                    { // We assume the (smallsize) output is extended to a full register
-                      // Create the extension operation to eliminate artifact
+                    if (res != OpCode.CPUI_COPY) {
+                        // We assume the (smallsize) output is extended to a full register
+                        // Create the extension operation to eliminate artifact
                         PcodeOp op = data.newOp(1, callop.getAddr());
                         data.newVarnodeOut(vdata.size, vdata.getAddr(), op);
                         Varnode invn = data.newVarnode(sz, addr);
@@ -128,7 +119,7 @@ namespace Sla.DECCORE
         }
 
         public ActionFuncLink(string g)
-            : base(rule_onceperfunc,"funclink", g)
+            : base(ruleflags.rule_onceperfunc,"funclink", g)
         {
         }
 
@@ -142,8 +133,7 @@ namespace Sla.DECCORE
             int i, size;
 
             size = data.numCalls();
-            for (i = 0; i < size; ++i)
-            {
+            for (i = 0; i < size; ++i) {
                 funcLinkInput(data.getCallSpecs(i), data);
                 funcLinkOutput(data.getCallSpecs(i), data);
             }

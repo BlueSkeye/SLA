@@ -1,9 +1,4 @@
-﻿using ghidra;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -24,7 +19,7 @@ namespace Sla.DECCORE
         public override Datatype getOutputToken(PcodeOp op, CastStrategy castStrategy)
         {
             Varnode vn = op.getOut();
-            Datatype* dt = vn.getHighTypeDefFacing();
+            Datatype dt = vn.getHighTypeDefFacing();
             type_metatype meta = dt.getMetatype();
             if ((meta == type_metatype.TYPE_INT) || (meta == type_metatype.TYPE_UINT))      // PIECE casts to uint or int, based on output
                 return dt;
@@ -33,10 +28,10 @@ namespace Sla.DECCORE
 
         public override string getOperatorName(PcodeOp op)
         {
-            ostringstream s;
+            TextWriter s = new StringWriter();
 
-            s << name << dec << op.getIn(0).getSize() << op.getIn(1).getSize();
-            return s.str();
+            s.Write($"{name}{op.getIn(0).getSize()}{op.getIn(1).getSize()}");
+            return s.ToString();
         }
 
         public override void push(PrintLanguage lng, PcodeOp op, PcodeOp readOp)

@@ -1,12 +1,5 @@
-﻿using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
+using Sla.DECCORE;
 
 namespace Sla.EXTRA
 {
@@ -29,7 +22,7 @@ namespace Sla.EXTRA
 
         public override bool step(UnifyState state)
         {
-            TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
+            TraverseCountState traverse = (TraverseCountState)state.getTraverse(uniqid);
             if (!traverse.step()) return false;
             PcodeOp op1 = state.data(op1index).getOp();
             PcodeOp op2 = state.data(op2index).getOp();
@@ -38,8 +31,8 @@ namespace Sla.EXTRA
 
         public override void collectTypes(List<UnifyDatatype> typelist)
         {
-            typelist[op1index] = UnifyDatatype(UnifyDatatype.TypeKind.op_type);
-            typelist[op2index] = UnifyDatatype(UnifyDatatype.TypeKind.op_type);
+            typelist[op1index] = new UnifyDatatype(UnifyDatatype.TypeKind.op_type);
+            typelist[op2index] = new UnifyDatatype(UnifyDatatype.TypeKind.op_type);
         }
 
         public override int getBaseIndex() => op1index;
@@ -47,12 +40,12 @@ namespace Sla.EXTRA
         public override void print(TextWriter s, UnifyCPrinter printstate)
         {
             printstate.printIndent(s);
-            s << "if (" << printstate.getName(op1index);
+            s.Write($"if ({printstate.getName(op1index)}");
             if (istrue)
-                s << " != ";
+                s.Write(" != ");
             else
-                s << " == ";
-            s << printstate.getName(op2index) << ')' << endl;
+                s.Write(" == ");
+            s.WriteLine($"{printstate.getName(op2index)})");
             printstate.printAbort(s);
         }
     }

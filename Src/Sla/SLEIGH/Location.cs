@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Sla.SLEIGH
 {
     internal class Location
@@ -27,9 +22,9 @@ namespace Sla.SLEIGH
 
         public string format()
         {
-            ostringstream s;
-            s << filename << ":" << dec << lineno;
-            return s.str();
+            TextWriter s = new StringWriter();
+            s.Write($"{filename}:{lineno}");
+            return s.ToString();
         }
     }
 }

@@ -1,13 +1,4 @@
 ﻿using Sla.CORE;
-using Sla.SLEIGH;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.SLEIGH
 {
@@ -17,11 +8,11 @@ namespace Sla.SLEIGH
         private TokenPattern pattern;
         private SubtableSymbol parent;
         private PatternEquation pateq;
-        private List<OperandSymbol> operands;
-        private List<string> printpiece;
-        private List<ContextChange> context; // Context commands
+        private List<OperandSymbol> operands = new List<OperandSymbol>();
+        private List<string> printpiece = new List<string>();
+        private List<ContextChange> context = new List<ContextChange>(); // Context commands
         private ConstructTpl templ;        // The main p-code section
-        private List<ConstructTpl> namedtempl; // Other named p-code sections
+        private List<ConstructTpl> namedtempl = new List<ConstructTpl>(); // Other named p-code sections
         private int minimumlength;     // Minimum length taken up by this constructor in bytes
         private uint id;           // Unique id of constructor within subtable
         private int firstwhitespace;       // Index of first whitespace piece in -printpiece-
@@ -38,35 +29,30 @@ namespace Sla.SLEIGH
             int lastsize;
 
             pateq.operandOrder(this, patternorder);
-            for (int i = 0; i < operands.size(); ++i)
-            { // Make sure patternorder contains all operands
+            for (int i = 0; i < operands.size(); ++i) {
+                // Make sure patternorder contains all operands
                 sym = operands[i];
-                if (!sym.isMarked())
-                {
+                if (!sym.isMarked()) {
                     patternorder.Add(sym);
                     sym.setMark();     // Make sure all operands are marked
                 }
             }
-            do
-            {
+            do {
                 lastsize = newops.size();
-                for (int i = 0; i < patternorder.size(); ++i)
-                {
+                for (int i = 0; i < patternorder.size(); ++i) {
                     sym = patternorder[i];
                     if (!sym.isMarked()) continue; // "unmarked" means it is already in newops
                     if (sym.isOffsetIrrelevant()) continue; // expression Operands come last
-                    if ((sym.offsetbase == -1) || (!operands[(int)sym.offsetbase].isMarked()))
-                    {
+                    if ((sym.offsetbase == -1) || (!operands[(int)sym.offsetbase].isMarked())) {
                         newops.Add(sym);
                         sym.clearMark();
                     }
                 }
             } while (newops.size() != lastsize);
-            for (int i = 0; i < patternorder.size(); ++i)
-            { // Tack on expression Operands
+            for (int i = 0; i < patternorder.size(); ++i) {
+                // Tack on expression Operands
                 sym = patternorder[i];
-                if (sym.isOffsetIrrelevant())
-                {
+                if (sym.isOffsetIrrelevant()) {
                     newops.Add(sym);
                     sym.clearMark();
                 }
@@ -75,9 +61,8 @@ namespace Sla.SLEIGH
             if (newops.size() != operands.size())
                 throw new SleighError("Circular offset dependency between operands");
 
-
-            for (int i = 0; i < newops.size(); ++i)
-            { // Fix up operand indices
+            for (int i = 0; i < newops.size(); ++i) {
+                // Fix up operand indices
                 newops[i].hand = i;
                 newops[i].localexp.changeIndex(i);
             }
@@ -86,8 +71,7 @@ namespace Sla.SLEIGH
                 handmap.Add(operands[i].hand);
 
             // Fix up offsetbase
-            for (int i = 0; i < newops.size(); ++i)
-            {
+            for (int i = 0; i < newops.size(); ++i) {
                 sym = newops[i];
                 if (sym.offsetbase == -1) continue;
                 sym.offsetbase = handmap[sym.offsetbase];
@@ -95,18 +79,15 @@ namespace Sla.SLEIGH
 
             if (templ != (ConstructTpl)null) // Fix up templates
                 templ.changeHandleIndex(handmap);
-            for (int i = 0; i < namedtempl.size(); ++i)
-            {
+            for (int i = 0; i < namedtempl.size(); ++i) {
                 ConstructTpl? ntempl = namedtempl[i];
                 if (ntempl != (ConstructTpl)null)
                     ntempl.changeHandleIndex(handmap);
             }
 
             // Fix up printpiece operand refs
-            for (int i = 0; i < printpiece.size(); ++i)
-            {
-                if (printpiece[i][0] == '\n')
-                {
+            for (int i = 0; i < printpiece.size(); ++i) {
+                if (printpiece[i][0] == '\n') {
                     int index = printpiece[i][1] - 'A';
                     index = handmap[index];
                     printpiece[i][1] = 'A' + index;
@@ -212,21 +193,19 @@ namespace Sla.SLEIGH
             if (!pateq.resolveOperandLeft(resolve))
                 throw new SleighError("Unable to resolve operand offsets");
 
-            for (int i = 0; i < operands.size(); ++i)
-            { // Unravel relative offsets to absolute (if possible)
+            for (int i = 0; i < operands.size(); ++i) {
+                // Unravel relative offsets to absolute (if possible)
                 int @base;
                 int offset;
                 OperandSymbol sym = operands[i];
-                if (sym.isOffsetIrrelevant())
-                {
+                if (sym.isOffsetIrrelevant()) {
                     sym.offsetbase = -1;
                     sym.reloffset = 0;
                     continue;
                 }
                 @base = sym.offsetbase;
                 offset = (int)sym.reloffset;
-                while (@base >= 0)
-                {
+                while (@base >= 0) {
                     sym = operands[@base];
                     if (sym.isVariableLength()) break; // Cannot resolve to absolute
                     @base = sym.offsetbase;
@@ -473,7 +452,7 @@ namespace Sla.SLEIGH
             if (handle.getSpace().getType() == ConstTpl.const_type.handle)
             {
                 int handleIndex = handle.getSpace().getHandleIndex();
-                OperandSymbol* opSym = getOperand(handleIndex);
+                OperandSymbol opSym = getOperand(handleIndex);
                 opSym.collectLocalValues(results);
             }
         }
@@ -489,7 +468,7 @@ namespace Sla.SLEIGH
         { // Does this constructor cause recursion with its table
             for (int i = 0; i < operands.size(); ++i)
             {
-                TripleSymbol* sym = operands[i].getDefiningSymbol();
+                TripleSymbol sym = operands[i].getDefiningSymbol();
                 if (sym == parent) return true;
             }
             return false;
@@ -497,25 +476,22 @@ namespace Sla.SLEIGH
 
         public void saveXml(TextWriter s)
         {
-            s << "<constructor";
-            s << " parent=\"0x" << hex << parent.getId() << "\"";
-            s << " first=\"" << dec << firstwhitespace << "\"";
-            s << " length=\"" << minimumlength << "\"";
-            s << " line=\"" << src_index << ":" << lineno << "\">\n";
+            s.Write("<constructor");
+            s.Write($" parent=\"0x{parent.getId():X}\"");
+            s.Write($" first=\"{firstwhitespace}\"");
+            s.Write($" length=\"{minimumlength}\"");
+            s.WriteLine(" line=\"{src_index}:{lineno}\">");
             for (int i = 0; i < operands.size(); ++i)
-                s << "<oper id=\"0x" << hex << operands[i].getId() << "\"/>\n";
-            for (int i = 0; i < printpiece.size(); ++i)
-            {
-                if (printpiece[i][0] == '\n')
-                {
+                s.WriteLine($"<oper id=\"0x{operands[i].getId():X}\"/>");
+            for (int i = 0; i < printpiece.size(); ++i) {
+                if (printpiece[i][0] == '\n') {
                     int index = printpiece[i][1] - 'A';
-                    s << "<opprint id=\"" << dec << index << "\"/>\n";
+                    s.WriteLine($"<opprint id=\"{index}\"/>");
                 }
-                else
-                {
-                    s << "<print piece=\"";
-                    xml_escape(s, printpiece[i].c_str());
-                    s << "\"/>\n";
+                else {
+                    s.Write("<print piece=\"");
+                    Xml.xml_escape(s, printpiece[i].c_str());
+                    s.WriteLine("\"/>");
                 }
             }
             for (int i = 0; i < context.size(); ++i)
@@ -528,86 +504,53 @@ namespace Sla.SLEIGH
                     continue;
                 namedtempl[i].saveXml(s, i);
             }
-            s << "</constructor>\n";
+            s.WriteLine("</constructor>");
         }
 
         public void restoreXml(Element el, SleighBase trans)
         {
-            uint id;
-            {
-                istringstream s = new istringstream(el.getAttributeValue("parent"));
-                s.unsetf(ios::dec | ios::hex | ios::oct);
-                s >> id;
-                parent = (SubtableSymbol)trans.findSymbol(id);
-            }
-            {
-                istringstream s = new istringstream(el.getAttributeValue("first"));
-                s.unsetf(ios::dec | ios::hex | ios::oct);
-                s >> firstwhitespace;
-            }
-            {
-                istringstream s = new istringstream(el.getAttributeValue("length"));
-                s.unsetf(ios::dec | ios::hex | ios::oct);
-                s >> minimumlength;
-            }
-            {
-                string src_and_line = el.getAttributeValue("line");
-                size_t pos = src_and_line.find(":");
-                src_index = stoi(src_and_line.Substring(0, pos), NULL, 10);
-                lineno = stoi(src_and_line.Substring(pos + 1, src_and_line.length()), NULL, 10);
-            }
-            List list = el.getChildren();
-            List::const_iterator iter;
-            iter = list.begin();
-            while (iter != list.end())
-            {
-                if ((*iter).getName() == "oper")
-                {
-                    uint id;
-                    {
-                        istringstream s = new istringstream((* iter).getAttributeValue("id"));
-                        s.unsetf(ios::dec | ios::hex | ios::oct);
-                        s >> id;
-                    }
+            uint id = uint.Parse(el.getAttributeValue("parent"));
+            parent = (SubtableSymbol)trans.findSymbol(id);
+            firstwhitespace = int.Parse(el.getAttributeValue("first"));
+            minimumlength = int.Parse(el.getAttributeValue("length"));
+            string src_and_line = el.getAttributeValue("line");
+            int pos = src_and_line.IndexOf(":");
+            src_index = stoi(src_and_line.Substring(0, pos), NULL, 10);
+            lineno = stoi(src_and_line.Substring(pos + 1, src_and_line.length()), NULL, 10);
+            IEnumerator<Element> iter = el.getChildren().begin();
+            while (iter.MoveNext()) {
+                if (iter.Current.getName() == "oper") {
+                    uint id = uint.Parse(iter.Current.getAttributeValue("id"));
                     OperandSymbol sym = (OperandSymbol)trans.findSymbol(id);
                     operands.Add(sym);
                 }
-                else if ((*iter).getName() == "print")
-                    printpiece.Add((*iter).getAttributeValue("piece"));
-                else if ((*iter).getName() == "opprint")
-                {
-                    int index;
-                    istringstream s = new istringstream((* iter).getAttributeValue("id"));
-                    s.unsetf(ios::dec | ios::hex | ios::oct);
-                    s >> index;
+                else if (iter.Current.getName() == "print")
+                    printpiece.Add(iter.Current.getAttributeValue("piece"));
+                else if (iter.Current.getName() == "opprint") {
+                    int index = int.Parse(iter.Current.getAttributeValue("id"));
                     string operstring = "\n ";
                     operstring[1] = ('A' + index);
                     printpiece.Add(operstring);
                 }
-                else if ((*iter).getName() == "context_op")
-                {
+                else if (iter.Current.getName() == "context_op") {
                     ContextOp c_op = new ContextOp();
-                    c_op.restoreXml(*iter, trans);
+                    c_op.restoreXml(iter.Current, trans);
                     context.Add(c_op);
                 }
-                else if ((*iter).getName() == "commit")
-                {
+                else if (iter.Current.getName() == "commit") {
                     ContextCommit c_op = new ContextCommit();
-                    c_op.restoreXml(*iter, trans);
+                    c_op.restoreXml(iter.Current, trans);
                     context.Add(c_op);
                 }
-                else
-                {
+                else {
                     ConstructTpl cur = new ConstructTpl();
-                    int sectionid = cur.restoreXml(*iter, trans);
-                    if (sectionid < 0)
-                    {
+                    int sectionid = cur.restoreXml(iter.Current, trans);
+                    if (sectionid < 0) {
                         if (templ != (ConstructTpl)null)
                             throw new LowlevelError("Duplicate main section");
                         templ = cur;
                     }
-                    else
-                    {
+                    else {
                         while (namedtempl.size() <= sectionid)
                             namedtempl.Add((ConstructTpl)null);
                         if (namedtempl[sectionid] != (ConstructTpl)null)
@@ -615,7 +558,6 @@ namespace Sla.SLEIGH
                         namedtempl[sectionid] = cur;
                     }
                 }
-                ++iter;
             }
             pattern = (TokenPattern)null;
             if ((printpiece.size() == 1) && (printpiece[0][0] == '\n'))

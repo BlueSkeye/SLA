@@ -485,6 +485,7 @@ namespace Sla.DECCORE
         /// \return \b true is the BlockTrace can be retired
         private bool checkRetirement(BlockTrace trace, out FlowBlock exitblock)
         {
+            exitblock = null;
             if (trace.pathout != 0) return false; // Only check, if this is the first sibling
             BranchPoint bp = trace.top;
             if (bp.depth == 0) {

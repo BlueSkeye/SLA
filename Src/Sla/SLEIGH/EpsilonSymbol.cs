@@ -1,10 +1,4 @@
 ﻿using Sla.CORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.SLEIGH
 {
@@ -33,31 +27,30 @@ namespace Sla.SLEIGH
 
         public override void print(TextWriter s, ParserWalker walker)
         {
-            s << '0';
+            s.Write('0');
         }
 
         public override symbol_type getType() => SleighSymbol.symbol_type.epsilon_symbol;
 
         public override VarnodeTpl getVarnode()
         {
-            VarnodeTpl* res = new VarnodeTpl(ConstTpl(const_space),
-                               ConstTpl(ConstTpl.const_type.real, 0),
-                               ConstTpl(ConstTpl.const_type.real, 0));
+            VarnodeTpl res = new VarnodeTpl(new ConstTpl(const_space),
+                new ConstTpl(ConstTpl.const_type.real, 0), new ConstTpl(ConstTpl.const_type.real, 0));
             return res;
         }
 
         public override void saveXml(TextWriter s)
         {
-            s << "<epsilon_sym";
-            SleighSymbol::saveXmlHeader(s);
-            s << "/>\n";
+            s.Write("<epsilon_sym");
+            base.saveXmlHeader(s);
+            s.WriteLine("/>");
         }
 
         public override void saveXmlHeader(TextWriter s)
         {
-            s << "<epsilon_sym_head";
-            SleighSymbol::saveXmlHeader(s);
-            s << "/>\n";
+            s.Write("<epsilon_sym_head");
+            base.saveXmlHeader(s);
+            s.Write("/>");
         }
 
         public override void restoreXml(Element el, SleighBase trans)

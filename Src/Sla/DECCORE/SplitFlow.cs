@@ -246,7 +246,7 @@ namespace Sla.DECCORE
                         if (cvn.getOffset() != laneDescription.getSize(0) * 8) return false;
                         Varnode invn = op.getIn(0) ?? throw new ApplicationException();
                         if (!invn.isWritten()) return false;
-                        PcodeOp zextOp = invn.getDef() ?? throw new ApplicationException()
+                        PcodeOp zextOp = invn.getDef() ?? throw new ApplicationException();
                         if (zextOp.code() != OpCode.CPUI_INT_ZEXT) return false;
                         invn = zextOp.getIn(0);
                         if (invn.getSize() != laneDescription.getSize(1)) return false;

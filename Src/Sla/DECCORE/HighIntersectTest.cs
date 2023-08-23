@@ -86,7 +86,7 @@ namespace Sla.DECCORE
         /// \return \b true if an intersection occurs in the specified block
         private bool blockIntersection(HighVariable a, HighVariable b, int blk)
         {
-            List<Varnode> blist = new List<Varnode>()
+            List<Varnode> blist = new List<Varnode>();
 
             Cover aCover = a.getCover();
             Cover bCover = b.getCover();
@@ -147,9 +147,9 @@ namespace Sla.DECCORE
             for (iter = iterfirst; iter != iterlast; ++iter)
                 highedgemap.Remove(iter.Current.Key.b);
             highedgemap.Remove(iter.Current.Key.b);
-            ++iterlast;         // Restore original range (with possibly new open endpoint)
-
-            highedgemap.Remove(iterfirst, iterlast);
+            // Restore original range (with possibly new open endpoint)
+            ++iterlast;
+            highedgemap.Remove(iterfirst, out iterlast);
         }
 
         /// \brief Translate any intersection tests for \e high2 into tests for \e high1
@@ -162,42 +162,52 @@ namespace Sla.DECCORE
         {
             List<HighVariable> yesinter = new List<HighVariable>();     // Highs that high2 intersects
             List<HighVariable> nointer = new List<HighVariable>();      // Highs that high2 does not intersect
-            Dictionary<HighEdge, bool>.Enumerator iterfirst = highedgemap.lower_bound(HighEdge(high2, (HighVariable)null));
-            Dictionary<HighEdge, bool>.Enumerator iterlast = highedgemap.lower_bound(HighEdge(high2, (HighVariable)~((ulong)0)));
-            Dictionary<HighEdge, bool>.Enumerator iter;
+            Dictionary<HighEdge, bool>.Enumerator iterfirst =
+                highedgemap.lower_bound(new HighEdge(high2, (HighVariable)null));
+            Dictionary<HighEdge, bool>.Enumerator iterlast =
+                highedgemap.lower_bound(new HighEdge(high2, (HighVariable)ulong.MaxValue));
+            Dictionary<HighEdge, bool>.Enumerator iter = iterfirst;
 
-            for (iter = iterfirst; iter != iterlast; ++iter) {
+            while (iter.MoveNext()) {
                 HighVariable b = iter.Current.Key.b;
                 if (b == high1) continue;
-                if (iter.Current.Value)     // Save all high2's intersections
-                    yesinter.Add(b);  // as they are still valid for the merge
+                if (iter.Current.Value)
+                    // Save all high2's intersections
+                    // as they are still valid for the merge
+                    yesinter.Add(b);
                 else {
                     nointer.Add(b);
-                    b.setMark();       // Mark that high2 did not intersect
+                    // Mark that high2 did not intersect
+                    b.setMark();
                 }
             }
             // Do a purge of all high2's tests
             if (iterfirst != iterlast) {
                 // Delete all the high2 tests
-                --iterlast;         // Move back 1 to prevent deleting under the iterator
+                // Move back 1 to prevent deleting under the iterator
+                --iterlast;
                 for (iter = iterfirst; iter != iterlast; ++iter)
-                    highedgemap.erase(new HighEdge(iter.Current.Key.b, iter.Current.Key.a));
-                highedgemap.erase(new HighEdge(iter.Current.Key.b, iter.Current.Key.a));
-                ++iterlast;         // Restore original range (with possibly new open endpoint)
+                    highedgemap.Remove(new HighEdge(iter.Current.Key.b, iter.Current.Key.a));
+                highedgemap.Remove(new HighEdge(iter.Current.Key.b, iter.Current.Key.a));
+                // Restore original range (with possibly new open endpoint)
+                ++iterlast;
 
-                highedgemap.erase(iterfirst, iterlast);
+                highedgemap.Remove(iterfirst, iterlast);
             }
 
             iter = highedgemap.lower_bound(new HighEdge(high1, (HighVariable)null));
             while ((iter != highedgemap.end()) && (iter.Current.Key.a == high1)) {
                 if (!iter.Current.Value) {
                     // If test is intersection==false
-                    if (!iter.Current.Key.b.isMark()) // and there was no test with high2
-                        highedgemap.erase(iter++); // Delete the test
+                    if (!iter.Current.Key.b.isMark())
+                        // and there was no test with high2
+                        // Delete the test
+                        highedgemap.Remove(iter++);
                     else
                         ++iter;
                 }
-                else            // Keep any intersection==true tests
+                else
+                    // Keep any intersection==true tests
                     ++iter;
             }
             foreach (HighVariable variable in nointer)
@@ -219,14 +229,12 @@ namespace Sla.DECCORE
         public bool updateHigh(HighVariable a)
         {
             if (!a.isCoverDirty()) return true;
-
             a.updateCover();
             purgeHigh(a);
             return false;
         }
 
         /// \brief Test the intersection of two HighVariables and cache the result
-        ///
         /// If the Covers of the two variables intersect, this routine returns \b true. To avoid
         /// expensive computation on the Cover objects themselves, the test result associated with
         /// the pair of HighVariables is cached.
@@ -241,23 +249,24 @@ namespace Sla.DECCORE
             if (ares && bres) {
                 // If neither high was dirty
                 bool result;
-                if (highedgemap.TryGetValue(new HighEdge(a, b), out result)) // If previous test is present
-                    return result;  // Use it
+                if (highedgemap.TryGetValue(new HighEdge(a, b), out result))
+                    // If previous test is present
+                    // Use it
+                    return result;
             }
 
             bool res = false;
             int blk;
             List<int> blockisect = new List<int>();
             a.getCover().intersectList(blockisect, b.getCover(), 2);
-            for (blk = 0; blk < blockisect.size(); ++blk)
-            {
-                if (blockIntersection(a, b, blockisect[blk]))
-                {
+            for (blk = 0; blk < blockisect.size(); ++blk) {
+                if (blockIntersection(a, b, blockisect[blk])) {
                     res = true;
                     break;
                 }
             }
-            highedgemap[new HighEdge(a, b)] = res; // Cache the result
+            // Cache the result
+            highedgemap[new HighEdge(a, b)] = res;
             highedgemap[new HighEdge(b, a)] = res;
             return res;
         }

@@ -1,15 +1,5 @@
 ﻿using Sla.CORE;
 using Sla.SLEIGH;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Diagnostics.SymbolStore;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.ConstrainedExecution;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
 
 using SymbolTree = System.Collections.Generic.HashSet<Sla.SLEIGH.SleighSymbol>; // SymbolCompare
 
@@ -29,32 +19,58 @@ namespace Sla.SLACOMP
         /// The p-code parsing (sub)engine
         public SleighPcode pcode = new SleighPcode();
 
-        private Dictionary<string, string> preproc_defines;  ///< Defines for the preprocessor
-        private List<FieldContext> contexttable;  ///< Context field definitions (prior to defining ContextField and ContextSymbol)
-        private List<ConstructTpl> macrotable;   ///< SLEIGH macro definitions
-        private List<Token> tokentable;      ///< SLEIGH token definitions
-        private List<SubtableSymbol> tables; ///< SLEIGH subtables
-        private List<SectionSymbol> sections;    ///< Symbols defining Constructor sections
-        private List<WithBlock> withstack;      ///< Current stack of \b with blocks
-        private Constructor? curct;         ///< Current Constructor being defined
-        private MacroSymbol? curmacro;      ///< Current macro being defined
-        private bool contextlock;           ///< If the context layout has been established yet
-        private List<string> relpath;     ///< Relative path (to cwd) for each filename
-        private List<string> filename;        ///< Stack of current files being parsed
-        private List<int> lineno;            ///< Current line number for each file in stack
-        private Dictionary<Constructor, Location> ctorLocationMap;        ///< Map each Constructor to its defining parse location
-        private Dictionary<SleighSymbol, Location> symbolLocationMap; ///< Map each symbol to its defining parse location
-        private int userop_count;          ///< Number of userops defined
-        private bool warnunnecessarypcode;      ///< \b true if we warn of unnecessary ZEXT or SEXT
-        private bool warndeadtemps;         ///< \b true if we warn of temporaries that are written but not read
-        private bool lenientconflicterrors;     ///< \b true if we ignore most pattern conflict errors
-        private bool largetemporarywarning;     ///< \b true if we warn about temporaries larger than SleighBase::MAX_UNIQUE_SIZE
-        private bool warnalllocalcollisions;        ///< \b true if local export collisions generate individual warnings
-        private bool warnallnops;           ///< \b true if pcode NOPs generate individual warnings
-        private bool failinsensitivedups;       ///< \b true if case insensitive register duplicates cause error
-        private List<string> noplist;     ///< List of individual NOP warnings
-        private /*mutable*/ Location currentLocCache;   ///< Location for (last) request of current location
-        private int errors;              ///< Number of fatal errors encountered
+        // Defines for the preprocessor
+        private Dictionary<string, string> preproc_defines = new Dictionary<string, string>();
+        // Context field definitions (prior to defining ContextField and ContextSymbol)
+        private List<FieldContext> contexttable = new List<FieldContext>();
+        // SLEIGH macro definitions
+        private List<ConstructTpl> macrotable = new List<ConstructTpl>();
+        // SLEIGH token definitions
+        private List<Token> tokentable = new List<Token>();
+        // SLEIGH subtables
+        private List<SubtableSymbol> tables = new List<SubtableSymbol>();
+        // Symbols defining Constructor sections
+        private List<SectionSymbol> sections = new List<SectionSymbol>();
+        // Current stack of \b with blocks
+        private List<WithBlock> withstack = new List<WithBlock>();
+        // Current Constructor being defined
+        private Constructor? curct;
+        // Current macro being defined
+        private MacroSymbol? curmacro;
+        // If the context layout has been established yet
+        private bool contextlock;
+        // Relative path (to cwd) for each filename
+        private List<string> relpath = new List<string>();
+        // Stack of current files being parsed
+        private List<string> filename = new List<string>();
+        // Current line number for each file in stack
+        private List<int> lineno = new List<int>();
+        // Map each Constructor to its defining parse location
+        private Dictionary<Constructor, Location> ctorLocationMap = new Dictionary<Constructor, Location>();
+        // Map each symbol to its defining parse location
+        private Dictionary<SleighSymbol, Location> symbolLocationMap = new Dictionary<SleighSymbol, Location>();
+        // Number of userops defined
+        private int userop_count;
+        // \b true if we warn of unnecessary ZEXT or SEXT
+        private bool warnunnecessarypcode;
+        // \b true if we warn of temporaries that are written but not read
+        private bool warndeadtemps;
+        // \b true if we ignore most pattern conflict errors
+        private bool lenientconflicterrors;
+        // \b true if we warn about temporaries larger than SleighBase::MAX_UNIQUE_SIZE
+        private bool largetemporarywarning;
+        // \b true if local export collisions generate individual warnings
+        private bool warnalllocalcollisions;
+        // \b true if pcode NOPs generate individual warnings
+        private bool warnallnops;
+        // \b true if case insensitive register duplicates cause error
+        private bool failinsensitivedups;
+        // List of individual NOP warnings
+        private List<string> noplist;
+        // Location for (last) request of current location
+        private /*mutable*/ Location currentLocCache;
+        // Number of fatal errors encountered
+        private int errors;
 
         ///< Get the current file and line number being parsed
         /// The current filename and line number are placed into a Location object
@@ -63,8 +79,8 @@ namespace Sla.SLACOMP
         private Location getCurrentLocation()
         {
             // Update the location cache field
-            currentLocCache = Location(filename.GetLastItem(), lineno.GetLastItem());
-            return &currentLocCache;
+            currentLocCache = new Location(filename.GetLastItem(), lineno.GetLastItem());
+            return currentLocCache;
         }
 
         ///< Get SLEIGHs predefined address spaces and symbols
@@ -81,7 +97,7 @@ namespace Sla.SLACOMP
             insertSpace(new ConstantSpace(this, this));
             SpaceSymbol spacesym = new SpaceSymbol(getConstantSpace()); // Constant space
             symtab.addSymbol(spacesym);
-            OtherSpace otherSpace = new OtherSpace(this, this, OtherSpace::INDEX);
+            OtherSpace otherSpace = new OtherSpace(this, this, OtherSpace.INDEX);
             insertSpace(otherSpace);
             spacesym = new SpaceSymbol(otherSpace);
             symtab.addSymbol(spacesym);
@@ -129,8 +145,8 @@ namespace Sla.SLACOMP
             {
 
                 qual = contexttable[i + start].qual;
-                int min = qual.low;
-                int max = qual.high;
+                int min = (int)qual.low;
+                int max = (int)qual.high;
                 if ((max - min) > (8 * sizeof(uint)))
                     reportError(getCurrentLocation(),
                         $"Size of bitfield '{qual.name}' larger than 32 bits");
@@ -144,7 +160,7 @@ namespace Sla.SLACOMP
                     if (qual.low <= max) {
                         // We have overlap of context variables
                         if (qual.high > max)
-                            max = qual.high;
+                            max = (int)qual.high;
                         // reportWarning("Local context variables overlap in "+sym.getName(),false);
                     }
                     else
@@ -158,15 +174,15 @@ namespace Sla.SLACOMP
                 if (startword != endword)
                     numbits = endword * (8 * sizeof(uint)); // Bump up to next word
 
-                uint low = numbits;
+                uint low = (uint)numbits;
                 numbits += alloc;
 
                 for (; i < j; ++i)
                 {
                     qual = contexttable[i + start].qual;
-                    uint l = qual.low - min + low;
-                    uint h = numbits - 1 - (max - qual.high);
-                    ContextField field = new ContextField(qual.signext, l, h);
+                    uint l = (uint)(qual.low - min + low);
+                    uint h = (uint)(numbits - 1 - (max - qual.high));
+                    ContextField field = new ContextField(qual.signext, (int)l, (int)h);
                     addSymbol(new ContextSymbol(qual.name, field, sym, qual.low, qual.high, qual.flow));
                 }
 
@@ -189,11 +205,9 @@ namespace Sla.SLACOMP
                 tables[i].buildDecisionTree(props);
 
             List<Tuple<Constructor, Constructor>> ierrors = props.getIdentErrors();
-            if (ierrors.size() != 0)
-            {
+            if (ierrors.size() != 0) {
                 string identMsg = "Constructor has identical pattern to constructor at ";
-                for (int i = 0; i < ierrors.size(); ++i)
-                {
+                for (int i = 0; i < ierrors.size(); ++i) {
                     errors += 1;
                     Location locA = getLocation(ierrors[i].first);
                     Location locB = getLocation(ierrors[i].second);
@@ -202,15 +216,13 @@ namespace Sla.SLACOMP
                 }
             }
 
-            List<pair<Constructor, Constructor>> cerrors = props.getConflictErrors();
-            if (!lenientconflicterrors && cerrors.size() != 0)
-            {
+            List<Tuple<Constructor, Constructor>> cerrors = props.getConflictErrors();
+            if (!lenientconflicterrors && cerrors.size() != 0) {
                 string conflictMsg = "Constructor pattern cannot be distinguished from constructor at ";
-                for (int i = 0; i < cerrors.size(); ++i)
-                {
+                for (int i = 0; i < cerrors.size(); ++i) {
                     errors += 1;
-                    Location locA = getLocation(cerrors[i].first);
-                    Location locB = getLocation(cerrors[i].second);
+                    Location locA = getLocation(cerrors[i].Item1);
+                    Location locB = getLocation(cerrors[i].Item2);
                     reportError(locA, conflictMsg + locB.format());
                     reportError(locB, conflictMsg + locA.format());
                 }
@@ -222,28 +234,23 @@ namespace Sla.SLACOMP
         /// the parsed constraints (PatternEquation).  Accumulated error messages are reported.
         private void buildPatterns()
         {
-            if (root == 0)
-            {
+            if (root == 0) {
                 reportError((Location)null, "No patterns to match.");
                 return;
             }
-            ostringstream msg;
+            TextWriter msg = new StringWriter();
             root.buildPattern(msg);    // This should recursively hit everything
-            if (root.isError())
-            {
-                reportError(getLocation(root), msg.str());
+            if (root.isError()) {
+                reportError(getLocation(root), msg.ToString());
                 errors += 1;
             }
-            for (int i = 0; i < tables.size(); ++i)
-            {
-                if (tables[i].isError())
-                {
-                    reportError(getLocation(tables[i]), "Problem in table '" + tables[i].getName() + "':" + msg.str());
+            for (int i = 0; i < tables.size(); ++i) {
+                if (tables[i].isError()) {
+                    reportError(getLocation(tables[i]), $"Problem in table '{tables[i].getName()}':{msg.ToString()}");
                     errors += 1;
                 }
-                if (tables[i].getPattern() == (TokenPattern)null)
-                {
-                    reportWarning(getLocation(tables[i]), "Unreferenced table '" + tables[i].getName() + "'");
+                if (tables[i].getPattern() == (TokenPattern)null) {
+                    reportWarning(getLocation(tables[i]), $"Unreferenced table '{tables[i].getName()}'");
                 }
             }
         }
@@ -332,11 +339,14 @@ namespace Sla.SLACOMP
         private bool checkLocalExports(Constructor ct)
         {
             if (ct.getTempl() == (ConstructTpl)null)
-                return true;        // No template, collisions impossible
+                // No template, collisions impossible
+                return true;
             if (ct.getTempl().buildOnly())
-                return true;        // Operand exports aren't manipulated, so no collision is possible
+                // Operand exports aren't manipulated, so no collision is possible
+                return true;
             if (ct.getNumOperands() < 2)
-                return true;        // Collision can only happen with multiple operands
+                // Collision can only happen with multiple operands
+                return true;
             bool noCollisions = true;
             Dictionary<ulong, int> collect = new Dictionary<ulong, int>();
             for (int i = 0; i < ct.getNumOperands(); ++i) {
@@ -363,7 +373,8 @@ namespace Sla.SLACOMP
         private void checkLocalCollisions()
         {
             int collisionCount = 0;
-            SubtableSymbol sym = root; // Start with the instruction table
+            // Start with the instruction table
+            SubtableSymbol sym = root;
             int i = -1;
             while(true) {
                 int numconst = sym.getNumConstructors();
@@ -425,11 +436,11 @@ namespace Sla.SLACOMP
                     // Name already existed
                     TextWriter s = new StringWriter();
                     s.Write($"Name collision: {sym.getName()} --- Duplicate symbol {oldsym.getName()}");
-                    Location oldLocation = getLocation(oldsym);
+                    Location? oldLocation = getLocation(oldsym);
                     if (oldLocation != (Location)null) {
                         s.Write(" defined at {oldLocation.format()}");
                     }
-                    Location location = getLocation(sym);
+                    Location? location = getLocation(sym);
                     reportError(location, s.ToString());
                 }
             }
@@ -462,7 +473,7 @@ namespace Sla.SLACOMP
         /// referenced with the current parse location.
         /// Duplicate symbol exceptions are caught and reported as a parse error.
         /// \param sym is the new symbol
-        private void addSymbol(SleighSymbol sym)
+        internal void addSymbol(SleighSymbol sym)
         {
             try {
                 symtab.addSymbol(sym);
@@ -551,14 +562,13 @@ namespace Sla.SLACOMP
             string sectionstring = "   Main section: ";
             int max = vec.getMaxId();
             while(true) {
-                string errstring;
-
-                errstring = checkSymbols(cur.scope); // Check labels in the section's scope
+                // Check labels in the section's scope
+                string errstring = checkSymbols(cur.scope ?? throw new ApplicationException());
                 if (errstring.Length != 0) {
                     errors.Add(sectionstring + errstring);
                 }
                 else {
-                    if (!expandMacros(cur.section))
+                    if (!expandMacros(cur.section ?? throw new ApplicationException()))
                         errors.Add(sectionstring + "Could not expand macros");
                     List<int> check = new List<int>();
                     big.markSubtableOperands(check);
@@ -744,7 +754,7 @@ namespace Sla.SLACOMP
         /// \param loc is the given source location (or null)
         /// \param msg is the message
         /// \return the formatted message
-        private static string formatStatusMessage(Location loc, string msg)
+        private static string formatStatusMessage(Location? loc, string msg)
         {
             TextWriter s = new StringWriter();
             if (loc != (Location)null) {
@@ -884,7 +894,7 @@ namespace Sla.SLACOMP
         /// Otherwise, parsing can continue, but the compiler will not produce an output file.
         /// \param loc is the location of the error
         /// \param msg is the error message
-        public void reportError(Location loc, string msg)
+        public void reportError(Location? loc, string msg)
         {
             reportError(formatStatusMessage(loc, msg));
         }
@@ -999,8 +1009,8 @@ namespace Sla.SLACOMP
             int begin, sz;
             stable_sort(contexttable.begin(), contexttable.end());
             begin = 0;
-            while (begin < contexttable.size())
-            { // Define the context variables
+            while (begin < contexttable.size()) {
+                // Define the context variables
                 sz = 1;
                 while (   (begin + sz < contexttable.size())
                        && (contexttable[begin + sz].sym == contexttable[begin].sym))
@@ -1075,7 +1085,7 @@ namespace Sla.SLACOMP
         ///< Indicate parsing proceeded to the next line of the current file
         public void nextLine()
         {
-            lineno.GetLastItem() += 1;
+            lineno.SetLastItem(lineno.GetLastItem() + 1);
         }
 
         ///< Retrieve a given preprocessor variable
@@ -1133,7 +1143,7 @@ namespace Sla.SLACOMP
                 isBig = isBigEndian();
             else
                 isBig = (endian > 0);
-            Token newtoken = new Token(name, size, isBig, tokentable.size());
+            Token newtoken = new Token(name, (int)size, isBig, tokentable.size());
             tokentable.Add(newtoken);
             // delete name;
             TokenSymbol res = new TokenSymbol(newtoken);
@@ -1154,7 +1164,7 @@ namespace Sla.SLACOMP
             if (sym.getToken().getSize() * 8 <= qual.high) {
                 reportError(getCurrentLocation(), $"Field '{qual.name}' high must be less than token size");
             }
-            TokenField field = new TokenField(sym.getToken(), qual.signext, qual.low, qual.high);
+            TokenField field = new TokenField(sym.getToken(), qual.signext, (int)qual.low, (int)qual.high);
             addSymbol(new ValueSymbol(qual.name, field));
             // delete qual;
         }
@@ -1191,9 +1201,9 @@ namespace Sla.SLACOMP
                 return;
             }
 
-            int delay = (qual.type == SpaceQuality.registertype) ? 0 : 1;
+            int delay = (qual.type == SpaceQuality.Type.registertype) ? 0 : 1;
             AddrSpace spc = new AddrSpace(this, this, spacetype.IPTR_PROCESSOR, qual.name, qual.size,
-                qual.wordsize, numSpaces(), AddrSpace::hasphysical, delay);
+                qual.wordsize, numSpaces(), AddrSpace.Properties.hasphysical, delay);
             insertSpace(spc);
             if (qual.isdefault) {
                 if (getDefaultCodeSpace() != (AddrSpace)null)
@@ -1959,22 +1969,25 @@ namespace Sla.SLACOMP
         public int run_compilation(string filein, string fileout)
         {
             parseFromNewFile(filein);
-            slgh = this;        // Set global pointer up for parser
-            sleighin = File.OpenRead(filein);  // Open the file for the lexer
-            if (sleighin == (FILE*)0) {
+            // Set global pointer up for parser
+            Parsing.slgh = this;
+            // Open the file for the lexer
+            try { Parsing.sleighin = File.OpenRead(filein); }
+            catch { }
+            if (Parsing.sleighin == null) {
                 Console.Error.WriteLine($"Unable to open specfile: {filein}");
                 return 2;
             }
 
             try {
                 int parseres = sleighparse();  // Try to parse
-                sleighin.Close();
+                Parsing.sleighin.Close();
                 if (parseres == 0)
                     process();  // Do all the post-processing
                 if ((parseres == 0) && (numErrors() == 0)) {
                     // If no errors
                     StreamWriter s;
-                    try { s = File.OpenWrite(fileout); }
+                    try { s = new StreamWriter(File.OpenWrite(fileout)); }
                     catch {
                         throw new SleighError($"Unable to open output file: {fileout}");
                     }

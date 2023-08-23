@@ -120,7 +120,7 @@ namespace Sla.DECCORE
         protected Scope? stackAddr(Scope? scope1, Scope scope2, Address addr, Address usepoint,
             out SymbolEntry? addrmatch)
         {
-            SymbolEntry? entry = new SymbolEntry();
+            SymbolEntry? entry = null;
             addrmatch = null;
             if (addr.isConstant()) return null;
             while ((scope1 != (Scope)null) && (scope1 != scope2)) {
@@ -486,8 +486,8 @@ namespace Sla.DECCORE
         /// Beginning iterator to dynamic SymbolEntrys
         public abstract IEnumerator<SymbolEntry> beginDynamic();
 
-        /// Ending iterator to dynamic SymbolEntrys
-        public abstract IEnumerator<SymbolEntry> endDynamic();
+        ///// Ending iterator to dynamic SymbolEntrys
+        //public abstract IEnumerator<SymbolEntry> endDynamic();
 
         /// Clear all symbols from \b this scope
         public abstract void clear();
@@ -540,7 +540,7 @@ namespace Sla.DECCORE
         public abstract void clearAttribute(Symbol sym, Varnode.varnode_flags attr);
 
         /// Set the display format for a Symbol
-        public abstract void setDisplayFormat(Symbol sym, uint attr);
+        public abstract void setDisplayFormat(Symbol sym, Symbol.DisplayFlags attr);
 
         // Find routines only search the scope itself
         /// \brief Find a Symbol at a given address and \b usepoint
@@ -554,35 +554,35 @@ namespace Sla.DECCORE
         /// \param size is the number of bytes in the range
         /// \param usepoint is the point at which the Symbol is accessed (may be \e invalid)
         /// \return the matching SymbolEntry or NULL
-        public abstract SymbolEntry findContainer(Address addr, int size, Address usepoint);
+        public abstract SymbolEntry? findContainer(Address addr, int size, Address usepoint);
 
         /// \brief Find Symbol which is the closest fit to the given memory range
         /// \param addr is the starting address of the given memory range
         /// \param size is the number of bytes in the range
         /// \param usepoint is the point at which the Symbol is accessed (may be \e invalid)
         /// \return the matching SymbolEntry or NULL
-        public abstract SymbolEntry findClosestFit(Address addr, int size, Address usepoint);
+        public abstract SymbolEntry? findClosestFit(Address addr, int size, Address usepoint);
 
         /// \brief Find the function starting at the given address
         /// \param addr is the given starting address
         /// \return the matching Funcdata object or NULL
-        public abstract Funcdata findFunction(Address addr);
+        public abstract Funcdata? findFunction(Address addr);
 
         /// \brief Find an \e external \e reference at the given address
         /// \param addr is the given address
         /// \return the matching ExternRefSymbol or NULL
-        public abstract ExternRefSymbol findExternalRef(Address addr);
+        public abstract ExternRefSymbol? findExternalRef(Address addr);
 
         /// \brief Find a label Symbol at the given address
         /// \param addr is the given address
         /// \return the matching LabSymbol or NULL
-        public abstract LabSymbol findCodeLabel(Address addr);
+        public abstract LabSymbol? findCodeLabel(Address addr);
 
         /// \brief Find first Symbol overlapping the given memory range
         /// \param addr is the starting address of the given range
         /// \param size is the number of bytes in the range
         /// \return an overlapping SymbolEntry or NULL if none exists
-        public abstract SymbolEntry findOverlap(Address addr, int size);
+        public abstract SymbolEntry? findOverlap(Address addr, int size);
 
         /// \brief Find a Symbol by name within \b this Scope
         /// If there are multiple Symbols with the same name, all are passed back.
@@ -601,7 +601,7 @@ namespace Sla.DECCORE
         /// \brief Convert an \e external \e reference to the referenced function
         /// \param sym is the Symbol marking the external reference
         /// \return the underlying Funcdata object or NULL if none exists
-        public abstract Funcdata resolveExternalRefFunction(ExternRefSymbol sym);
+        public abstract Funcdata? resolveExternalRefFunction(ExternRefSymbol sym);
 
         /// \brief Given an address and data-type, build a suitable generic symbol name
         /// \param addr is the given address
@@ -1048,8 +1048,8 @@ namespace Sla.DECCORE
         /// \return the new Symbol
         public Symbol? addMapSym(Sla.CORE.Decoder decoder)
         {
-            uint elemId = decoder.openElement(ElementId.ELEM_MAPSYM);
-            uint subId = decoder.peekElement();
+            ElementId elemId = decoder.openElement(ElementId.ELEM_MAPSYM);
+            ElementId subId = decoder.peekElement();
             Symbol sym;
             if (subId == ElementId.ELEM_SYMBOL)
                 sym = new Symbol(owner);

@@ -210,10 +210,10 @@ namespace Sla.DECCORE
         /// \param vn is the given Varnode member to remove
         internal void remove(Varnode vn)
         {
-            IEnumerator<Varnode> iter = lower_bound(inst.begin(), inst.end(), vn, compareJustLoc);
+            IEnumerator<Varnode> iter = lower_bound(inst.GetEnumerator(), inst.end(), vn, compareJustLoc);
             while (iter.MoveNext()) {
                 if (iter.Current == vn) {
-                    inst.erase(iter);
+                    inst.Remove(iter);
                     highflags |= (DirtinessFlags.flagsdirty | DirtinessFlags.namerepdirty | DirtinessFlags.coverdirty | HighVariable.DirtinessFlags.typedirty);
                     if (vn.getSymbolEntry() != (SymbolEntry)null)
                         highflags |= DirtinessFlags.symboldirty;
@@ -236,9 +236,11 @@ namespace Sla.DECCORE
             if (tv2.symbol != (Symbol)null) {
                 // Check if we inherit a Symbol
                 if ((tv2.highflags & DirtinessFlags.symboldirty) == 0) {
-                    symbol = tv2.symbol;           // Overwrite our Symbol (assume it is the same)
+                    // Overwrite our Symbol (assume it is the same)
+                    symbol = tv2.symbol;
                     symboloffset = tv2.symboloffset;
-                    highflags &= ~(DirtinessFlags.symboldirty); // Mark that we are not symbol dirty
+                    // Mark that we are not symbol dirty
+                    highflags &= ~(DirtinessFlags.symboldirty);
                 }
             }
 
@@ -260,14 +262,17 @@ namespace Sla.DECCORE
             }
             List<Varnode> instcopy = new List<Varnode>(inst);
             inst.resize(inst.size() + tv2.inst.size(), (Varnode)null);
-            std::merge(instcopy.begin(), instcopy.end(), tv2.inst.begin(), tv2.inst.end(), inst.begin(), compareJustLoc);
+            std::merge(instcopy.GetEnumerator(), instcopy.end(), tv2.inst.GetEnumerator(), tv2.inst.end(),
+                inst.GetEnumerator(), compareJustLoc);
             tv2.inst.Clear();
 
-            if (((highflags & HighVariable.DirtinessFlags.coverdirty) == 0) && ((tv2.highflags & HighVariable.DirtinessFlags.coverdirty) == 0))
+            if (   ((highflags & HighVariable.DirtinessFlags.coverdirty) == 0)
+                && ((tv2.highflags & HighVariable.DirtinessFlags.coverdirty) == 0))
+            {
                 internalCover.merge(tv2.internalCover);
+            }
             else
                 highflags |= HighVariable.DirtinessFlags.coverdirty;
-
             // delete tv2;
         }
 
@@ -410,7 +415,7 @@ namespace Sla.DECCORE
         /// Is the cover returned by getCover() up-to-date
         /// The cover could either by the internal one or the extended one if \b this is part of a Variable Group.
         /// \return \b true if the cover needs to be recomputed.
-        private bool isCoverDirty()
+        internal bool isCoverDirty()
         {
             return ((highflags & (DirtinessFlags.coverdirty | DirtinessFlags.extendcoverdirty)) != 0);
         }
@@ -430,7 +435,7 @@ namespace Sla.DECCORE
             nameRepresentative = (Varnode)null;
             symboloffset = -1;
             inst.Add(vn);
-            vn.setHigh(this, numMergeClasses - 1);
+            vn.setHigh(this, (short)(numMergeClasses - 1));
             if (vn.getSymbolEntry() != (SymbolEntry)null)
                 setSymbol(vn);
         }

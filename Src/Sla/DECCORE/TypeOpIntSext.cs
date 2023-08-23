@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -23,18 +19,18 @@ namespace Sla.DECCORE
 
         public override string getOperatorName(PcodeOp op)
         {
-            ostringstream s;
+            TextWriter s = new StringWriter();
 
-            s << name << dec << op.getIn(0).getSize() << op.getOut().getSize();
-            return s.str();
+            s.Write($"{name}{op.getIn(0).getSize()}{op.getOut().getSize()}");
+            return s.ToString();
         }
 
         public override Datatype getInputCast(PcodeOp op, int slot, CastStrategy castStrategy)
         {
-            Datatype* reqtype = op.inputTypeLocal(slot);
+            Datatype reqtype = op.inputTypeLocal(slot);
             if (castStrategy.checkIntPromotionForExtension(op))
                 return reqtype;
-            Datatype* curtype = op.getIn(slot).getHighTypeReadFacing(op);
+            Datatype curtype = op.getIn(slot).getHighTypeReadFacing(op);
             return castStrategy.castStandard(reqtype, curtype, true, false);
         }
     }

@@ -1,17 +1,11 @@
 ﻿using Sla.CORE;
-using Sla.SLEIGH;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.SLEIGH
 {
     internal abstract class DisjointPattern : Pattern
     {
         // A pattern with no ORs in it
-        protected abstract PatternBlock getBlock(bool context);
+        protected abstract PatternBlock? getBlock(bool context);
         
         public override int numDisjoint() => 0;
 

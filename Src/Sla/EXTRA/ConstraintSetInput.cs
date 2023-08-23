@@ -1,13 +1,4 @@
 ﻿using Sla.DECCORE;
-using Sla.EXTRA;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.EXTRA
 {
@@ -27,7 +18,7 @@ namespace Sla.EXTRA
 
         ~ConstraintSetInput()
         {
-            delete slot;
+            // delete slot;
         }
 
         public override UnifyConstraint clone() 
@@ -37,9 +28,9 @@ namespace Sla.EXTRA
 
         public override bool step(UnifyState state)
         {
-            TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
+            TraverseCountState traverse = (TraverseCountState)state.getTraverse(uniqid);
             if (!traverse.step()) return false;
-            Funcdata* fd = state.getFunction();
+            Funcdata fd = state.getFunction();
             PcodeOp op = state.data(opindex).getOp();
             Varnode vn = state.data(varindex).getVarnode();
             int slt = (int)slot.getConstant(state);
@@ -49,17 +40,17 @@ namespace Sla.EXTRA
 
         public override void collectTypes(List<UnifyDatatype> typelist)
         {
-            typelist[opindex] = UnifyDatatype(UnifyDatatype.TypeKind.op_type);
-            typelist[varindex] = UnifyDatatype(UnifyDatatype.TypeKind.var_type);
+            typelist[opindex] = new UnifyDatatype(UnifyDatatype.TypeKind.op_type);
+            typelist[varindex] = new UnifyDatatype(UnifyDatatype.TypeKind.var_type);
         }
 
         public override void print(TextWriter s, UnifyCPrinter printstate)
         {
             printstate.printIndent(s);
-            s << "data.opSetInput(" << printstate.getName(opindex) << ',' << printstate.getName(varindex);
-            s << ',';
+            s.Write($"data.opSetInput({printstate.getName(opindex)},{printstate.getName(varindex)}");
+            s.Write(',');
             slot.writeExpression(s, printstate);
-            s << ");" << endl;
+            s.WriteLine(");");
         }
     }
 }

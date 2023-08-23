@@ -1,10 +1,4 @@
 ﻿using Sla.CORE;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace Sla.DECCORE
 {
@@ -45,9 +39,8 @@ namespace Sla.DECCORE
 
             if (fc.getEntryAddress().isInvalid())
                 encoder.writeString(AttributeId.ATTRIB_SPACE, "fspec");
-            else
-            {
-                AddrSpace* id = fc.getEntryAddress().getSpace();
+            else {
+                AddrSpace id = fc.getEntryAddress().getSpace();
                 encoder.writeSpace(AttributeId.ATTRIB_SPACE, id);
                 encoder.writeUnsignedInteger(AttributeId.ATTRIB_OFFSET, fc.getEntryAddress().getOffset());
             }
@@ -59,9 +52,8 @@ namespace Sla.DECCORE
 
             if (fc.getEntryAddress().isInvalid())
                 encoder.writeString(AttributeId.ATTRIB_SPACE, "fspec");
-            else
-            {
-                AddrSpace* id = fc.getEntryAddress().getSpace();
+            else {
+                AddrSpace id = fc.getEntryAddress().getSpace();
                 encoder.writeSpace(AttributeId.ATTRIB_SPACE, id);
                 encoder.writeUnsignedInteger(AttributeId.ATTRIB_OFFSET, fc.getEntryAddress().getOffset());
                 encoder.writeSignedInteger(AttributeId.ATTRIB_SIZE, size);
@@ -72,16 +64,15 @@ namespace Sla.DECCORE
         {
             FuncCallSpecs fc = (FuncCallSpecs)(ulong)offset;
 
-            if (fc.getName().size() != 0)
-                s << fc.getName();
-            else
-            {
-                s << "func_";
+            if (fc.getName().Length != 0)
+                s.Write(fc.getName());
+            else {
+                s.Write("func_");
                 fc.getEntryAddress().printRaw(s);
             }
         }
 
-        public override void saveXml(StreamWriter s)
+        public override void saveXml(TextWriter s)
         {
             throw new LowlevelError("Should never encode fspec space to stream");
         }

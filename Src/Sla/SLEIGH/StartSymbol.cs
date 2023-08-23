@@ -1,12 +1,4 @@
 ﻿using Sla.CORE;
-using Sla.SLEIGH;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static Sla.SLEIGH.SleighSymbol;
 
 namespace Sla.SLEIGH
 {
@@ -30,20 +22,21 @@ namespace Sla.SLEIGH
         ~StartSymbol()
         {
             if (patexp != (PatternExpression)null)
-                PatternExpression::release(patexp);
+                PatternExpression.release(patexp);
         }
 
         public override VarnodeTpl getVarnode()
-        { // Returns current instruction offset as a constant
-            ConstTpl spc(const_space);
-            ConstTpl off(ConstTpl.const_type.j_start);
+        {
+            // Returns current instruction offset as a constant
+            ConstTpl spc = new ConstTpl(const_space);
+            ConstTpl off = new ConstTpl(ConstTpl.const_type.j_start);
             ConstTpl sz_zero;
             return new VarnodeTpl(spc, off, sz_zero);
         }
 
         public override PatternExpression getPatternExpression() => patexp;
 
-        public override void getFixedHandle(ref FixedHandle hand, ParserWalker walker)
+        public override void getFixedHandle(FixedHandle hand, ParserWalker walker)
         {
             hand.space = walker.getCurSpace();
             hand.offset_space = (AddrSpace)null;
@@ -54,23 +47,23 @@ namespace Sla.SLEIGH
         public override void print(TextWriter s, ParserWalker walker)
         {
             long val = (long)walker.getAddr().getOffset();
-            s << "0x" << hex << val;
+            s.Write($"0x{val:X}");
         }
 
         public override symbol_type getType() => SleighSymbol.symbol_type.start_symbol;
 
         public override void saveXml(TextWriter s)
         {
-            s << "<start_sym";
-            SleighSymbol::saveXmlHeader(s);
-            s << "/>\n";
+            s.Write("<start_sym");
+            base.saveXmlHeader(s);
+            s.WriteLine("/>");
         }
 
         public override void saveXmlHeader(TextWriter s)
         {
-            s << "<start_sym_head";
-            SleighSymbol::saveXmlHeader(s);
-            s << "/>\n";
+            s.Write("<start_sym_head");
+            base.saveXmlHeader(s);
+            s.WriteLine("/>");
         }
 
         public override void restoreXml(Element el, SleighBase trans)

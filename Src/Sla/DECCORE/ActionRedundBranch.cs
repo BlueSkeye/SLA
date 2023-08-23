@@ -49,11 +49,11 @@ namespace Sla.DECCORE
                     if (bb.getOut(j) != bl) break;
                 if (j != bb.sizeOut()) continue;
 
-                //    ostringstream s;
+                //    TextWriter s = new StringWriter();
                 //    s << "Removing redundant branch out of block ";
                 //    s << "code_" << bb.start.Target().getShortcut();
                 //    bb.start.Target().printRaw(s);
-                //    data.warningHeader(s.str());
+                //    data.warningHeader(s.ToString());
                 data.removeBranch(bb, 1);   // Remove the branch instruction
                 count += 1;
             }

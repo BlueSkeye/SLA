@@ -136,7 +136,7 @@ namespace Sla.SLEIGH
 
         public override PatternExpression getPatternExpression() => localexp;
 
-        public override void getFixedHandle(out FixedHandle hnd, ParserWalker walker)
+        public override void getFixedHandle(FixedHandle hnd, ParserWalker walker)
         {
             hnd = walker.getFixedHandle(hand);
         }
@@ -179,7 +179,7 @@ namespace Sla.SLEIGH
             s.Write($" off=\"{reloffset}\" base=\"{offsetbase}\" minlen=\"{minimumlength}\"");
             if (isCodeAddress())
                 s.Write(" code=\"true\"");
-            s.WriteLine(" index=\"{hand}\">";
+            s.WriteLine(" index=\"{hand}\">");
             localexp.saveXml(s);
             if (defexp != (PatternExpression)null)
                 defexp.saveXml(s);

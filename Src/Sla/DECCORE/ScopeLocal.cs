@@ -139,10 +139,8 @@ namespace Sla.DECCORE
             int i = 0;
 
             IEnumerator<SymbolEntry> iter = rangemap.begin_list();
-            IEnumerator<SymbolEntry> enditer = rangemap.end_list();
-
-            while (iter != enditer) {
-                SymbolEntry entry = *iter++;
+            while (iter.MoveNext()) {
+                SymbolEntry entry = iter.Current;
                 ulong curoff = entry.getAddr().getOffset() + entry.getSize() - 1;
                 while ((i < alias.Count) && (alias[i] <= curoff)) {
                     aliason = true;

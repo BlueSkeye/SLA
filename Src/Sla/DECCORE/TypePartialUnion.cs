@@ -1,13 +1,4 @@
-﻿using ghidra;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -39,7 +30,7 @@ namespace Sla.DECCORE
         public TypePartialUnion(TypeUnion contain, int off, int sz, Datatype strip)
             : base(sz, type_metatype.TYPE_PARTIALUNION)
         {
-            flags |= (needs_resolution | has_stripped);
+            flags |= (Properties.needs_resolution | Properties.has_stripped);
             stripped = strip;
             container = contain;
             offset = off;
@@ -51,7 +42,7 @@ namespace Sla.DECCORE
         public override void printRaw(TextWriter s)
         {
             container.printRaw(s);
-            s << "[off=" << dec << offset << ",sz=" << size << ']';
+            s.Write($"[off={offset},sz={size}]");
         }
 
         public override TypeField findTruncation(int off, int sz, PcodeOp op, int slot, int newoff)
@@ -64,7 +55,7 @@ namespace Sla.DECCORE
         public override Datatype getDepend(int index)
         {
             // Treat dependents as coming from the underlying union
-            Datatype* res = container.getDepend(index);
+            Datatype res = container.getDepend(index);
             if (res.getSize() != size) // But if the size doesn't match
                 return stripped;        // Return the stripped data-type
             return res;
@@ -72,30 +63,29 @@ namespace Sla.DECCORE
 
         public override int compare(Datatype op, int level)
         {
-            int res = Datatype::compare(op, level);
+            int res = Datatype.compare(op, level);
             if (res != 0) return res;
             // Both must be partial unions
-            TypePartialUnion* tp = (TypePartialUnion*)&op;
+            TypePartialUnion tp = (TypePartialUnion)op;
             if (offset != tp.offset) return (offset < tp.offset) ? -1 : 1;
             level -= 1;
-            if (level < 0)
-            {
+            if (level < 0) {
                 if (id == op.getId()) return 0;
                 return (id < op.getId()) ? -1 : 1;
             }
-            return container.compare(*tp.container, level); // Compare the underlying union
+            return container.compare(tp.container, level); // Compare the underlying union
         }
 
         public override int compareDependency(Datatype op)
         {
             if (submeta != op.getSubMeta()) return (submeta < op.getSubMeta()) ? -1 : 1;
-            TypePartialUnion* tp = (TypePartialUnion*)&op;  // Both must be partial unions
+            TypePartialUnion tp = (TypePartialUnion)op;  // Both must be partial unions
             if (container != tp.container) return (container < tp.container) ? -1 : 1;    // Compare absolute pointers
             if (offset != tp.offset) return (offset < tp.offset) ? -1 : 1;
             return (op.getSize() - size);
         }
 
-        public override Datatype clone() => new TypePartialUnion(this);
+        internal override Datatype clone() => new TypePartialUnion(this);
 
         public override void encode(Sla.CORE.Encoder encoder)
         {
@@ -110,17 +100,14 @@ namespace Sla.DECCORE
 
         public override Datatype resolveInFlow(PcodeOp op, int slot)
         {
-            Datatype* curType = container;
+            Datatype curType = container;
             int curOff = offset;
-            while (curType != (Datatype)null && curType.getSize() > size)
-            {
-                if (curType.getMetatype() == type_metatype.TYPE_UNION)
-                {
+            while (curType != (Datatype)null && curType.getSize() > size) {
+                if (curType.getMetatype() == type_metatype.TYPE_UNION) {
                     TypeField field = curType.resolveTruncation(curOff, op, slot, curOff);
                     curType = (field == (TypeField)null) ? (Datatype)null : field.type;
                 }
-                else
-                {
+                else {
                     ulong newOff;
                     curType = curType.getSubType(curOff, &newOff);
                     curOff = newOff;
@@ -133,19 +120,16 @@ namespace Sla.DECCORE
 
         public override Datatype findResolve(PcodeOp op, int slot)
         {
-            Datatype* curType = container;
+            Datatype curType = container;
             int curOff = offset;
-            while (curType != (Datatype)null && curType.getSize() > size)
-            {
-                if (curType.getMetatype() == type_metatype.TYPE_UNION)
-                {
-                    Datatype* newType = curType.findResolve(op, slot);
+            while (curType != (Datatype)null && curType.getSize() > size) {
+                if (curType.getMetatype() == type_metatype.TYPE_UNION) {
+                    Datatype newType = curType.findResolve(op, slot);
                     curType = (newType == curType) ? (Datatype)null : newType;
                 }
-                else
-                {
+                else {
                     ulong newOff;
-                    curType = curType.getSubType(curOff, &newOff);
+                    curType = curType.getSubType(curOff, newOff);
                     curOff = newOff;
                 }
             }

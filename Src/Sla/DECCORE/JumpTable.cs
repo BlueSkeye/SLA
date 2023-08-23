@@ -353,7 +353,7 @@ namespace Sla.DECCORE
         private int numIndicesByBlock(FlowBlock bl)
         {
             IndexPair val = new IndexPair(block2Position(bl),0);
-            pair<List<IndexPair>::const_iterator, List<IndexPair>::const_iterator> range;
+            Tuple<IEnumerator<IndexPair>, IEnumerator<IndexPair>> range;
             range = equal_range(block2addr.begin(), block2addr.end(), val, IndexPair.compareByPosition);
             return range.second - range.first;
         }

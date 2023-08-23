@@ -28,7 +28,7 @@ namespace Sla.EXTRA
 
         public override void writeExpression(TextWriter s, UnifyCPrinter printstate)
         {
-            s << printstate.getName(varindex) << ".getConsume()";
+            s.Write($"{printstate.getName(varindex)}.getConsume()");
         }
     }
 }

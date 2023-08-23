@@ -1,4 +1,4 @@
-﻿using Sla.DECCORE;
+﻿using Sla.SLEIGH;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,8 +12,8 @@ namespace Sla.SLACOMP
     internal class /*union*/ SLEIGHSTYPE
     {
         internal char ch;
-        internal ulong* i;
-        internal long* big;
+        internal ulong i;
+        internal long big;
         internal string str;
         internal List<string> strlist;
         internal List<long> biglist;

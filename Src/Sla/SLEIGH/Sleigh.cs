@@ -410,7 +410,7 @@ namespace Sla.SLEIGH
             ParserWalkerChange walker = new ParserWalkerChange(pos);
             pos.deallocateState(walker);    // Clear the previous resolve and initialize the walker
             Constructor ct;
-            Constructor subct;
+            Constructor? subct;
             uint off;
             int oper, numoper;
 
@@ -430,7 +430,7 @@ namespace Sla.SLEIGH
                     off = walker.getOffset(sym.getOffsetBase()) + sym.getRelativeOffset();
                     pos.allocateOperand(oper, walker); // Descend into new operand and reserve space
                     walker.setOffset(off);
-                    TripleSymbol tsym = sym.getDefiningSymbol();
+                    TripleSymbol? tsym = sym.getDefiningSymbol();
                     if (tsym != (TripleSymbol)null) {
                         subct = tsym.resolve(walker);
                         if (subct != (Constructor)null) {
@@ -448,7 +448,7 @@ namespace Sla.SLEIGH
                     walker.calcCurrentLength(ct.getMinimumLength(), numoper);
                     walker.popOperand();
                     // Check for use of delayslot
-                    ConstructTpl templ = ct.getTempl();
+                    ConstructTpl? templ = ct.getTempl();
                     if ((templ != (ConstructTpl)null) && (templ.delaySlot() > 0))
                         pos.setDelaySlot((int)templ.delaySlot());
                 }
@@ -480,11 +480,12 @@ namespace Sla.SLEIGH
                     if (triple != (TripleSymbol)null) {
                         if (triple.getType() ==  SleighSymbol.symbol_type.subtable_symbol)
                             break;
-                        else            // Some other kind of symbol as an operand
+                        else
+                            // Some other kind of symbol as an operand
                             triple.getFixedHandle(out walker.getParentHandle(), walker);
                     }
-                    else
-                    {           // Must be an expression
+                    else {
+                        // Must be an expression
                         PatternExpression patexp = sym.getDefiningExpression();
                         long res = patexp.getValue(walker);
                         FixedHandle hand = walker.getParentHandle();
@@ -501,7 +502,8 @@ namespace Sla.SLEIGH
                     ConstructTpl? templ = ct.getTempl();
                     if (templ != (ConstructTpl)null) {
                         HandleTpl res = templ.getResult();
-                        if (res != (HandleTpl)null)   // Pop up handle to containing operand
+                        if (res != (HandleTpl)null)
+                            // Pop up handle to containing operand
                             res.fix(walker.getParentHandle(), walker);
                         // If we need an indicator that the constructor exports nothing try
                         // else

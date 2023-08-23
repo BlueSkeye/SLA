@@ -1,12 +1,5 @@
 ﻿using Sla.CORE;
 using Sla.SLEIGH;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static Sla.SLEIGH.SleighSymbol;
 
 namespace Sla.SLEIGH
 {
@@ -35,24 +28,22 @@ namespace Sla.SLEIGH
 
         public override void saveXml(TextWriter s)
         {
-            s << "<userop";
-            SleighSymbol::saveXmlHeader(s);
-            s << " index=\"" << dec << index << "\"";
-            s << "/>\n";
+            s.Write("<userop");
+            base.saveXmlHeader(s);
+            s.Write($" index=\"{index}\"");
+            s.WriteLine("/>");
         }
 
         public override void saveXmlHeader(TextWriter s)
         {
-            s << "<userop_head";
-            SleighSymbol::saveXmlHeader(s);
-            s << "/>\n";
+            s.Write("<userop_head");
+            base.saveXmlHeader(s);
+            s.WriteLine("/>");
         }
 
         public override void restoreXml(Element el, SleighBase trans)
         {
-            istringstream s = new istringstream(el.getAttributeValue("index"));
-            s.unsetf(ios::dec | ios::hex | ios::oct);
-            s >> index;
+            index = uint.Parse(el.getAttributeValue("index"));
         }
     }
 }

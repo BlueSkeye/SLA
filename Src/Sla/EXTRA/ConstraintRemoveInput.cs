@@ -1,13 +1,4 @@
 ﻿using Sla.DECCORE;
-using Sla.EXTRA;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.EXTRA
 {
@@ -25,7 +16,7 @@ namespace Sla.EXTRA
 
         ~ConstraintRemoveInput()
         {
-            delete slot;
+            // delete slot;
         }
 
         public override UnifyConstraint clone() 
@@ -35,9 +26,9 @@ namespace Sla.EXTRA
 
         public override bool step(UnifyState state)
         {
-            TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
+            TraverseCountState traverse = (TraverseCountState)state.getTraverse(uniqid);
             if (!traverse.step()) return false;
-            Funcdata* fd = state.getFunction();
+            Funcdata fd = state.getFunction();
             PcodeOp op = state.data(opindex).getOp();
             int slt = (int)slot.getConstant(state);
             fd.opRemoveInput(op, slt);
@@ -46,15 +37,15 @@ namespace Sla.EXTRA
 
         public override void collectTypes(List<UnifyDatatype> typelist)
         {
-            typelist[opindex] = UnifyDatatype(UnifyDatatype.TypeKind.op_type);
+            typelist[opindex] = new UnifyDatatype(UnifyDatatype.TypeKind.op_type);
         }
 
         public override void print(TextWriter s, UnifyCPrinter printstate)
         {
             printstate.printIndent(s);
-            s << "data.opRemoveInput(" << printstate.getName(opindex) << ',';
+            s.Write($"data.opRemoveInput({printstate.getName(opindex)},");
             slot.writeExpression(s, printstate);
-            s << ");" << endl;
+            s.WriteLine(");");
         }
     }
 }

@@ -1,12 +1,4 @@
 ﻿using Sla.CORE;
-using Sla.SLEIGH;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.SLEIGH
 {
@@ -18,7 +10,8 @@ namespace Sla.SLEIGH
 
         public override long getValue(ParserWalker walker)
         {
-            return (long)AddrSpace.byteToAddress(walker.getN2addr().getOffset(), walker.getN2addr().getSpace().getWordSize());
+            return (long)AddrSpace.byteToAddress(walker.getN2addr().getOffset(),
+                walker.getN2addr().getSpace().getWordSize());
         }
 
         public override TokenPattern genMinPattern(List<TokenPattern> ops) => new TokenPattern();
@@ -31,7 +24,7 @@ namespace Sla.SLEIGH
 
         public override void saveXml(TextWriter s) 
         {
-            s << "<next2_exp/>";
+            s.Write("<next2_exp/>");
         }
 
         public override void restoreXml(Element el, Translate trans)

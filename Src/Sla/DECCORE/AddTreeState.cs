@@ -659,10 +659,10 @@ namespace Sla.DECCORE
             if (!valid)
             {
                 // Distribution transforms were made
-                ostringstream s;
-                s << "Problems distributing in pointer arithmetic at ";
+                TextWriter s = new StringWriter();
+                s.Write("Problems distributing in pointer arithmetic at ");
                 baseOp.getAddr().printRaw(s);
-                data.warningHeader(s.str());
+                data.warningHeader(s.ToString());
                 return true;
             }
             buildTree();

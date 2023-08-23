@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -24,16 +20,16 @@ namespace Sla.DECCORE
         protected static string appendSize(string @base, int size)
         {
             if (size == 1)
-                return base + "_1";
+                return @base + "_1";
             if (size == 2)
-                return base + "_2";
+                return @base + "_2";
             if (size == 4)
-                return base + "_4";
+                return @base + "_4";
             if (size == 8)
-                return base + "_8";
-            ostringstream s;
-            s << base << '_' << dec << size;
-            return s.str();
+                return @base + "_8";
+            TextWriter s = new StringWriter();
+            s.Write($"{@base}_{size}");
+            return s.ToString();
         }
 
         public VolatileOp(Architecture g, string nm,int ind)

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Sla.EXTRA
 {
     internal class ConstraintBoolean : UnifyConstraint
@@ -22,7 +16,7 @@ namespace Sla.EXTRA
 
         ~ConstraintBoolean()
         {
-            delete expr;
+            // delete expr;
         }
 
         public override UnifyConstraint clone() => (new ConstraintBoolean(istrue, expr.clone())).copyid(this);
@@ -32,13 +26,13 @@ namespace Sla.EXTRA
         public override void print(TextWriter s, UnifyCPrinter printstate)
         {
             printstate.printIndent(s);
-            s << "if (";
+            s.Write("if (");
             expr.writeExpression(s, printstate);
             if (istrue)
-                s << "== 0)";       // If false abort
+                s.Write("== 0)");       // If false abort
             else
-                s << "!= 0)";       // If true abort
-            s << endl;
+                s.Write("!= 0)");       // If true abort
+            s.WriteLine();
             printstate.printAbort(s);
         }
     }

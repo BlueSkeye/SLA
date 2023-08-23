@@ -163,7 +163,7 @@ namespace Sla.DECCORE
         /// \param val is the value to find the representation for
         /// \param valnames will hold the returned list of names
         /// \return true if the representation needs to be complemented
-        public bool getMatches(ulong val, List<string> matchname)
+        public bool getMatches(ulong val, List<string> valnames)
         {
             int count;
 
@@ -180,24 +180,33 @@ namespace Sla.DECCORE
                 else {
                     for (int i = 0; i < masklist.size(); ++i) {
                         ulong maskedval = val & masklist[i];
-                        if (maskedval == 0) // No component of -val- in this mask
-                            continue;       // print nothing
+                        if (maskedval == 0)
+                            // No component of -val- in this mask
+                            // print nothing
+                            continue;
                         string value;
                         if (namemap.TryGetValue(maskedval, out value))
                             valnames.Add(value); // Found name for this component
                         else {
                             // If no name for this component
-                            allmatch = false;           // Give up on representation
-                            break;              // Stop searching for other components
+                            // Give up on representation
+                            allmatch = false;
+                            // Stop searching for other components
+                            break;
                         }
                     }
                 }
-                if (allmatch)           // If we have a complete representation
-                    return (count == 1);        // Return whether we represented original value or complement
-                val = val ^ Globals.calc_mask(size);    // Switch value we are trying to represent (to complement)
-                valnames.Clear();           // Clear out old attempt
+                if (allmatch)
+                    // If we have a complete representation
+                    // Return whether we represented original value or complement
+                    return (count == 1);
+                // Switch value we are trying to represent (to complement)
+                val = val ^ Globals.calc_mask((uint)size);
+                // Clear out old attempt
+                valnames.Clear();
             }
-            return false;   // If we reach here, no representation was possible, -valnames- is empty
+            // If we reach here, no representation was possible, -valnames- is empty
+            return false;
         }
 
         public override int compare(Datatype op, int level)
@@ -207,7 +216,8 @@ namespace Sla.DECCORE
 
         public override int compareDependency(Datatype op)
         {
-            int res = base.compareDependency(op); // Compare as basic types first
+            // Compare as basic types first
+            int res = base.compareDependency(op);
             if (res != 0) return res;
 
             TypeEnum te = (TypeEnum) op;

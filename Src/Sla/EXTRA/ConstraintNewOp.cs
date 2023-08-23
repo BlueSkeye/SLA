@@ -1,13 +1,5 @@
-﻿using Sla.DECCORE;
-using Sla.EXTRA;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
+using Sla.DECCORE;
 
 namespace Sla.EXTRA
 {
@@ -37,9 +29,9 @@ namespace Sla.EXTRA
 
         public override bool step(UnifyState state)
         {
-            TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
+            TraverseCountState traverse = (TraverseCountState)state.getTraverse(uniqid);
             if (!traverse.step()) return false;
-            Funcdata* fd = state.getFunction();
+            Funcdata fd = state.getFunction();
             PcodeOp op = state.data(oldopindex).getOp();
             PcodeOp newop = fd.newOp(numparams, op.getAddr());
             fd.opSetOpcode(newop, opc);
@@ -52,23 +44,23 @@ namespace Sla.EXTRA
 
         public override void collectTypes(List<UnifyDatatype> typelist)
         {
-            typelist[newopindex] = UnifyDatatype(UnifyDatatype.TypeKind.op_type);
-            typelist[oldopindex] = UnifyDatatype(UnifyDatatype.TypeKind.op_type);
+            typelist[newopindex] = new UnifyDatatype(UnifyDatatype.TypeKind.op_type);
+            typelist[oldopindex] = new UnifyDatatype(UnifyDatatype.TypeKind.op_type);
         }
 
         public override void print(TextWriter s, UnifyCPrinter printstate)
         {
             printstate.printIndent(s);
-            s << printstate.getName(newopindex) << " = data.newOp(" << dec << numparams;
-            s << ',' << printstate.getName(oldopindex) << ".getAddr());" << endl;
+            s.Write($"{printstate.getName(newopindex)} = data.newOp({numparams}");
+            s.WriteLine($",{printstate.getName(oldopindex)}.getAddr());");
             printstate.printIndent(s);
-            s << "data.opSetOpcode(" << printstate.getName(newopindex) << ",CPUI_" << Globals.get_opname(opc) << ");" << endl;
-            s << "data.opInsert";
+            s.WriteLine($"data.opSetOpcode({printstate.getName(newopindex)},CPUI_{Globals.get_opname(opc));");
+            s.Write("data.opInsert");
             if (insertafter)
-                s << "After(";
+                s.Write("After(");
             else
-                s << "Before(";
-            s << printstate.getName(newopindex) << ',' << printstate.getName(oldopindex) << ");" << endl;
+                s.Write("Before(");
+            s.WriteLine($"{printstate.getName(newopindex)},{printstate.getName(oldopindex)});");
         }
     }
 }

@@ -1,13 +1,5 @@
-﻿using Sla.DECCORE;
-using Sla.EXTRA;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
+using Sla.DECCORE;
 
 namespace Sla.EXTRA
 {
@@ -30,9 +22,9 @@ namespace Sla.EXTRA
 
         public override bool step(UnifyState state)
         {
-            TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
+            TraverseCountState traverse = (TraverseCountState)state.getTraverse(uniqid);
             if (!traverse.step()) return false;
-            Funcdata* fd = state.getFunction();
+            Funcdata fd = state.getFunction();
             PcodeOp op = state.data(opindex).getOp();
             fd.opSetOpcode(op, opc);
             return true;
@@ -40,13 +32,13 @@ namespace Sla.EXTRA
 
         public override void collectTypes(List<UnifyDatatype> typelist)
         {
-            typelist[opindex] = UnifyDatatype(UnifyDatatype.TypeKind.op_type);
+            typelist[opindex] = new UnifyDatatype(UnifyDatatype.TypeKind.op_type);
         }
 
         public override void print(TextWriter s, UnifyCPrinter printstate)
         {
             printstate.printIndent(s);
-            s << "data.opSetOpcode(" << printstate.getName(opindex) << ",CPUI_" << Globals.get_opname(opc) << ");" << endl;
+            s.WriteLine($"data.opSetOpcode({printstate.getName(opindex)},CPUI_{Globals.get_opname(opc)});");
         }
     }
 }

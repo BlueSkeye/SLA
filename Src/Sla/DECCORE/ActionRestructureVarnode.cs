@@ -97,9 +97,9 @@ namespace Sla.DECCORE
             numpass += 1;
 #if OPACTION_DEBUG
             if ((flags & rule_debug) == 0) return 0;
-            ostringstream s;
+            TextWriter s = new StringWriter();
             data.getScopeLocal().printEntries(s);
-            data.getArch().printDebug(s.str());
+            data.getArch().printDebug(s.ToString());
 #endif
             return 0;
         }

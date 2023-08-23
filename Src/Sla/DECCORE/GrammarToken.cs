@@ -49,19 +49,18 @@ namespace Sla.DECCORE
             type = tp;
         }
 
-        private void set(Token tp, char ptr, int len)
+        private void set(Token tp, char[] ptr, int len)
         {
             type = tp;
             switch (tp) {
                 case Token.integer:
-                    string charstring(ptr, len);
-                    // s.unsetf(ios::dec | ios::hex | ios::oct);
+                    string charstring = new string(ptr, 0, len);
                     long val = long.Parse(charstring);
                     value.integer = (ulong)val;
                     break;
                 case Token.identifier:
                 case Token.stringval:
-                    value.stringval = new string(ptr, len);
+                    value.stringval = new string(ptr, 0, len);
                     break;
                 case Token.charconstant:
                     if (len == 1)

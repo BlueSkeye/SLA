@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.SLEIGH;
 
 namespace Sla.SLACOMP
 {
@@ -15,20 +11,20 @@ namespace Sla.SLACOMP
     {
         private SleighCompile compiler;            ///< The main SLEIGH parser
         
-        protected virtual uint allocateTemp() => compiler.getUniqueAddr();
+        protected override uint allocateTemp() => compiler.getUniqueAddr();
 
-        protected virtual Location getLocation(SleighSymbol sym) => compiler.getLocation(sym);
+        public override Location? getLocation(SleighSymbol sym) => compiler.getLocation(sym);
 
-        protected virtual void reportError(Location loc, string msg) => compiler.reportError(loc, msg);
+        public override void reportError(Location loc, string msg) => compiler.reportError(loc, msg);
 
-        protected virtual void reportWarning(Location loc, string msg) => compiler.reportWarning(loc, msg);
+        public override void reportWarning(Location loc, string msg) => compiler.reportWarning(loc, msg);
 
-        protected virtual void addSymbol(SleighSymbol sym) => compiler.addSymbol(sym);
+        protected override void addSymbol(SleighSymbol sym) => compiler.addSymbol(sym);
 
         public SleighPcode()
             : base()
         {
-            compiler = (SleighCompile*)0;
+            compiler = (SleighCompile)null;
         }
 
         /// Hook in the main parser

@@ -1,11 +1,4 @@
 ﻿using Sla.CORE;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Formats.Asn1.AsnWriter;
 
 namespace Sla.DECCORE
 {
@@ -24,15 +17,15 @@ namespace Sla.DECCORE
         /// Build name, type, and flags based on the placeholder address
         private void buildNameType()
         {
-            TypeFactory* typegrp = scope.getArch().types;
+            TypeFactory typegrp = scope.getArch().types;
             type = typegrp.getTypeCode();
             type = typegrp.getTypePointer(refaddr.getAddrSize(), type, refaddr.getSpace().getWordSize());
-            if (name.size() == 0)
-            {   // If a name was not already provided
-                ostringstream s;        // Give the reference a unique name
-                s << refaddr.getShortcut();
+            if (name.Length == 0) {
+                // If a name was not already provided
+                TextWriter s = new StringWriter();        // Give the reference a unique name
+                s.Write(refaddr.getShortcut());
                 refaddr.printRaw(s);
-                name = s.str();
+                name = s.ToString();
                 name += "_exref"; // Indicate this is an external reference variable
             }
             if (displayName.size() == 0)
@@ -74,7 +67,7 @@ namespace Sla.DECCORE
 
         public override void decode(Sla.CORE.Decoder decoder)
         {
-            uint elemId = decoder.openElement(ElementId.ELEM_EXTERNREFSYMBOL);
+            ElementId elemId = decoder.openElement(ElementId.ELEM_EXTERNREFSYMBOL);
             name = string.Empty;           // Name is empty
             displayName = string.Empty;
             while(true) {

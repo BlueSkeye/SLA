@@ -63,6 +63,11 @@ namespace Sla
             from.RemoveAt(lastItemIndex);
         }
 
+        internal static void stable_sort<T>(this List<T> container)
+        {
+            throw new NotImplementedException();
+        }
+
         private class ReverseEnumerator<T> : IEnumerator<T>
         {
             private bool _disposed = false;

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -18,8 +13,8 @@ namespace Sla.DECCORE
 
         public override Datatype getInputCast(PcodeOp op, int slot, CastStrategy castStrategy)
         {
-            Datatype* reqtype = op.getOut().getHighTypeDefFacing();   // Require input to be same type as output
-            Datatype* curtype = op.getIn(0).getHighTypeReadFacing(op);
+            Datatype reqtype = op.getOut().getHighTypeDefFacing();   // Require input to be same type as output
+            Datatype curtype = op.getIn(0).getHighTypeReadFacing(op);
             return castStrategy.castStandard(reqtype, curtype, false, true);
         }
 
@@ -28,14 +23,13 @@ namespace Sla.DECCORE
             return op.getIn(0).getHighTypeReadFacing(op);
         }
 
-        public override Datatype propagateType(Datatype alttype, PcodeOp op, Varnode invn, Varnode outvn,
+        public override Datatype? propagateType(Datatype alttype, PcodeOp op, Varnode invn, Varnode outvn,
             int inslot, int outslot)
         {
             if ((inslot != -1) && (outslot != -1)) return (Datatype)null; // Must propagate input <. output
-            Datatype* newtype;
-            if (invn.isSpacebase())
-            {
-                AddrSpace* spc = tlst.getArch().getDefaultDataSpace();
+            Datatype newtype;
+            if (invn.isSpacebase()) {
+                AddrSpace spc = tlst.getArch().getDefaultDataSpace();
                 newtype = tlst.getTypePointer(alttype.getSize(), tlst.getBase(1, type_metatype.TYPE_UNKNOWN), spc.getWordSize());
             }
             else
@@ -50,9 +44,9 @@ namespace Sla.DECCORE
 
         public override void printRaw(TextWriter s, PcodeOp op)
         {
-            Varnode::printRaw(s, op.getOut());
-            s << " = ";
-            Varnode::printRaw(s, op.getIn(0));
+            Varnode.printRaw(s, op.getOut());
+            s.Write(" = ");
+            Varnode.printRaw(s, op.getIn(0));
         }
     }
 }

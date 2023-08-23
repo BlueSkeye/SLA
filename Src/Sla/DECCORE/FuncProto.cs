@@ -55,7 +55,7 @@ namespace Sla.DECCORE
         /// Boolean properties of the function prototype
         private FuncFlags flags;
         /// Side-effects associated with non-parameter storage locations
-        private List<EffectRecord> effectlist;
+        private LinkedList<EffectRecord> effectlist;
         /// Locations that may contain \e trash values
         private List<VarnodeData> likelytrash;
         /// (If non-negative) id of p-code snippet that should replace this function

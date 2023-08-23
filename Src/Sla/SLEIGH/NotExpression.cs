@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Sla.SLEIGH
 {
     internal class NotExpression : UnaryExpression
@@ -33,9 +26,9 @@ namespace Sla.SLEIGH
 
         public override void saveXml(TextWriter s)
         {
-            s << "<not_exp>\n";
-            UnaryExpression::saveXml(s);
-            s << "</not_exp>\n";
+            s.WriteLine("<not_exp>");
+            base.saveXml(s);
+            s.WriteLine("</not_exp>");
         }
     }
 }

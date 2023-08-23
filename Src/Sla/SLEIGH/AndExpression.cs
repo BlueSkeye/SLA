@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Sla.SLEIGH
 {
     internal class AndExpression : BinaryExpression
@@ -35,9 +28,9 @@ namespace Sla.SLEIGH
 
         public override void saveXml(TextWriter s)
         {
-            s << "<and_exp>\n";
-            BinaryExpression::saveXml(s);
-            s << "</and_exp>\n";
+            s.WriteLine("<and_exp>");
+            base.saveXml(s);
+            s.WriteLine("</and_exp>");
         }
     }
 }

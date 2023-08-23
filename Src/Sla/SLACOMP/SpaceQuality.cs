@@ -24,7 +24,7 @@ namespace Sla.SLACOMP
         /// Name of the address space
         internal string name;
         /// Type of address space, \e ramtype or \e registertype
-        internal uint type;
+        internal Type type;
         /// Number of bytes required to index all bytes of the space
         internal uint size;
         /// Number of bytes in an addressable unit of the space

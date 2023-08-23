@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Sla.SLEIGH
 {
     internal class PlusExpression : BinaryExpression
@@ -35,9 +28,9 @@ namespace Sla.SLEIGH
 
         public override void saveXml(TextWriter s)
         {
-            s << "<plus_exp>\n";
-            BinaryExpression::saveXml(s);
-            s << "</plus_exp>\n";
+            s.WriteLine("<plus_exp>");
+            base.saveXml(s);
+            s.WriteLine("</plus_exp>");
         }
     }
 }

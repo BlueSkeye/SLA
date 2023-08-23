@@ -691,91 +691,91 @@ namespace Sla.DECCORE
         {
           switch(tagtype) {
           case tag_type.docu_b:	// beginDocument
-            s << "docu_b";
+            s.Write("docu_b");
             break;
           case tag_type.docu_e:	// endDocument
-            s << "docu_e";
+            s.Write("docu_e");
             break;
           case tag_type.func_b:	// beginFunction
-            s << "func_b";
+            s.Write("func_b");
             break;
           case tag_type.func_e:	// endFunction
-            s << "func_e";
+            s.Write("func_e");
             break;
           case tag_type.bloc_b:	// beginBlock
-            s << "bloc_b";
+            s.Write("bloc_b");
             break;
           case tag_type.bloc_e:	// endBlock
-            s << "bloc_e";
+            s.Write("bloc_e");
             break;
           case tag_type.rtyp_b:	// beginReturnType
-            s << "rtyp_b";
+            s.Write("rtyp_b");
             break;
           case tag_type.rtyp_e:	// endReturnType
-            s << "rtyp_e";
+            s.Write("rtyp_e");
             break;
           case tag_type.vard_b:	// beginVarDecl
-            s << "vard_b";
+            s.Write("vard_b");
             break;
           case tag_type.vard_e:	// endVarDecl
-            s << "vard_e";
+            s.Write("vard_e");
             break;
           case tag_type.stat_b:	// beginStatement
-            s << "stat_b";
+            s.Write("stat_b");
             break;
           case tag_type.stat_e:	// endStatement
-            s << "stat_e";
+            s.Write("stat_e");
             break;
           case tag_type.prot_b:	// beginFuncProto
-            s << "prot_b";
+            s.Write("prot_b");
             break;
           case tag_type.prot_e:	// endFuncProto
-            s << "prot_e";
+            s.Write("prot_e");
             break;
           case tag_type.vari_t:	// tagVariable
-            s << "vari_t";
+            s.Write("vari_t");
             break;
           case tag_type.op_t:		// tagOp
-            s << "op_t";
+            s.Write("op_t");
             break;
           case tag_type.fnam_t:	// tagFuncName
-            s << "fnam_t";
+            s.Write("fnam_t");
             break;
           case tag_type.type_t:	// tagType
-            s << "type_t";
+            s.Write("type_t");
             break;
           case tag_type.field_t: // tagField
-            s << "field_t";
+            s.Write("field_t");
             break;
           case tag_type.comm_t:	// tagComment
-            s << "comm_t";
+            s.Write("comm_t");
             break;
           case tag_type.label_t:	// tagLabel
-            s << "label_t";
+            s.Write("label_t");
             break;
           case tag_type.synt_t:	// print
-            s << "synt_t";
+            s.Write("synt_t");
             break;
           case tag_type.opar_t:	// openParen
-            s << "opar_t";
+            s.Write("opar_t");
             break;
           case tag_type.cpar_t:	// closeParen
-            s << "cpar_t";
+            s.Write("cpar_t");
             break;
           case tag_type.oinv_t:	// Invisible open
-            s << "oinv_t";
+            s.Write("oinv_t");
             break;
           case tag_type.cinv_t:	// Invisible close
-            s << "cinv_t";
+            s.Write("cinv_t");
             break;
           case tag_type.spac_t:	// Spaces
-            s << "spac_t";
+            s.Write("spac_t");
             break;
           case tag_type.line_t:	// tagLine
-            s << "line_t";
+            s.Write("line_t");
             break;
           case tag_type.bump_t:
-            s << "bump_t";
+            s.Write("bump_t");
             break;
           }
         }

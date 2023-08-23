@@ -1,12 +1,4 @@
 ﻿using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.EXTRA
 {
@@ -28,7 +20,7 @@ namespace Sla.EXTRA
 
         public override bool step(UnifyState state)
         {
-            TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
+            TraverseCountState traverse = (TraverseCountState)state.getTraverse(uniqid);
             if (!traverse.step()) return false;
             PcodeOp op = state.data(opindex).getOp();
             Varnode vn = op.getIn(slot);
@@ -39,18 +31,18 @@ namespace Sla.EXTRA
 
         public override void collectTypes(List<UnifyDatatype> typelist)
         {
-            typelist[opindex] = UnifyDatatype(UnifyDatatype.TypeKind.op_type);
+            typelist[opindex] = new UnifyDatatype(UnifyDatatype.TypeKind.op_type);
         }
 
         public override void print(TextWriter s, UnifyCPrinter printstate)
         {
             printstate.printIndent(s);
-            s << "if (!" << printstate.getName(opindex) << ".getIn(" << dec << slot << ").isConstant())" << endl;
+            s.WriteLine($"if (!{printstate.getName(opindex)}.getIn({slot}).isConstant())");
             printstate.printAbort(s);
             printstate.printIndent(s);
-            s << "if (" << printstate.getName(opindex) << ".getIn(" << dec << slot << ").getOffset() != 0x";
-            s << hex << val << " & Globals.calc_mask(" << printstate.getName(opindex) << ".getIn(" << dec;
-            s << slot << ").getSize()))" << endl;
+            s.Write($"if ({printstate.getName(opindex)}.getIn({slot}).getOffset() != 0x");
+            s.Write($"{val:X} & Globals.calc_mask({printstate.getName(opindex)}.getIn(");
+            s.WriteLine($"{slot}).getSize()))");
             printstate.printAbort(s);
         }
     }

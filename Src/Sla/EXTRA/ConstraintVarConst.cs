@@ -1,12 +1,4 @@
 ﻿using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.EXTRA
 {
@@ -27,15 +19,15 @@ namespace Sla.EXTRA
         
         ~ConstraintVarConst()
         {
-            delete expr;
-            if (exprsz != (RHSConstant)null)
-                delete exprsz;
+            //delete expr;
+            //if (exprsz != (RHSConstant)null)
+            //    delete exprsz;
         }
 
         public override UnifyConstraint clone()
         {
-            UnifyConstraint* res;
-            RHSConstant* newexprsz = (RHSConstant)null;
+            UnifyConstraint res;
+            RHSConstant? newexprsz = (RHSConstant)null;
             if (exprsz != (RHSConstant)null)
                 newexprsz = exprsz.clone();
             res = (new ConstraintVarConst(varindex, expr.clone(), newexprsz)).copyid(this);
@@ -44,10 +36,10 @@ namespace Sla.EXTRA
 
         public override bool step(UnifyState state)
         {
-            TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
+            TraverseCountState traverse = (TraverseCountState)state.getTraverse(uniqid);
             if (!traverse.step()) return false;
             ulong ourconst = expr.getConstant(state);
-            Funcdata* fd = state.getFunction();
+            Funcdata fd = state.getFunction();
             int sz;
             if (exprsz != (RHSConstant)null)
                 sz = (int)exprsz.getConstant(state);
@@ -61,7 +53,7 @@ namespace Sla.EXTRA
 
         public override void collectTypes(List<UnifyDatatype> typelist)
         {
-            typelist[varindex] = UnifyDatatype(UnifyDatatype.TypeKind.var_type);
+            typelist[varindex] = new UnifyDatatype(UnifyDatatype.TypeKind.var_type);
         }
 
         public override int getBaseIndex() => varindex;
@@ -69,16 +61,16 @@ namespace Sla.EXTRA
         public override void print(TextWriter s, UnifyCPrinter printstate)
         {
             printstate.printIndent(s);
-            s << printstate.getName(varindex) << " = data.newConstant(";
+            s.Write($"{printstate.getName(varindex)} = data.newConstant(");
             if (exprsz != (RHSConstant)null)
                 exprsz.writeExpression(s, printstate);
             else
-                s << dec << (int)sizeof(ulong);
-            s << ',';
+                s.Write((int)sizeof(ulong));
+            s.Write(',');
             expr.writeExpression(s, printstate);
-            s << " & Globals.calc_mask(";
+            s.Write(" & Globals.calc_mask(");
             exprsz.writeExpression(s, printstate);
-            s << "));" << endl;
+            s.WriteLine("));");
         }
     }
 }

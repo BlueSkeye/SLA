@@ -24,7 +24,7 @@ namespace Sla.EXTRA
 
         public override void writeExpression(TextWriter s, UnifyCPrinter printstate)
         {
-            s << "(ulong)0x" << hex << val;
+            s.Write($"(ulong)0x{val:X}");
         }
     }
 }

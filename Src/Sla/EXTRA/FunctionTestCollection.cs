@@ -102,7 +102,7 @@ namespace Sla.EXTRA
             foreach (FunctionTestProperty property in testList) {
                 numTestsApplied += 1;
                 if (property.endTest()) {
-                    console.optr.WriteLine($"Success -- {property.getName()}";
+                    console.optr.WriteLine($"Success -- {property.getName()}");
                     numTestsSucceeded += 1;
                 }
                 else {
@@ -233,7 +233,7 @@ namespace Sla.EXTRA
                 lateStream.Add($"Execution failed for {fileName}");
                 return;
             }
-            string result = bulkout.str();
+            string result = bulkout.ToString();
             if (result.Length == 0) {
                 lateStream.Add($"No output for {fileName}");
                 return;
@@ -279,7 +279,6 @@ namespace Sla.EXTRA
                     failures.Add($"Error executing {testFiles[i]}: {err.ToString()}{fs.ToString()}\n");
                 }
             }
-
             s.WriteLine();
             s.WriteLine($"Total tests applied = {totalTestsApplied}");
             s.WriteLine($"Total passing tests = { totalTestsSucceeded})");

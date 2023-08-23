@@ -12,7 +12,7 @@ namespace Sla.DECCORE
     internal class ActionPrototypeWarnings : Action
     {
         public ActionPrototypeWarnings(string g)
-            : base(rule_onceperfunc,"prototypewarnings", g)
+            : base(ruleflags.rule_onceperfunc,"prototypewarnings", g)
         {
         }
 
@@ -23,56 +23,51 @@ namespace Sla.DECCORE
 
         public override int apply(Funcdata data)
         {
-            List<string> overridemessages;
+            List<string> overridemessages = new List<string>();
             data.getOverride().generateOverrideMessages(overridemessages, data.getArch());
             for (int i = 0; i < overridemessages.size(); ++i)
                 data.warningHeader(overridemessages[i]);
 
-            FuncProto & ourproto(data.getFuncProto());
-            if (ourproto.hasInputErrors())
-            {
-                data.warningHeader("Cannot assign parameter locations for this function: Prototype may be inaccurate");
+            FuncProto ourproto = data.getFuncProto();
+            if (ourproto.hasInputErrors()) {
+                data.warningHeader(
+                    "Cannot assign parameter locations for this function: Prototype may be inaccurate");
             }
-            if (ourproto.hasOutputErrors())
-            {
+            if (ourproto.hasOutputErrors()) {
                 data.warningHeader("Cannot assign location of return value for this function: Return value may be inaccurate");
             }
-            if (ourproto.isModelUnknown())
-            {
-                ostringstream s;
-                s << "Unknown calling convention";
+            if (ourproto.isModelUnknown()) {
+                TextWriter s = new StringWriter();
+                s.Write("Unknown calling convention");
                 if (ourproto.printModelInDecl())
-                    s << ": " << ourproto.getModelName();
+                    s.Write($": {ourproto.getModelName()}");
                 if (!ourproto.hasCustomStorage() && (ourproto.isInputLocked() || ourproto.isOutputLocked()))
-                    s << " -- yet parameter storage is locked";
-                data.warningHeader(s.str());
+                    s.Write(" -- yet parameter storage is locked");
+                data.warningHeader(s.ToString());
             }
             int numcalls = data.numCalls();
-            for (int i = 0; i < numcalls; ++i)
-            {
+            for (int i = 0; i < numcalls; ++i) {
                 FuncCallSpecs fc = data.getCallSpecs(i);
-                Funcdata* fd = fc.getFuncdata();
-                if (fc.hasInputErrors())
-                {
-                    ostringstream s;
-                    s << "Cannot assign parameter location for function ";
+                Funcdata fd = fc.getFuncdata();
+                if (fc.hasInputErrors()) {
+                    TextWriter s = new StringWriter();
+                    s.Write("Cannot assign parameter location for function ");
                     if (fd != (Funcdata)null)
-                        s << fd.getName();
+                        s.Write(fd.getName());
                     else
-                        s << "<indirect>";
-                    s << ": Prototype may be inaccurate";
-                    data.warning(s.str(), fc.getEntryAddress());
+                        s.Write("<indirect>");
+                    s.Write(": Prototype may be inaccurate");
+                    data.warning(s.ToString(), fc.getEntryAddress());
                 }
-                if (fc.hasOutputErrors())
-                {
-                    ostringstream s;
-                    s << "Cannot assign location of return value for function ";
+                if (fc.hasOutputErrors()) {
+                    TextWriter s = new StringWriter();
+                    s.Write("Cannot assign location of return value for function ");
                     if (fd != (Funcdata)null)
-                        s << fd.getName();
+                        s.Write(fd.getName());
                     else
-                        s << "<indirect>";
-                    s << ": Return value may be inaccurate";
-                    data.warning(s.str(), fc.getEntryAddress());
+                        s.Write("<indirect>");
+                    s.Write(": Return value may be inaccurate");
+                    data.warning(s.ToString(), fc.getEntryAddress());
                 }
             }
             return 0;

@@ -257,7 +257,7 @@ namespace Sla.CORE {
         /// \param size is the (offset encoding) size of the new space
         /// \param ws is the number of bytes in an addressable unit
         /// \param ind is the integer identifier for the new space
-        /// \param fl can be 0 or AddrSpace::hasphysical
+        /// \param fl can be 0 or AddrSpace.Properties.hasphysical
         /// \param dl is the number of rounds to delay heritage for the new space
         public AddrSpace(AddrSpaceManager m, Translate t, spacetype tp, string nm, uint size,
             uint ws, int ind, Properties fl, int dl)

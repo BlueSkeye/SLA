@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -14,7 +9,7 @@ namespace Sla.DECCORE
             : base(t, OpCode.CPUI_INT_SRIGHT,">>", type_metatype.TYPE_INT, type_metatype.TYPE_INT)
         {
             opflags = PcodeOp.Flags.binary;
-            addlflags = inherits_sign | inherits_sign_zero | shift_op;
+            addlflags = OperationType.inherits_sign | OperationType.inherits_sign_zero | OperationType.shift_op;
             behave = new OpBehaviorIntSright();
         }
 
@@ -25,38 +20,38 @@ namespace Sla.DECCORE
 
         public override void printRaw(TextWriter s, PcodeOp op)
         {
-            Varnode::printRaw(s, op.getOut());
-            s << " = ";
-            Varnode::printRaw(s, op.getIn(0));
-            s << " s>> ";
-            Varnode::printRaw(s, op.getIn(1));
+            Varnode.printRaw(s, op.getOut());
+            s.Write(" = ");
+            Varnode.printRaw(s, op.getIn(0));
+            s.Write(" s>> ");
+            Varnode.printRaw(s, op.getIn(1));
         }
 
-        public override Datatype getInputCast(PcodeOp op, int slot, CastStrategy castStrategy)
+        public override Datatype? getInputCast(PcodeOp op, int slot, CastStrategy castStrategy)
         {
-            if (slot == 0)
-            {
+            if (slot == 0) {
                 Varnode vn = op.getIn(0);
-                Datatype* reqtype = op.inputTypeLocal(slot);
-                Datatype* curtype = vn.getHighTypeReadFacing(op);
-                int promoType = castStrategy.intPromotionType(vn);
-                if (promoType != CastStrategy::NO_PROMOTION && ((promoType & CastStrategy::SIGNED_EXTENSION) == 0))
+                Datatype reqtype = op.inputTypeLocal(slot);
+                Datatype curtype = vn.getHighTypeReadFacing(op);
+                CastStrategy.IntPromotionCode promoType = castStrategy.intPromotionType(vn);
+                if (promoType != CastStrategy.IntPromotionCode.NO_PROMOTION
+                    && ((promoType & CastStrategy.IntPromotionCode.SIGNED_EXTENSION) == 0))
                     return reqtype;
                 return castStrategy.castStandard(reqtype, curtype, true, true);
             }
-            return TypeOpBinary::getInputCast(op, slot, castStrategy);
+            return base.getInputCast(op, slot, castStrategy);
         }
 
         public override Datatype getInputLocal(PcodeOp op, int slot)
         {
             if (slot == 1)
                 return tlst.getBaseNoChar(op.getIn(1).getSize(), type_metatype.TYPE_INT);
-            return TypeOpBinary::getInputLocal(op, slot);
+            return base.getInputLocal(op, slot);
         }
 
         public override Datatype getOutputToken(PcodeOp op, CastStrategy castStrategy)
         {
-            Datatype* res1 = op.getIn(0).getHighTypeReadFacing(op);
+            Datatype res1 = op.getIn(0).getHighTypeReadFacing(op);
             if (res1.getMetatype() == type_metatype.TYPE_BOOL)
                 res1 = tlst.getBase(res1.getSize(), type_metatype.TYPE_INT);
             return res1;

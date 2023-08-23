@@ -1,17 +1,10 @@
 ﻿using Sla.CORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.SLEIGH
 {
     internal class VarnodeListSymbol : ValueSymbol
     {
-        private List<VarnodeSymbol> varnode_table;
+        private List<VarnodeSymbol> varnode_table = new List<VarnodeSymbol>();
         private bool tableisfilled;
 
         private void checkTableFill()
@@ -19,8 +12,7 @@ namespace Sla.SLEIGH
             long min = patval.minValue();
             long max = patval.maxValue();
             tableisfilled = (min >= 0) && (max < varnode_table.size());
-            for (uint i = 0; i < varnode_table.size(); ++i)
-            {
+            for (int i = 0; i < varnode_table.size(); ++i) {
                 if (varnode_table[i] == (VarnodeSymbol)null)
                     tableisfilled = false;
             }
@@ -34,22 +26,23 @@ namespace Sla.SLEIGH
             : base(nm, pv)
         {
             for (int i = 0; i < vt.size(); ++i)
-                varnode_table.Add((VarnodeSymbol*)vt[i]);
+                varnode_table.Add((VarnodeSymbol)vt[i]);
             checkTableFill();
         }
 
         public override Constructor resolve(ParserWalker walker)
         {
-            if (!tableisfilled)
-            {
+            if (!tableisfilled) {
                 long ind = patval.getValue(walker);
-                if ((ind < 0) || (ind >= varnode_table.size()) || (varnode_table[ind] == (VarnodeSymbol)null))
+                if (   (ind < 0)
+                    || (ind >= varnode_table.size())
+                    || (varnode_table[(int)ind] == (VarnodeSymbol)null))
                 {
-                    ostringstream s;
-                    s << walker.getAddr().getShortcut();
+                    TextWriter s = new StringWriter();
+                    s.Write(walker.getAddr().getShortcut());
                     walker.getAddr().printRaw(s);
-                    s << ": No corresponding entry in varnode list";
-                    throw BadDataError(s.str());
+                    s.Write(": No corresponding entry in varnode list");
+                    throw new BadDataError(s.ToString());
                 }
             }
             return (Constructor)null;
@@ -59,7 +52,7 @@ namespace Sla.SLEIGH
         {
             uint ind = (uint)patval.getValue(walker);
             // The resolve routine has checked that -ind- must be a valid index
-            VarnodeData fix = varnode_table[ind].getFixedVarnode();
+            VarnodeData fix = varnode_table[(int)ind].getFixedVarnode();
             hand.space = fix.space;
             hand.offset_space = (AddrSpace)null; // Not a dynamic value
             hand.offset_offset = fix.offset;
@@ -68,9 +61,8 @@ namespace Sla.SLEIGH
 
         public override int getSize()
         {
-            for (int i = 0; i < varnode_table.size(); ++i)
-            {
-                VarnodeSymbol* vnsym = varnode_table[i]; // Assume all are same size
+            for (int i = 0; i < varnode_table.size(); ++i) {
+                VarnodeSymbol? vnsym = varnode_table[i]; // Assume all are same size
                 if (vnsym != (VarnodeSymbol)null)
                     return vnsym.getSize();
             }
@@ -82,56 +74,48 @@ namespace Sla.SLEIGH
             uint ind = (uint)patval.getValue(walker);
             if (ind >= varnode_table.size())
                 throw new SleighError("Value out of range for varnode table");
-            s << varnode_table[ind].getName();
+            s.Write(varnode_table[(int)ind].getName());
         }
 
         public override symbol_type getType() => SleighSymbol.symbol_type.varnodelist_symbol;
 
         public override void saveXml(TextWriter s)
         {
-            s << "<varlist_sym";
-            SleighSymbol::saveXmlHeader(s);
-            s << ">\n";
+            s.Write("<varlist_sym");
+            base.saveXmlHeader(s);
+            s.WriteLine(">");
             patval.saveXml(s);
-            for (int i = 0; i < varnode_table.size(); ++i)
-            {
+            for (int i = 0; i < varnode_table.size(); ++i) {
                 if (varnode_table[i] == (VarnodeSymbol)null)
-                    s << "<null/>\n";
+                    s.WriteLine("<null/>");
                 else
-                    s << "<var id=\"0x" << hex << varnode_table[i].getId() << "\"/>\n";
+                    s.Write($"<var id=\"0x{varnode_table[i].getId():X}\"/>");
             }
-            s << "</varlist_sym>\n";
+            s.WriteLine("</varlist_sym>");
         }
 
         public override void saveXmlHeader(TextWriter s)
         {
-            s << "<varlist_sym_head";
-            SleighSymbol::saveXmlHeader(s);
-            s << "/>\n";
+            s.Write("<varlist_sym_head");
+            base.saveXmlHeader(s);
+            s.WriteLine("/>");
         }
 
         public override void restoreXml(Element el, SleighBase trans)
         {
-            List list = el.getChildren();
-            List::const_iterator iter;
-            iter = list.begin();
-            patval = (PatternValue*)PatternExpression::restoreExpression(*iter, trans);
+            IEnumerator<Element> iter = el.getChildren().GetEnumerator();
+            if (!iter.MoveNext()) throw new ApplicationException();
+            patval = (PatternValue)PatternExpression.restoreExpression(iter.Current, trans);
             patval.layClaim();
-            ++iter;
-            while (iter != list.end())
-            {
-                Element subel = *iter;
-                if (subel.getName() == "var")
-                {
+            while (iter.MoveNext()) {
+                Element subel = iter.Current;
+                if (subel.getName() == "var") {
                     uint id;
-                    istringstream s = new istringstream(subel.getAttributeValue("id"));
-                    s.unsetf(ios::dec | ios::hex | ios::oct);
-                    s >> id;
-                    varnode_table.Add((VarnodeSymbol*)trans.findSymbol(id));
+                    id = uint.Parse(subel.getAttributeValue("id"));
+                    varnode_table.Add((VarnodeSymbol)trans.findSymbol(id));
                 }
                 else
                     varnode_table.Add((VarnodeSymbol)null);
-                ++iter;
             }
             checkTableFill();
         }

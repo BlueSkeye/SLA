@@ -1,4 +1,5 @@
-﻿using Sla.SLEIGH;
+﻿using Sla.CORE;
+using Sla.SLEIGH;
 
 namespace Sla.SLACOMP
 {
@@ -61,7 +62,7 @@ namespace Sla.SLACOMP
                     ulong newtemp = slgh.getUniqueAddr(); // Generate a new temporary location
 
                     // Generate a SUBPIECE op that implements the offset_plus
-                    OpTpl subpieceop = new OpTpl(CPUI_SUBPIECE);
+                    OpTpl subpieceop = new OpTpl(OpCode.CPUI_SUBPIECE);
                     VarnodeTpl newvn = new VarnodeTpl(new ConstTpl(slgh.getUniqueSpace()),
                         new ConstTpl(ConstTpl.const_type.real, newtemp),
                         new ConstTpl(ConstTpl.const_type.real, realsize));
@@ -70,7 +71,7 @@ namespace Sla.SLACOMP
                     VarnodeTpl origvn = new VarnodeTpl(hand.getSpace(), hand.getPtrOffset(), hand.getSize());
                     subpieceop.addInput(origvn);
                     VarnodeTpl plusvn = new VarnodeTpl(new ConstTpl(slgh.getConstantSpace()),
-                        new ConstTpl(ConstTpl.const_type.real, plus),
+                        new ConstTpl(ConstTpl.const_type.real, (ulong)plus),
                         new ConstTpl(ConstTpl.const_type.real, 4));
                     subpieceop.addInput(plusvn);
                     outvec.Add(subpieceop);
@@ -83,7 +84,7 @@ namespace Sla.SLACOMP
             return true;
         }
         
-        protected virtual void dump(OpTpl op)
+        protected override void dump(OpTpl op)
         {
             OpTpl clone;
             VarnodeTpl v_clone;
@@ -134,7 +135,7 @@ namespace Sla.SLACOMP
             : base(lbcnt)
         {
             outvec = ovec;
-            slgh = sl;
+            Parsing.slgh = sl;
             haserror = false;
         }
 
@@ -176,8 +177,9 @@ namespace Sla.SLACOMP
             // in with other labels local to the parent
 
             OpTpl clone = new OpTpl(op.getOpcode());
-            VarnodeTpl v_clone = new VarnodeTpl(op.getIn(0)); // Clone the label index
-                                                     // Make adjustment to macro local value so that it is parent local
+            // Clone the label index
+            VarnodeTpl v_clone = new VarnodeTpl(op.getIn(0));
+            // Make adjustment to macro local value so that it is parent local
             ulong val = v_clone.getOffset().getReal() + getLabelBase();
             v_clone.setOffset(val);
             clone.addInput(v_clone);

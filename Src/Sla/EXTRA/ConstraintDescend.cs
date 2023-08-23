@@ -1,12 +1,5 @@
-﻿using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
+using Sla.DECCORE;
 
 namespace Sla.EXTRA
 {
@@ -29,20 +22,20 @@ namespace Sla.EXTRA
         {
             if (uniqid != state.numTraverse())
                 throw new LowlevelError("Traverse id does not match index");
-            TraverseConstraint* newt = new TraverseDescendState(uniqid);
+            TraverseConstraint newt = new TraverseDescendState(uniqid);
             state.registerTraverseConstraint(newt);
         }
 
         public override void initialize(UnifyState state)
         {
-            TraverseDescendState* traverse = (TraverseDescendState*)state.getTraverse(uniqid);
+            TraverseDescendState traverse = (TraverseDescendState)state.getTraverse(uniqid);
             Varnode vn = state.data(varindex).getVarnode();
             traverse.initialize(vn);
         }
 
         public override bool step(UnifyState state)
         {
-            TraverseDescendState* traverse = (TraverseDescendState*)state.getTraverse(uniqid);
+            TraverseDescendState traverse = (TraverseDescendState)state.getTraverse(uniqid);
             if (!traverse.step()) return false;
             PcodeOp op = traverse.getCurrentOp();
             state.data(opindex).setOp(op);
@@ -51,8 +44,8 @@ namespace Sla.EXTRA
 
         public override void collectTypes(List<UnifyDatatype> typelist)
         {
-            typelist[opindex] = UnifyDatatype(UnifyDatatype.TypeKind.op_type);
-            typelist[varindex] = UnifyDatatype(UnifyDatatype.TypeKind.var_type);
+            typelist[opindex] = new UnifyDatatype(UnifyDatatype.TypeKind.op_type);
+            typelist[varindex] = new UnifyDatatype(UnifyDatatype.TypeKind.var_type);
         }
 
         public override int getBaseIndex() => opindex;
@@ -60,18 +53,18 @@ namespace Sla.EXTRA
         public override void print(TextWriter s, UnifyCPrinter printstate)
         {
             printstate.printIndent(s);
-            s << "list<PcodeOp *>::const_iterator iter" << dec << printstate.getDepth() << ",enditer" << printstate.getDepth() << ';' << endl;
+            s.WriteLine($"list<PcodeOp *>::const_iterator iter{printstate.getDepth()},enditer{printstate.getDepth()};");
             printstate.printIndent(s);
-            s << "iter" << printstate.getDepth() << " = " << printstate.getName(varindex) << ".beginDescend();" << endl;
+            s.WriteLine($"iter{printstate.getDepth()} = {printstate.getName(varindex)}.beginDescend();");
             printstate.printIndent(s);
-            s << "enditer" << printstate.getDepth() << " = " << printstate.getName(varindex) << ".endDescend();" << endl;
+            s.WriteLine($"enditer{printstate.getDepth()} = {printstate.getName(varindex)}.endDescend();");
             printstate.printIndent(s);
-            s << "while(iter" << printstate.getDepth() << " != enditer" << printstate.getDepth() << ") {" << endl;
+            s.WriteLine($"while(iter{printstate.getDepth()} != enditer{printstate.getDepth()}) {{");
             printstate.incDepth();  // permanent increase in depth
             printstate.printIndent(s);
-            s << printstate.getName(opindex) << " = *iter" << (printstate.getDepth() - 1) << ';' << endl;
+            s.WriteLine($"{printstate.getName(opindex)} = *iter{(printstate.getDepth() - 1)}");
             printstate.printIndent(s);
-            s << "++iter" << (printstate.getDepth() - 1) << endl;
+            s.WriteLine($"++iter{(printstate.getDepth() - 1)}");
         }
     }
 }

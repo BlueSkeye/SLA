@@ -1,10 +1,4 @@
 ﻿using Sla.CORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.EXTRA
 {
@@ -23,15 +17,15 @@ namespace Sla.EXTRA
         
         ~ConstantExpression()
         {
-            delete expr1;
-            if (expr2 != (RHSConstant)null)
-                delete expr2;
+            //delete expr1;
+            //if (expr2 != (RHSConstant)null)
+            //    delete expr2;
         }
 
         public override RHSConstant clone()
         {
-            RHSConstant* ecopy1 = expr1.clone();
-            RHSConstant* ecopy2 = (RHSConstant)null;
+            RHSConstant ecopy1 = expr1.clone();
+            RHSConstant ecopy2 = (RHSConstant)null;
             if (expr2 != (RHSConstant)null)
                 ecopy2 = expr2.clone();
             return new ConstantExpression(ecopy1, ecopy2, opc);
@@ -39,17 +33,15 @@ namespace Sla.EXTRA
 
         public override ulong getConstant(UnifyState state)
         {
-            OpBehavior* behavior = state.getBehavior(opc);
+            OpBehavior behavior = state.getBehavior(opc);
             if (behavior.isSpecial())
                 throw new CORE.LowlevelError("Cannot evaluate special operator in constant expression");
             ulong res;
-            if (behavior.isUnary())
-            {
+            if (behavior.isUnary()) {
                 ulong ourconst1 = expr1.getConstant(state);
                 res = behavior.evaluateUnary(sizeof(ulong), sizeof(ulong), ourconst1);
             }
-            else
-            {
+            else {
                 ulong ourconst1 = expr1.getConstant(state);
                 ulong ourconst2 = expr2.getConstant(state);
                 res = behavior.evaluateBinary(sizeof(ulong), sizeof(ulong), ourconst1, ourconst2);
@@ -61,8 +53,7 @@ namespace Sla.EXTRA
         {
             int type;          // 0=binary 1=unarypre 2=unarypost 3=func
             string name;            // name of operator
-            switch (opc)
-            {
+            switch (opc) {
                 case OpCode.CPUI_INT_ADD:
                     type = 0;
                     name = " + ";
@@ -126,31 +117,27 @@ namespace Sla.EXTRA
                 default:
                     throw new CORE.LowlevelError("Unable to generate C for this expression element");
             }
-            if (type == 0)
-            {
-                s << '(';
+            if (type == 0) {
+                s.Write('(');
                 expr1.writeExpression(s, printstate);
-                s << name;
+                s.Write(name);
                 expr2.writeExpression(s, printstate);
-                s << ')';
+                s.Write(')');
             }
-            else if (type == 1)
-            {
-                s << '(' << name;
+            else if (type == 1) {
+                s.Write($"({name}");
                 expr1.writeExpression(s, printstate);
-                s << ')';
+                s.Write(')');
             }
-            else if (type == 2)
-            {
-                s << '(';
+            else if (type == 2) {
+                s.Write('(');
                 expr1.writeExpression(s, printstate);
-                s << name << ')';
+                s.Write($"{name})");
             }
-            else
-            {
-                s << name << '(';
+            else {
+                s.Write($"{name}(");
                 expr1.writeExpression(s, printstate);
-                s << ')';
+                s.Write(')');
             }
         }
     }

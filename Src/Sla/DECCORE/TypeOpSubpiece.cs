@@ -1,9 +1,4 @@
-﻿using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -26,7 +21,7 @@ namespace Sla.DECCORE
         {
             Varnode outvn = op.getOut();
             TypeField field;
-            Datatype* ct = op.getIn(0).getHighTypeReadFacing(op);
+            Datatype ct = op.getIn(0).getHighTypeReadFacing(op);
             int offset;
             int byteOff = computeByteOffsetForComposite(op);
             field = ct.findTruncation(byteOff, outvn.getSize(), op, 1, offset);   // Use artificial slot
@@ -34,7 +29,7 @@ namespace Sla.DECCORE
                 if (outvn.getSize() == field.type.getSize())
                     return field.type;
             }
-            Datatype* dt = outvn.getHighTypeDefFacing();   // SUBPIECE prints as cast to whatever its output is
+            Datatype dt = outvn.getHighTypeDefFacing();   // SUBPIECE prints as cast to whatever its output is
             if (dt.getMetatype() != type_metatype.TYPE_UNKNOWN)
                 return dt;
             return tlst.getBase(outvn.getSize(), type_metatype.TYPE_INT);   // If output is unknown, treat as cast to int
@@ -48,15 +43,13 @@ namespace Sla.DECCORE
             int newoff;
             TypeField field;
             type_metatype meta = alttype.getMetatype();
-            if (meta == type_metatype.TYPE_UNION || meta == type_metatype.TYPE_PARTIALUNION)
-            {
+            if (meta == type_metatype.TYPE_UNION || meta == type_metatype.TYPE_PARTIALUNION) {
                 // NOTE: We use an artificial slot here to store the field being truncated to
                 // as the facing data-type for slot 0 is already to the parent (this type_metatype.TYPE_UNION)
                 byteOff = computeByteOffsetForComposite(op);
                 field = alttype.resolveTruncation(byteOff, op, 1, newoff);
             }
-            else if (alttype.getMetatype() == type_metatype.TYPE_STRUCT)
-            {
+            else if (alttype.getMetatype() == type_metatype.TYPE_STRUCT) {
                 int byteOff = computeByteOffsetForComposite(op);
                 field = alttype.findTruncation(byteOff, outvn.getSize(), op, 1, newoff);
             }
@@ -70,10 +63,10 @@ namespace Sla.DECCORE
 
         public override string getOperatorName(PcodeOp op)
         {
-            ostringstream s;
+            TextWriter s = new StringWriter();
 
-            s << name << dec << op.getIn(0).getSize() << op.getOut().getSize();
-            return s.str();
+            s.Write($"{name}{op.getIn(0).getSize()}{op.getOut().getSize()}");
+            return s.ToString();
         }
 
         public override void push(PrintLanguage lng, PcodeOp op, PcodeOp readOp)

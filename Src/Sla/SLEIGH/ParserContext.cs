@@ -79,7 +79,7 @@ namespace Sla.SLEIGH
 
         public void allocateOperand(int i, ParserWalkerChange walker)
         {
-            ConstructState opstate = &state[alloc++];
+            ConstructState opstate = state[alloc++];
             opstate.parent = walker.point;
             opstate.ct = (Constructor)null;
             walker.point.resolve[i] = opstate;
@@ -91,7 +91,7 @@ namespace Sla.SLEIGH
         public void setAddr(Address ad)
         {
             addr = ad;
-            n2addr = Address();
+            n2addr = new Address();
         }
 
         public void setNaddr(Address ad)
@@ -113,7 +113,7 @@ namespace Sla.SLEIGH
                 mask = mask,
                 value = context[num] & mask,
                 flow = flow
-            };
+            });
         }
 
         public void clearCommits()
@@ -141,8 +141,8 @@ namespace Sla.SLEIGH
                     commitaddr = new Address(h.space, h.offset_offset);
                 }
                 else {
-                    FixedHandle hand;
-                    sym.getFixedHandle(out hand, walker);
+                    FixedHandle hand = new FixedHandle();
+                    sym.getFixedHandle(hand, walker);
                     commitaddr = new Address(hand.space, hand.offset_offset);
                 }
                 if (commitaddr.isConstant()) {
@@ -192,8 +192,7 @@ namespace Sla.SLEIGH
 
         public uint getInstructionBytes(int byteoff, int numbytes, uint off)
         {
-            // Get bytes from the instruction stream into a intm
-                        // (assuming big endian format)
+            // Get bytes from the instruction stream into a intm (assuming big endian format)
             off += bytestart;
             if (off >= 16)
                 throw new BadDataError("Instruction is using more than 16 bytes");

@@ -1,16 +1,20 @@
-﻿using System;
+﻿using Sla.CORE;
+using Sla.SLACOMP;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static ghidra.Globals;
 
-namespace ghidra
+namespace Sla
 {
     // A tailor made class used to group yyparse and yylex related methods.
     internal static class Parsing
     {
+        internal static FileStream? sleighin;
+        internal static SleighCompile? slgh;
+
         /* Error token number */
         private const int YYTERROR = 1;
         private const int YYERRCODE = 256;
@@ -49,9 +53,9 @@ namespace ghidra
         private static unsafe short* yyssp;
 
         /* The semantic value stack.  */
-        private static XMLSTYPE[] yyvsa = new XMLSTYPE[YYINITDEPTH];
-        private static unsafe XMLSTYPE* yyvs;
-        private static unsafe XMLSTYPE* yyvsp;
+        private static Xml.XMLSTYPE[] yyvsa = new Xml.XMLSTYPE[YYINITDEPTH];
+        private static unsafe Xml.XMLSTYPE* yyvs;
+        private static unsafe Xml.XMLSTYPE* yyvsp;
 
         private static ulong yystacksize;
 
@@ -59,16 +63,15 @@ namespace ghidra
         private static int yyresult;
         /* Lookahead token as an internal (translated) token number.  */
         private static int yytoken = 0;
-        /* The variables used to return semantic value and location from the
-           action routines.  */
-        private static XMLSTYPE yyval;
+        /* The variables used to return semantic value and location from the action routines.  */
+        private static Xml.XMLSTYPE yyval;
         /* YYINITDEPTH -- initial size of the parser's stacks.  */
 #if !YYINITDEPTH
         private const int YYINITDEPTH = 200;
 #endif
 
         /* The semantic value of the lookahead symbol.  */
-        private static XMLSTYPE yylval;
+        internal static Xml.XMLSTYPE yylval;
         /* Number of syntax errors so far.  */
         private static int yynerrs;
         /* The lookahead symbol.  */
@@ -303,9 +306,9 @@ namespace ghidra
             int yylen = 0;
 
             fixed (short* pyyssa = yyssa)
-            fixed (XMLSTYPE* pyyvsa = yyvsa)
-            fixed (XMLSTYPE* pyylval =&yylval)
-            fixed (XMLSTYPE* pyyval = &yyval)
+            fixed (Xml.XMLSTYPE* pyyvsa = yyvsa)
+            fixed (Xml.XMLSTYPE* pyylval =&yylval)
+            fixed (Xml.XMLSTYPE* pyyval = &yyval)
             {
                 yyssp = yyss = pyyssa;
                 yyvsp = yyvs = pyyvsa;
@@ -1015,7 +1018,7 @@ namespace ghidra
         | Print this symbol's value on YYOUTPUT.  |
         `----------------------------------------*/
         private static unsafe void yy_symbol_value_print(TextWriter yyoutput, int yytype,
-            XMLSTYPE* yyvaluep)
+            Xml.XMLSTYPE* yyvaluep)
         {
 #if XMLDEBUG
             FILE* yyo = yyoutput;
@@ -1074,7 +1077,7 @@ namespace ghidra
         /*------------------------------------------------.
         | Report that the YYRULE is going to be reduced.  |
         `------------------------------------------------*/
-        private static unsafe void yy_reduce_print(short* yyssp, XMLSTYPE* yyvsp,
+        private static unsafe void yy_reduce_print(short* yyssp, Xml.XMLSTYPE* yyvsp,
             int yyrule)
         {
 #if XMLDEBUG
@@ -1321,8 +1324,7 @@ namespace ghidra
         | Release the memory associated to this symbol.  |
         `-----------------------------------------------*/
 
-        private static unsafe void yydestruct(string yymsg, int yytype,
-            XMLSTYPE *yyvaluep)
+        private static unsafe void yydestruct(string yymsg, int yytype, Xml.XMLSTYPE yyvaluep)
         {
             /// YYUSE(yyvaluep);
             if (null == yymsg) {

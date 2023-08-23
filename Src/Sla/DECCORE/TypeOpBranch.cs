@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -12,8 +7,9 @@ namespace Sla.DECCORE
     {
         public TypeOpBranch(TypeFactory t)
         {
-            opflags = (PcodeOp.Flags.special | PcodeOp::branch | PcodeOp::coderef | PcodeOp.Flags.nocollapse);
-            behave = new OpBehavior(CPUI_BRANCH, false, true); // Dummy behavior
+            opflags = (PcodeOp.Flags.special | PcodeOp.Flags.branch | PcodeOp.Flags.coderef |
+                PcodeOp.Flags.nocollapse);
+            behave = new OpBehavior(OpCode.CPUI_BRANCH, false, true); // Dummy behavior
         }
 
         public override void push(PrintLanguage lng, PcodeOp op, PcodeOp readOp)
@@ -23,8 +19,8 @@ namespace Sla.DECCORE
 
         public override void printRaw(TextWriter s, PcodeOp op)
         {
-            s << name << ' ';
-            Varnode::printRaw(s, op.getIn(0));
+            s.Write($"{name} ");
+            Varnode.printRaw(s, op.getIn(0));
         }
     }
 }

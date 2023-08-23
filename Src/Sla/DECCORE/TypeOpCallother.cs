@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -12,8 +7,8 @@ namespace Sla.DECCORE
     {
         public TypeOpCallother(TypeFactory t)
         {
-            opflags = PcodeOp.Flags.special | PcodeOp::call | PcodeOp.Flags.nocollapse;
-            behave = new OpBehavior(CPUI_CALLOTHER, false, true); // Dummy behavior
+            opflags = PcodeOp.Flags.special | PcodeOp.Flags.call | PcodeOp.Flags.nocollapse;
+            behave = new OpBehavior(OpCode.CPUI_CALLOTHER, false, true); // Dummy behavior
         }
 
         public override void push(PrintLanguage lng, PcodeOp op, PcodeOp readOp)
@@ -23,85 +18,78 @@ namespace Sla.DECCORE
 
         public override void printRaw(TextWriter s, PcodeOp op)
         {
-            if (op.getOut() != (Varnode)null)
-            {
-                Varnode::printRaw(s, op.getOut());
-                s << " = ";
+            if (op.getOut() != (Varnode)null) {
+                Varnode.printRaw(s, op.getOut());
+                s.Write(" = ");
             }
-            s << getOperatorName(op);
-            if (op.numInput() > 1)
-            {
-                s << '(';
-                Varnode::printRaw(s, op.getIn(1));
-                for (int i = 2; i < op.numInput(); ++i)
-                {
-                    s << ',';
-                    Varnode::printRaw(s, op.getIn(i));
+            s.Write(getOperatorName(op));
+            if (op.numInput() > 1) {
+                s.Write('(');
+                Varnode.printRaw(s, op.getIn(1));
+                for (int i = 2; i < op.numInput(); ++i) {
+                    s.Write(',');
+                    Varnode.printRaw(s, op.getIn(i));
                 }
-                s << ')';
+                s.Write(')');
             }
         }
 
         public override string getOperatorName(PcodeOp op)
         {
-            BlockBasic bb = op.getParent();
-            if (bb != (BlockBasic)null)
-            {
-                Architecture* glb = bb.getFuncdata().getArch();
+            BlockBasic? bb = op.getParent();
+            if (bb != (BlockBasic)null) {
+                Architecture glb = bb.getFuncdata().getArch();
                 int index = op.getIn(0).getOffset();
-                UserPcodeOp* userop = glb.userops.getOp(index);
+                UserPcodeOp userop = glb.userops.getOp(index);
                 if (userop != (UserPcodeOp)null)
                     return userop.getOperatorName(op);
             }
-            ostringstream res;
-            res << TypeOp::getOperatorName(op) << '[';
+            TextWriter res = new StringWriter();
+            res.Write($"{base.getOperatorName(op)}[");
             op.getIn(0).printRaw(res);
-            res << ']';
-            return res.str();
+            res.Write(']');
+            return res.ToString();
         }
 
         public override Datatype getInputLocal(PcodeOp op, int slot)
         {
             if (!op.doesSpecialPropagation())
-                return TypeOp::getInputLocal(op, slot);
-            Architecture* glb = tlst.getArch();
-            VolatileWriteOp* vw_op = glb.userops.getVolatileWrite(); // Check if this a volatile write op
-            if ((vw_op.getIndex() == op.getIn(0).getOffset()) && (slot == 2))
-            { // And we are requesting slot 2
+                return base.getInputLocal(op, slot);
+            Architecture glb = tlst.getArch();
+            VolatileWriteOp vw_op = glb.userops.getVolatileWrite(); // Check if this a volatile write op
+            if ((vw_op.getIndex() == op.getIn(0).getOffset()) && (slot == 2)) {
+                // And we are requesting slot 2
                 Address addr = op.getIn(1).getAddr(); // Address of volatile memory
                 int size = op.getIn(2).getSize(); // Size of memory being written
                 uint vflags = 0;
-                SymbolEntry* entry = glb.symboltab.getGlobalScope().queryProperties(addr, size, op.getAddr(), vflags);
-                if (entry != (SymbolEntry)null)
-                {
-                    Datatype* res = entry.getSizedType(addr, size);
+                SymbolEntry? entry = glb.symboltab.getGlobalScope().queryProperties(addr, size, op.getAddr(), vflags);
+                if (entry != (SymbolEntry)null) {
+                    Datatype? res = entry.getSizedType(addr, size);
                     if (res != (Datatype)null)
                         return res;
                 }
             }
-            return TypeOp::getInputLocal(op, slot);
+            return base.getInputLocal(op, slot);
         }
 
         public override Datatype getOutputLocal(PcodeOp op)
         {
             if (!op.doesSpecialPropagation())
-                return TypeOp::getOutputLocal(op);
-            Architecture* glb = tlst.getArch();
-            VolatileReadOp* vr_op = glb.userops.getVolatileRead(); // Check if this a volatile read op
-            if (vr_op.getIndex() == op.getIn(0).getOffset())
-            {
+                return base.getOutputLocal(op);
+            Architecture glb = tlst.getArch();
+            VolatileReadOp vr_op = glb.userops.getVolatileRead(); // Check if this a volatile read op
+            if (vr_op.getIndex() == op.getIn(0).getOffset()) {
                 Address addr = op.getIn(1).getAddr(); // Address of volatile memory
                 int size = op.getOut().getSize(); // Size of memory being written
                 uint vflags = 0;
-                SymbolEntry* entry = glb.symboltab.getGlobalScope().queryProperties(addr, size, op.getAddr(), vflags);
-                if (entry != (SymbolEntry)null)
-                {
-                    Datatype* res = entry.getSizedType(addr, size);
+                SymbolEntry? entry = glb.symboltab.getGlobalScope().queryProperties(addr, size, op.getAddr(), vflags);
+                if (entry != (SymbolEntry)null) {
+                    Datatype? res = entry.getSizedType(addr, size);
                     if (res != (Datatype)null)
                         return res;
                 }
             }
-            return TypeOp::getOutputLocal(op);
+            return base.getOutputLocal(op);
         }
     }
 }

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -13,7 +9,7 @@ namespace Sla.DECCORE
             : base(t, OpCode.CPUI_INT_SBORROW,"SBORROW", type_metatype.TYPE_BOOL, type_metatype.TYPE_INT)
         {
             opflags = PcodeOp.Flags.binary;
-            addlflags = arithmetic_op;
+            addlflags = OperationType.arithmetic_op;
             behave = new OpBehaviorIntSborrow();
         }
 
@@ -24,9 +20,9 @@ namespace Sla.DECCORE
 
         public override string getOperatorName(PcodeOp op)
         {
-            ostringstream s;
-            s << name << dec << op.getIn(0).getSize();
-            return s.str();
+            TextWriter s = new StringWriter();
+            s.Write($"{name}{op.getIn(0).getSize()}");
+            return s.ToString();
         }
     }
 }

@@ -1,11 +1,4 @@
 ﻿using Sla.CORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.SLEIGH
 {
@@ -15,14 +8,13 @@ namespace Sla.SLEIGH
         private bool tableisfilled;
 
         private void checkTableFill()
-        { // Check if all possible entries in the table have been filled
+        {
+            // Check if all possible entries in the table have been filled
             long min = patval.minValue();
             long max = patval.maxValue();
             tableisfilled = (min >= 0) && (max < nametable.size());
-            for (uint i = 0; i < nametable.size(); ++i)
-            {
-                if ((nametable[i] == "_") || (nametable[i] == "\t"))
-                {
+            for (int i = 0; i < nametable.size(); ++i) {
+                if ((nametable[i] == "_") || (nametable[i] == "\t")) {
                     nametable[i] = "\t";        // TAB indicates illegal index
                     tableisfilled = false;
                 }
@@ -42,16 +34,15 @@ namespace Sla.SLEIGH
 
         public override Constructor resolve(ParserWalker walker)
         {
-            if (!tableisfilled)
-            {
+            if (!tableisfilled) {
                 long ind = patval.getValue(walker);
                 if ((ind >= nametable.size()) || (ind < 0) || ((nametable[ind].size() == 1) && (nametable[ind][0] == '\t')))
                 {
-                    ostringstream s;
-                    s << walker.getAddr().getShortcut();
+                    TextWriter s = new StringWriter();
+                    s.Write(walker.getAddr().getShortcut());
                     walker.getAddr().printRaw(s);
-                    s << ": No corresponding entry in nametable";
-                    throw BadDataError(s.str());
+                    s.Write(": No corresponding entry in nametable");
+                    throw new BadDataError(s.ToString());
                 }
             }
             return (Constructor)null;
@@ -61,32 +52,31 @@ namespace Sla.SLEIGH
         {
             uint ind = (uint)patval.getValue(walker);
             // ind is already checked to be in range by the resolve routine
-            s << nametable[ind];
+            s.Write(nametable[(int)ind]);
         }
 
         public override symbol_type getType() => SleighSymbol.symbol_type.name_symbol;
 
         public override void saveXml(TextWriter s)
         {
-            s << "<name_sym";
-            SleighSymbol::saveXmlHeader(s);
-            s << ">\n";
+            s.Write("<name_sym");
+            base.saveXmlHeader(s);
+            s.WriteLine(">");
             patval.saveXml(s);
-            for (int i = 0; i < nametable.size(); ++i)
-            {
+            for (int i = 0; i < nametable.size(); ++i) {
                 if (nametable[i] == "\t")       // TAB indicates an illegal index
-                    s << "<nametab/>\n";        // Emit tag with no name attribute
+                    s.WriteLine("<nametab/>");        // Emit tag with no name attribute
                 else
-                    s << "<nametab name=\"" << nametable[i] << "\"/>\n";
+                    s.WriteLine($"<nametab name=\"{nametable[i]}\"/>");
             }
-            s << "</name_sym>\n";
+            s.WriteLine("</name_sym>");
         }
 
         public override void saveXmlHeader(TextWriter s)
         {
-            s << "<name_sym_head";
-            SleighSymbol::saveXmlHeader(s);
-            s << "/>\n";
+            s.Write("<name_sym_head");
+            base.saveXmlHeader(s);
+            s.WriteLine("/>");
         }
 
         public override void restoreXml(Element el, SleighBase trans)

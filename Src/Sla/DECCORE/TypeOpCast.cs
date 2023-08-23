@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -14,7 +9,7 @@ namespace Sla.DECCORE
 
         {
             opflags = PcodeOp.Flags.unary | PcodeOp.Flags.special | PcodeOp.Flags.nocollapse;
-            behave = new OpBehavior(CPUI_CAST, false, true); // Dummy behavior
+            behave = new OpBehavior(OpCode.CPUI_CAST, false, true); // Dummy behavior
         }
 
         // We don't care what types are cast
@@ -26,9 +21,9 @@ namespace Sla.DECCORE
 
         public override void printRaw(TextWriter s, PcodeOp op)
         {
-            Varnode::printRaw(s, op.getOut());
-            s << " = " << name << ' ';
-            Varnode::printRaw(s, op.getIn(0));
+            Varnode.printRaw(s, op.getOut());
+            s.Write($" = {name} ");
+            Varnode.printRaw(s, op.getIn(0));
         }
     }
 }

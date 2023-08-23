@@ -566,9 +566,9 @@ namespace Sla.DECCORE
             }
             else {
                 push_integer(val, ct.getSize(), false, vn, op);
-                //    ostringstream s;
+                //    TextWriter s = new StringWriter();
                 //    s << "BAD_ENUM(0x" << hex << val << ")";
-                //    pushAtom(new Atom(s.str(),vartoken,EmitMarkup.syntax_highlight.const_color,op,vn));
+                //    pushAtom(new Atom(s.ToString(),vartoken,EmitMarkup.syntax_highlight.const_color,op,vn));
             }
         }
 
@@ -1240,13 +1240,13 @@ namespace Sla.DECCORE
         protected static void printCharHexEscape(TextWriter s, int val)
         {
             if (val < 256) {
-                s << "\\x" << setfill('0') << setw(2) << hex << val;
+                s.Write($"\\x{val:X02}");
             }
             else if (val < 65536) {
-                s << "\\x" << setfill('0') << setw(4) << hex << val;
+                s.Write($"\\x{val:X04}");
             }
             else
-                s << "\\x" << setfill('0') << setw(8) << hex << val;
+                s.Write("\\x{val:X08}");
         }
 
         /// \brief Print a quoted (unicode) string at the given address.
@@ -1260,7 +1260,7 @@ namespace Sla.DECCORE
         /// \return \b true if a proper string was found and printed to the stream
         protected bool printCharacterConstant(TextWriter s, Address addr, Datatype charType)
         {
-            StringManager manager = glb.stringManager;
+            StringManager manager = glb.stringManager ?? throw new ApplicationException();
 
             // Retrieve UTF8 version of string
             bool isTrunc = false;
@@ -1270,7 +1270,7 @@ namespace Sla.DECCORE
             if (doEmitWideCharPrefix() && charType.getSize() > 1 && !charType.isOpaqueString())
                 s.Write('L');           // Print symbol indicating wide character
             s.Write('"');
-            escapeCharacterData(s, buffer.data(), buffer.size(), 1, glb.translate.isBigEndian());
+            escapeCharacterData(s, buffer.ToArray(), buffer.size(), 1, glb.translate.isBigEndian());
             if (isTrunc)
                 s.Write("...\" /* TRUNCATED STRING LITERAL */");
             else
@@ -1482,7 +1482,7 @@ namespace Sla.DECCORE
                     s.Write(sym.getDisplayName());
                     SymbolEntry entry = high.getSymbolEntry();
                     if (entry != (SymbolEntry)null) {
-                        s << '$' << dec << entry.getSymbol().getMapEntryPosition(entry);
+                        s.Write($"${entry.getSymbol().getMapEntryPosition(entry)}");
                     }
                     else
                         s.Write("$$");
@@ -1894,7 +1894,7 @@ namespace Sla.DECCORE
 
             s.Write("func_");
             addr.printRaw(s);
-            return s.str();
+            return s.ToString();
         }
 
         /// \brief Generate a generic name for an unnamed data-type
@@ -1916,7 +1916,7 @@ namespace Sla.DECCORE
                     break;
                 case type_metatype.TYPE_SPACEBASE:
                     s.Write("BADSPACEBASE");
-                    return s.str();
+                    return s.ToString();
                 case type_metatype.TYPE_FLOAT:
                     s.Write("unkfloat");
                     break;

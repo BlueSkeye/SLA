@@ -54,7 +54,7 @@ namespace Sla.DECCORE
         /// The model \b this is a copy of
         internal ProtoModel? compatModel;
         /// List of side-effects
-        internal List<EffectRecord> effectlist = new List<EffectRecord>();
+        internal LinkedList<EffectRecord> effectlist = new LinkedList<EffectRecord>();
         /// Storage locations potentially carrying \e trash values
         internal List<VarnodeData> likelytrash = new List<VarnodeData>();
         /// Id of injection to perform at beginning of function (-1 means not used)
@@ -359,11 +359,14 @@ namespace Sla.DECCORE
             return input.checkSplit(loc, size, splitpoint);
         }
 
-        public RangeList getLocalRange() => localrange; ///< Get the range of (possible) local stack variables
+        // Get the range of (possible) local stack variables
+        public RangeList getLocalRange() => localrange;
 
-        public RangeList getParamRange() => paramrange; ///< Get the range of (possible) stack parameters
+        // Get the range of (possible) stack parameters
+        public RangeList getParamRange() => paramrange;
 
-        public IEnumerator<EffectRecord> effectBegin() => effectlist.GetEnumerator(); ///< Get an iterator to the first EffectRecord
+        // Get an iterator to the first EffectRecord
+        public IEnumerator<EffectRecord> effectBegin() => effectlist.GetEnumerator();
 
         //public IEnumerator<EffectRecord> effectEnd() => effectlist.end(); ///< Get an iterator to the last EffectRecord
 
@@ -715,26 +718,27 @@ namespace Sla.DECCORE
         /// \param addr is the starting address of the given memory range
         /// \param size is the number of bytes in the memory range
         /// \return the EffectRecord type
-        public static EffectRecord.EffectType lookupEffect(List<EffectRecord> efflist, Address addr, int size)
+        public static EffectRecord.EffectType lookupEffect(LinkedList<EffectRecord> efflist, Address addr, int size)
         {
             // Unique is always local to function
             if (addr.getSpace().getType() == spacetype.IPTR_INTERNAL)
                 return EffectRecord.EffectType.unaffected;
 
             EffectRecord cur = new EffectRecord(addr, size);
-            IEnumerator<EffectRecord> iter = upper_bound(efflist.begin(), efflist.end(), cur,
-                EffectRecord.compareByAddress);
+            LinkedListNode<EffectRecord>? iter = efflist.upper_bound(cur, EffectRecord.compareByAddress);
             // First element greater than cur  (address must be greater)
             // go back one more, and we get first el less or equal to cur
-            if (iter == efflist.begin()) return EffectRecord.EffectType.unknown_effect; // Can't go back one
-            --iter;
-            Address hit = iter.Current.getAddress();
-            int sz = iter.Current.getSize();
-            if (sz == 0 && (hit.getSpace() == addr.getSpace())) // A size of zero indicates the whole space is unaffected
+            // Can't go back one
+            if ((null != iter) && (null == iter.Previous)) return EffectRecord.EffectType.unknown_effect;
+            iter = (null == iter) ? efflist.Last : iter.Previous;
+            Address hit = iter.Value.getAddress();
+            int sz = iter.Value.getSize();
+            if (sz == 0 && (hit.getSpace() == addr.getSpace()))
+                // A size of zero indicates the whole space is unaffected
                 return EffectRecord.EffectType.unaffected;
             int where = addr.overlap(0, hit, sz);
             if ((where >= 0) && (where + size <= sz))
-                return iter.Current.getType();
+                return iter.Value.getType();
             return EffectRecord.EffectType.unknown_effect;
         }
 

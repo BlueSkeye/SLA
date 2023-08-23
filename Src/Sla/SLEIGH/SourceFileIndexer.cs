@@ -1,11 +1,4 @@
 ﻿using Sla.CORE;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.SLEIGH
 {
@@ -33,10 +26,9 @@ namespace Sla.SLEIGH
         ///Returns the index of the file.  If the file is not in the index it is added.
         public int index(string filename)
         {
-            auto it = fileToIndex.find(filename);
-            if (fileToIndex.end() != it)
-            {
-                return it.second;
+            int index;
+            if (fileToIndex.TryGetValue(filename, out index)) {
+                return index;
             }
             fileToIndex[filename] = leastUnusedIndex;
             indexToFile[leastUnusedIndex] = filename;
@@ -58,12 +50,10 @@ namespace Sla.SLEIGH
         /// read a stored index mapping from an XML file
         public void restoreXml(Element el)
         {
-            List sourceFiles = el.getChildren();
-            List::const_iterator iter = sourceFiles.begin();
-            for (; iter != sourceFiles.end(); ++iter)
-            {
-                string filename = (*iter).getAttributeValue("name");
-                int index = stoi((*iter).getAttributeValue("index"), NULL, 10);
+            IEnumerator<Element> iter = el.getChildren().GetEnumerator();
+            while (iter.MoveNext()) {
+                string filename = iter.Current.getAttributeValue("name");
+                int index = stoi(iter.Current.getAttributeValue("index"), NULL, 10);
                 fileToIndex[filename] = index;
                 indexToFile[index] = filename;
             }
@@ -72,15 +62,14 @@ namespace Sla.SLEIGH
         ///< save the index mapping to an XML file
         public void saveXml(TextWriter s)
         {
-            s << "<sourcefiles>\n";
-            for (int i = 0; i < leastUnusedIndex; ++i)
-            {
-                s << ("<sourcefile name=\"");
-                string str = indexToFile.at(i).c_str();
-                xml_escape(s, str);
-                s << "\" index=\"" << dec << i << "\"/>\n";
+            s.WriteLine("<sourcefiles>");
+            for (int i = 0; i < leastUnusedIndex; ++i) {
+                s.Write("<sourcefile name=\"");
+                string str = indexToFile[i].ToString();
+                Xml.xml_escape(s, str);
+                s.WriteLine($"\" index=\"{i}\"/>");
             }
-            s << "</sourcefiles>\n";
+            s.WriteLine("</sourcefiles>");
         }
 
         private int leastUnusedIndex; ///< one-up count for assigning indices to files

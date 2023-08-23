@@ -35,9 +35,9 @@ namespace Sla.SLEIGH
 
         public override void saveXml(TextWriter s)
         {
-            s << "<or_exp>\n";
-            BinaryExpression::saveXml(s);
-            s << "</or_exp>\n";
+            s.WriteLine("<or_exp>");
+            base.saveXml(s);
+            s.WriteLine("</or_exp>");
         }
     }
 }

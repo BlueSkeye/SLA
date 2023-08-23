@@ -1,13 +1,4 @@
-﻿using Sla.EXTRA;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Sla.EXTRA
 {
     internal class ConstraintNamedExpression : UnifyConstraint
@@ -24,7 +15,7 @@ namespace Sla.EXTRA
 
         ~ConstraintNamedExpression()
         {
-            delete expr;
+            // delete expr;
         }
 
         public override UnifyConstraint clone()
@@ -32,7 +23,7 @@ namespace Sla.EXTRA
 
         public override bool step(UnifyState state)
         {
-            TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
+            TraverseCountState traverse = (TraverseCountState)state.getTraverse(uniqid);
             if (!traverse.step()) return false;
             ulong ourconst = expr.getConstant(state);
             state.data(constindex).setConstant(ourconst);
@@ -49,9 +40,9 @@ namespace Sla.EXTRA
         public override void print(TextWriter s, UnifyCPrinter printstate)
         {
             printstate.printIndent(s);
-            s << printstate.getName(constindex) << " = ";
+            s.Write($"{printstate.getName(constindex)} = ");
             expr.writeExpression(s, printstate);
-            s << ';' << endl;
+            s.WriteLine(';');
         }
     }
 }

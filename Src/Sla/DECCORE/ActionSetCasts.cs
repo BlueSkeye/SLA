@@ -1,13 +1,4 @@
 ﻿using Sla.CORE;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static ghidra.XmlScan;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Sla.DECCORE
 {
@@ -42,28 +33,26 @@ namespace Sla.DECCORE
         /// \param data is the function containing the PcodeOp
         private static void checkPointerIssues(PcodeOp op, Varnode vn, Funcdata data)
         {
-            Datatype* ptrtype = op.getIn(1).getHighTypeReadFacing(op);
+            Datatype ptrtype = op.getIn(1).getHighTypeReadFacing(op);
             int valsize = vn.getSize();
-            if ((ptrtype.getMetatype() != type_metatype.TYPE_PTR) || (((TypePointer)ptrtype).getPtrTo().getSize() != valsize))
+            if ((ptrtype.getMetatype() != type_metatype.TYPE_PTR)
+                || (((TypePointer)ptrtype).getPtrTo().getSize() != valsize))
             {
                 string name = op.getOpcode().getName();
                 name[0] = toupper(name[0]);
-                data.warning(name + " size is inaccurate", op.getAddr());
+                data.warning($"{name} size is inaccurate", op.getAddr());
             }
-            if (ptrtype.getMetatype() == type_metatype.TYPE_PTR)
-            {
-                AddrSpace* spc = ((TypePointer)ptrtype).getSpace();
-                if (spc != (AddrSpace)null)
-                {
-                    AddrSpace* opSpc = op.getIn(0).getSpaceFromConst();
-                    if (opSpc != spc && spc.getContain() != opSpc)
-                    {
+            if (ptrtype.getMetatype() == type_metatype.TYPE_PTR) {
+                AddrSpace spc = ((TypePointer)ptrtype).getSpace();
+                if (spc != (AddrSpace)null) {
+                    AddrSpace opSpc = op.getIn(0).getSpaceFromConst();
+                    if (opSpc != spc && spc.getContain() != opSpc) {
                         string name = op.getOpcode().getName();
                         name[0] = toupper(name[0]);
-                        ostringstream s;
-                        s << name << " refers to '" << opSpc.getName() << "' but pointer attribute is '";
-                        s << spc.getName() << '\'';
-                        data.warning(s.str(), op.getAddr());
+                        TextWriter s = new StringWriter();
+                        s.Write($"{name} refers to '{opSpc.getName()}' but pointer attribute is '");
+                        s.Write($"{spc.getName()}\'");
+                        data.warning(s.ToString(), op.getAddr());
                     }
                 }
             }
@@ -90,9 +79,9 @@ namespace Sla.DECCORE
             TypeStruct highStruct = (TypeStruct)highPtrTo;
             if (highStruct.numDepend() == 0) return false;
             IEnumerator<TypeField> iter = highStruct.beginField();
-            if ((*iter).offset != 0) return false;
+            if (iter.Current.offset != 0) return false;
             Datatype reqtype = ((TypePointer)ct).getPtrTo();
-            Datatype curtype = (*iter).type;
+            Datatype curtype = iter.Current.type;
             if (reqtype.getMetatype() == type_metatype.TYPE_ARRAY)
                 reqtype = ((TypeArray)reqtype).getBase();
             if (curtype.getMetatype() == type_metatype.TYPE_ARRAY)
@@ -114,18 +103,16 @@ namespace Sla.DECCORE
             Varnode outvn = op.getOut();
             if (outvn == (Varnode)null)
                 return false;
-            Datatype* outType = outvn.getHigh().getType();
-            Datatype* inType = op.getIn(slot).getHigh().getType();
+            Datatype outType = outvn.getHigh().getType();
+            Datatype inType = op.getIn(slot).getHigh().getType();
             if (!inType.needsResolution() && !outType.needsResolution()) return false;
             int inResolve = -1;
             int outResolve = -1;
-            if (inType.needsResolution())
-            {
+            if (inType.needsResolution()) {
                 inResolve = inType.findCompatibleResolve(outType);
                 if (inResolve < 0) return false;
             }
-            if (outType.needsResolution())
-            {
+            if (outType.needsResolution()) {
                 if (inResolve >= 0)
                     outResolve = outType.findCompatibleResolve(inType.getDepend(inResolve));
                 else
@@ -134,14 +121,13 @@ namespace Sla.DECCORE
             }
 
             TypeFactory typegrp = data.getArch().types;
-            if (inType.needsResolution())
-            {
-                ResolvedUnion resolve = new ResolvedUnion(inType, inResolve,* typegrp);
+            if (inType.needsResolution()) {
+                ResolvedUnion resolve = new ResolvedUnion(inType, inResolve, typegrp);
                 if (!data.setUnionField(inType, op, slot, resolve))
                     return false;
             }
             if (outType.needsResolution()) {
-                ResolvedUnion resolve = new ResolvedUnion(outType, outResolve,* typegrp);
+                ResolvedUnion resolve = new ResolvedUnion(outType, outResolve, typegrp);
                 if (!data.setUnionField(outType, op, -1, resolve))
                     return false;
             }
@@ -158,7 +144,8 @@ namespace Sla.DECCORE
         /// \param ct2 is the second data-type
         private static bool isOpIdentical(Datatype ct1, Datatype ct2)
         {
-            while ((ct1.getMetatype() == type_metatype.TYPE_PTR) && (ct2.getMetatype() == type_metatype.TYPE_PTR))
+            while ((ct1.getMetatype() == type_metatype.TYPE_PTR)
+                && (ct2.getMetatype() == type_metatype.TYPE_PTR))
             {
                 ct1 = ((TypePointer)ct1).getPtrTo();
                 ct2 = ((TypePointer)ct2).getPtrTo();
@@ -180,28 +167,24 @@ namespace Sla.DECCORE
         {
             Varnode vn = op.getIn(slot);
             if (vn.isAnnotation()) return 0;
-            Datatype* dt = vn.getHigh().getType();
+            Datatype dt = vn.getHigh().getType();
             if (!dt.needsResolution())
                 return 0;
             if (dt != vn.getType())
                 dt.resolveInFlow(op, slot);    // Last chance to resolve data-type based on flow
             ResolvedUnion resUnion = data.getUnionField(dt, op, slot);
-            if (resUnion != (ResolvedUnion)null && resUnion.getFieldNum() >= 0)
-            {
+            if (resUnion != (ResolvedUnion)null && resUnion.getFieldNum() >= 0) {
                 // Insert specific placeholder indicating which field is accessed
-                if (dt.getMetatype() == type_metatype.TYPE_PTR)
-                {
+                if (dt.getMetatype() == type_metatype.TYPE_PTR) {
                     PcodeOp ptrsub = insertPtrsubZero(op, slot, resUnion.getDatatype(), data);
-                    data.setUnionField(dt, ptrsub, -1, *resUnion);          // Attach the resolution to the PTRSUB
+                    data.setUnionField(dt, ptrsub, -1, resUnion);          // Attach the resolution to the PTRSUB
                 }
-                else if (vn.isImplied())
-                {
-                    if (vn.isWritten())
-                    {
+                else if (vn.isImplied()) {
+                    if (vn.isWritten()) {
                         // If the writefacing and readfacing resolutions for vn (an implied variable) are the same,
                         // the resolutions are unnecessary and we treat the vn as if it had the field data-type
-                        ResolvedUnion* writeRes = data.getUnionField(dt, vn.getDef(), -1);
-                        if (writeRes != (ResolvedUnion)0 && writeRes.getFieldNum() == resUnion.getFieldNum())
+                        ResolvedUnion writeRes = data.getUnionField(dt, vn.getDef(), -1);
+                        if (writeRes != (ResolvedUnion)null && writeRes.getFieldNum() == resUnion.getFieldNum())
                             return 0; // Don't print implied fields for vn
                     }
                     vn.setImpliedField();
@@ -231,10 +214,8 @@ namespace Sla.DECCORE
             tokenct = op.getOpcode().getOutputToken(op, castStrategy);
             outvn = op.getOut();
             outHighType = outvn.getHigh().getType();
-            if (tokenct == outHighType)
-            {
-                if (tokenct.needsResolution())
-                {
+            if (tokenct == outHighType) {
+                if (tokenct.needsResolution()) {
                     // operation copies directly to outvn AS a union
                     ResolvedUnion resolve = new ResolvedUnion(tokenct); // Force the varnode to resolve to the parent data-type
                     data.setUnionField(tokenct, op, -1, resolve);
@@ -243,44 +224,41 @@ namespace Sla.DECCORE
                 return 0;
             }
             Datatype outHighResolve = outHighType;
-            if (outHighType.needsResolution())
-            {
+            if (outHighType.needsResolution()) {
                 if (outHighType != outvn.getType())
                     outHighType.resolveInFlow(op, -1);     // Last chance to resolve data-type based on flow
                 outHighResolve = outHighType.findResolve(op, -1);  // Finish fetching DefFacing data-type
             }
-            if (outvn.isImplied())
-            {
+            if (outvn.isImplied()) {
                 // implied varnode must have parse type
-                if (outvn.isTypeLock())
-                {
+                if (outvn.isTypeLock()) {
                     PcodeOp outOp = outvn.loneDescend();
                     // The Varnode input to a OpCode.CPUI_RETURN is marked as implied but
                     // casting should act as if it were explicit
-                    if (outOp == (PcodeOp)null || outOp.code() != OpCode.CPUI_RETURN)
-                    {
+                    if (outOp == (PcodeOp)null || outOp.code() != OpCode.CPUI_RETURN) {
                         force = !isOpIdentical(outHighResolve, tokenct);
                     }
                 }
-                else if (outHighResolve.getMetatype() != type_metatype.TYPE_PTR)
-                {   // If implied varnode has an atomic (non-pointer) type
+                else if (outHighResolve.getMetatype() != type_metatype.TYPE_PTR) {
+                    // If implied varnode has an atomic (non-pointer) type
                     outvn.updateType(tokenct, false, false); // Ignore it in favor of the token type
                     outHighResolve = outvn.getHighTypeDefFacing();
                 }
-                else if (tokenct.getMetatype() == type_metatype.TYPE_PTR)
-                { // If the token is a pointer AND implied varnode is pointer
+                else if (tokenct.getMetatype() == type_metatype.TYPE_PTR) {
+                    // If the token is a pointer AND implied varnode is pointer
                     outct = ((TypePointer)outHighResolve).getPtrTo();
                     type_metatype meta = outct.getMetatype();
                     // Preserve implied pointer if it points to a composite
-                    if ((meta != type_metatype.TYPE_ARRAY) && (meta != type_metatype.TYPE_STRUCT) && (meta != type_metatype.TYPE_UNION))
+                    if (   (meta != type_metatype.TYPE_ARRAY)
+                        && (meta != type_metatype.TYPE_STRUCT)
+                        && (meta != type_metatype.TYPE_UNION))
                     {
                         outvn.updateType(tokenct, false, false); // Otherwise ignore it in favor of the token type
                         outHighResolve = outvn.getHighTypeDefFacing();
                     }
                 }
             }
-            if (!force)
-            {
+            if (!force) {
                 outct = outHighResolve; // Type of result
                 ct = castStrategy.castStandard(outct, tokenct, false, true);
                 if (ct == (Datatype)null) return 0;
@@ -331,31 +309,26 @@ namespace Sla.DECCORE
 
             vn = op.getIn(slot);
             // Check to make sure we don't have a double cast
-            if (vn.isWritten() && (vn.getDef().code() == OpCode.CPUI_CAST))
-            {
-                if (vn.isImplied() && (vn.loneDescend() == op))
-                {
+            if (vn.isWritten() && (vn.getDef().code() == OpCode.CPUI_CAST)) {
+                if (vn.isImplied() && (vn.loneDescend() == op)) {
                     vn.updateType(ct, false, false);
                     if (vn.getType() == ct)
                         return 1;
                 }
             }
-            else if (vn.isConstant())
-            {
+            else if (vn.isConstant()) {
                 vn.updateType(ct, false, false);
                 if (vn.getType() == ct)
                     return 1;
             }
-            else if (testStructOffset0(vn, op, ct, castStrategy))
-            {
+            else if (testStructOffset0(vn, op, ct, castStrategy)) {
                 // Insert a PTRSUB(vn,#0) instead of a CAST
                 newop = insertPtrsubZero(op, slot, ct, data);
                 if (vn.getHigh().getType().needsResolution())
                     data.inheritResolution(vn.getHigh().getType(), newop, 0, op, slot);
                 return 1;
             }
-            else if (tryResolutionAdjustment(op, slot, data))
-            {
+            else if (tryResolutionAdjustment(op, slot, data)) {
                 return 1;
             }
             newop = data.newOp(1, op.getAddr());
@@ -369,12 +342,10 @@ namespace Sla.DECCORE
             data.opSetInput(newop, vn, 0);
             data.opSetInput(op, vnout, slot);
             data.opInsertBefore(newop, op); // Cast comes AFTER operation
-            if (ct.needsResolution())
-            {
+            if (ct.needsResolution()) {
                 data.forceFacingType(ct, -1, newop, -1);
             }
-            if (vn.getHigh().getType().needsResolution())
-            {
+            if (vn.getHigh().getType().needsResolution()) {
                 data.inheritResolution(vn.getHigh().getType(), newop, 0, op, slot);
             }
             return 1;
@@ -391,7 +362,8 @@ namespace Sla.DECCORE
         /// \param ct is the data-type produced by the PTRSUB
         /// \param data is containing Function
         /// \return the new PTRSUB op
-        private static PcodeOp insertPtrsubZero(PcodeOp op, int slot, Datatype ct, Funcdata data)
+        private static PcodeOp insertPtrsubZero(PcodeOp op, int slot, Datatype ct,
+            Funcdata data)
         {
             Varnode vn = op.getIn(slot);
             PcodeOp newop = data.newOp(2, op.getAddr());
@@ -407,7 +379,7 @@ namespace Sla.DECCORE
         }
 
         public ActionSetCasts(string g)
-            : base(rule_onceperfunc,"setcasts", g)
+            : base(ruleflags.rule_onceperfunc,"setcasts", g)
         {
         }
 
@@ -433,8 +405,8 @@ namespace Sla.DECCORE
                     if (op.notPrinted()) continue;
                     OpCode opc = op.code();
                     if (opc == OpCode.CPUI_CAST) continue;
-                    if (opc == OpCode.CPUI_PTRADD)
-                    {   // Check for PTRADD that no longer fits its pointer
+                    if (opc == OpCode.CPUI_PTRADD) {
+                        // Check for PTRADD that no longer fits its pointer
                         int sz = (int)op.getIn(2).getOffset();
                         TypePointer ct = (TypePointer)op.getIn(0).getHighTypeReadFacing(op);
                         if (   (ct.getMetatype() != type_metatype.TYPE_PTR)

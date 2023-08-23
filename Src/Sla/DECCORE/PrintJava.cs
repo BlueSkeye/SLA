@@ -97,58 +97,56 @@ namespace Sla.DECCORE
                 switch (onechar)
                 {       // Special escape characters
                     case 0:
-                        s << "\\0";
+                        s.Write("\\0");
                         return;
                     case 8:
-                        s << "\\b";
+                        s.Write("\\b");
                         return;
                     case 9:
-                        s << "\\t";
+                        s.Write("\\t");
                         return;
                     case 10:
-                        s << "\\n";
+                        s.Write("\\n");
                         return;
                     case 12:
-                        s << "\\f";
+                        s.Write("\\f");
                         return;
                     case 13:
-                        s << "\\r";
+                        s.Write("\\r");
                         return;
                     case 92:
-                        s << "\\\\";
+                        s.Write("\\\\");
                         return;
                     case '"':
-                        s << "\\\"";
+                        s.Write("\\\"");
                         return;
                     case '\'':
-                        s << "\\\'";
+                        s.Write("\\\'");
                         return;
                 }
                 // Generic unicode escape
-                if (onechar < 65536)
-                {
-                    s << "\\ux" << setfill('0') << setw(4) << hex << onechar;
+                if (onechar < 65536) {
+                    s.Write("\\ux{onechar:X04}");
                 }
                 else
-                    s << "\\ux" << setfill('0') << setw(8) << hex << onechar;
+                    s.Write($"\\ux{onechar:X08}");
                 return;
             }
-            StringManager::writeUtf8(s, onechar);       // Emit normally
+            StringManager.writeUtf8(s, onechar);       // Emit normally
         }
 
         public PrintJava(Architecture g, string nm="java-language")
         {
             resetDefaultsPrintJava();
             nullToken = "null";         // Java standard lower-case 'null'
-            if (castStrategy != (CastStrategy*)0)
-                delete castStrategy;
-
+            //if (castStrategy != (CastStrategy)null)
+            //    delete castStrategy;
             castStrategy = new CastStrategyJava();
         }
 
         public override void resetDefaults()
         {
-            PrintC::resetDefaults();
+            base.resetDefaults();
             resetDefaultsPrintJava();
         }
 
@@ -160,7 +158,7 @@ namespace Sla.DECCORE
                 // Always assume we are in the scope of the parent class
                 pushScope(fd.getScopeLocal().getParent());
             }
-            PrintC::docFunction(fd);
+            base.docFunction(fd);
             if (singletonFunction)
                 popScope();
         }
@@ -173,49 +171,41 @@ namespace Sla.DECCORE
         protected override void pushTypeStart(Datatype ct,bool noident)
         {
             int arrayCount = 0;
-            while(true)
-            {
-                if (ct.getMetatype() == type_metatype.TYPE_PTR)
-                {
+            while(true) {
+                if (ct.getMetatype() == type_metatype.TYPE_PTR) {
                     if (isArrayType(ct))
                         arrayCount += 1;
                     ct = ((TypePointer)ct).getPtrTo();
                 }
-                else if (ct.getName().size() != 0)
+                else if (ct.getName().Length != 0)
                     break;
-                else
-                {
+                else {
                     ct = glb.types.getTypeVoid();
                     break;
                 }
             }
-            OpToken* tok;
-
-            if (noident)
-                tok = &type_expr_nospace;
-            else
-                tok = &type_expr_space;
+            OpToken tok = (noident) ? type_expr_nospace : type_expr_space;
 
             pushOp(tok, (PcodeOp)null);
             for (int i = 0; i < arrayCount; ++i)
-                pushOp(&subscript, (PcodeOp)null);
+                pushOp(subscript, (PcodeOp)null);
 
-            if (ct.getName().size() == 0)
-            {   // Check for anonymous type
+            if (ct.getName().Length == 0) {
+                // Check for anonymous type
                 // We could support a struct or enum declaration here
                 string nm = genericTypeName(ct);
-                pushAtom(Atom(nm, typetoken, EmitMarkup::type_color, ct));
+                pushAtom(new Atom(nm, typetoken, EmitMarkup.syntax_highlight.type_color, ct));
             }
-            else
-            {
-                pushAtom(Atom(ct.getDisplayName(), typetoken, EmitMarkup::type_color, ct));
+            else {
+                pushAtom(new Atom(ct.getDisplayName(), typetoken, EmitMarkup.syntax_highlight.type_color, ct));
             }
             for (int i = 0; i < arrayCount; ++i)
-                pushAtom(Atom(EMPTY_STRING, blanktoken, EmitMarkup::no_color));     // Fill in the blank array index
+                pushAtom(new Atom(EMPTY_STRING, blanktoken, EmitMarkup.syntax_highlight.no_color));     // Fill in the blank array index
         }
 
         protected override void pushTypeEnd(Datatype ct)
-        { // This routine doesn't have to do anything
+        {
+            // This routine doesn't have to do anything
         }
 
         protected override bool doEmitWideCharPrefix() => false;
@@ -232,7 +222,7 @@ namespace Sla.DECCORE
             uint m = mods | print_load_value;
             bool printArrayRef = needZeroArray(op.getIn(1));
             if (printArrayRef)
-                pushOp(&subscript, op);
+                pushOp(subscript, op);
             pushVn(op.getIn(1), op, m);
             if (printArrayRef)
                 push_integer(0, 4, false, (Varnode)null, op);
@@ -241,16 +231,14 @@ namespace Sla.DECCORE
         public override void opStore(PcodeOp op)
         {
             uint m = mods | print_store_value; // Inform sub-tree that we are storing
-            pushOp(&assignment, op);    // This is an assignment
-            if (needZeroArray(op.getIn(1)))
-            {
-                pushOp(&subscript, op);
+            pushOp(assignment, op);    // This is an assignment
+            if (needZeroArray(op.getIn(1))) {
+                pushOp(subscript, op);
                 pushVn(op.getIn(1), op, m);
                 push_integer(0, 4, false, (Varnode)null, op);
                 pushVn(op.getIn(2), op, mods);
             }
-            else
-            {
+            else {
                 // implied vn's pushed on in reverse order for efficiency
                 // see PrintLanguage::pushVnImplied
                 pushVn(op.getIn(2), op, mods);
@@ -260,7 +248,7 @@ namespace Sla.DECCORE
 
         public override void opCallind(PcodeOp op)
         {
-            pushOp(&function_call, op);
+            pushOp(function_call, op);
             Funcdata fd = op.getParent().getFuncdata();
             FuncCallSpecs fc = fd.getCallSpecs(op);
             if (fc == (FuncCallSpecs)null)
@@ -268,31 +256,30 @@ namespace Sla.DECCORE
             int skip = getHiddenThisSlot(op, fc);
             int count = op.numInput() - 1;
             count -= (skip < 0) ? 0 : 1;
-            if (count > 1)
-            {   // Multiple parameters
+            if (count > 1) {
+                // Multiple parameters
                 pushVn(op.getIn(0), op, mods);
                 for (int i = 0; i < count - 1; ++i)
-                    pushOp(&comma, op);
+                    pushOp(comma, op);
                 // implied vn's pushed on in reverse order for efficiency
                 // see PrintLanguage::pushVnImplied
-                for (int i = op.numInput() - 1; i >= 1; --i)
-                {
+                for (int i = op.numInput() - 1; i >= 1; --i) {
                     if (i == skip) continue;
                     pushVn(op.getIn(i), op, mods);
                 }
             }
-            else if (count == 1)
-            {   // One parameter
+            else if (count == 1) {
+                // One parameter
                 if (skip == 1)
                     pushVn(op.getIn(2), op, mods);
                 else
                     pushVn(op.getIn(1), op, mods);
                 pushVn(op.getIn(0), op, mods);
             }
-            else
-            {           // A void function
+            else {
+                // A void function
                 pushVn(op.getIn(0), op, mods);
-                pushAtom(Atom(EMPTY_STRING, blanktoken, EmitMarkup::no_color));
+                pushAtom(new Atom(EMPTY_STRING, blanktoken, EmitMarkup.syntax_highlight.no_color));
             }
         }
 
@@ -300,73 +287,67 @@ namespace Sla.DECCORE
         {
             Varnode outvn = op.getOut();
             Varnode vn0 = op.getIn(0);
-            List<ulong> refs;
+            List<ulong> refs = new List<ulong>();
             for (int i = 1; i < op.numInput(); ++i)
                 refs.Add(op.getIn(i).getOffset());
-            CPoolRecord* rec = glb.cpool.getRecord(refs);
-            if (rec == (CPoolRecord*)0) {
-                pushAtom(Atom("UNKNOWNREF", syntax, EmitMarkup::const_color, op, outvn));
+            CPoolRecord rec = glb.cpool.getRecord(refs);
+            if (rec == (CPoolRecord)null) {
+                pushAtom(new Atom("UNKNOWNREF", syntax, EmitMarkup.syntax_highlight.const_color, op, outvn));
             }
-            else
-            {
-                switch (rec.getTag())
-                {
-                    case CPoolRecord::string_literal:
-                        {
-                            ostringstream str;
+            else {
+                switch (rec.getTag()) {
+                    case CPoolRecord.ConstantPoolTagTypes.string_literal: {
+                            TextWriter str = new StringWriter();
                             int len = rec.getByteDataLength();
                             if (len > 2048)
                                 len = 2048;
-                            str << '\"';
+                            str.Write("\"");
                             escapeCharacterData(str, rec.getByteData(), len, 1, false);
                             if (len == rec.getByteDataLength())
-                                str << '\"';
-                            else
-                            {
-                                str << "...\"";
+                                str.Write("\"");
+                            else {
+                                str.Write("...\"");
                             }
-                            pushAtom(Atom(str.str(), vartoken, EmitMarkup::const_color, op, outvn));
+                            pushAtom(new Atom(str.str(), vartoken,
+                                EmitMarkup.syntax_highlight.const_color, op, outvn));
                             break;
                         }
-                    case CPoolRecord::class_reference:
-                        pushAtom(Atom(rec.getToken(), vartoken, EmitMarkup::type_color, op, outvn));
+                    case CPoolRecord.ConstantPoolTagTypes.class_reference:
+                        pushAtom(new Atom(rec.getToken(), vartoken,
+                            EmitMarkup.syntax_highlight.type_color, op, outvn));
                         break;
-                    case CPoolRecord::instance_of:
-                        {
-                            Datatype* dt = rec.getType();
-                            while (dt.getMetatype() == type_metatype.TYPE_PTR)
-                            {
+                    case CPoolRecord.ConstantPoolTagTypes.instance_of: {
+                            Datatype dt = rec.getType();
+                            while (dt.getMetatype() == type_metatype.TYPE_PTR) {
                                 dt = ((TypePointer)dt).getPtrTo();
                             }
-                            pushOp(&instanceof, op);
+                            pushOp(instanceof, op);
                             pushVn(vn0, op, mods);
-                            pushAtom(Atom(dt.getDisplayName(), syntax, EmitMarkup::type_color, op, outvn));
+                            pushAtom(new Atom(dt.getDisplayName(), syntax,
+                                EmitMarkup.syntax_highlight.type_color, op, outvn));
                             break;
                         }
-                    case CPoolRecord::primitive:        // Should be eliminated
-                    case CPoolRecord::pointer_method:
-                    case CPoolRecord::pointer_field:
-                    case CPoolRecord::array_length:
-                    case CPoolRecord::check_cast:
-                    default:
-                        {
-                            Datatype* ct = rec.getType();
-                            EmitMarkup.syntax_highlight color = EmitMarkup::var_color;
-                            if (ct.getMetatype() == type_metatype.TYPE_PTR)
-                            {
+                    case CPoolRecord.ConstantPoolTagTypes.primitive:        // Should be eliminated
+                    case CPoolRecord.ConstantPoolTagTypes.pointer_method:
+                    case CPoolRecord.ConstantPoolTagTypes.pointer_field:
+                    case CPoolRecord.ConstantPoolTagTypes.array_length:
+                    case CPoolRecord.ConstantPoolTagTypes.check_cast:
+                    default: {
+                            Datatype ct = rec.getType();
+                            EmitMarkup.syntax_highlight color = EmitMarkup.syntax_highlight.var_color;
+                            if (ct.getMetatype() == type_metatype.TYPE_PTR) {
                                 ct = ((TypePointer)ct).getPtrTo();
                                 if (ct.getMetatype() == type_metatype.TYPE_CODE)
-                                    color = EmitMarkup::funcname_color;
+                                    color = EmitMarkup.syntax_highlight.funcname_color;
                             }
-                            if (vn0.isConstant())
-                            {   // If this is NOT relative to an object reference
-                                pushAtom(Atom(rec.getToken(), vartoken, color, op, outvn));
+                            if (vn0.isConstant()) {
+                                // If this is NOT relative to an object reference
+                                pushAtom(new Atom(rec.getToken(), vartoken, color, op, outvn));
                             }
-                            else
-                            {
-                                pushOp(&object_member, op);
+                            else {
+                                pushOp(object_member, op);
                                 pushVn(vn0, op, mods);
-                                pushAtom(Atom(rec.getToken(), syntax, color, op, outvn));
+                                pushAtom(new Atom(rec.getToken(), syntax, color, op, outvn));
                             }
                         }
                 }

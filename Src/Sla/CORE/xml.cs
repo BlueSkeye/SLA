@@ -61,7 +61,6 @@ using System.Security.AccessControl;
 using System.Xml.Linq;
 using System.Collections.Generic;
 using System.Runtime.Intrinsics;
-using ghidra;
 using Locator = object;
 using System.Runtime.InteropServices.JavaScript;
 using System.Linq;

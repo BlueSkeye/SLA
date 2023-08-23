@@ -1,11 +1,4 @@
 ﻿using Sla.CORE;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.DECCORE
 {
@@ -23,6 +16,10 @@ namespace Sla.DECCORE
     /// holds the Symbol across \e all code.
     internal class SymbolEntry
     {
+        //typedef ulong linetype;     ///< The linear element for a rangemap of SymbolEntry
+        //typedef EntrySubsort subsorttype;   ///< The sub-sort object for a rangemap
+        //typedef EntryInitData inittype; ///< Initialization data for a SymbolEntry in a rangemap
+
         // friend class Scope;
         /// Symbol object being mapped
         internal Symbol symbol;
@@ -120,10 +117,6 @@ namespace Sla.DECCORE
                 return (op1.useoffset < op2.useoffset);
             }
         }
-
-        //typedef ulong linetype;     ///< The linear element for a rangemap of SymbolEntry
-        //typedef EntrySubsort subsorttype;   ///< The sub-sort object for a rangemap
-        //typedef EntryInitData inittype; ///< Initialization data for a SymbolEntry in a rangemap
 
         /// Fully initialize \b this
         /// Establish the boundary offsets and fill in additional data
@@ -286,18 +279,17 @@ namespace Sla.DECCORE
         /// \param s is the output stream
         public void printEntry(TextWriter s)
         {
-            s << symbol.getName() << " : ";
+            s.Write($"{symbol.getName()} : ");
             if (addr.isInvalid())
-                s << "<dynamic>";
-            else
-            {
-                s << addr.getShortcut();
+                s.Write("<dynamic>");
+            else {
+                s.Write(addr.getShortcut());
                 addr.printRaw(s);
             }
-            s << ':' << dec << (uint)symbol.getType().getSize();
-            s << ' ';
+            s.Write($":{(uint)symbol.getType().getSize()}");
+            s.Write(' ');
             symbol.getType().printRaw(s);
-            s << " : ";
+            s.Write(" : ");
             uselimit.printBounds(s);
         }
 

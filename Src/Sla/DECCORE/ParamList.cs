@@ -1,11 +1,4 @@
 ﻿using Sla.CORE;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.DECCORE
 {
@@ -126,7 +119,7 @@ namespace Sla.DECCORE
         /// \param res is the parameter storage to pass back
         /// \return the extension operator (INT_ZEXT INT_SEXT) or INT_COPY if there is no extension.
         /// INT_PIECE indicates the extension is determined by the specific prototype.
-        public abstract OpCode assumedExtension(Address addr,int size, out VarnodeData res);
+        public abstract OpCode assumedExtension(Address addr,int size, VarnodeData res);
 
         /// \brief Get the address space associated with any stack based parameters in \b this list.
         /// \return the stack address space, if \b this models parameters passed on the stack, NULL otherwise

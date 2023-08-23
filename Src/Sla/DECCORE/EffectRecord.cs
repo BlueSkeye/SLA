@@ -115,15 +115,14 @@ namespace Sla.DECCORE
         }
 
         /// \brief Compare two EffectRecords by their start Address
-        ///
         /// \param op1 is the first record to compare
         /// \param op2 is the other record to compare
         /// \return \b true if \b this should be ordered before the other record
-        public static bool compareByAddress(EffectRecord op1, EffectRecord op2)
+        public static int compareByAddress(EffectRecord op1, EffectRecord op2)
         {
-            if (op1.range.space != op2.range.space)
-                return (op1.range.space.getIndex() < op2.range.space.getIndex());
-            return (op1.range.offset < op2.range.offset);
+            return (op1.range.space != op2.range.space)
+                ? op1.range.space.getIndex().CompareTo(op2.range.space.getIndex())
+                : op1.range.offset.CompareTo(op2.range.offset);
         }
     }
 }

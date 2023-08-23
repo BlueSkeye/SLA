@@ -1,13 +1,4 @@
 ﻿using Sla.CORE;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.SLEIGH
 {
@@ -40,12 +31,13 @@ namespace Sla.SLEIGH
 
         public abstract void restoreXml(Element el, Translate trans);
 
-        public abstract long getSubValue(List<long> replace) {
+        public virtual long getSubValue(List<long> replace)
+        {
             int listpos = 0;
             return getSubValue(replace, listpos);
         }
 
-        public abstract void layClaim()
+        public virtual void layClaim()
         {
             refcount += 1;
         }
@@ -53,13 +45,13 @@ namespace Sla.SLEIGH
         public static void release(PatternExpression p)
         {
             p.refcount -= 1;
-            if (p.refcount <= 0)
-                delete p;
+            //if (p.refcount <= 0)
+            //    delete p;
         }
 
-        public static PatternExpression restoreExpression(Element el, Translate trans)
+        public static PatternExpression? restoreExpression(Element el, Translate trans)
         {
-            PatternExpression* res;
+            PatternExpression res;
             string nm = el.getName();
 
             if (nm == "tokenfield")

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -23,9 +19,9 @@ namespace Sla.DECCORE
 
         public override string getOperatorName(PcodeOp op)
         {
-            ostringstream s;
-            s << name << dec << op.getIn(0).getSize();
-            return s.str();
+            TextWriter s = new StringWriter();
+            s.Write("{name}{op.getIn(0).getSize()}");
+            return s.ToString();
         }
     }
 }

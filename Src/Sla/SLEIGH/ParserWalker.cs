@@ -14,9 +14,12 @@ namespace Sla.SLEIGH
         private readonly ParserContext const_context;
         private readonly ParserContext cross_context;
 
-        internal ConstructState point;    // The current node being visited
-        protected int depth;         // Depth of the current node
-        internal int[] breadcrumb = new int[32];    // Path of operands from root
+        // The current node being visited
+        internal ConstructState point;
+        // Depth of the current node
+        internal int depth;
+        // Path of operands from root
+        internal int[] breadcrumb = new int[32];
 
         public ParserWalker(ParserContext c)
         {

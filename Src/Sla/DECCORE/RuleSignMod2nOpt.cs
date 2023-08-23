@@ -58,12 +58,12 @@ namespace Sla.DECCORE
                 else if (andOp.code() != OpCode.CPUI_INT_AND)
                     continue;
 
-                Varnode constVn = andOp.getIn(1);
+                Varnode constVn = andOp.getIn(1) ?? throw new ApplicationException();
                 if (!constVn.isConstant()) continue;
                 if (constVn.getOffset() != mask) continue;
-                Varnode addOut = andOp.getIn(0);
+                Varnode addOut = andOp.getIn(0) ?? throw new ApplicationException();
                 if (!addOut.isWritten()) continue;
-                PcodeOp addOp = addOut.getDef() ?? throw new ApplicationExceptionl();
+                PcodeOp addOp = addOut.getDef() ?? throw new ApplicationException();
                 if (addOp.code() != OpCode.CPUI_INT_ADD) continue;
                 // Search for "a" as one of the inputs to addOp
                 int aSlot;

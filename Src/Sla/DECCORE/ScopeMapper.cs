@@ -1,10 +1,4 @@
-﻿using ghidra;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Sla.DECCORE
 {
     /// \brief An Address range associated with the symbol Scope that owns it
@@ -13,6 +7,10 @@ namespace Sla.DECCORE
     /// the \e namespace Scope that holds the Symbol it sees accessed.
     internal class ScopeMapper
     {
+        //typedef Address linetype;		///< The linear element for a rangemap
+        //typedef NullSubsort subsorttype;	///< The sub-sort object for a rangemap
+        //typedef Scope *inittype;		///< Initialization data for a ScopeMapper
+
         // friend class Database;
         /// \brief Helper class for \e not doing any sub-sorting of overlapping ScopeMapper ranges
         internal class NullSubsort
@@ -37,10 +35,6 @@ namespace Sla.DECCORE
                 return false;
             }
         }
-
-        //typedef Address linetype;		///< The linear element for a rangemap
-        //typedef NullSubsort subsorttype;	///< The sub-sort object for a rangemap
-        //typedef Scope *inittype;		///< Initialization data for a ScopeMapper
 
         /// The Scope owning this address range
         private Scope scope;

@@ -1,10 +1,4 @@
 ﻿using Sla.CORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.EXTRA
 {
@@ -25,10 +19,10 @@ namespace Sla.EXTRA
 
         public override void dump(Address addr, string mnem, string body)
         {
-            addr.printRaw(*s);
-            *s << ": " << mnem;
-            for (int i = mnem.size(); i < mnemonicpad; ++i) *s << ' ';
-            *s << body << endl;
+            addr.printRaw(s);
+            s.Write($": {mnem}");
+            for (int i = mnem.Length; i < mnemonicpad; ++i) s.Write(' ');
+            s.WriteLine(body);
         }
     }
 }

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.EXTRA
 {
@@ -13,10 +8,9 @@ namespace Sla.EXTRA
     {
         public override UnifyConstraint clone()
         {
-            ConstraintOr* res = new ConstraintOr();
-            for (int i = 0; i < constraintlist.size(); ++i)
-            {
-                UnifyConstraint* subconst = constraintlist[i].clone();
+            ConstraintOr res = new ConstraintOr();
+            for (int i = 0; i < constraintlist.size(); ++i) {
+                UnifyConstraint subconst = constraintlist[i].clone();
                 res.constraintlist.Add(subconst);
             }
             res.copyid(this);
@@ -25,17 +19,17 @@ namespace Sla.EXTRA
 
         public override void initialize(UnifyState state)
         {
-            TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
+            TraverseCountState traverse = (TraverseCountState)state.getTraverse(uniqid);
             traverse.initialize(constraintlist.size());
         }
 
         public override bool step(UnifyState state)
         {
-            TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
+            TraverseCountState traverse = (TraverseCountState)state.getTraverse(uniqid);
             int stateind = traverse.getState();
-            UnifyConstraint* cur;
-            if (stateind == -1)
-            { // First time through
+            UnifyConstraint cur;
+            if (stateind == -1) {
+                // First time through
                 if (!traverse.step()) return false;
                 stateind = traverse.getState();
                 cur = getConstraint(stateind);
@@ -43,8 +37,7 @@ namespace Sla.EXTRA
             }
             else
                 cur = getConstraint(stateind);
-            while(true)
-            {
+            while(true) {
                 if (cur.step(state)) return true;
                 if (!traverse.step()) break;
                 stateind = traverse.getState();
@@ -58,12 +51,11 @@ namespace Sla.EXTRA
         {
             if (uniqid != state.numTraverse())
                 throw new LowlevelError("Traverse id does not match index in or");
-            TraverseCountState* trav = new TraverseCountState(uniqid);
+            TraverseCountState trav = new TraverseCountState(uniqid);
             state.registerTraverseConstraint(trav);
 
-            for (int i = 0; i < constraintlist.size(); ++i)
-            {
-                UnifyConstraint* subconstraint = constraintlist[i];
+            for (int i = 0; i < constraintlist.size(); ++i) {
+                UnifyConstraint subconstraint = constraintlist[i];
                 subconstraint.buildTraverseState(state);
             }
         }
@@ -74,17 +66,16 @@ namespace Sla.EXTRA
         public override void print(TextWriter s, UnifyCPrinter printstate)
         {
             printstate.printIndent(s);
-            s << "for(i" << dec << printstate.getDepth() << "=0;i" << printstate.getDepth() << '<';
-            s << (int)constraintlist.size() << ";++i" << printstate.getDepth() << ") {" << endl;
+            s.Write($"for(i{printstate.getDepth()}=0;i{printstate.getDepth()}<");
+            s.WriteLine($"{(int)constraintlist.size()};++i{printstate.getDepth()}) {{");
             printstate.incDepth();  // permanent increase in depth
-            for (int i = 0; i < constraintlist.size(); ++i)
-            {
+            for (int i = 0; i < constraintlist.size(); ++i) {
                 printstate.printIndent(s);
                 if (i != 0)
-                    s << "else ";
+                    s.Write("else ");
                 if (i != constraintlist.size() - 1)
-                    s << "if (i" << printstate.getDepth() - 1 << " == " << dec << i << ") ";
-                s << '{' << endl;
+                    s.Write($"if (i{printstate.getDepth() - 1} == {i}) ");
+                s.WriteLine('{');
                 int olddepth = printstate.getDepth();
                 printstate.incDepth();
                 constraintlist[i].print(s, printstate);

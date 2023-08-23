@@ -69,47 +69,27 @@ namespace Sla.SLEIGH
 
         public override void saveXml(TextWriter s)
         {
-            s << "<contextfield";
-            s << " signbit=\"";
+            s.Write("<contextfield");
+            s.Write(" signbit=\"");
             if (signbit)
-                s << "true\"";
+                s.Write("true\"");
             else
-                s << "false\"";
-            s << " startbit=\"" << dec << startbit << "\"";
-            s << " endbit=\"" << endbit << "\"";
-            s << " startbyte=\"" << startbyte << "\"";
-            s << " endbyte=\"" << endbyte << "\"";
-            s << " shift=\"" << shift << "\"/>\n";
+                s.Write("false\"");
+            s.Write($" startbit=\"{startbit}\"");
+            s.Write($" endbit=\"{endbit}\"");
+            s.Write($" startbyte=\"{startbyte}\"");
+            s.Write($" endbyte=\"{endbyte}\"");
+            s.WriteLine(" shift=\"{shift}\"/>");
         }
 
         public override void restoreXml(Element el, Translate trans)
         {
-            signbit = xml_readbool(el.getAttributeValue("signbit"));
-            {
-                istringstream s = new istringstream(el.getAttributeValue("startbit"));
-                s.unsetf(ios::dec | ios::hex | ios::oct);
-                s >> startbit;
-            }
-            {
-                istringstream s = new istringstream(el.getAttributeValue("endbit"));
-                s.unsetf(ios::dec | ios::hex | ios::oct);
-                s >> endbit;
-            }
-            {
-                istringstream s = new istringstream(el.getAttributeValue("startbyte"));
-                s.unsetf(ios::dec | ios::hex | ios::oct);
-                s >> startbyte;
-            }
-            {
-                istringstream s = new istringstream(el.getAttributeValue("endbyte"));
-                s.unsetf(ios::dec | ios::hex | ios::oct);
-                s >> endbyte;
-            }
-            {
-                istringstream s = new istringstream(el.getAttributeValue("shift"));
-                s.unsetf(ios::dec | ios::hex | ios::oct);
-                s >> shift;
-            }
+            signbit = Xml.xml_readbool(el.getAttributeValue("signbit"));
+            startbit = int.Parse(el.getAttributeValue("startbit"));
+            endbit = int.Parse(el.getAttributeValue("endbit"));
+            startbyte = int.Parse(el.getAttributeValue("startbyte"));
+            endbyte = int.Parse(el.getAttributeValue("endbyte"));
+            shift = int.Parse(el.getAttributeValue("shift"));
         }
     }
 }

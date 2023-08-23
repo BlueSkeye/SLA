@@ -1,12 +1,4 @@
 ﻿using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.EXTRA
 {
@@ -29,7 +21,7 @@ namespace Sla.EXTRA
 
         public override bool step(UnifyState state)
         {
-            TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
+            TraverseCountState traverse = (TraverseCountState)state.getTraverse(uniqid);
             if (!traverse.step()) return false;
             Varnode vn1 = state.data(var1index).getVarnode();
             Varnode vn2 = state.data(var2index).getVarnode();
@@ -38,8 +30,8 @@ namespace Sla.EXTRA
 
         public override void collectTypes(List<UnifyDatatype> typelist)
         {
-            typelist[var1index] = UnifyDatatype(UnifyDatatype.TypeKind.var_type);
-            typelist[var2index] = UnifyDatatype(UnifyDatatype.TypeKind.var_type);
+            typelist[var1index] = new UnifyDatatype(UnifyDatatype.TypeKind.var_type);
+            typelist[var2index] = new UnifyDatatype(UnifyDatatype.TypeKind.var_type);
         }
 
         public override int getBaseIndex() => var1index;
@@ -47,12 +39,12 @@ namespace Sla.EXTRA
         public override void print(TextWriter s, UnifyCPrinter printstate)
         {
             printstate.printIndent(s);
-            s << "if (" << printstate.getName(var1index);
+            s.Write($"if ({printstate.getName(var1index)}");
             if (istrue)
-                s << " != ";
+                s.Write(" != ");
             else
-                s << " == ";
-            s << printstate.getName(var2index) << ')' << endl;
+                s.Write(" == ");
+            s.WriteLine($"{printstate.getName(var2index)})");
             printstate.printAbort(s);
         }
     }

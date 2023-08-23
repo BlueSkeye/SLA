@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static ghidra.Emit;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using System.Xml.Linq;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -18,12 +9,12 @@ namespace Sla.DECCORE
     /// for EmitPrettyPrint.
     internal class EmitNoMarkup : Emit
     {
-        private TextWriter s;             ///< The stream to output tokens to
+        private TextWriter? s;             ///< The stream to output tokens to
         
         public EmitNoMarkup()
             : base()
         {
-            s = (ostream*)0;
+            s = null;
         }
 
         public override int beginDocument() => 0;
@@ -46,12 +37,13 @@ namespace Sla.DECCORE
 
         public override void tagLine()
         {
-            *s << endl; for (int i = indentlevel; i > 0; --i) *s << ' ';
+            s.WriteLine();
+            for (int i = indentlevel; i > 0; --i) s.Write(' ');
         }
 
         public override void tagLine(int indent)
         {
-            *s << endl; for (int i = indent; i > 0; --i) *s << ' ';
+            s.WriteLine(); for (int i = indent; i > 0; --i) s.Write(' ');
         }
 
         public override int beginReturnType(Varnode vn) => 0;
@@ -80,55 +72,61 @@ namespace Sla.DECCORE
 
         public override void tagVariable(string name, syntax_highlight hl, Varnode vn, PcodeOp op)
         {
-            *s << name;
+            s.Write(name);
         }
 
         public override void tagOp(string name, syntax_highlight hl, PcodeOp op)
         {
-            *s << name;
+            s.Write(name);
         }
 
         public override void tagFuncName(string name, syntax_highlight hl, Funcdata fd, PcodeOp op)
         {
-            *s << name;
+            s.Write(name);
         }
 
         public override void tagType(string name, syntax_highlight hl, Datatype ct)
         {
-            *s << name;
+            s.Write(name);
         }
 
         public override void tagField(string name, syntax_highlight hl, Datatype ct, int off, PcodeOp op)
         {
-            *s << name;
+            s.Write(name);
         }
 
         public override void tagComment(string name, syntax_highlight hl, AddrSpace spc, ulong off)
         {
-            *s << name;
+            s.Write(name);
         }
 
         public override void tagLabel(string name, syntax_highlight hl, AddrSpace spc, ulong off)
         {
-            *s << name;
+            s.Write(name);
         }
 
-        public override void print(string data, syntax_highlight hl = no_color)
+        public override void print(string data, syntax_highlight hl = syntax_highlight.no_color)
         {
-            *s << data;
+            s.Write(data);
         }
 
         public override int openParen(string paren, int id = 0)
         {
-            *s << paren; parenlevel += 1; return id;
+            s.Write(paren);
+            parenlevel += 1;
+            return id;
         }
 
         public override void closeParen(string paren, int id)
         {
-            *s << paren; parenlevel -= 1;
+            s.Write(paren);
+            parenlevel -= 1;
         }
 
-        public override void setOutputStream(TextWriter t) { s = t; }
+        public override void setOutputStream(TextWriter t)
+        {
+            s = t;
+        }
 
         public override TextWriter getOutputStream() => s;
 

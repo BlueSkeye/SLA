@@ -55,7 +55,7 @@ namespace Sla.DECCORE
         /// The local name of the symbol
         internal string name;
         /// Name to use when displaying symbol in output
-        protected string displayName;
+        internal string displayName;
         /// The symbol's data-type
         internal Datatype? type;
         /// id to distinguish symbols with the same name
@@ -73,7 +73,7 @@ namespace Sla.DECCORE
         /// Unique id, 0=unassigned
         internal ulong symbolId;
         /// List of storage locations labeled with \b this Symbol
-        protected List<IEnumerator<SymbolEntry>> mapentry;
+        internal List<IEnumerator<SymbolEntry>> mapentry = new List<IEnumerator<SymbolEntry>>();
         /// Scope associated with current depth resolution
         protected /*mutable const*/ Scope? depthScope;
         /// Number of namespace elements required to resolve symbol in current scope

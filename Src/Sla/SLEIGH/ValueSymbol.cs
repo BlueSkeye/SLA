@@ -1,13 +1,4 @@
 ﻿using Sla.CORE;
-using Sla.DECCORE;
-using Sla.SLEIGH;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static Sla.SLEIGH.SleighSymbol;
 
 namespace Sla.SLEIGH
 {
@@ -17,7 +8,7 @@ namespace Sla.SLEIGH
         
         public ValueSymbol()
         {
-            patval = (PatternValue*)0;
+            patval = (PatternValue)null;
         }
 
         public ValueSymbol(string nm,PatternValue pv)
@@ -28,8 +19,8 @@ namespace Sla.SLEIGH
 
         ~ValueSymbol()
         {
-            if (patval != (PatternValue*)0)
-                PatternExpression::release(patval);
+            if (patval != (PatternValue)null)
+                PatternExpression.release(patval);
         }
 
         public override PatternValue getPatternValue() => patval;
@@ -48,35 +39,34 @@ namespace Sla.SLEIGH
         {
             long val = patval.getValue(walker);
             if (val >= 0)
-                s << "0x" << hex << val;
+                s.Write($"0x{val:X}");
             else
-                s << "-0x" << hex << -val;
+                s.Write($"-0x{-val:X}");
         }
 
         public override symbol_type getType() => SleighSymbol.symbol_type.value_symbol;
 
         public override void saveXml(TextWriter s)
         {
-            s << "<value_sym";
-            SleighSymbol::saveXmlHeader(s);
-            s << ">\n";
+            s.Write("<value_sym");
+            base.saveXmlHeader(s);
+            s.WriteLine(">");
             patval.saveXml(s);
-            s << "</value_sym>\n";
+            s.WriteLine("</value_sym>");
         }
 
         public override void saveXmlHeader(TextWriter s)
         {
-            s << "<value_sym_head";
-            SleighSymbol::saveXmlHeader(s);
-            s << "/>\n";
+            s.Write("<value_sym_head");
+            base.saveXmlHeader(s);
+            s.WriteLine("/>");
         }
 
         public override void restoreXml(Element el, SleighBase trans)
         {
-            List list = el.getChildren();
-            List::const_iterator iter;
-            iter = list.begin();
-            patval = (PatternValue*)PatternExpression::restoreExpression(*iter, trans);
+            IEnumerator<Element> iter = el.getChildren().GetEnumerator();
+            if (!iter.MoveNext()) throw new ApplicationException();
+            patval = (PatternValue)PatternExpression.restoreExpression(iter.Current, trans);
             patval.layClaim();
         }
     }
