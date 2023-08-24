@@ -19,12 +19,12 @@ namespace Sla.EXTRA
 
         public override bool step(UnifyState state)
         {
-            TraverseCountState traverse = (TraverseCountState*)state.getTraverse(uniqid);
+            TraverseCountState traverse = (TraverseCountState)state.getTraverse(uniqid);
             if (!traverse.step()) return false;
             ulong c1 = state.data(const1index).getConstant();
             ulong c2 = state.data(const2index).getConstant();
             // This only does operations with boolean result
-            OpBehavior behavior = state.getBehavior(opc);
+            OpBehavior behavior = state.getBehavior(opc) ?? throw new ApplicationException();
             ulong res = behavior.evaluateBinary(1, sizeof(ulong), c1, c2);
             return (res != 0);
         }

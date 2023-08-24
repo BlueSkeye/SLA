@@ -25,5 +25,12 @@ namespace Sla
         {
             return 0 == candidate.Length;
         }
+
+        internal static string ReplaceCharacter(this string candidate, int index, char replacement)
+        {
+            StringBuilder builder = new StringBuilder(candidate);
+            builder[index] = replacement;
+            return builder.ToString();
+        }
     }
 }

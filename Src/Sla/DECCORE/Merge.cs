@@ -1,6 +1,6 @@
 ﻿using Sla.CORE;
 
-using VarnodeLocSet = System.Collections.Generic.HashSet<Sla.DECCORE.Varnode>; // VarnodeCompareLocDef : A set of Varnodes sorted by location (then by definition)
+using VarnodeLocSet = System.Collections.Generic.SortedSet<Sla.DECCORE.Varnode>; // VarnodeCompareLocDef : A set of Varnodes sorted by location (then by definition)
 
 namespace Sla.DECCORE
 {
@@ -602,10 +602,10 @@ namespace Sla.DECCORE
         /// the Varnodes into two or more flows, which involves inserting new COPY ops and temporaries.
         /// \param startiter is the beginning of the range of Varnodes with the same storage address
         /// \param enditer is the end of the range
-        private void unifyAddress(VarnodeLocSet::const_iterator startiter,
-            VarnodeLocSet::const_iterator enditer)
+        private void unifyAddress(IEnumerator<Varnode> startiter,
+            IEnumerator<Varnode> enditer)
         {
-            VarnodeLocSet::const_iterator iter;
+            IEnumerator<Varnode> iter;
             Varnode vn;
             List<Varnode> isectlist = new List<Varnode>();
             List<BlockVarnode> blocksort = new List<BlockVarnode>();
@@ -694,8 +694,8 @@ namespace Sla.DECCORE
         /// with merging cause an exception to be thrown.
         /// \param startiter is the beginning of the range of Varnodes with the same storage address
         /// \param enditer is the end of the range
-        private void mergeRangeMust(VarnodeLocSet::const_iterator startiter,
-            VarnodeLocSet::const_iterator enditer)
+        private void mergeRangeMust(IEnumerator<Varnode> startiter,
+            IEnumerator<Varnode> enditer)
         {
             HighVariable high;
             Varnode vn;
@@ -1248,21 +1248,16 @@ namespace Sla.DECCORE
         /// a group. If a particular merge causes Cover intersection, it is skipped.
         /// \param startiter is the start of the given range of Varnodes
         /// \param enditer is the end of the given range
-        public void mergeByDatatype(VarnodeLocSet::const_iterator startiter,
-            VarnodeLocSet::const_iterator enditer)
+        public void mergeByDatatype(IEnumerator<Varnode> startiter /*, IEnumerator<Varnode> enditer*/)
         {
             List<HighVariable> highvec = new List<HighVariable>();
             List<HighVariable> highlist = new List<HighVariable>();
-
-            IEnumerator<HighVariable> hiter;
-            VarnodeLocSet::const_iterator iter;
-            Varnode vn;
             HighVariable high;
-            Datatype? ct = (Datatype)null;
 
-            for (iter = startiter; iter != enditer; ++iter) {
+            IEnumerator<Varnode> iter = startiter;
+            while (iter.MoveNext()) {
                 // Gather all the highs
-                vn = iter.Current;
+                Varnode vn = iter.Current;
                 if (vn.isFree()) continue;
                 high = iter.Current.getHigh();
                 if (high.isMark()) continue;   // dedup
@@ -1270,27 +1265,29 @@ namespace Sla.DECCORE
                 high.setMark();
                 highlist.Add(high);
             }
-            for (hiter = highlist.begin(); hiter != highlist.end(); ++hiter)
-                hiter.Current.clearMark();
+            foreach (HighVariable variable in highlist) {
+                variable.clearMark();
+            }
 
             while (!highlist.empty()) {
                 highvec.Clear();
-                hiter = highlist.begin();
-                high = *hiter;
-                ct = high.getType();
+                high = highlist[0];
+                Datatype? ct = high.getType();
                 highvec.Add(high);
-                highlist.erase(hiter++);
-                while (hiter != highlist.end()) {
-                    high = hiter.Current;
+                highlist.RemoveAt(0);
+                for(int index = 0; index < highlist.Count; ) {
+                    high = highlist[index];
                     if (ct == high.getType()) {
                         // Check for exact same type
                         highvec.Add(high);
-                        highlist.erase(hiter++);
+                        highlist.RemoveAt(index);
                     }
-                    else
-                        ++hiter;
+                    else {
+                        index++;
+                    }
                 }
-                mergeLinear(highvec);   // Try to merge all highs of the same type
+                // Try to merge all highs of the same type
+                mergeLinear(highvec);
             }
         }
 
@@ -1302,18 +1299,18 @@ namespace Sla.DECCORE
         /// \e unique Varnodes.
         public void mergeAddrTied()
         {
-            VarnodeLocSet::const_iterator startiter;
-            List<VarnodeLocSet::const_iterator> bounds;
+            List<IEnumerator<Varnode>> bounds = new List<IEnumerator<Varnode>>();
+            IEnumerator<Varnode> startiter = data.beginLoc();
             for (startiter = data.beginLoc(); startiter != data.endLoc();) {
-                AddrSpace spc = (*startiter).getSpace();
+                AddrSpace spc = startiter.Current.getSpace();
                 spacetype type = spc.getType();
                 if (type != spacetype.IPTR_PROCESSOR && type != spacetype.IPTR_SPACEBASE) {
                     startiter = data.endLoc(spc);   // Skip over the whole space
                     continue;
                 }
-                VarnodeLocSet::const_iterator finaliter = data.endLoc(spc);
+                IEnumerator<Varnode> finaliter = data.endLoc(spc);
                 while (startiter != finaliter) {
-                    Varnode vn = *startiter;
+                    Varnode vn = startiter.Current;
                     if (vn.isFree()) {
                         startiter = data.endLoc(vn.getSize(), vn.getAddr(), 0);   // Skip over any free Varnodes
                         continue;
@@ -1327,9 +1324,9 @@ namespace Sla.DECCORE
                             mergeRangeMust(bounds[i], bounds[i + 1]);
                         }
                         if (max > 2) {
-                            Varnode vn1 = *bounds[0];
+                            Varnode vn1 = bounds[0].Current;
                             for (int i = 2; i < max; i += 2) {
-                                Varnode vn2 = *bounds[i];
+                                Varnode vn2 = bounds[i].Current;
                                 int off = (int)(vn2.getOffset() - vn1.getOffset());
                                 vn2.getHigh().groupWith(off, vn1.getHigh());
                             }
@@ -1654,7 +1651,7 @@ namespace Sla.DECCORE
         /// its instance Varnodes (unless one is a COPY shadow of the other).
         public void verifyHighCovers()
         {
-          VarnodeLocSet::const_iterator iter,enditer;
+          IEnumerator<Varnode> iter,enditer;
 
           enditer = data.endLoc();
           for(iter=data.beginLoc();iter!=enditer;++iter) {

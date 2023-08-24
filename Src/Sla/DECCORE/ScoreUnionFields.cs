@@ -281,7 +281,7 @@ namespace Sla.DECCORE
                 Datatype? ptrto = ((TypePointer)ct).getPtrTo();
                 while (ptrto != (Datatype)null && ptrto.getSize() > vn.getSize()) {
                     ulong newoff;
-                    ptrto = ptrto.getSubType(0, newoff);
+                    ptrto = ptrto.getSubType(0, out newoff);
                 }
                 if (ptrto != (Datatype)null && ptrto.getSize() == vn.getSize()) {
                     score = 10;
@@ -906,7 +906,7 @@ namespace Sla.DECCORE
                             break;
                         }
                     }
-                    ct = ct.getSubType(off, &off);
+                    ct = ct.getSubType(off, out off);
                 }
                 if (ct == (Datatype)null)
                     score = -10;

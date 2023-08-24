@@ -41,7 +41,7 @@ namespace Sla.DECCORE
         {
             int movesize;          // Number of bytes being moved by load or store
 
-            if (!data.hasTypeRecoveryStarted()) return false;
+            if (!data.hasTypeRecoveryStarted()) return 0;
             if (op.code() == OpCode.CPUI_LOAD) {
                 movesize = op.getOut().getSize();
             }
@@ -49,38 +49,38 @@ namespace Sla.DECCORE
                 movesize = op.getIn(2).getSize();
             }
             else
-                return false;
+                return 0;
 
             Varnode ptrVn = op.getIn(1);
             Datatype ct = ptrVn.getTypeReadFacing(op);
-            if (ct.getMetatype() != type_metatype.TYPE_PTR) return false;
+            if (ct.getMetatype() != type_metatype.TYPE_PTR) return 0;
             Datatype baseType = ((TypePointer)ct).getPtrTo();
             ulong offset = 0;
             if (ct.isFormalPointerRel() && ((TypePointerRel)ct).evaluateThruParent(0)) {
                 TypePointerRel ptRel = (TypePointerRel)ct;
                 baseType = ptRel.getParent();
                 if (baseType.getMetatype() != type_metatype.TYPE_STRUCT)
-                    return false;
+                    return 0;
                 int iOff = ptRel.getPointerOffset();
                 iOff = AddrSpace.addressToByteInt(iOff, ptRel.getWordSize());
                 if (iOff >= baseType.getSize())
-                    return false;
+                    return 0;
                 offset = iOff;
             }
             if (baseType.getMetatype() == type_metatype.TYPE_STRUCT) {
                 if (baseType.getSize() < movesize)
-                    return false;               // Moving something bigger than entire structure
-                Datatype subType = baseType.getSubType(offset, offset); // Get field at pointer's offset
-                if (subType == (Datatype)null) return false;
-                if (subType.getSize() < movesize) return false;    // Subtype is too small to handle LOAD/STORE
-                                                                //    if (baseType.getSize() == movesize) {
-                                                                // If we reach here, move is same size as the structure, which is the same size as
-                                                                // the first element.
-                                                                //    }
+                    return 0;               // Moving something bigger than entire structure
+                Datatype? subType = baseType.getSubType(offset, out offset); // Get field at pointer's offset
+                if (subType == (Datatype)null) return 0;
+                if (subType.getSize() < movesize) return 0;    // Subtype is too small to handle LOAD/STORE
+                //    if (baseType.getSize() == movesize) {
+                // If we reach here, move is same size as the structure, which is the same size as
+                // the first element.
+                //    }
             }
             else if (baseType.getMetatype() == type_metatype.TYPE_ARRAY) {
                 if (baseType.getSize() < movesize)
-                    return false;               // Moving something bigger than entire array
+                    return 0;               // Moving something bigger than entire array
                 if (baseType.getSize() == movesize) {
                     // Moving something the size of entire array
                     if (((TypeArray)baseType).numElements() != 1)
@@ -89,14 +89,14 @@ namespace Sla.DECCORE
                 }
             }
             else
-                return false;
+                return 0;
 
             PcodeOp newop = data.newOpBefore(op, OpCode.CPUI_PTRSUB, ptrVn, data.newConstant(ptrVn.getSize(), 0));
             if (ptrVn.getType().needsResolution())
                 data.inheritResolution(ptrVn.getType(), newop, 0, op, 1);
             newop.setStopTypePropagation();
             data.opSetInput(op, newop.getOut(), 1);
-            return true;
+            return 1;
         }
     }
 }

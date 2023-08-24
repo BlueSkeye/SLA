@@ -1,7 +1,9 @@
 ﻿using Sla.CORE;
 
-using VarnodeDefSet = System.Collections.Generic.HashSet<Sla.DECCORE.Varnode>; // VarnodeDefSet : A set of Varnodes sorted by definition (then location)
-using VarnodeLocSet = System.Collections.Generic.HashSet<Sla.DECCORE.Varnode>; // VarnodeCompareLocDef : A set of Varnodes sorted by location (then by definition)
+// VarnodeDefSet : A set of Varnodes sorted by definition (then location)
+using VarnodeDefSet = System.Collections.Generic.SortedSet<Sla.DECCORE.Varnode>;
+// VarnodeCompareLocDef : A set of Varnodes sorted by location (then by definition)
+using VarnodeLocSet = System.Collections.Generic.SortedSet<Sla.DECCORE.Varnode>;
 
 namespace Sla.DECCORE
 {
@@ -28,9 +30,9 @@ namespace Sla.DECCORE
         /// Number of varnodes created
         private uint create_index;
         /// Varnodes sorted by location then def
-        private VarnodeLocSet loc_tree;
+        private VarnodeLocSet loc_tree; // TODO : Instanciate with proper comparer
         /// Varnodes sorted by def then location
-        private VarnodeDefSet def_tree;
+        private VarnodeDefSet def_tree; // TODO : Instanciate with proper comparer
         /// Template varnode for searching trees
         private /*mutable*/ Varnode searchvn;
 
@@ -41,22 +43,23 @@ namespace Sla.DECCORE
         /// \return the inserted object, which may not be the same as the input Varnode
         private Varnode xref(Varnode vn)
         {
-            pair<VarnodeLocSet::iterator, bool> check;
+            Tuple<IEnumerator<Varnode>, bool> check;
             Varnode othervn;
+            Varnode? actualNode;
 
             check = loc_tree.insert(vn);
-            if (!check.second) {
+            if (loc_tree.TryGetValue(vn, out actualNode)) {
                 // Set already contains this varnode
-                othervn = *(check.first);
+                othervn = actualNode ?? throw new ApplicationException();
                 replace(vn, othervn); // Patch ops using the old varnode
                 // delete vn;
                 return othervn;
             }
             // Otherwise a new insertion
+            loc_tree.Add(vn);
             vn.lociter = check.first;
             vn.setFlags(Varnode.varnode_flags.insert);
-            vn.defiter = def_tree.insert(vn).first; // Insertion should also be new in def_tree
-
+            vn.defiter = def_tree.Add(vn).first; // Insertion should also be new in def_tree
             return vn;
         }
 
@@ -270,7 +273,7 @@ namespace Sla.DECCORE
         /// \return the matching Varnode or NULL
         public Varnode find(int s, Address loc, Address pc, uint uniq = uint.MaxValue)
         {
-            VarnodeLocSet::const_iterator iter;
+            IEnumerator<Varnode> iter;
             Varnode vn;
             PcodeOp op;
 
@@ -295,7 +298,7 @@ namespace Sla.DECCORE
         /// \return the match Varnode object or NULL
         public Varnode? findInput(int s, Address loc)
         {
-            VarnodeLocSet::const_iterator iter;
+            IEnumerator<Varnode> iter;
             Varnode vn;
 
             iter = beginLoc(s, loc, Varnode.varnode_flags.input);
@@ -366,16 +369,16 @@ namespace Sla.DECCORE
         public uint getCreateIndex() => create_index;
 
         /// Beginning of location list
-        public VarnodeLocSet::const_iterator beginLoc() => loc_tree.begin();
+        public IEnumerator<Varnode> beginLoc() => loc_tree.GetEnumerator();
 
         /// End of location list
-        public VarnodeLocSet::const_iterator endLoc() => loc_tree.end();
+        public IEnumerator<Varnode> endLoc() => loc_tree.end();
 
         /// \brief Beginning of Varnodes in given address space sorted by location
         ///
         /// \param spaceid is the given address space
         /// \return the beginning iterator
-        public VarnodeLocSet::const_iterator beginLoc(AddrSpace spaceid)
+        public IEnumerator<Varnode> beginLoc(AddrSpace spaceid)
         {
             searchvn.loc = new Address(spaceid, 0);
             return loc_tree.lower_bound(searchvn);
@@ -385,7 +388,7 @@ namespace Sla.DECCORE
         ///
         /// \param spaceid is the given address space
         /// \return the ending iterator
-        public VarnodeLocSet::const_iterator endLoc(AddrSpace spaceid)
+        public IEnumerator<Varnode> endLoc(AddrSpace spaceid)
         {
             searchvn.loc = new Address(manage.getNextSpaceInOrder(spaceid), 0);
             return loc_tree.lower_bound(searchvn);
@@ -395,7 +398,7 @@ namespace Sla.DECCORE
         ///
         /// \param addr is the given starting address
         /// \return the beginning iterator
-        public VarnodeLocSet::const_iterator beginLoc(Address addr)
+        public IEnumerator<Varnode> beginLoc(Address addr)
         {
             searchvn.loc = addr;
             return loc_tree.lower_bound(searchvn);
@@ -405,7 +408,7 @@ namespace Sla.DECCORE
         ///
         /// \param addr is the given starting address
         /// \return the ending iterator
-        public VarnodeLocSet::const_iterator endLoc(Address addr)
+        public IEnumerator<Varnode> endLoc(Address addr)
         {
             if (addr.getOffset() == addr.getSpace().getHighest()) {
                 AddrSpace space = addr.getSpace();
@@ -421,11 +424,11 @@ namespace Sla.DECCORE
         /// \param s is the given size
         /// \param addr is the given starting address
         /// \return the beginning iterator
-        public VarnodeLocSet::const_iterator beginLoc(int s, Address addr)
+        public IEnumerator<Varnode> beginLoc(int s, Address addr)
         {
             searchvn.size = s;
             searchvn.loc = addr;
-            VarnodeLocSet::const_iterator iter = loc_tree.lower_bound(searchvn);
+            IEnumerator<Varnode> iter = loc_tree.lower_bound(searchvn);
             searchvn.size = 0;      // Return size to 0
             return iter;
         }
@@ -435,11 +438,11 @@ namespace Sla.DECCORE
         /// \param s is the given size
         /// \param addr is the given starting address
         /// \return the ending iterator
-        public VarnodeLocSet::const_iterator endLoc(int s, Address addr)
+        public IEnumerator<Varnode> endLoc(int s, Address addr)
         {
             searchvn.size = s + 1;
             searchvn.loc = addr;
-            VarnodeLocSet::const_iterator iter = loc_tree.lower_bound(searchvn);
+            IEnumerator<Varnode> iter = loc_tree.lower_bound(searchvn);
             searchvn.size = 0;      // Return size to 0
             return iter;
         }
@@ -454,9 +457,9 @@ namespace Sla.DECCORE
         /// \param addr is the given starting address
         /// \param fl is the property restriction
         /// \return the beginning iterator
-        public VarnodeLocSet::const_iterator beginLoc(int s, Address addr, Varnode.varnode_flags fl)
+        public IEnumerator<Varnode> beginLoc(int s, Address addr, Varnode.varnode_flags fl)
         {
-            VarnodeLocSet::const_iterator iter;
+            IEnumerator<Varnode> iter;
             SeqNum sq;
             PcodeOp searchop;
 
@@ -503,9 +506,9 @@ namespace Sla.DECCORE
         /// \param addr is the given starting address
         /// \param fl is the property restriction
         /// \return the ending iterator
-        public VarnodeLocSet::const_iterator endLoc(int s,Address addr, Varnode.varnode_flags fl)
+        public IEnumerator<Varnode> endLoc(int s,Address addr, Varnode.varnode_flags fl)
         {
-            VarnodeLocSet::const_iterator iter;
+            IEnumerator<Varnode> iter;
             searchvn.loc = addr;
 
             switch (fl)
@@ -542,10 +545,10 @@ namespace Sla.DECCORE
         /// \param pc is the address of the PcodeOp defining the Varnode
         /// \param uniq is the sequence number of the PcodeOp or -1 for now sequence number restriction
         /// \return the beginning iterator
-        public VarnodeLocSet::const_iterator beginLoc(int s, Address addr, Address pc, uint uniq)
+        public IEnumerator<Varnode> beginLoc(int s, Address addr, Address pc, uint uniq)
         {               // Find first varnode of given loc and size
                         // defined at a particular location
-            VarnodeLocSet::const_iterator iter;
+            IEnumerator<Varnode> iter;
             searchvn.size = s;
             searchvn.loc = addr;
             searchvn.flags = Varnode.varnode_flags.written;
@@ -570,9 +573,9 @@ namespace Sla.DECCORE
         /// \param pc is the address of the PcodeOp defining the Varnode
         /// \param uniq is the sequence number of the PcodeOp or -1 for now sequence number restriction
         /// \return the ending iterator
-        public VarnodeLocSet::const_iterator endLoc(int s, Address addr, Address pc, uint uniq)
+        public IEnumerator<Varnode> endLoc(int s, Address addr, Address pc, uint uniq)
         {
-            VarnodeLocSet::const_iterator iter;
+            IEnumerator<Varnode> iter;
             searchvn.size = s;
             searchvn.loc = addr;
             searchvn.flags = Varnode.varnode_flags.written;
@@ -597,8 +600,8 @@ namespace Sla.DECCORE
         /// \param iter is an iterator to the given start Varnode
         /// \param bounds holds the array of iterator pairs passed back
         /// \return the union of Varnode flags across the range
-        public Varnode.varnode_flags overlapLoc(VarnodeLocSet::const_iterator iter,
-            List<VarnodeLocSet::const_iterator> bounds)
+        public Varnode.varnode_flags overlapLoc(IEnumerator<Varnode> iter,
+            List<IEnumerator<Varnode>> bounds)
         {
             Varnode vn = *iter;
             AddrSpace spc = vn.getSpace();

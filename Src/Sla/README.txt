@@ -68,8 +68,8 @@ using ScopeResolve = Sla.EXTRA.rangemap<Sla.DECCORE.ScopeMapper>;
 using SymbolTree = System.Collections.Generic.HashSet<Sla.SLEIGH.SleighSymbol>; // SymbolCompare
 using TrackedSet = System.Collections.Generic.List<Sla.CORE.TrackedContext>;
 using VariableStack = System.Collections.Generic.Dictionary<Sla.CORE.Address, System.Collections.Generic.List<Sla.DECCORE.Varnode>>;
-using VarnodeLocSet = System.Collections.Generic.HashSet<Sla.DECCORE.Varnode>; // VarnodeCompareLocDef : A set of Varnodes sorted by location (then by definition)
-using VarnodeDefSet = System.Collections.Generic.HashSet<Sla.DECCORE.Varnode>; // VarnodeDefSet : A set of Varnodes sorted by definition (then location)
+using VarnodeLocSet = System.Collections.Generic.SortedSet<Sla.DECCORE.Varnode>; // VarnodeCompareLocDef : A set of Varnodes sorted by location (then by definition)
+using VarnodeDefSet = System.Collections.Generic.SortedSet<Sla.DECCORE.Varnode>; // VarnodeDefSet : A set of Varnodes sorted by definition (then location)
 
 Returning references from functions and references to array element
 https://www.danielcrabtree.com/blog/128/c-sharp-7-ref-returns-ref-locals-and-how-to-use-them#:~:text=To%20return%20by%20reference%2C%20add,to%20be%20returned%20by%20reference.

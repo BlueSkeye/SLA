@@ -25,7 +25,7 @@ namespace Sla.EXTRA
             PcodeOp op = state.data(opindex).getOp();
             Varnode vn = op.getIn(slot);
             if (!vn.isConstant()) return false;
-            if (vn.getOffset() != (val & Globals.calc_mask(vn.getSize()))) return false;
+            if (vn.getOffset() != (val & Globals.calc_mask((uint)vn.getSize()))) return false;
             return true;
         }
 

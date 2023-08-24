@@ -21,7 +21,13 @@ namespace Sla.EXTRA
 
         public override UnifyConstraint clone() => (new ConstraintBoolean(istrue, expr.clone())).copyid(this);
 
-        public override bool step(UnifyState state);
+        public override bool step(UnifyState state)
+        {
+            TraverseCountState traverse = (TraverseCountState)state.getTraverse(uniqid);
+            if (!traverse.step()) return false;
+            ulong ourconst = expr.getConstant(state);
+            return (istrue) ? (ourconst != 0) : (ourconst == 0);
+        }
 
         public override void print(TextWriter s, UnifyCPrinter printstate)
         {

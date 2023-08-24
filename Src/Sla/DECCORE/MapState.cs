@@ -1,7 +1,7 @@
 ﻿using Sla.CORE;
 
 using EntryMap = Sla.EXTRA.rangemap<Sla.DECCORE.SymbolEntry>;
-using VarnodeLocSet = System.Collections.Generic.HashSet<Sla.DECCORE.Varnode>; // VarnodeCompareLocDef : A set of Varnodes sorted by location (then by definition)
+using VarnodeLocSet = System.Collections.Generic.SortedSet<Sla.DECCORE.Varnode>; // VarnodeCompareLocDef : A set of Varnodes sorted by location (then by definition)
 
 namespace Sla.DECCORE
 {
@@ -86,7 +86,7 @@ namespace Sla.DECCORE
             if (!range.inRange(new Address(spaceid, st), sz))
                 return;
             long sst = (long)AddrSpace.byteToAddress(st, spaceid.getWordSize());
-            Globals.sign_extend(sst, spaceid.getAddrSize() * 8 - 1);
+            Globals.sign_extend(sst, (int)spaceid.getAddrSize() * 8 - 1);
             sst = (long)AddrSpace.addressToByte(sst, spaceid.getWordSize());
             RangeHint newRange = new RangeHint(st, sz, sst, ct, fl, rt, hi);
             maplist.Add(newRange);
@@ -244,7 +244,7 @@ namespace Sla.DECCORE
         /// \param fd is the given function
         public void gatherVarnodes(Funcdata fd)
         {
-            VarnodeLocSet::const_iterator riter, iterend;
+            IEnumerator<Varnode> riter, iterend;
             Varnode vn;
             riter = fd.beginLoc(spaceid);
             iterend = fd.endLoc(spaceid);
@@ -270,7 +270,7 @@ namespace Sla.DECCORE
         public void gatherHighs(Funcdata fd)
         {
             List<HighVariable> varvec = new List<HighVariable>();
-            VarnodeLocSet::const_iterator riter, iterend;
+            IEnumerator<Varnode> riter, iterend;
             Varnode vn;
             HighVariable high;
             riter = fd.beginLoc(spaceid);

@@ -90,7 +90,7 @@ namespace Sla.SLEIGH
                 if (printpiece[i][0] == '\n') {
                     int index = printpiece[i][1] - 'A';
                     index = handmap[index];
-                    printpiece[i][1] = 'A' + index;
+                    printpiece[i].ReplaceCharacter(1, (char)('A' + index));
                 }
             }
             operands = newops;
@@ -263,7 +263,9 @@ namespace Sla.SLEIGH
 
         public void addOperand(OperandSymbol sym)
         {
-            string operstring = "\n ";  // Indicater character for operand
+            // Indicater character for operand
+            string operstring = "\n ";
+            operstring.Capitalize
             operstring[1] = ('A' + operands.size()); // Encode index of operand
             operands.Add(sym);
             printpiece.Add(operstring); // Placeholder for operand's string
@@ -520,7 +522,7 @@ namespace Sla.SLEIGH
             IEnumerator<Element> iter = el.getChildren().begin();
             while (iter.MoveNext()) {
                 if (iter.Current.getName() == "oper") {
-                    uint id = uint.Parse(iter.Current.getAttributeValue("id"));
+                    id = uint.Parse(iter.Current.getAttributeValue("id"));
                     OperandSymbol sym = (OperandSymbol)trans.findSymbol(id);
                     operands.Add(sym);
                 }
@@ -529,7 +531,7 @@ namespace Sla.SLEIGH
                 else if (iter.Current.getName() == "opprint") {
                     int index = int.Parse(iter.Current.getAttributeValue("id"));
                     string operstring = "\n ";
-                    operstring[1] = ('A' + index);
+                    operstring.ReplaceCharacter(1, (char)('A' + index));
                     printpiece.Add(operstring);
                 }
                 else if (iter.Current.getName() == "context_op") {

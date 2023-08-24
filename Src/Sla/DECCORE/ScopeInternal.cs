@@ -723,7 +723,7 @@ namespace Sla.DECCORE
                     if (ct != (Datatype)null)
                         ct.printNameBase(s);
                     spacename = addr.getSpace().getName();
-                    spacename[0] = toupper(spacename[0]); // Capitalize space
+                    spacename = spacename.Capitalize(); // Capitalize space
                     s.Write(spacename);
                     string formatString = $"{{0:0X{2 * addr.getAddrSize()}}}";
                     s.Write(string.Format(formatString,
@@ -749,10 +749,10 @@ namespace Sla.DECCORE
                 if (ct != (Datatype)null)
                     ct.printNameBase(s);
                 string spacename = addr.getSpace().getName();
-                spacename[0] = toupper(spacename[0]); // Capitalize space
+                spacename = spacename.Capitalize(); // Capitalize space
                 s.Write(spacename);
-                s << hex << setfill('0') << setw(2 * addr.getAddrSize());
-                s << AddrSpace.byteToAddress(addr.getOffset(), addr.getSpace().getWordSize());
+                string formatString = $"0:X0{2 * addr.getAddrSize()}";
+                s.Write(formatString, AddrSpace.byteToAddress(addr.getOffset(), addr.getSpace().getWordSize()));
             }
             else if ((flags & Varnode.varnode_flags.indirect_creation) != 0) {
                 string regname;
@@ -1009,7 +1009,7 @@ namespace Sla.DECCORE
             sym.category = cat;
             sym.catindex = (ushort)ind;
             if (cat < 0) return;
-            while (category.size() <= sym.category)
+            while (category.size() <= (int)sym.category)
                 category.Add(new List<Symbol>());
             List<Symbol?> list = category[(int)sym.category];
             while (list.size() <= sym.catindex)

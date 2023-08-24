@@ -3,7 +3,7 @@
 /// Container holding the stack system for the renaming algorithm.  Every disjoint address
 /// range (indexed by its initial address) maps to its own Varnode stack.
 using VariableStack = System.Collections.Generic.Dictionary<Sla.CORE.Address, System.Collections.Generic.List<Sla.DECCORE.Varnode>>;
-using VarnodeLocSet = System.Collections.Generic.HashSet<Sla.DECCORE.Varnode>; // VarnodeCompareLocDef : A set of Varnodes sorted by location (then by definition)
+using VarnodeLocSet = System.Collections.Generic.SortedSet<Sla.DECCORE.Varnode>; // VarnodeCompareLocDef : A set of Varnodes sorted by location (then by definition)
 
 namespace Sla.DECCORE
 {
@@ -356,7 +356,7 @@ namespace Sla.DECCORE
         private void processJoins()
         {
             AddrSpace joinspace = fd.getArch().getJoinSpace();
-            VarnodeLocSet::const_iterator iter, enditer;
+            IEnumerator<Varnode> iter, enditer;
 
             iter = fd.beginLoc(joinspace);
             enditer = fd.endLoc(joinspace);
@@ -534,8 +534,8 @@ namespace Sla.DECCORE
             List<Varnode> input, List<Varnode> remove)
         {
             Varnode vn;
-            VarnodeLocSet::const_iterator viter = fd.beginLoc(addr);
-            VarnodeLocSet::const_iterator enditer;
+            IEnumerator<Varnode> viter = fd.beginLoc(addr);
+            IEnumerator<Varnode> enditer;
             ulong start = addr.getOffset();
             addr = addr + size;
             if (addr.getOffset() < start) {
@@ -1365,7 +1365,7 @@ namespace Sla.DECCORE
             //     // Check to see if a concatenation of inputs already exists
             //     // If it existed already it would be defined at fd.getAddress()
             //     // and it would have full size
-            //     VarnodeLocSet::const_iterator iter,enditer;
+            //     IEnumerator<Varnode> iter,enditer;
             //     iter = fd.beginLoc(size,addr,fd.getAddress());
             //     enditer = fd.endLoc(size,addr,fd.getAddress());
             //     if (iter != enditer) return; // It already exists
@@ -2363,7 +2363,7 @@ namespace Sla.DECCORE
         /// are identified, and phi-nodes are placed.
         public void heritage()
         {
-            VarnodeLocSet::const_iterator iter, enditer;
+            IEnumerator<Varnode> iter, enditer;
             HeritageInfo info;
             Varnode vn;
             bool needwarning;

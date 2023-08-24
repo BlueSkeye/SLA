@@ -1,6 +1,6 @@
 ﻿using Sla.CORE;
 
-using VarnodeLocSet = System.Collections.Generic.HashSet<Sla.DECCORE.Varnode>; // VarnodeCompareLocDef : A set of Varnodes sorted by location (then by definition)
+using VarnodeLocSet = System.Collections.Generic.SortedSet<Sla.DECCORE.Varnode>; // VarnodeCompareLocDef : A set of Varnodes sorted by location (then by definition)
 
 namespace Sla.DECCORE
 {
@@ -84,16 +84,16 @@ namespace Sla.DECCORE
         {
             Datatype ct;
             Varnode vn;
-            VarnodeLocSet::const_iterator iter;
             TypeFactory typegrp = data.getArch().types;
+            IEnumerator<Varnode> iter = data.beginLoc();
 
-            for (iter = data.beginLoc(); iter != data.endLoc(); ++iter) {
+            while (iter.MoveNext()) {
                 vn = iter.Current;
                 if (vn.isAnnotation()) continue;
                 if ((!vn.isWritten()) && (vn.hasNoDescend())) continue;
                 bool needsBlock = false;
-                SymbolEntry entry = vn.getSymbolEntry();
-                if (entry != (SymbolEntry)null
+                SymbolEntry? entry = vn.getSymbolEntry();
+                if (   entry != (SymbolEntry)null
                     && !vn.isTypeLock()
                     && entry.getSymbol().isTypeLocked())
                 {
@@ -123,7 +123,7 @@ namespace Sla.DECCORE
             bool change = false;
             Datatype ct;
             Varnode vn;
-            VarnodeLocSet::const_iterator iter = data.beginLoc();
+            IEnumerator<Varnode> iter = data.beginLoc();
 
             while (iter.MoveNext()) {
                 vn = iter.Current;
@@ -240,7 +240,7 @@ namespace Sla.DECCORE
             ct = ((TypePointer)ct).getPtrTo();
             if (ct.getMetatype() == type_metatype.TYPE_SPACEBASE) return;
             if (ct.getMetatype() == type_metatype.TYPE_UNKNOWN) return; // Don't bother propagating this
-            VarnodeLocSet::const_iterator iter, enditer;
+            IEnumerator<Varnode> iter, enditer;
             ulong off = addr.getOffset();
             TypeFactory typegrp = data.getArch().types;
             Address endaddr = addr + ct.getSize();
@@ -265,7 +265,7 @@ namespace Sla.DECCORE
                 if ((cursize != lastsize) || (curoff != lastoff)) {
                     lastoff = curoff;
                     lastsize = cursize;
-                    lastct = typegrp.getExactPiece(ct, curoff, cursize);
+                    lastct = typegrp.getExactPiece(ct, (int)curoff, cursize);
                 }
                 if (lastct == (Datatype)null) continue;
 
@@ -417,7 +417,6 @@ namespace Sla.DECCORE
             if (!data.hasTypeRecoveryStarted()) return 0;
             TypeFactory typegrp = data.getArch().types;
             Varnode vn;
-            VarnodeLocSet::const_iterator iter;
 
 #if TYPEPROP_DEBUG
             TextWriter s = new StringWriter();
@@ -434,15 +433,16 @@ namespace Sla.DECCORE
             }
             data.getScopeLocal().applyTypeRecommendations();
             buildLocaltypes(data);  // Set up initial types (based on local info)
-            for (iter = data.beginLoc(); iter != data.endLoc(); ++iter) {
+            IEnumerator<Varnode> iter = data.beginLoc();
+            while (iter.MoveNext()) {
                 vn = iter.Current;
                 if (vn.isAnnotation()) continue;
-                if ((!vn.isWritten()) && (vn.hasNoDescend())) continue;
+                if (!vn.isWritten() && vn.hasNoDescend()) continue;
                 propagateOneType(typegrp, vn);
             }
             propagateAcrossReturns(data);
             AddrSpace spcid = data.getScopeLocal().getSpaceId();
-            Varnode spcvn = data.findSpacebaseInput(spcid);
+            Varnode? spcvn = data.findSpacebaseInput(spcid);
             if (spcvn != (Varnode)null)
                 propagateSpacebaseRef(data, spcvn);
             if (writeBack(data)) {

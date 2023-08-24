@@ -1,5 +1,4 @@
 ﻿using Sla.CORE;
-using Sla.SLEIGH;
 
 namespace Sla.SLEIGH
 {
@@ -13,7 +12,14 @@ namespace Sla.SLEIGH
         {
         }
 
-        public ContextSymbol(string nm,ContextField pate, VarnodeSymbol v,uint l, uint h, bool flow);
+        public ContextSymbol(string nm,ContextField pate, VarnodeSymbol v,uint l, uint h, bool flow)
+            : base(nm, pate)
+        {
+            vn = v;
+            low = l;
+            high = h;
+            this.flow = flow;
+        }
 
         public VarnodeSymbol getVarnode() => vn;
 
@@ -30,7 +36,7 @@ namespace Sla.SLEIGH
             s.Write("<context_sym");
             base.saveXmlHeader(s);
             s.Write($" varnode=\"0x{vn.getId():X}\" low=\"{low}\" high=\"{high}\"");
-            a_v_b(s, "flow", flow);
+            Xml.a_v_b(s, "flow", flow);
             s.WriteLine();
             patval.saveXml(s);
             s.WriteLine("</context_sym>");
@@ -38,37 +44,22 @@ namespace Sla.SLEIGH
 
         public override void saveXmlHeader(TextWriter s)
         {
-            s << "<context_sym_head";
-            SleighSymbol::saveXmlHeader(s);
-            s << "/>\n";
+            s.Write("<context_sym_head");
+            base.saveXmlHeader(s);
+            s.WriteLine("/>");
         }
 
         public override void restoreXml(Element el, SleighBase trans)
         {
-            ValueSymbol::restoreXml(el, trans);
-            {
-                uint id;
-                istringstream s = new istringstream(el.getAttributeValue("varnode"));
-                s.unsetf(ios::dec | ios::hex | ios::oct);
-                s >> id;
-                vn = (VarnodeSymbol*)trans.findSymbol(id);
-            }
-            {
-                istringstream s = new istringstream(el.getAttributeValue("low"));
-                s.unsetf(ios::dec | ios::hex | ios::oct);
-                s >> low;
-            }
-            {
-                istringstream s = new istringstream(el.getAttributeValue("high"));
-                s.unsetf(ios::dec | ios::hex | ios::oct);
-                s >> high;
-            }
+            base.restoreXml(el, trans);
+            uint id = uint.Parse(el.getAttributeValue("varnode"));
+            vn = (VarnodeSymbol)trans.findSymbol(id);
+            low = uint.Parse(el.getAttributeValue("low"));
+            high = uint.Parse(el.getAttributeValue("high"));
             flow = true;
-            for (int i = el.getNumAttributes() - 1; i >= 0; --i)
-            {
-                if (el.getAttributeName(i) == "flow")
-                {
-                    flow = xml_readbool(el.getAttributeValue(i));
+            for (int i = el.getNumAttributes() - 1; i >= 0; --i) {
+                if (el.getAttributeName(i) == "flow") {
+                    flow = Xml.xml_readbool(el.getAttributeValue(i));
                     break;
                 }
             }

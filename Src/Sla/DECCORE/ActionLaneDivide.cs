@@ -1,6 +1,6 @@
 ﻿using Sla.CORE;
 
-using VarnodeLocSet = System.Collections.Generic.HashSet<Sla.DECCORE.Varnode>; // VarnodeCompareLocDef : A set of Varnodes sorted by location (then by definition)
+using VarnodeLocSet = System.Collections.Generic.SortedSet<Sla.DECCORE.Varnode>; // VarnodeCompareLocDef : A set of Varnodes sorted by location (then by definition)
 
 namespace Sla.DECCORE
 {
@@ -115,8 +115,8 @@ namespace Sla.DECCORE
                     LanedRegister lanedReg = iter.Current.Value;
                     Address addr = iter.Current.Key.getAddr();
                     uint sz = iter.Current.Key.size;
-                    VarnodeLocSet::const_iterator viter = data.beginLoc(sz, addr);
-                    VarnodeLocSet::const_iterator venditer = data.endLoc(sz, addr);
+                    IEnumerator<Varnode> viter = data.beginLoc(sz, addr);
+                    IEnumerator<Varnode> venditer = data.endLoc(sz, addr);
                     bool allVarnodesProcessed = true;
                     while (viter != venditer) {
                         Varnode vn = viter.Current;

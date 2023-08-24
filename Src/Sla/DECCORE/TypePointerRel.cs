@@ -232,7 +232,7 @@ namespace Sla.DECCORE
             if (off > 0) {
                 ulong curoff = (ulong)off;
                 do {
-                    @base = @base.getSubType(curoff, curoff);
+                    @base = @base.getSubType(curoff, out curoff);
                 } while (curoff != 0 && @base != (Datatype)null);
                 if (@base == (Datatype)null)
                     @base = typegrp.getBase(1, type_metatype.TYPE_UNKNOWN);

@@ -1,10 +1,4 @@
 ﻿using Sla.CORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.SLEIGH
 {
@@ -34,37 +28,22 @@ namespace Sla.SLEIGH
 
         public override void saveXml(TextWriter s)
         {
-            s << "<commit";
-            a_v_u(s, "id", sym.getId());
-            a_v_i(s, "num", num);
-            a_v_u(s, "mask", mask);
-            a_v_b(s, "flow", flow);
-            s << "/>\n";
+            s.Write("<commit");
+            Xml.a_v_u(s, "id", sym.getId());
+            Xml.a_v_i(s, "num", num);
+            Xml.a_v_u(s, "mask", mask);
+            Xml.a_v_b(s, "flow", flow);
+            s.WriteLine("/>");
         }
 
         public override void restoreXml(Element el, SleighBase trans)
         {
-            uint id;
-            {
-                istringstream s = new istringstream(el.getAttributeValue("id"));
-                s.unsetf(ios::dec | ios::hex | ios::oct);
-                s >> id;
-                sym = (TripleSymbol)trans.findSymbol(id);
-            }
-            {
-                istringstream s = new istringstream(el.getAttributeValue("num"));
-                s.unsetf(ios::dec | ios::hex | ios::oct);
-                s >> num;
-            }
-            {
-                istringstream s = new istringstream(el.getAttributeValue("mask"));
-                s.unsetf(ios::dec | ios::hex | ios::oct);
-                s >> mask;
-            }
-            if (el.getNumAttributes() == 4)
-                flow = xml_readbool(el.getAttributeValue("flow"));
-            else
-                flow = true;        // Default is to flow.  flow=true
+            uint id = uint.Parse(el.getAttributeValue("id"));
+            num = int.Parse(el.getAttributeValue("num"));
+            mask = uint.Parse(el.getAttributeValue("mask"));
+            // Default is to flow.  flow=true
+            flow = (el.getNumAttributes() != 4)
+                || Xml.xml_readbool(el.getAttributeValue("flow"));
         }
 
         public override void apply(ParserWalkerChange walker)

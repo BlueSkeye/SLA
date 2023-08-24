@@ -44,9 +44,9 @@ namespace Sla.SLEIGH
             long res = getContextBytes(walker, startbyte, endbyte);
             res >>= shift;
             if (signbit)
-                Globals.sign_extend(res, endbit - startbit);
+                Globals.sign_extend(ref res, endbit - startbit);
             else
-                Globals.zero_extend(res, endbit - startbit);
+                Globals.zero_extend(ref res, endbit - startbit);
             return res;
         }
 
@@ -63,7 +63,7 @@ namespace Sla.SLEIGH
         {
             long res=0;
             res = ~res;
-            Globals.zero_extend(res, (endbit - startbit));
+            Globals.zero_extend(ref res, (endbit - startbit));
             return res;
         }
 

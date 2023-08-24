@@ -1,13 +1,4 @@
-﻿using ghidra;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static ghidra.FlowBlock;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -31,14 +22,14 @@ namespace Sla.DECCORE
     internal class BlockIf : BlockGraph
     {
         /// The type of unstructured edge (if present)
-        private uint gototype;
+        private block_flags gototype;
         /// The target FlowBlock of the unstructured edge (if present)
         private FlowBlock? gototarget;
 
         /// Constructor
         public BlockIf()
         {
-            gototype = f_goto_goto;
+            gototype = block_flags.f_goto_goto;
             gototarget = null;
         }
 
@@ -49,17 +40,17 @@ namespace Sla.DECCORE
         }
 
         /// Get the target of the unstructured edge
-        public FlowBlock getGotoTarget() => gototarget;
+        public FlowBlock? getGotoTarget() => gototarget;
 
         /// Get the type of unstructured edge
-        public uint getGotoType() => gototype;
+        public block_flags getGotoType() => gototype;
 
         public override block_type getType() => block_type.t_if;
         
         public override void markUnstructured()
         {
-            @base.markUnstructured(); // Recurse
-            if ((gototarget != null) && (gototype == f_goto_goto)) {
+            base.markUnstructured(); // Recurse
+            if ((gototarget != null) && (gototype == block_flags.f_goto_goto)) {
                 markCopyBlock(gototarget, f_unstructured_targ);
             }
         }
@@ -72,14 +63,14 @@ namespace Sla.DECCORE
                 getBlock(i).scopeBreak(curexit, curloopexit);
             }
             if ((gototarget != null) && (gototarget.getIndex() == curloopexit)) {
-                gototype = f_break_goto;
+                gototype = block_flags.f_break_goto;
             }
         }
 
         public override void printHeader(TextWriter s)
         {
             s.Write("If block ");
-            @base.printHeader(s);
+            base.printHeader(s);
         }
 
         public override void emit(PrintLanguage lng) 
@@ -108,7 +99,7 @@ namespace Sla.DECCORE
             return true;
         }
 
-        public override FlowBlock getExitLeaf()
+        public override FlowBlock? getExitLeaf()
         {
             // In the special case of an ifgoto block, we do have an exit leaf
             if (getSize() == 1) {
@@ -137,7 +128,7 @@ namespace Sla.DECCORE
 
         public override void encodeBody(Encoder encoder)
         {
-            @base.encodeBody(encoder);
+            base.encodeBody(encoder);
             if (getSize() == 1) {
                 if (null == gototarget) {
                     throw new InvalidOperationException();
@@ -148,7 +139,7 @@ namespace Sla.DECCORE
                 encoder.openElement(ElementId.ELEM_TARGET);
                 encoder.writeSignedInteger(AttributeId.ATTRIB_INDEX, leaf.getIndex());
                 encoder.writeSignedInteger(AttributeId.ATTRIB_DEPTH, depth);
-                encoder.writeUnsignedInteger(AttributeId.ATTRIB_TYPE, gototype);
+                encoder.writeUnsignedInteger(AttributeId.ATTRIB_TYPE, (ulong)gototype);
                 encoder.closeElement(ElementId.ELEM_TARGET);
             }
         }

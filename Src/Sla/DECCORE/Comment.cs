@@ -1,12 +1,4 @@
-﻿using ghidra;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.PortableExecutable;
-using System.Runtime.Intrinsics.X86;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -56,7 +48,7 @@ namespace Sla.DECCORE
         /// \param ad is the Address of the instruction associated with the comment
         /// \param uq is used internally to sub-sort comments at the same address
         /// \param txt is the body of the comment
-        public Comment(uint tp, Address fad, Address ad, int uq, string txt)
+        public Comment(comment_type tp, Address fad, Address ad, int uq, string txt)
         {
             type = tp;
             uniq = uq;
@@ -136,11 +128,11 @@ namespace Sla.DECCORE
         {
             emitted = false;
             type = 0;
-            uint elemId = decoder.openElement(ElementId.ELEM_COMMENT);
+            ElementId elemId = decoder.openElement(ElementId.ELEM_COMMENT);
             type = Comment.encodeCommentType(decoder.readString(AttributeId.ATTRIB_TYPE));
             funcaddr = Address.decode(decoder);
             addr = Address.decode(decoder);
-            uint subId = decoder.peekElement();
+            ElementId subId = decoder.peekElement();
             if (subId != 0) {
                 decoder.openElement();
                 text = decoder.readString(AttributeId.ATTRIB_CONTENT);
@@ -154,20 +146,19 @@ namespace Sla.DECCORE
         /// \return the enumerated property type
         public static comment_type encodeCommentType(string name)
         {
-            switch (name)
-            {
+            switch (name) {
                 case "user1":
-                    return Comment.comment_type.user1;
+                    return comment_type.user1;
                 case "user2":
-                    return Comment.comment_type.user2;
+                    return comment_type.user2;
                 case "user3":
-                    return Comment.comment_type.user3;
+                    return comment_type.user3;
                 case "header":
-                    return Comment.comment_type.header;
+                    return comment_type.header;
                 case "warning":
-                    return Comment.comment_type.warning;
+                    return comment_type.warning;
                 case "warningheader":
-                    return Comment.comment_type.warningheader;
+                    return comment_type.warningheader;
                 default:
                     throw new LowlevelError($"Unknown comment type: {name}");
             }

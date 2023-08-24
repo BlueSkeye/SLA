@@ -1,6 +1,6 @@
 ﻿using Sla.CORE;
 
-using VarnodeLocSet = System.Collections.Generic.HashSet<Sla.DECCORE.Varnode>; // VarnodeCompareLocDef : A set of Varnodes sorted by location (then by definition)
+using VarnodeLocSet = System.Collections.Generic.SortedSet<Sla.DECCORE.Varnode>; // VarnodeCompareLocDef : A set of Varnodes sorted by location (then by definition)
 
 namespace Sla.DECCORE
 {
@@ -472,17 +472,17 @@ namespace Sla.DECCORE
             Varnode vn;
             ulong returnConsume;
             List<Varnode> worklist;
-            VarnodeLocSet::const_iterator viter, endviter;
             AddrSpaceManager manage = data.getArch();
             AddrSpace spc;
 
             // Clear consume flags
-            for (viter = data.beginLoc(); viter != data.endLoc(); ++viter) {
-                vn = *viter;
+            IEnumerator<Varnode> viter = data.beginLoc();
+            while (viter.MoveNext()) {
+                vn = viter.Current;
                 vn.clearConsumeList();
                 vn.clearConsumeVacuous();
                 vn.setConsume(0);
-                if (vn.isAddrForce() && (!vn.isDirectWrite()))
+                if (vn.isAddrForce() && !vn.isDirectWrite())
                     vn.clearAddrForce();
             }
 

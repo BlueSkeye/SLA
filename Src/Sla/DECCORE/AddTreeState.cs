@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -48,11 +41,11 @@ namespace Sla.DECCORE
         /// Number of bytes being double counted
         private ulong correct;
         /// Varnodes which are multiples of size
-        private List<Varnode> multiple;
+        private List<Varnode> multiple = new List<Varnode>();
         /// Associated constant multiple
-        private List<long> coeff;
+        private List<long> coeff = new List<long>();
         /// Varnodes which are not multiples
-        private List<Varnode> nonmult;
+        private List<Varnode> nonmult = new List<Varnode>();
         /// A OpCode.CPUI_INT_MULT op that needs to be distributed
         private PcodeOp distributeOp;
         /// Sum of multiple constants
@@ -80,21 +73,17 @@ namespace Sla.DECCORE
         private uint findArrayHint()
         {
             uint res = 0;
-            for (int i = 0; i < nonmult.size(); ++i)
-            {
+            for (int i = 0; i < nonmult.size(); ++i) {
                 Varnode vn = nonmult[i];
                 if (vn.isConstant()) continue;
                 uint vncoeff = 1;
-                if (vn.isWritten())
-                {
+                if (vn.isWritten()) {
                     PcodeOp op = vn.getDef();
-                    if (op.code() == OpCode.CPUI_INT_MULT)
-                    {
+                    if (op.code() == OpCode.CPUI_INT_MULT) {
                         Varnode vnconst = op.getIn(1);
-                        if (vnconst.isConstant())
-                        {
-                            long sval = vnconst.getOffset();
-                            Globals.sign_extend(sval, vnconst.getSize() * 8 - 1);
+                        if (vnconst.isConstant()) {
+                            long sval = (long)vnconst.getOffset();
+                            Globals.sign_extend(ref sval, vnconst.getSize() * 8 - 1);
                             vncoeff = (sval < 0) ? (uint) - sval : (uint)sval;
                         }
                     }
@@ -116,53 +105,49 @@ namespace Sla.DECCORE
         /// \param arrayHint if non-zero indicates array access, where the value is the element size
         /// \param newoff is used to pass back the actual offset of the selected component
         /// \return \b true if a good component match was found
-        private bool hasMatchingSubType(ulong off, uint arrayHint, ulong newoff)
+        private bool hasMatchingSubType(ulong off, uint arrayHint, out ulong newoff)
         {
             if (arrayHint == 0)
-                return (baseType.getSubType(off, newoff) != (Datatype)null);
+                return (baseType.getSubType(off, out newoff) != (Datatype)null);
 
             int elSizeBefore;
             ulong offBefore;
-            Datatype* typeBefore = baseType.nearestArrayedComponentBackward(off, &offBefore, &elSizeBefore);
-            if (typeBefore != (Datatype)null)
-            {
-                if (arrayHint == 1 || elSizeBefore == arrayHint)
-                {
-                    int sizeAddr = AddrSpace::byteToAddressInt(typeBefore.getSize(), ct.getWordSize());
-                    if (offBefore < sizeAddr)
-                    {
+            Datatype typeBefore = baseType.nearestArrayedComponentBackward(off, out offBefore,
+                out elSizeBefore);
+            if (typeBefore != (Datatype)null) {
+                if (arrayHint == 1 || elSizeBefore == arrayHint) {
+                    int sizeAddr = AddrSpace.byteToAddressInt(typeBefore.getSize(), ct.getWordSize());
+                    if (offBefore < (uint)sizeAddr) {
                         // If the offset is \e inside a component with a compatible array, return it.
-                        *newoff = offBefore;
+                        newoff = offBefore;
                         return true;
                     }
                 }
             }
             int elSizeAfter;
             ulong offAfter;
-            Datatype* typeAfter = baseType.nearestArrayedComponentForward(off, &offAfter, &elSizeAfter);
+            Datatype typeAfter = baseType.nearestArrayedComponentForward(off, out offAfter,
+                out elSizeAfter);
             if (typeBefore == (Datatype)null && typeAfter == (Datatype)null)
-                return (baseType.getSubType(off, newoff) != (Datatype)null);
-            if (typeBefore == (Datatype)null)
-            {
-                *newoff = offAfter;
+                return (baseType.getSubType(off, out newoff) != (Datatype)null);
+            if (typeBefore == (Datatype)null) {
+                newoff = offAfter;
                 return true;
             }
-            if (typeAfter == (Datatype)null)
-            {
-                *newoff = offBefore;
+            if (typeAfter == (Datatype)null) {
+                newoff = offBefore;
                 return true;
             }
 
             ulong distBefore = offBefore;
             ulong distAfter = -offAfter;
-            if (arrayHint != 1)
-            {
+            if (arrayHint != 1) {
                 if (elSizeBefore != arrayHint)
                     distBefore += 0x1000;
                 if (elSizeAfter != arrayHint)
                     distAfter += 0x1000;
             }
-            *newoff = (distAfter < distBefore) ? offAfter : offBefore;
+            newoff = (distAfter < distBefore) ? offAfter : offBefore;
             return true;
         }
 
@@ -182,28 +167,22 @@ namespace Sla.DECCORE
             Varnode vnterm = op.getIn(0);
             ulong val;
 
-            if (vnterm.isFree())
-            {
+            if (vnterm.isFree()) {
                 valid = false;
                 return false;
             }
-            if (vnconst.isConstant())
-            {
+            if (vnconst.isConstant()) {
                 val = (vnconst.getOffset() * treeCoeff) & ptrmask;
                 long sval = (long)val;
-                Globals.sign_extend(sval, vn.getSize() * 8 - 1);
+                Globals.sign_extend(ref sval, vn.getSize() * 8 - 1);
                 long rem = (size == 0) ? sval : sval % size;
-                if (rem != 0)
-                {
-                    if ((val > size) && (size != 0))
-                    {
+                if (rem != 0) {
+                    if ((val > size) && (size != 0)) {
                         valid = false; // Size is too big: pointer type must be wrong
                         return false;
                     }
-                    if (!preventDistribution)
-                    {
-                        if (vnterm.isWritten() && vnterm.getDef().code() == OpCode.CPUI_INT_ADD)
-                        {
+                    if (!preventDistribution) {
+                        if (vnterm.isWritten() && vnterm.getDef().code() == OpCode.CPUI_INT_ADD) {
                             if (distributeOp == (PcodeOp)null)
                                 distributeOp = op;
                             return spanAddTree(vnterm.getDef(), val);
@@ -211,8 +190,7 @@ namespace Sla.DECCORE
                     }
                     return true;
                 }
-                else
-                {
+                else {
                     if (treeCoeff != 1)
                         isDistributeUsed = true;
                     multiple.Add(vnterm);
@@ -235,16 +213,14 @@ namespace Sla.DECCORE
             PcodeOp def;
 
             if (vn == ptr) return false;
-            if (vn.isConstant())
-            {
+            if (vn.isConstant()) {
                 val = vn.getOffset() * treeCoeff;
                 long sval = (long)val;
-                Globals.sign_extend(sval, vn.getSize() * 8 - 1);
+                Globals.sign_extend(ref sval, vn.getSize() * 8 - 1);
                 long rem = (size == 0) ? sval : (sval % size);
-                if (rem != 0)
-                {       // constant is not multiple of size
-                    if (treeCoeff != 1)
-                    {
+                if (rem != 0) {
+                    // constant is not multiple of size
+                    if (treeCoeff != 1) {
                         // An offset "into" the base data-type makes little sense unless is has subcomponents
                         if (baseType.getMetatype() == type_metatype.TYPE_ARRAY || baseType.getMetatype() == type_metatype.TYPE_STRUCT)
                             isDistributeUsed = true;
@@ -259,21 +235,20 @@ namespace Sla.DECCORE
                 multsum &= ptrmask;
                 return false;
             }
-            if (vn.isWritten())
-            {
+            if (vn.isWritten()) {
                 def = vn.getDef();
                 if (def.code() == OpCode.CPUI_INT_ADD) // Recurse
                     return spanAddTree(def, treeCoeff);
-                if (def.code() == OpCode.CPUI_COPY)
-                { // Not finished reducing yet
+                if (def.code() == OpCode.CPUI_COPY) {
+                    // Not finished reducing yet
                     valid = false;
                     return false;
                 }
-                if (def.code() == OpCode.CPUI_INT_MULT)   // Check for constant coeff indicating size
+                if (def.code() == OpCode.CPUI_INT_MULT)
+                    // Check for constant coeff indicating size
                     return checkMultTerm(vn, def, treeCoeff);
             }
-            else if (vn.isFree())
-            {
+            else if (vn.isFree()) {
                 valid = false;
                 return false;
             }
@@ -301,9 +276,8 @@ namespace Sla.DECCORE
             two_is_non = checkTerm(op.getIn(1), treeCoeff);
             if (!valid) return false;
 
-            if (pRelType != (TypePointerRel*)0) {
-                if (multsum != 0 || nonmultsum >= size || !multiple.empty())
-                {
+            if (pRelType != (TypePointerRel)null) {
+                if (multsum != 0 || nonmultsum >= size || !multiple.empty()) {
                     valid = false;
                     return false;
                 }
@@ -321,22 +295,20 @@ namespace Sla.DECCORE
         /// data-type is being calculated, which will result in a OpCode.CPUI_PTRSUB being generated.
         private void calcSubtype()
         {
-            if (size == 0 || nonmultsum < size)
+            if (size == 0 || nonmultsum < (uint)size)
                 offset = nonmultsum;
-            else
-            {
+            else {
                 // For a sum that falls completely outside the data-type, there is presumably some
                 // type of constant term added to an array index either at the current level or lower.
                 // If we knew here whether an array of the baseType was possible we could make a slightly
                 // better decision.
                 long snonmult = (long)nonmultsum;
-                Globals.sign_extend(snonmult, ptrsize * 8 - 1);
+                Globals.sign_extend(ref snonmult, ptrsize * 8 - 1);
                 snonmult = snonmult % size;
                 if (snonmult >= 0)
                     // We assume the sum is big enough it represents an array index at this level
                     offset = (ulong)snonmult;
-                else
-                {
+                else {
                     // For a negative sum, if the baseType is a structure and there is array hints,
                     // we assume the sum is an array index at a lower level
                     if (baseType.getMetatype() == type_metatype.TYPE_STRUCT && findArrayHint() != 0)
@@ -348,23 +320,22 @@ namespace Sla.DECCORE
             correct = nonmultsum - offset;
             nonmultsum = offset;
             multsum = (multsum + correct) & ptrmask;    // Some extra multiples of size
-            if (nonmult.empty())
-            {
-                if ((multsum == 0) && multiple.empty())
-                {   // Is there anything at all
+            if (nonmult.empty()) {
+                if ((multsum == 0) && multiple.empty()) {
+                    // Is there anything at all
                     valid = false;
                     return;
                 }
-                isSubtype = false;      // There are no offsets INTO the pointer
+                // There are no offsets INTO the pointer
+                isSubtype = false;
             }
-            else if (baseType.getMetatype() == type_metatype.TYPE_SPACEBASE)
-            {
-                ulong nonmultbytes = AddrSpace.addressToByte(nonmultsum, ct.getWordSize()); // Convert to bytes
+            else if (baseType.getMetatype() == type_metatype.TYPE_SPACEBASE) {
+                // Convert to bytes
+                ulong nonmultbytes = AddrSpace.addressToByte(nonmultsum, ct.getWordSize());
                 ulong extra;
                 uint arrayHint = findArrayHint();
                 // Get offset into mapped variable
-                if (!hasMatchingSubType(nonmultbytes, arrayHint, &extra))
-                {
+                if (!hasMatchingSubType(nonmultbytes, arrayHint, extra)) {
                     valid = false;      // Cannot find mapped variable but nonmult is non-empty
                     return;
                 }
@@ -372,16 +343,14 @@ namespace Sla.DECCORE
                 offset = (nonmultsum - extra) & ptrmask;
                 isSubtype = true;
             }
-            else if (baseType.getMetatype() == type_metatype.TYPE_STRUCT)
-            {
+            else if (baseType.getMetatype() == type_metatype.TYPE_STRUCT) {
                 ulong nonmultbytes = AddrSpace.addressToByte(nonmultsum, ct.getWordSize()); // Convert to bytes
                 ulong extra;
                 uint arrayHint = findArrayHint();
                 // Get offset into field in structure
-                if (!hasMatchingSubType(nonmultbytes, arrayHint, &extra))
-                {
-                    if (nonmultbytes >= baseType.getSize())
-                    {   // Compare as bytes! not address units
+                if (!hasMatchingSubType(nonmultbytes, arrayHint, extra)) {
+                    if (nonmultbytes >= baseType.getSize()) {
+                        // Compare as bytes! not address units
                         valid = false; // Out of structure's bounds
                         return;
                     }
@@ -389,24 +358,21 @@ namespace Sla.DECCORE
                 }
                 extra = AddrSpace.byteToAddress(extra, ct.getWordSize()); // Convert back to address units
                 offset = (nonmultsum - extra) & ptrmask;
-                if (pRelType != (TypePointerRel*)0 && offset == pRelType.getPointerOffset())
-                {
+                if (pRelType != (TypePointerRel)null && offset == pRelType.getPointerOffset()) {
                     // offset falls within basic ptrto
-                    if (!pRelType.evaluateThruParent(0))
-                    {   // If we are not representing offset 0 through parent
+                    if (!pRelType.evaluateThruParent(0)) {
+                        // If we are not representing offset 0 through parent
                         valid = false;              // Use basic (alternate) form
                         return;
                     }
                 }
                 isSubtype = true;
             }
-            else if (baseType.getMetatype() == type_metatype.TYPE_ARRAY)
-            {
+            else if (baseType.getMetatype() == type_metatype.TYPE_ARRAY) {
                 isSubtype = true;
                 offset = 0;
             }
-            else
-            {
+            else {
                 // No struct or array, but nonmult is non-empty
                 valid = false;          // There is substructure we don't know about
             }
@@ -419,30 +385,27 @@ namespace Sla.DECCORE
         /// \return the output Varnode of the multiple tree or null
         private Varnode buildMultiples()
         {
-            Varnode resNode;
+            Varnode? resNode;
 
             // Be sure to preserve sign in division below
             // Calc size-relative constant PTR addition
             long smultsum = (long)multsum;
-            Globals.sign_extend(smultsum, ptrsize * 8 - 1);
-            ulong constCoeff = (size == 0) ? (ulong)0 : (smultsum / size) & ptrmask;
+            Globals.sign_extend(ref smultsum, ptrsize * 8 - 1);
+            ulong constCoeff = (size == 0) ? (ulong)0 : (ulong)(smultsum / size) & ptrmask;
             if (constCoeff == 0)
                 resNode = (Varnode)null;
             else
                 resNode = data.newConstant(ptrsize, constCoeff);
-            for (int i = 0; i < multiple.size(); ++i)
-            {
-                ulong finalCoeff = (size == 0) ? (ulong)0 : (coeff[i] / size) & ptrmask;
+            for (int i = 0; i < multiple.size(); ++i) {
+                ulong finalCoeff = (size == 0) ? (ulong)0 : (ulong)(coeff[i] / size) & ptrmask;
                 Varnode vn = multiple[i];
-                if (finalCoeff != 1)
-                {
+                if (finalCoeff != 1) {
                     PcodeOp op = data.newOpBefore(baseOp, OpCode.CPUI_INT_MULT, vn, data.newConstant(ptrsize, finalCoeff));
                     vn = op.getOut();
                 }
                 if (resNode == (Varnode)null)
                     resNode = vn;
-                else
-                {
+                else {
                     PcodeOp op = data.newOpBefore(baseOp, OpCode.CPUI_INT_ADD, vn, resNode);
                     resNode = op.getOut();
                 }
@@ -459,30 +422,25 @@ namespace Sla.DECCORE
         {
             correct = correct + offset; // Total correction that needs to be made
             Varnode resNode = (Varnode)null;
-            for (int i = 0; i < nonmult.size(); ++i)
-            {
+            for (int i = 0; i < nonmult.size(); ++i) {
                 Varnode vn = nonmult[i];
-                if (vn.isConstant())
-                {
+                if (vn.isConstant()) {
                     correct -= vn.getOffset();
                     continue;
                 }
                 if (resNode == (Varnode)null)
                     resNode = vn;
-                else
-                {
+                else {
                     PcodeOp op = data.newOpBefore(baseOp, OpCode.CPUI_INT_ADD, vn, resNode);
                     resNode = op.getOut();
                 }
             }
             correct &= ptrmask;
-            if (correct != 0)
-            {
+            if (correct != 0) {
                 Varnode vn = data.newConstant(ptrsize, Globals.uintb_negate(correct - 1, ptrsize));
                 if (resNode == (Varnode)null)
                     resNode = vn;
-                else
-                {
+                else {
                     PcodeOp op = data.newOpBefore(baseOp, OpCode.CPUI_INT_ADD, vn, resNode);
                     resNode = op.getOut();
                 }
@@ -502,7 +460,7 @@ namespace Sla.DECCORE
                 return false;   // Don't transform at all
             if (baseOp.getOut().getTypeDefFacing().getMetatype() != type_metatype.TYPE_PTR)    // Make sure pointer propagates thru INT_ADD
                 return false;
-            List<Varnode> newparams;
+            List<Varnode> newparams = new List<Varnode>();
             int slot = baseOp.getSlot(ptr);
             newparams.Add(ptr);
             newparams.Add(baseOp.getIn(1 - slot));
@@ -519,9 +477,9 @@ namespace Sla.DECCORE
         /// data-type offset has been calculated, and preserving and remaining terms.
         private void buildTree()
         {
-            if (pRelType != (TypePointerRel*)0) {
-                int ptrOff = ((TypePointerRel*)ct).getPointerOffset();
-                offset -= ptrOff;
+            if (pRelType != (TypePointerRel)null) {
+                int ptrOff = ((TypePointerRel)ct).getPointerOffset();
+                offset -= (uint)ptrOff;
                 offset &= ptrmask;
             }
             Varnode multNode = buildMultiples();
@@ -529,9 +487,9 @@ namespace Sla.DECCORE
             PcodeOp newop = (PcodeOp)null;
 
             // Create PTRADD portion of operation
-            if (multNode != (Varnode)null)
-            {
-                newop = data.newOpBefore(baseOp, OpCode.CPUI_PTRADD, ptr, multNode, data.newConstant(ptrsize, size));
+            if (multNode != (Varnode)null) {
+                newop = data.newOpBefore(baseOp, OpCode.CPUI_PTRADD, ptr, multNode, data.newConstant(ptrsize,
+                    (uint)size));
                 if (ptr.getType().needsResolution())
                     data.inheritResolution(ptr.getType(), newop, 0, baseOp, baseSlot);
                 multNode = newop.getOut();
@@ -540,8 +498,7 @@ namespace Sla.DECCORE
                 multNode = ptr;     // Zero multiple terms
 
             // Create PTRSUB portion of operation
-            if (isSubtype)
-            {
+            if (isSubtype) {
                 newop = data.newOpBefore(baseOp, OpCode.CPUI_PTRSUB, multNode, data.newConstant(ptrsize, offset));
                 if (multNode.getType().needsResolution())
                     data.inheritResolution(multNode.getType(), newop, 0, baseOp, baseSlot);
@@ -554,8 +511,7 @@ namespace Sla.DECCORE
             if (extraNode != (Varnode)null)
                 newop = data.newOpBefore(baseOp, OpCode.CPUI_INT_ADD, multNode, extraNode);
 
-            if (newop == (PcodeOp)null)
-            {
+            if (newop == (PcodeOp)null) {
                 // This should never happen
                 data.warning("ptrarith problems", baseOp.getAddr());
                 return;
@@ -569,13 +525,13 @@ namespace Sla.DECCORE
         {
             multsum = 0;
             nonmultsum = 0;
-            if (pRelType != (TypePointerRel*)0) {
-                nonmultsum = ((TypePointerRel*)ct).getPointerOffset();
+            if (pRelType != (TypePointerRel)null) {
+                nonmultsum = (ulong)((TypePointerRel)ct).getPointerOffset();
                 nonmultsum &= ptrmask;
             }
-            multiple.clear();
-            coeff.clear();
-            nonmult.clear();
+            multiple.Clear();
+            coeff.Clear();
+            nonmult.Clear();
             correct = 0;
             offset = 0;
             valid = true;
@@ -593,22 +549,21 @@ namespace Sla.DECCORE
             ptr = op.getIn(slot);
             ct = (TypePointer)ptr.getTypeReadFacing(op);
             ptrsize = ptr.getSize();
-            ptrmask = Globals.calc_mask(ptrsize);
+            ptrmask = Globals.calc_mask((uint)ptrsize);
             baseType = ct.getPtrTo();
             multsum = 0;        // Sums start out as zero
             nonmultsum = 0;
-            pRelType = (TypePointerRel*)0;
-            if (ct.isFormalPointerRel())
-            {
-                pRelType = (TypePointerRel*)ct;
+            pRelType = (TypePointerRel)null;
+            if (ct.isFormalPointerRel()) {
+                pRelType = (TypePointerRel)ct;
                 baseType = pRelType.getParent();
-                nonmultsum = pRelType.getPointerOffset();
+                nonmultsum = (ulong)pRelType.getPointerOffset();
                 nonmultsum &= ptrmask;
             }
             if (baseType.isVariableLength())
                 size = 0;       // Open-ended size being pointed to, there will be no "multiples" component
             else
-                size = AddrSpace::byteToAddressInt(baseType.getSize(), ct.getWordSize());
+                size = AddrSpace.byteToAddressInt(baseType.getSize(), ct.getWordSize());
             correct = 0;
             offset = 0;
             valid = true;       // Valid until proven otherwise
@@ -628,18 +583,15 @@ namespace Sla.DECCORE
                 return buildDegenerate();
             spanAddTree(baseOp, 1);
             if (!valid) return false;       // Were there any show stoppers
-            if (distributeOp != (PcodeOp)null && !isDistributeUsed)
-            {
+            if (distributeOp != (PcodeOp)null && !isDistributeUsed) {
                 clear();
                 preventDistribution = true;
                 spanAddTree(baseOp, 1);
             }
             calcSubtype();
             if (!valid) return false;
-            while (valid && distributeOp != (PcodeOp)null)
-            {
-                if (!data.distributeIntMultAdd(distributeOp))
-                {
+            while (valid && distributeOp != (PcodeOp)null) {
+                if (!data.distributeIntMultAdd(distributeOp)) {
                     valid = false;
                     break;
                 }
@@ -648,16 +600,14 @@ namespace Sla.DECCORE
                 data.collapseIntMultMult(distributeOp.getIn(1));
                 clear();
                 spanAddTree(baseOp, 1);
-                if (distributeOp != (PcodeOp)null && !isDistributeUsed)
-                {
+                if (distributeOp != (PcodeOp)null && !isDistributeUsed) {
                     clear();
                     preventDistribution = true;
                     spanAddTree(baseOp, 1);
                 }
                 calcSubtype();
             }
-            if (!valid)
-            {
+            if (!valid) {
                 // Distribution transforms were made
                 TextWriter s = new StringWriter();
                 s.Write("Problems distributing in pointer arithmetic at ");
@@ -676,15 +626,16 @@ namespace Sla.DECCORE
         /// \return \b true if there is a second version that can still be analyzed
         public bool initAlternateForm()
         {
-            if (pRelType == (TypePointerRel*)0)
+            if (pRelType == (TypePointerRel)null)
                 return false;
 
-            pRelType = (TypePointerRel*)0;
+            pRelType = (TypePointerRel)null;
             baseType = ct.getPtrTo();
             if (baseType.isVariableLength())
-                size = 0;       // Open-ended size being pointed to, there will be no "multiples" component
+                // Open-ended size being pointed to, there will be no "multiples" component
+                size = 0;
             else
-                size = AddrSpace::byteToAddressInt(baseType.getSize(), ct.getWordSize());
+                size = AddrSpace.byteToAddressInt(baseType.getSize(), ct.getWordSize());
             int unitsize = AddrSpace.addressToByteInt(1, ct.getWordSize());
             isDegenerate = (baseType.getSize() <= unitsize && baseType.getSize() > 0);
             preventDistribution = false;

@@ -1,11 +1,5 @@
 ﻿using Sla.CORE;
 using Sla.SLACOMP;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla
 {
@@ -269,7 +263,7 @@ namespace Sla
         }
 
         private static unsafe void YY_SYMBOL_PRINT(string Title, int Type,
-            XMLSTYPE* Value)
+            Xml.XMLSTYPE Value)
         {
             if (!yydebug) {
                 return;
@@ -426,7 +420,7 @@ namespace Sla
                 }
                 else {
                     yytoken = YYTRANSLATE(yychar);
-                    YY_SYMBOL_PRINT("Next token is", yytoken, pyylval);
+                    YY_SYMBOL_PRINT("Next token is", yytoken, *pyylval);
                 }
 
                 /* If the proper action on seeing token YYTOKEN is to reduce or to
@@ -450,7 +444,7 @@ namespace Sla
                 }
 
                 /* Shift the lookahead token.  */
-                YY_SYMBOL_PRINT("Shifting", yytoken, pyylval);
+                YY_SYMBOL_PRINT("Shifting", yytoken, *pyylval);
 
                 /* Discard the shifted token.  */
                 yychar = YYEMPTY;
@@ -697,7 +691,7 @@ namespace Sla
                     case of YYERROR or YYBACKUP, subsequent parser actions might lead
                     to an incorrect destructor call or verbose syntax error message
                     before the lookahead is translated.  */
-                YY_SYMBOL_PRINT(". $$ =", yyr1[yyn], pyyval);
+                YY_SYMBOL_PRINT(". $$ =", yyr1[yyn], *pyyval);
 
                 YYPOPSTACK(yylen);
                 yylen = 0;
@@ -773,7 +767,7 @@ namespace Sla
                         }
                     }
                     else {
-                        yydestruct("Error: discarding", yytoken, pyylval);
+                        yydestruct("Error: discarding", yytoken, *pyylval);
                         yychar = YYEMPTY;
                     }
                 }
@@ -821,7 +815,7 @@ namespace Sla
                     if (yyssp == yyss) {
                         goto yyabortlab;
                     }
-                    yydestruct("Error: popping", yystos[yystate], yyvsp);
+                    yydestruct("Error: popping", yystos[yystate], *yyvsp);
                     YYPOPSTACK(1);
                     yystate = *yyssp;
                     YY_STACK_PRINT(yyss, yyssp);
@@ -831,7 +825,7 @@ namespace Sla
                 // YY_IGNORE_MAYBE_UNINITIALIZED_END
 
                 /* Shift the error token.  */
-                YY_SYMBOL_PRINT("Shifting", yystos[yyn], yyvsp);
+                YY_SYMBOL_PRINT("Shifting", yystos[yyn], *yyvsp);
 
                 yystate = yyn;
                 goto yynewstate;
@@ -865,14 +859,14 @@ namespace Sla
                     /* Make sure we have latest lookahead translation.  See comments at
                         user semantic actions for why this is necessary.  */
                     yytoken = YYTRANSLATE(yychar);
-                    yydestruct("Cleanup: discarding lookahead", yytoken, pyylval);
+                    yydestruct("Cleanup: discarding lookahead", yytoken, *pyylval);
                 }
                 /* Do not reclaim the symbols of the rule whose action triggered
                     this YYABORT or YYACCEPT.  */
                 YYPOPSTACK(yylen);
                 YY_STACK_PRINT(yyss, yyssp);
                 while (yyssp != yyss) {
-                    yydestruct("Cleanup: popping", yystos[*yyssp], yyvsp);
+                    yydestruct("Cleanup: popping", yystos[*yyssp], *yyvsp);
                     YYPOPSTACK(1);
                 }
 #if !yyoverflow
@@ -1039,7 +1033,7 @@ namespace Sla
         | Print this symbol on YYOUTPUT.  |
         `--------------------------------*/
         private static unsafe void yy_symbol_print(TextWriter yyoutput, int yytype,
-            XMLSTYPE* yyvaluep)
+            Xml.XMLSTYPE yyvaluep)
         {
 #if XMLDEBUG
             YYFPRINTF(yyoutput, 

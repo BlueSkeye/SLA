@@ -42,7 +42,7 @@ namespace Sla.EXTRA
         /// \param decoder is the stream decoder
         public void decode(Sla.CORE.Decoder decoder)
         {
-            uint elemId = decoder.openElement(ElementId.ELEM_LANGUAGE);
+            ElementId elemId = decoder.openElement(ElementId.ELEM_LANGUAGE);
             processor = decoder.readString(AttributeId.ATTRIB_PROCESSOR);
             isbigendian = (decoder.readString(AttributeId.ATTRIB_ENDIAN) == "big");
             size = (int)decoder.readSignedInteger(AttributeId.ATTRIB_SIZE);
@@ -59,7 +59,7 @@ namespace Sla.EXTRA
                     deprecated = decoder.readBool();
             }
             while(true) {
-                uint subId = decoder.peekElement();
+                ElementId subId = decoder.peekElement();
                 if (subId == 0) break;
                 if (subId == ElementId.ELEM_DESCRIPTION) {
                     decoder.openElement();

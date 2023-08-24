@@ -104,9 +104,9 @@ namespace Sla.DECCORE
         /// \return the matching scope
         private Scope parseParentTag(Decoder decoder)
         {
-            uint elemId = decoder.openElement(ElementId.ELEM_PARENT);
+            ElementId elemId = decoder.openElement(ElementId.ELEM_PARENT);
             ulong id = decoder.readUnsignedInteger(AttributeId.ATTRIB_ID);
-            Scope* res = resolveScope(id);
+            Scope? res = resolveScope(id);
             if (res == (Scope)null)
                 throw new CORE.LowlevelError("Could not find scope matching id");
             decoder.closeElement(elemId);
@@ -415,7 +415,8 @@ namespace Sla.DECCORE
             flagbase.split(addr1);
             // WARNING : The returned enumerator is already set on the first relevant record.
             // DO NOT use MoveNext before reading
-            IEnumerator<KeyValuePair<Address, uint>> aiter = flagbase.begin(addr1) ?? throw new BugException();
+            IEnumerator<KeyValuePair<Address, Varnode.varnode_flags>> aiter =
+                flagbase.begin(addr1) ?? throw new BugException();
             IEnumerator<KeyValuePair<Address, uint>>? biter;
 
             if (!addr2.isInvalid()) {
@@ -508,7 +509,7 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         public void decode(Sla.CORE.Decoder decoder)
         {
-            uint elemId = decoder.openElement(ElementId.ELEM_DB);
+            ElementId elemId = decoder.openElement(ElementId.ELEM_DB);
             idByNameHash = false;       // Default
             while(true) {
                 AttributeId attribId = decoder.getNextAttributeId();
@@ -517,7 +518,7 @@ namespace Sla.DECCORE
                     idByNameHash = decoder.readBool();
             }
             while(true) {
-                uint subId = decoder.peekElement();
+                ElementId subId = decoder.peekElement();
                 if (subId != ElementId.ELEM_PROPERTY_CHANGEPOINT) break;
                 decoder.openElement();
                 uint val = (uint)decoder.readUnsignedInteger(AttributeId.ATTRIB_VAL);
@@ -528,7 +529,7 @@ namespace Sla.DECCORE
             }
 
             while(true) {
-                uint subId = decoder.openElement();
+                ElementId subId = decoder.openElement();
                 if (subId != ElementId.ELEM_SCOPE) break;
                 string name;
                 string displayName;
@@ -547,14 +548,13 @@ namespace Sla.DECCORE
                         displayName = decoder.readString();
                 }
                 if (name.empty() || !seenId)
-                    throw DecoderError("Missing name and id attributes in scope");
-                Scope* parentScope = (Scope)null;
-                uint parentId = decoder.peekElement();
-                if (parentId == ELEM_PARENT)
-                {
+                    throw new DecoderError("Missing name and id attributes in scope");
+                Scope parentScope = (Scope)null;
+                ElementId parentId = decoder.peekElement();
+                if (parentId == ElementId.ELEM_PARENT) {
                     parentScope = parseParentTag(decoder);
                 }
-                Scope* newScope = findCreateScope(id, name, parentScope);
+                Scope newScope = findCreateScope(id, name, parentScope);
                 if (!displayName.empty())
                     newScope.setDisplayName(displayName);
                 newScope.decode(decoder);
@@ -573,18 +573,16 @@ namespace Sla.DECCORE
         /// \param newScope is the empty Scope
         public void decodeScope(Decoder decoder, Scope newScope)
         {
-            uint elemId = decoder.openElement();
-            if (elemId == ELEM_SCOPE)
-            {
-                Scope* parentScope = parseParentTag(decoder);
+            ElementId elemId = decoder.openElement();
+            if (elemId == ElementId.ELEM_SCOPE) {
+                Scope parentScope = parseParentTag(decoder);
                 attachScope(newScope, parentScope);
                 newScope.decode(decoder);
             }
-            else
-            {
+            else {
                 newScope.decodeWrappingAttributes(decoder);
-                uint subId = decoder.openElement(ElementId.ELEM_SCOPE);
-                Scope* parentScope = parseParentTag(decoder);
+                ElementId subId = decoder.openElement(ElementId.ELEM_SCOPE);
+                Scope parentScope = parseParentTag(decoder);
                 attachScope(newScope, parentScope);
                 newScope.decode(decoder);
                 decoder.closeElement(subId);
@@ -599,8 +597,8 @@ namespace Sla.DECCORE
         public Scope decodeScopePath(Decoder decoder)
         {
             Scope curscope = getGlobalScope();
-            uint elemId = decoder.openElement(ElementId.ELEM_PARENT);
-            uint subId = decoder.openElement();
+            ElementId elemId = decoder.openElement(ElementId.ELEM_PARENT);
+            ElementId subId = decoder.openElement();
             decoder.closeElementSkipping(subId);        // Skip element describing the root scope
             while(true) {
                 subId = decoder.openElement();

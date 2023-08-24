@@ -1,5 +1,6 @@
-﻿
-using VarnodeLocSet = System.Collections.Generic.HashSet<Sla.DECCORE.Varnode>; // VarnodeCompareLocDef : A set of Varnodes sorted by location (then by definition)
+﻿using Sla.CORE;
+
+using VarnodeLocSet = System.Collections.Generic.SortedSet<Sla.DECCORE.Varnode>; // VarnodeCompareLocDef : A set of Varnodes sorted by location (then by definition)
 
 namespace Sla.DECCORE
 {
@@ -24,36 +25,28 @@ namespace Sla.DECCORE
         
         public override int apply(Funcdata data)
         {
-            Architecture* glb = data.getArch();
+            Architecture glb = data.getArch();
             bool cachereadonly = glb.readonlypropagate;
             int pass = data.getHeritagePass();
-            VarnodeLocSet::const_iterator iter;
             Varnode vn;
 
-            iter = data.beginLoc();
-            while (iter != data.endLoc())
-            {
-                vn = *iter++;       // Advance iterator in case vn is deleted
+            IEnumerator<Varnode> iter = data.beginLoc();
+            while (iter.MoveNext()) {
+                vn = iter.Current;       // Advance iterator in case vn is deleted
                 if (vn.isAnnotation()) continue;
                 int vnSize = vn.getSize();
-                if (vn.isAutoLiveHold())
-                {
-                    if (pass > 0)
-                    {
-                        if (vn.isWritten())
-                        {
-                            PcodeOp loadOp = vn.getDef();
-                            if (loadOp.code() == OpCode.CPUI_LOAD)
-                            {
-                                Varnode ptr = loadOp.getIn(1);
+                if (vn.isAutoLiveHold()) {
+                    if (pass > 0) {
+                        if (vn.isWritten()) {
+                            PcodeOp loadOp = vn.getDef() ?? throw new ApplicationException();
+                            if (loadOp.code() == OpCode.CPUI_LOAD) {
+                                Varnode ptr = loadOp.getIn(1) ?? throw new ApplicationException();
                                 if (ptr.isConstant() || ptr.isReadOnly())
                                     continue;
-                                if (ptr.isWritten())
-                                {
-                                    PcodeOp copyOp = ptr.getDef();
-                                    if (copyOp.code() == OpCode.CPUI_COPY)
-                                    {
-                                        ptr = copyOp.getIn(0);
+                                if (ptr.isWritten()) {
+                                    PcodeOp copyOp = ptr.getDef() ?? throw new ApplicationException();
+                                    if (copyOp.code() == OpCode.CPUI_COPY) {
+                                        ptr = copyOp.getIn(0) ?? throw new ApplicationException();
                                         if (ptr.isConstant() || ptr.isReadOnly())
                                             continue;
                                     }
@@ -64,10 +57,8 @@ namespace Sla.DECCORE
                         count += 1;
                     }
                 }
-                else if (vn.hasActionProperty())
-                {
-                    if (cachereadonly && vn.isReadOnly())
-                    {
+                else if (vn.hasActionProperty()) {
+                    if (cachereadonly && vn.isReadOnly()) {
                         if (data.fillinReadOnly(vn)) // Try to replace vn with its lookup in LoadImage
                             count += 1;
                     }
@@ -79,12 +70,9 @@ namespace Sla.DECCORE
                 {
                     // FIXME: ulong should be arbitrary precision
                     if (vn.isConstant()) continue; // Don't replace a constant
-                    if (vn.isWritten())
-                    {
-                        if (vn.getDef().code() == OpCode.CPUI_COPY)
-                        {
-                            if (vn.getDef().getIn(0).isConstant())
-                            {
+                    if (vn.isWritten()) {
+                        if (vn.getDef().code() == OpCode.CPUI_COPY) {
+                            if (vn.getDef().getIn(0).isConstant()) {
                                 // Don't replace a COPY 0, with a zero, let
                                 // constant propagation do that. This prevents
                                 // an infinite recursion
@@ -93,8 +81,7 @@ namespace Sla.DECCORE
                             }
                         }
                     }
-                    if (!vn.hasNoDescend())
-                    {
+                    if (!vn.hasNoDescend()) {
                         data.totalReplaceConstant(vn, 0);
                         count += 1;
                     }

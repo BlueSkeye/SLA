@@ -104,12 +104,15 @@ namespace Sla.DECCORE
         /// the value in the Varnode.
         public struct NodePending
         {
-            internal readonly Varnode vn;      ///< The implied Varnode
-            internal readonly PcodeOp op;      ///< The single operator consuming value from the implied Varnode
-            internal uint vnmod;        ///< Printing modifications to enforce on the expression
+            // The implied Varnode
+            internal readonly Varnode vn;
+            // The single operator consuming value from the implied Varnode
+            internal readonly PcodeOp op;
+            // Printing modifications to enforce on the expression
+            internal modifiers vnmod;
 
             /// \brief Construct a pending data-flow node
-            internal NodePending(Varnode v, PcodeOp o, uint m)
+            internal NodePending(Varnode v, PcodeOp o, modifiers m)
             {
                 vn = v;
                 op = o;
@@ -196,24 +199,41 @@ namespace Sla.DECCORE
             }
         }
 
-        private string name;              ///< The name of the high-level language
-        private List<uint> modstack;     ///< Printing modification stack
-        private List<Scope> scopestack;   ///< The symbol scope stack
-        private List<ReversePolish> revpol;       ///< The Reverse Polish Notation (RPN) token stack
-        private List<NodePending> nodepend;       ///< Data-flow nodes waiting to be pushed onto the RPN stack
-        private int pending;               ///< Number of data-flow nodes waiting to be pushed
-        private int line_commentindent;        ///< Number of characters a comment line should be indented
-        private string commentstart;            ///< Delimiter characters for the start of a comment
-        private string commentend;			///< Delimiter characters (if any) for the end of a comment
+        // The name of the high-level language
+        private string name;
+        // Printing modification stack
+        private List<PrintLanguage.modifiers> modstack = new List<PrintLanguage.modifiers>();
+        // The symbol scope stack
+        private List<Scope> scopestack = new List<Scope>();
+        // The Reverse Polish Notation (RPN) token stack
+        private List<ReversePolish> revpol = new List<ReversePolish>();
+        // Data-flow nodes waiting to be pushed onto the RPN stack
+        private List<NodePending> nodepend = new List<NodePending>();
+        // Number of data-flow nodes waiting to be pushed
+        private int pending;
+        // Number of characters a comment line should be indented
+        private int line_commentindent;
+        // Delimiter characters for the start of a comment
+        private string commentstart;
+        // Delimiter characters (if any) for the end of a comment
+        private string commentend;
 
-        protected Architecture glb;            ///< The Architecture owning the language emitter
-        protected Scope curscope;      ///< The current symbol scope
-        protected CastStrategy castStrategy;     ///< The strategy for emitting explicit \e case operations
-        protected Emit emit;             ///< The low-level token emitter
-        protected uint mods;             ///< Currently active printing modifications
-        protected uint instr_comment_type;       ///< Type of instruction comments to display
-        protected uint head_comment_type;        ///< Type of header comments to display
-        protected namespace_strategy namespc_strategy;	///< How should namespace tokens be displayed
+        // The Architecture owning the language emitter
+        protected Architecture glb;
+        // The current symbol scope
+        protected Scope? curscope;
+        // The strategy for emitting explicit \e case operations
+        protected CastStrategy castStrategy;
+        // The low-level token emitter
+        protected Emit emit;
+        // Currently active printing modifications
+        protected modifiers mods;
+        // Type of instruction comments to display
+        protected Comment.comment_type instr_comment_type;
+        // Type of header comments to display
+        protected Comment.comment_type head_comment_type;
+        // How should namespace tokens be displayed
+        protected namespace_strategy namespc_strategy;
 #if CPUI_DEBUG
         protected bool isStackEmpty() => (nodepend.empty()&& revpol.empty());	///< Return \b true if the RPN stack is empty
 
@@ -221,7 +241,7 @@ namespace Sla.DECCORE
 #endif
         
         // Routines that are probably consistent across languages
-        protected bool isSet(uint m) => ((mods & m)!= 0); ///< Is the given printing modification active
+        protected bool isSet(modifiers m) => ((mods & m)!= 0); ///< Is the given printing modification active
 
         ///< Push a new symbol scope
         protected void pushScope(Scope sc)
@@ -233,11 +253,8 @@ namespace Sla.DECCORE
         ///< Pop to the previous symbol scope
         protected void popScope()
         {
-            scopestack.pop_back();
-            if (scopestack.empty())
-                curscope = (Scope*)0;
-            else
-                curscope = scopestack.back();
+            scopestack.RemoveLastItem();
+            curscope = (scopestack.empty())? (Scope)null : scopestack.GetLastItem();
         }
 
         ///< Push current printing modifications to the stack
@@ -254,13 +271,13 @@ namespace Sla.DECCORE
         }
 
         ///< Activate the given printing modification
-        protected void setMod(uint m)
+        protected void setMod(modifiers m)
         {
             mods |= m;
         }
 
         ///< Deactivate the given printing modification
-        protected void unsetMod(uint m)
+        protected void unsetMod(modifiers m)
         {
             mods &= ~m;
         }
@@ -343,7 +360,7 @@ namespace Sla.DECCORE
         /// \param vn is the given implied Varnode
         /// \param op is PcodeOp taking the Varnode as input
         /// \param m is the set of printing modifications to apply for this sub-expression
-        protected void pushVn(Varnode vn, PcodeOp op, uint m)
+        protected void pushVn(Varnode vn, PcodeOp op, modifiers m)
         {
             //   if (pending == nodepend.size())
             //     nodepend.push_back(NodePending(vn,op,m));
@@ -668,14 +685,15 @@ namespace Sla.DECCORE
         /// Any complete sub-expressions that are still on the RPN will get emitted.
         protected void recurse()
         {
-            uint modsave = mods;
+            modifiers modsave = mods;
             int lastPending = pending;     // Already claimed
             pending = nodepend.size();  // Lay claim to the rest
             while (lastPending < pending) {
-                Varnode vn = nodepend.back().vn;
-                PcodeOp op = nodepend.back().op;
-                mods = nodepend.back().vnmod;
-                nodepend.pop_back();
+                NodePending lastPendingNode = nodepend.Last();
+                Varnode vn = lastPendingNode.vn;
+                PcodeOp op = lastPendingNode.op;
+                mods = lastPendingNode.vnmod;
+                nodepend.Remove(lastPendingNode);
                 pending -= 1;
                 if (vn.isImplied()) {
                     if (vn.hasImpliedField()) {
@@ -700,9 +718,9 @@ namespace Sla.DECCORE
         /// \param op is the associated PcodeOp
         protected void opBinary(OpToken tok, PcodeOp op)
         {
-            if (isSet(negatetoken)) {
+            if (isSet(modifiers.negatetoken)) {
                 tok = tok.negate;
-                unsetMod(negatetoken);
+                unsetMod(modifiers.negatetoken);
                 if (tok == (OpToken)null)
                     throw new LowlevelError("Could not find fliptoken");
             }
@@ -1005,18 +1023,18 @@ namespace Sla.DECCORE
             if (usecommentfill)
                 emit.setCommentFill(start);
             else {
-                string spaces;
-                for (int4 i = 0; i < start.size(); ++i)
+                string spaces = string.Empty;
+                for (int i = 0; i < start.Length; ++i)
                     spaces += ' ';
                 emit.setCommentFill(spaces);
             }
         }
 
         ///< Get the type of comments suitable within the body of a function
-        public uint getInstructionComment() => instr_comment_type;
+        public Comment.comment_type getInstructionComment() => instr_comment_type;
 
         ///< Set the type of comments suitable within the body of a function
-        public void setInstructionComment(uint val)
+        public void setInstructionComment(Comment.comment_type val)
         {
             instr_comment_type = val;
         }
@@ -1028,10 +1046,10 @@ namespace Sla.DECCORE
         }
 
         ///< Get the type of comments suitable for a function header
-        public uint getHeaderComment() => head_comment_type;
+        public Comment.comment_type getHeaderComment() => head_comment_type;
 
         ///< Set the type of comments suitable for a function header
-        public void setHeaderComment(uint val)
+        public void setHeaderComment(Comment.comment_type val)
         {
             head_comment_type = val;
         }
@@ -1095,16 +1113,16 @@ namespace Sla.DECCORE
         /// \param nm is "hex", "dec", or "best"
         public virtual void setIntegerFormat(string nm)
         {
-            uint mod;
-            if (nm.compare(0, 3, "hex") == 0)
-                mod = force_hex;
-            else if (nm.compare(0, 3, "dec") == 0)
-                mod = force_dec;
-            else if (nm.compare(0, 4, "best") == 0)
+            modifiers mod;
+            if (nm.StartsWith("hex"))
+                mod = modifiers.force_hex;
+            else if (nm.StartsWith("dec"))
+                mod = modifiers.force_dec;
+            else if (nm.StartsWith("best"))
                 mod = 0;
             else
                 throw new LowlevelError("Unknown integer format option: " + nm);
-            mods &= ~((uint4)(force_hex | force_dec)); // Turn off any pre-existing force
+            mods &= ~(modifiers.force_hex | modifiers.force_dec); // Turn off any pre-existing force
             mods |= mod;            // Set any new force
         }
 

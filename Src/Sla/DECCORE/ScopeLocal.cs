@@ -2,7 +2,7 @@
 using Sla.DECCORE;
 
 using EntryMap = Sla.EXTRA.rangemap<Sla.DECCORE.SymbolEntry>;
-using VarnodeDefSet = System.Collections.Generic.HashSet<Sla.DECCORE.Varnode>; // VarnodeDefSet : A set of Varnodes sorted by definition (then location)
+using VarnodeDefSet = System.Collections.Generic.SortedSet<Sla.DECCORE.Varnode>; // VarnodeDefSet : A set of Varnodes sorted by definition (then location)
 
 namespace Sla.DECCORE
 {
@@ -18,11 +18,11 @@ namespace Sla.DECCORE
         /// Address space containing the local stack
         private AddrSpace space;
         /// Symbol name recommendations for specific addresses
-        private List<NameRecommend> nameRecommend;
+        private List<NameRecommend> nameRecommend = new List<NameRecommend>();
         /// Symbol name recommendations for dynamic locations
-        private List<DynamicRecommend> dynRecommend;
+        private List<DynamicRecommend> dynRecommend = new List<DynamicRecommend>();
         /// Data-types for specific storage locations
-        private List<TypeRecommend> typeRecommend;
+        private List<TypeRecommend> typeRecommend = new List<TypeRecommend>();
         /// Minimum offset of parameter passed (to a called function) on the stack
         private ulong minParamOffset;
         /// Maximum offset of parameter passed (to a called function) on the stack
@@ -189,8 +189,7 @@ namespace Sla.DECCORE
             iter = fd.beginDef(Varnode.varnode_flags.input);
             enditer = fd.endDef(Varnode.varnode_flags.input);
 
-            while (iter != enditer)
-            {
+            while (iter != enditer) {
                 Varnode vn = *iter++;
                 bool locked = vn.isTypeLock();
                 Address addr = vn.getAddr();
@@ -219,21 +218,18 @@ namespace Sla.DECCORE
                     // representative symbol.  If the input prototype is locked
                     // but one of the types is type_metatype.TYPE_UNKNOWN, then the 
                     // corresponding varnodes won't get typelocked
-                    if (lockedinputs != 0)
-                    {
+                    if (lockedinputs != 0) {
                         uint vflags = 0;
-                        SymbolEntry* entry = queryProperties(vn.getAddr(), vn.getSize(), usepoint, vflags);
-                        if (entry != (SymbolEntry)null)
-                        {
+                        SymbolEntry entry = queryProperties(vn.getAddr(), vn.getSize(), usepoint, vflags);
+                        if (entry != (SymbolEntry)null) {
                             if (entry.getSymbol().getCategory() == Symbol.SymbolCategory.function_parameter)
                                 continue;       // Found a matching symbol
                         }
                     }
 
-                    int size = (endpoint - addr.getOffset()) + 1;
-                    Datatype* ct = fd.getArch().types.getBase(size, type_metatype.TYPE_UNKNOWN);
-                    try
-                    {
+                    int size = (int)(endpoint - addr.getOffset()) + 1;
+                    Datatype ct = fd.getArch().types.getBase(size, type_metatype.TYPE_UNKNOWN);
+                    try {
                         addSymbol("", ct, addr, usepoint).getSymbol();
                     }
                     catch (LowlevelError err) {
@@ -441,7 +437,7 @@ namespace Sla.DECCORE
             space = decoder.readSpace(AttributeId.ATTRIB_MAIN);
         }
 
-        public override string buildVariableName(Address addr, Address pc, Datatype ct, int index,
+        public override string buildVariableName(Address addr, Address pc, Datatype? ct, int index,
             Varnode.varnode_flags flags)
         {
             if (((flags & (Varnode.varnode_flags.addrtied | Varnode.varnode_flags.persist)) == Varnode.varnode_flags.addrtied) &&
@@ -456,7 +452,7 @@ namespace Sla.DECCORE
                     if (ct != (Datatype)null)
                         ct.printNameBase(s);
                     string spacename =  addr.getSpace().getName();
-                    spacename[0] = toupper(spacename[0]);
+                    spacename = spacename.Capitalize();
                     s.Write(spacename);
                     if (start <= 0) {
                         s.Write('X');       // Indicate local stack space allocated by caller
@@ -473,7 +469,7 @@ namespace Sla.DECCORE
                     return makeNameUnique(s.ToString());
                 }
             }
-            return ScopeInternal.buildVariableName(addr, pc, ct, index, flags);
+            return base.buildVariableName(addr, pc, ct, index, flags);
         }
 
         /// Reset the set of addresses that are considered mapped by the scope to the default

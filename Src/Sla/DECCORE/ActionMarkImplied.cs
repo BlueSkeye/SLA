@@ -1,6 +1,6 @@
 ﻿using Sla.CORE;
 
-using VarnodeLocSet = System.Collections.Generic.HashSet<Sla.DECCORE.Varnode>; // VarnodeCompareLocDef : A set of Varnodes sorted by location (then by definition)
+using VarnodeLocSet = System.Collections.Generic.SortedSet<Sla.DECCORE.Varnode>; // VarnodeCompareLocDef : A set of Varnodes sorted by location (then by definition)
 
 namespace Sla.DECCORE
 {
@@ -184,7 +184,6 @@ namespace Sla.DECCORE
 
         public override int apply(Funcdata data)
         {
-            VarnodeLocSet::const_iterator viter;
             Varnode vn;
             Varnode vncur;
             Varnode defvn;
@@ -192,7 +191,8 @@ namespace Sla.DECCORE
             // Depth first varnode traversal stack
             List<DescTreeElement> varstack = new List<DescTreeElement>();
 
-            for (viter = data.beginLoc(); viter != data.endLoc(); ++viter) {
+            IEnumerator<Varnode> viter = data.beginLoc();
+            while (viter.MoveNext()) {
                 vn = viter.Current;
                 if (vn.isFree()) continue;
                 if (vn.isExplicit()) continue;

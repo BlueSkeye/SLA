@@ -19,10 +19,10 @@ namespace Sla.SLEIGH
             return leftval & rightval;
         }
 
-        public override long getSubValue(List<long> replace,int listpos)
+        public override long getSubValue(List<long> replace, int listpos)
         {
-            long leftval = getLeft().getValue(walker);
-            long rightval = getRight().getValue(walker);
+            long leftval = getLeft().getSubValue(replace, listpos); // Must be left first
+            long rightval = getRight().getSubValue(replace, listpos);
             return leftval & rightval;
         }
 

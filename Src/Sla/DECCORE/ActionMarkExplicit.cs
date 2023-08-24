@@ -1,6 +1,6 @@
 ﻿using Sla.CORE;
 
-using VarnodeDefSet = System.Collections.Generic.HashSet<Sla.DECCORE.Varnode>; // VarnodeDefSet : A set of Varnodes sorted by definition (then location)
+using VarnodeDefSet = System.Collections.Generic.SortedSet<Sla.DECCORE.Varnode>; // VarnodeDefSet : A set of Varnodes sorted by definition (then location)
 
 namespace Sla.DECCORE
 {

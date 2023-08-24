@@ -72,7 +72,7 @@ namespace Sla.CORE
         /// This closes the given element, which must be current.  If there are child elements that have not been
         /// parsed, this is not considered an error, and they are skipped over in the parse.
         /// \param id is the id of the element to close (which must be the current element)
-        public abstract void closeElementSkipping(uint id);
+        public abstract void closeElementSkipping(ElementId id);
 
         /// \brief Get the next attribute id for the current element
         /// Attributes are automatically set up for traversal using this method, when the element is opened.
@@ -186,7 +186,7 @@ namespace Sla.CORE
         /// The element skipped is the one that would be opened by the next call to openElement.
         public void skipElement()
         {
-            uint elemId = openElement();
+            ElementId elemId = openElement();
             closeElementSkipping(elemId);
         }
     }

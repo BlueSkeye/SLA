@@ -41,7 +41,7 @@ namespace Sla.DECCORE
                     int sz = param.getSize();
                     if (spc.getType() == spacetype.IPTR_SPACEBASE) {
                         // Param is stack relative
-                        Varnode loadval = data.opStackLoad(spc, off, sz, op, (Varnode)null,
+                        Varnode loadval = data.opStackLoad(spc, off, (uint)sz, op, (Varnode)null,
                             false);
                         data.opInsertInput(op, loadval, op.numInput());
                         if (!setplaceholder) {

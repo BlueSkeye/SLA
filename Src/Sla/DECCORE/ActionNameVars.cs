@@ -1,6 +1,6 @@
 ﻿using Sla.CORE;
 
-using VarnodeLocSet = System.Collections.Generic.HashSet<Sla.DECCORE.Varnode>; // VarnodeCompareLocDef : A set of Varnodes sorted by location (then by definition)
+using VarnodeLocSet = System.Collections.Generic.SortedSet<Sla.DECCORE.Varnode>; // VarnodeCompareLocDef : A set of Varnodes sorted by location (then by definition)
 
 namespace Sla.DECCORE
 {
@@ -182,7 +182,7 @@ namespace Sla.DECCORE
         private static void linkSymbols(Funcdata data, List<Varnode> namerec)
         {
             AddrSpaceManager manage = data.getArch();
-            VarnodeLocSet::const_iterator iter, enditer;
+            IEnumerator<Varnode> iter, enditer;
             AddrSpace spc;
             AddrSpace constSpace = manage.getConstantSpace();
             enditer = data.endLoc(constSpace);

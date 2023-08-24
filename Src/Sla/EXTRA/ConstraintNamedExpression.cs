@@ -32,7 +32,7 @@ namespace Sla.EXTRA
 
         public override void collectTypes(List<UnifyDatatype> typelist)
         {
-            typelist[constindex] = UnifyDatatype(UnifyDatatype::const_type);
+            typelist[constindex] = new UnifyDatatype(UnifyDatatype.TypeKind.const_type);
         }
 
         public override int getBaseIndex() => constindex;

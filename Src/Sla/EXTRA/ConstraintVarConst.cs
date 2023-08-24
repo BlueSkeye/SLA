@@ -40,12 +40,10 @@ namespace Sla.EXTRA
             if (!traverse.step()) return false;
             ulong ourconst = expr.getConstant(state);
             Funcdata fd = state.getFunction();
-            int sz;
-            if (exprsz != (RHSConstant)null)
-                sz = (int)exprsz.getConstant(state);
-            else
-                sz = (int)sizeof(ulong);
-            ourconst &= Globals.calc_mask(sz);
+            int sz = (exprsz != (RHSConstant)null)
+                ? (int)exprsz.getConstant(state)
+                : (int)sizeof(ulong);
+            ourconst &= Globals.calc_mask((uint)sz);
             Varnode vn = fd.newConstant(sz, ourconst);
             state.data(varindex).setVarnode(vn);
             return true;

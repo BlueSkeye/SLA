@@ -1,6 +1,6 @@
 ﻿using Sla.CORE;
 
-using VarnodeLocSet = System.Collections.Generic.HashSet<Sla.DECCORE.Varnode>; // VarnodeCompareLocDef : A set of Varnodes sorted by location (then by definition)
+using VarnodeLocSet = System.Collections.Generic.SortedSet<Sla.DECCORE.Varnode>; // VarnodeCompareLocDef : A set of Varnodes sorted by location (then by definition)
 
 namespace Sla.DECCORE
 {
@@ -212,7 +212,7 @@ namespace Sla.DECCORE
         {
             VarnodeData spacebasedata = id.getSpacebase(spcbase);
             Address spacebase = new Address(spacebasedata.space, spacebasedata.offset);
-            VarnodeLocSet::const_iterator begiter, enditer;
+            IEnumerator<Varnode> begiter, enditer;
             int clogcount = 0;
 
             begiter = data.beginLoc(spacebasedata.size, spacebase);

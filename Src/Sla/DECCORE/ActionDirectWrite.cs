@@ -1,6 +1,6 @@
 ﻿using Sla.CORE;
 
-using VarnodeLocSet = System.Collections.Generic.HashSet<Sla.DECCORE.Varnode>; // VarnodeCompareLocDef : A set of Varnodes sorted by location (then by definition)
+using VarnodeLocSet = System.Collections.Generic.SortedSet<Sla.DECCORE.Varnode>; // VarnodeCompareLocDef : A set of Varnodes sorted by location (then by definition)
 
 namespace Sla.DECCORE
 {
@@ -35,15 +35,15 @@ namespace Sla.DECCORE
         }
         public override int apply(Funcdata data)
         {
-            VarnodeLocSet::const_iterator iter;
             IEnumerator<PcodeOp> oiter;
             Varnode vn, dvn;
             PcodeOp op;
             List<Varnode> worklist = new List<Varnode>();
 
             // Collect legal inputs and other auto direct writes
-            for (iter = data.beginLoc(); iter != data.endLoc(); ++iter) {
-                vn = *iter;
+            IEnumerator<Varnode> iter = data.beginLoc();
+            while (iter.MoveNext()) {
+                vn = iter.Current;
                 vn.clearDirectWrite();
                 if (vn.isInput()) {
                     if (vn.isPersist() || vn.isSpacebase()) {
@@ -56,7 +56,7 @@ namespace Sla.DECCORE
                     }
                 }
                 else if (vn.isWritten()) {
-                    op = vn.getDef();
+                    op = vn.getDef() ?? throw new ApplicationException();
                     if (!op.isMarker()) {
                         if (vn.isPersist()) {
                             // Anything that writes to a global variable (in a real way) is considered a direct write
@@ -81,7 +81,8 @@ namespace Sla.DECCORE
                                 }
                             }
                         }
-                        else if ((op.code() != OpCode.CPUI_PIECE) && (op.code() != OpCode.CPUI_SUBPIECE))
+                        else if ((op.code() != OpCode.CPUI_PIECE)
+                            && (op.code() != OpCode.CPUI_SUBPIECE))
                         {
                             // Anything that writes to a variable in a way that isn't some form of COPY is a direct write
                             vn.setDirectWrite();

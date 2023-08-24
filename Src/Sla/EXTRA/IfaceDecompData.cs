@@ -1,7 +1,7 @@
 ﻿using Sla.CORE;
 using Sla.DECCORE;
 
-using VarnodeLocSet = System.Collections.Generic.HashSet<Sla.DECCORE.Varnode>; // VarnodeCompareLocDef : A set of Varnodes sorted by location (then by definition)
+using VarnodeLocSet = System.Collections.Generic.SortedSet<Sla.DECCORE.Varnode>; // VarnodeCompareLocDef : A set of Varnodes sorted by location (then by definition)
 
 namespace Sla.EXTRA
 {
@@ -162,7 +162,7 @@ namespace Sla.EXTRA
             else if ((!pc.isInvalid()) && (uq != uint.MaxValue))
                 vn = fd.findVarnodeWritten(defsize, loc, pc, uq);
             else {
-                VarnodeLocSet::const_iterator iter, enditer;
+                IEnumerator<Varnode> iter, enditer;
                 iter = fd.beginLoc(defsize, loc);
                 enditer = fd.endLoc(defsize, loc);
                 while (iter != enditer) {

@@ -44,7 +44,7 @@ namespace Sla.DECCORE
             /// Index coming out of switch to this case
             internal int outindex;
             /// (If non-zero) What type of unstructured \e case is this?
-            internal uint gototype;
+            internal block_flags gototype;
             /// Does this case flow to the \e exit block
             internal bool isexit;
             /// True if this is formal \e default case for the switch
@@ -167,7 +167,7 @@ namespace Sla.DECCORE
         public bool isDefaultCase(int i) => caseblocks[i].isdefault;
 
         /// Get the edge type for the i-th \e case block
-        public uint getGotoType(int i) => caseblocks[i].gototype;
+        public block_flags getGotoType(int i) => caseblocks[i].gototype;
 
         /// Does the i-th \e case block exit the switch?
         public bool isExit(int i) => caseblocks[i].isexit;

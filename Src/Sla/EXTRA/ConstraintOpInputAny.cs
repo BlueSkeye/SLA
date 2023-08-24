@@ -53,7 +53,7 @@ namespace Sla.EXTRA
             printstate.incDepth();  // A permanent increase in depth
             printstate.printIndent(s);
             s.Write($"{printstate.getName(varnodeindex)} = {printstate.getName(opindex)}.getIn(i");
-            s.WriteLine($"{printstate.getDepth() - 1)});");
+            s.WriteLine($"{printstate.getDepth() - 1});");
         }
     }
 }

@@ -3,8 +3,8 @@ using Sla.EXTRA;
 
 using PcodeOpTree = System.Collections.Generic.Dictionary<Sla.CORE.SeqNum, Sla.DECCORE.PcodeOp>;
 using ScopeMap = System.Collections.Generic.Dictionary<ulong, Sla.DECCORE.Scope>;
-using VarnodeLocSet = System.Collections.Generic.HashSet<Sla.DECCORE.Varnode>; // VarnodeCompareLocDef : A set of Varnodes sorted by location (then by definition)
-using VarnodeDefSet = System.Collections.Generic.HashSet<Sla.DECCORE.Varnode>; // VarnodeDefSet : A set of Varnodes sorted by definition (then location)
+using VarnodeLocSet = System.Collections.Generic.SortedSet<Sla.DECCORE.Varnode>; // VarnodeCompareLocDef : A set of Varnodes sorted by location (then by definition)
+using VarnodeDefSet = System.Collections.Generic.SortedSet<Sla.DECCORE.Varnode>; // VarnodeDefSet : A set of Varnodes sorted by definition (then location)
 
 namespace Sla.DECCORE
 {
@@ -171,7 +171,7 @@ namespace Sla.DECCORE
             Varnode otherVn;
             HighVariable? otherHigh = (HighVariable)null;
             // Look for a conflicting HighVariable
-            VarnodeLocSet::const_iterator iter = beginLoc(entry.getSize(), entry.getAddr());
+            IEnumerator<Varnode> iter = beginLoc(entry.getSize(), entry.getAddr());
             while (iter != endLoc()) {
                 otherVn = *iter;
                 if (otherVn.getSize() != entry.getSize()) break;
@@ -206,7 +206,7 @@ namespace Sla.DECCORE
         private bool syncVarnodesWithSymbol(ScopeLocal lm, bool updateDatatypes, bool unmappedAliasCheck)
         {
             bool updateoccurred = false;
-            VarnodeLocSet::const_iterator iter, enditer;
+            IEnumerator<Varnode> iter, enditer;
             Datatype? ct;
             SymbolEntry? entry;
             Varnode.varnode_flags fl;
@@ -1034,8 +1034,8 @@ namespace Sla.DECCORE
         /// \param encoder is the stream encoder
         /// \param iter is the beginning of the set
         /// \param enditer is the end of the set
-        private static void encodeVarnode(Sla.CORE.Encoder encoder, VarnodeLocSet::const_iterator iter,
-            VarnodeLocSet::const_iterator enditer)
+        private static void encodeVarnode(Sla.CORE.Encoder encoder, IEnumerator<Varnode> iter,
+            IEnumerator<Varnode> enditer)
         {
             Varnode vn;
             while (iter != enditer) {
@@ -1786,7 +1786,7 @@ namespace Sla.DECCORE
             size = -1;
             ulong id = 0;
             AddrSpace stackid = glb.getStackSpace();
-            uint elemId = decoder.openElement(ElementId.ELEM_FUNCTION);
+            ElementId elemId = decoder.openElement(ElementId.ELEM_FUNCTION);
             while(true) {
                 AttributeId attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
@@ -1813,7 +1813,7 @@ namespace Sla.DECCORE
                 throw new LowlevelError("Missing function size");
             baseaddr = Address.decode(decoder);
             while(true) {
-                uint subId = decoder.peekElement();
+                ElementId subId = decoder.peekElement();
                 if (subId == 0) break;
                 if (subId == ElementId.ELEM_LOCALDB) {
                     if (localmap != (ScopeLocal)null)
@@ -1872,7 +1872,7 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         public void decodeJumpTable(Sla.CORE.Decoder decoder)
         {
-            uint elemId = decoder.openElement(ElementId.ELEM_JUMPTABLELIST);
+            ElementId elemId = decoder.openElement(ElementId.ELEM_JUMPTABLELIST);
             while (decoder.peekElement() != 0) {
                 JumpTable jt = new JumpTable(glb);
                 jt.decode(decoder);
@@ -1892,8 +1892,8 @@ namespace Sla.DECCORE
             for (int i = 0; i < glb.numSpaces(); ++i) {
                 AddrSpace? @base = glb.getSpace(i);
                 if (@base == (AddrSpace)null || @base.getType() == spacetype.IPTR_IOP) continue;
-                VarnodeLocSet::const_iterator iter = vbank.beginLoc(@base);
-                VarnodeLocSet::const_iterator enditer = vbank.endLoc(@base);
+                IEnumerator<Varnode> iter = vbank.beginLoc(@base);
+                IEnumerator<Varnode> enditer = vbank.endLoc(@base);
                 encodeVarnode(encoder, iter, enditer);
             }
             encoder.closeElement(ElementId.ELEM_VARNODES);
@@ -1934,17 +1934,18 @@ namespace Sla.DECCORE
 
             if (!isHighOn()) return;
             encoder.openElement(ElementId.ELEM_HIGHLIST);
-            VarnodeLocSet::const_iterator iter;
-            for (iter = beginLoc(); iter != endLoc(); ++iter) {
-                vn = *iter;
+            IEnumerator<Varnode> iter = beginLoc();
+            while (iter.MoveNext()) {
+                vn = iter.Current;
                 if (vn.isAnnotation()) continue;
                 high = vn.getHigh();
                 if (high.isMark()) continue;
                 high.setMark();
                 high.encode(encoder);
             }
-            for (iter = beginLoc(); iter != endLoc(); ++iter) {
-                vn = *iter;
+            iter = beginLoc();
+            while (iter.MoveNext()) {
+                vn = iter.Current;
                 if (!vn.isAnnotation())
                     vn.getHigh().clearMark();
             }
@@ -1978,7 +1979,7 @@ namespace Sla.DECCORE
         /// special data-type and is marked so that Varnode::isSpacebase() returns \b true.
         public void spacebase()
         {
-            VarnodeLocSet::const_iterator iter, enditer;
+            IEnumerator<Varnode> iter, enditer;
             int i, numspace;
             Varnode vn;
 
@@ -2563,7 +2564,7 @@ namespace Sla.DECCORE
         {
             Address addr = vn.getAddr();
             Address endaddr = addr + vn.getSize();
-            VarnodeLocSet::const_iterator iter = vn.lociter;
+            IEnumerator<Varnode> iter = vn.lociter;
 
             while (iter != beginLoc()) {
                 --iter;
@@ -2611,10 +2612,10 @@ namespace Sla.DECCORE
             => vbank.find(s, loc, pc, uniq);
 
         /// \brief Start of all Varnodes sorted by storage
-        public VarnodeLocSet.Enumerator beginLoc() => vbank.beginLoc();
+        public IEnumerator<Varnode> beginLoc() => vbank.beginLoc();
 
-        /// \brief End of all Varnodes sorted by storage
-        public VarnodeLocSet.Enumerator endLoc() => vbank.endLoc();
+        ///// \brief End of all Varnodes sorted by storage
+        //public VarnodeLocSet.Enumerator endLoc() => vbank.endLoc();
 
         /// \brief Start of Varnodes stored in a given address space
         public VarnodeLocSet.Enumerator beginLoc(AddrSpace spaceid) => vbank.beginLoc(spaceid);
@@ -2732,8 +2733,8 @@ namespace Sla.DECCORE
             bool inconsistentuse = false;
 
             // Go through all varnodes for this space
-            VarnodeLocSet.Enumerator iter = vbank.beginLoc();
-            VarnodeLocSet.Enumerator enditer = vbank.endLoc();
+            IEnumerator<Varnode> iter = vbank.beginLoc();
+            // VarnodeLocSet.Enumerator enditer = vbank.endLoc();
             while (iter.MoveNext()) {
                 vn = iter.Current;
                 if (vn.isFree()) continue;
@@ -3412,10 +3413,10 @@ namespace Sla.DECCORE
             if ((flags & Flags.highlevel_on) != 0) return;
             flags |= Flags.highlevel_on;
             high_level_index = vbank.getCreateIndex();
-            VarnodeLocSet::const_iterator iter;
+            IEnumerator<Varnode> iter = vbank.beginLoc();
 
-            for (iter = vbank.beginLoc(); iter != vbank.endLoc(); ++iter)
-                assignHigh(*iter);
+            while (iter.MoveNext())
+                assignHigh(iter.Current);
         }
 
         /// Delete any dead Varnodes
@@ -3423,12 +3424,11 @@ namespace Sla.DECCORE
         /// editing operations can detach (and then reattach) Varnodes without losing them.
         public void clearDeadVarnodes()
         {
-            VarnodeLocSet::const_iterator iter;
             Varnode vn;
 
-            iter = vbank.beginLoc();
-            while (iter != vbank.endLoc()) {
-                vn = *iter++;
+            IEnumerator<Varnode> iter = vbank.beginLoc();
+            while (iter.MoveNext()) {
+                vn = iter.Current;
                 if (vn.hasNoDescend()) {
                     if (vn.isInput() && !vn.isLockedInput()) {
                         vbank.makeFree(vn);
@@ -3653,7 +3653,7 @@ namespace Sla.DECCORE
                 return vn;
             }
 
-            VarnodeLocSet::const_iterator iter, enditer;
+            IEnumerator<Varnode> iter, enditer;
             Address usestart = entry.getFirstUseAddress();
             enditer = vbank.endLoc(entry.getSize(), entry.getAddr());
 
@@ -3691,8 +3691,8 @@ namespace Sla.DECCORE
                     res.Add(vn);
             }
             else {
-                VarnodeLocSet::const_iterator iter = beginLoc(entry.getSize(), entry.getAddr());
-                VarnodeLocSet::const_iterator enditer = endLoc(entry.getSize(), entry.getAddr());
+                IEnumerator<Varnode> iter = beginLoc(entry.getSize(), entry.getAddr());
+                IEnumerator<Varnode> enditer = endLoc(entry.getSize(), entry.getAddr());
                 for (; iter != enditer; ++iter) {
                     Varnode vn = iter.Current;
                     Address addr = vn.getUsePoint(this);

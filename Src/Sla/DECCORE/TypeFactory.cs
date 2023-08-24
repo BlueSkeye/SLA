@@ -298,7 +298,7 @@ namespace Sla.DECCORE
             string metastring;
             Datatype ct;
 
-            uint elemId = decoder.openElement();
+            ElementId elemId = decoder.openElement();
             if (elemId == ElementId.ELEM_VOID) {
                 ct = getTypeVoid(); // Automatically a coretype
                 decoder.closeElement(elemId);
@@ -311,8 +311,7 @@ namespace Sla.DECCORE
             }
             type_metatype meta = Globals.string2metatype(decoder.readString(AttributeId.ATTRIB_METATYPE));
             switch (meta) {
-                case type_metatype.TYPE_PTR:
-                    {
+                case type_metatype.TYPE_PTR: {
                         TypePointer tp = new TypePointer();
                         tp.decode(decoder, this);
                         if (forcecore)
@@ -320,8 +319,7 @@ namespace Sla.DECCORE
                         ct = findAdd(tp);
                     }
                     break;
-                case type_metatype.TYPE_PTRREL:
-                    {
+                case type_metatype.TYPE_PTRREL: {
                         TypePointerRel tp = new TypePointerRel();
                         tp.decode(decoder, this);
                         if (forcecore)
@@ -329,8 +327,7 @@ namespace Sla.DECCORE
                         ct = findAdd(tp);
                     }
                     break;
-                case type_metatype.TYPE_ARRAY:
-                    {
+                case type_metatype.TYPE_ARRAY: {
                         TypeArray ta = new TypeArray();
                         ta.decode(decoder, this);
                         if (forcecore)
@@ -344,8 +341,7 @@ namespace Sla.DECCORE
                 case type_metatype.TYPE_UNION:
                     ct = decodeUnion(decoder, forcecore);
                     break;
-                case type_metatype.TYPE_SPACEBASE:
-                    {
+                case type_metatype.TYPE_SPACEBASE: {
                         TypeSpacebase tsb = new TypeSpacebase((AddrSpace)null, new Address(),glb);
                         tsb.decode(decoder, this);
                         if (forcecore)
@@ -822,7 +818,7 @@ namespace Sla.DECCORE
         public Datatype decodeType(Decoder decoder)
         {
             Datatype ct;
-            uint elemId = decoder.peekElement();
+            ElementId elemId = decoder.peekElement();
             if (ElementId.ELEM_TYPEREF == elemId) {
                 elemId = decoder.openElement();
                 ulong newid = 0;
@@ -860,7 +856,7 @@ namespace Sla.DECCORE
         public Datatype decodeTypeWithCodeFlags(Decoder decoder, bool isConstructor, bool isDestructor)
         {
             TypePointer tp = new TypePointer();
-            uint elemId = decoder.openElement();
+            ElementId elemId = decoder.openElement();
             tp.decodeBasic(decoder);
             if (tp.getMetatype() != type_metatype.TYPE_PTR)
                 throw new LowlevelError("Special type decode does not see pointer");
@@ -913,18 +909,15 @@ namespace Sla.DECCORE
         /// \return the Datatype object
         public Datatype getBase(int s, type_metatype m)
         {
-            Datatype* ct;
-            if (s < 9)
-            {
-                if (m >= type_metatype.TYPE_FLOAT)
-                {
+            Datatype ct;
+            if (s < 9) {
+                if (m >= type_metatype.TYPE_FLOAT) {
                     ct = typecache[s][m - type_metatype.TYPE_FLOAT];
                     if (ct != (Datatype)null)
                         return ct;
                 }
             }
-            else if (m == type_metatype.TYPE_FLOAT)
-            {
+            else if (m == type_metatype.TYPE_FLOAT) {
                 if (s == 10)
                     ct = typecache10;
                 else if (s == 16)
@@ -1035,11 +1028,15 @@ namespace Sla.DECCORE
                 type_metatype meta = basetype.getMetatype();
                 // Make sure that at least we return a pointer to something the size of -pt-
                 if (meta == type_metatype.TYPE_PTR)
-                    pt = getBase(pt.getSize(), type_metatype.TYPE_UNKNOWN);      // Pass back unknown *
+                    // Pass back unknown *
+                    pt = getBase(pt.getSize(), type_metatype.TYPE_UNKNOWN);
                 else if (meta == type_metatype.TYPE_UNKNOWN) {
-                    if (basetype.getSize() == pt.getSize())   // If -pt- is pointer to UNKNOWN of the size of a pointer
-                        return (TypePointer)pt; // Just return pt, don't add another pointer
-                    pt = getBase(pt.getSize(), type_metatype.TYPE_UNKNOWN);  // Otherwise construct pointer to UNKNOWN of size of pointer
+                    if (basetype.getSize() == pt.getSize())
+                        // If -pt- is pointer to UNKNOWN of the size of a pointer
+                        // Just return pt, don't add another pointer
+                        return (TypePointer)pt;
+                    // Otherwise construct pointer to UNKNOWN of size of pointer
+                    pt = getBase(pt.getSize(), type_metatype.TYPE_UNKNOWN);
                 }
             }
             return getTypePointer(s, pt, ws);
@@ -1053,7 +1050,7 @@ namespace Sla.DECCORE
         {
             if (ao.hasStripped())
                 ao = ao.getStripped();
-            TypeArray tmp = new TypeArray(@as,ao);
+            TypeArray tmp = new TypeArray(@as, ao);
             return (TypeArray)findAdd(tmp);
         }
 
@@ -1063,10 +1060,11 @@ namespace Sla.DECCORE
         /// \return the TypeStruct object
         public TypeStruct getTypeStruct(string n)
         {
-            TypeStruct tmp;
-            tmp.name = n;
-            tmp.displayName = n;
-            tmp.id = Datatype.hashName(n);
+            TypeStruct tmp = new TypeStruct() {
+                name = n,
+                displayName = n,
+                id = Datatype.hashName(n)
+            };
             return (TypeStruct)findAdd(tmp);
         }
 
@@ -1084,10 +1082,11 @@ namespace Sla.DECCORE
         /// \return the TypeUnion object
         public TypeUnion getTypeUnion(string n)
         {
-            TypeUnion tmp;
-            tmp.name = n;
-            tmp.displayName = n;
-            tmp.id = Datatype.hashName(n);
+            TypeUnion tmp = new TypeUnion() {
+                name = n,
+                displayName = n,
+                id = Datatype.hashName(n)
+            };
             return (TypeUnion)findAdd(tmp);
         }
 
@@ -1196,7 +1195,7 @@ namespace Sla.DECCORE
         public TypePointerRel getTypePointerRel(int sz, Datatype parent, Datatype ptrTo, int ws, int off,
             string nm)
         {
-            TypePointerRel tp = new TypePointerRel(sz, ptrTo, ws, parent, off);
+            TypePointerRel tp = new TypePointerRel(sz, ptrTo, (uint)ws, parent, off);
             tp.name = nm;
             tp.displayName = nm;
             tp.id = Datatype.hashName(nm);
@@ -1361,7 +1360,7 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         public void decode(Sla.CORE.Decoder decoder)
         {
-            uint elemId = decoder.openElement(ElementId.ELEM_TYPEGRP);
+            ElementId elemId = decoder.openElement(ElementId.ELEM_TYPEGRP);
 
             sizeOfInt = (int)decoder.readSignedInteger(AttributeId.ATTRIB_INTSIZE);
             sizeOfLong = (int)decoder.readSignedInteger(AttributeId.ATTRIB_LONGSIZE);
@@ -1385,7 +1384,7 @@ namespace Sla.DECCORE
         {
             clear();            // Make sure this routine flushes
 
-            uint elemId = decoder.openElement(ElementId.ELEM_CORETYPES);
+            ElementId elemId = decoder.openElement(ElementId.ELEM_CORETYPES);
             while (decoder.peekElement() != 0)
                 decodeTypeNoRef(decoder, true);
             decoder.closeElement(elemId);
@@ -1401,10 +1400,9 @@ namespace Sla.DECCORE
         {
             uint defaultSize = glb.getDefaultSize();
             align = 0;
-            uint elemId = decoder.openElement(ElementId.ELEM_DATA_ORGANIZATION);
-            while(true)
-            {
-                uint subId = decoder.openElement();
+            ElementId elemId = decoder.openElement(ElementId.ELEM_DATA_ORGANIZATION);
+            while(true) {
+                ElementId subId = decoder.openElement();
                 if (subId == 0) break;
                 if (subId == ElementId.ELEM_INTEGER_SIZE) {
                     sizeOfInt = (int)decoder.readSignedInteger(AttributeId.ATTRIB_VALUE);
@@ -1414,7 +1412,7 @@ namespace Sla.DECCORE
                 }
                 else if (subId == ElementId.ELEM_SIZE_ALIGNMENT_MAP) {
                     while(true) {
-                        uint mapId = decoder.openElement();
+                        ElementId mapId = decoder.openElement();
                         if (mapId != ElementId.ELEM_ENTRY) break;
                         int sz = (int)decoder.readSignedInteger(AttributeId.ATTRIB_SIZE);
                         int val = (int)decoder.readSignedInteger(AttributeId.ATTRIB_ALIGNMENT);
@@ -1439,7 +1437,7 @@ namespace Sla.DECCORE
         /// param el is the XML element
         public void parseEnumConfig(Decoder decoder)
         {
-            uint elemId = decoder.openElement(ElementId.ELEM_ENUM);
+            ElementId elemId = decoder.openElement(ElementId.ELEM_ENUM);
             enumsize = (int)decoder.readSignedInteger(AttributeId.ATTRIB_SIZE);
             if (decoder.readBool(AttributeId.ATTRIB_SIGNED))
                 enumtype = type_metatype.TYPE_INT;

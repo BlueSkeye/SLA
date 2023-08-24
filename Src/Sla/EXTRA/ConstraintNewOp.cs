@@ -54,7 +54,7 @@ namespace Sla.EXTRA
             s.Write($"{printstate.getName(newopindex)} = data.newOp({numparams}");
             s.WriteLine($",{printstate.getName(oldopindex)}.getAddr());");
             printstate.printIndent(s);
-            s.WriteLine($"data.opSetOpcode({printstate.getName(newopindex)},CPUI_{Globals.get_opname(opc));");
+            s.WriteLine($"data.opSetOpcode({printstate.getName(newopindex)},CPUI_{Globals.get_opname(opc)});");
             s.Write("data.opInsert");
             if (insertafter)
                 s.Write("After(");

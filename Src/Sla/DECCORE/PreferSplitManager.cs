@@ -1,6 +1,6 @@
 ﻿using Sla.CORE;
 
-using VarnodeLocSet = System.Collections.Generic.HashSet<Sla.DECCORE.Varnode>; // VarnodeCompareLocDef : A set of Varnodes sorted by location (then by definition)
+using VarnodeLocSet = System.Collections.Generic.SortedSet<Sla.DECCORE.Varnode>; // VarnodeCompareLocDef : A set of Varnodes sorted by location (then by definition)
 
 namespace Sla.DECCORE
 {
@@ -424,7 +424,7 @@ namespace Sla.DECCORE
         private void splitRecord(PreferSplitRecord rec)
         {
             Address addr = rec.storage.getAddr();
-            VarnodeLocSet::const_iterator iter, enditer;
+            IEnumerator<Varnode> iter, enditer;
 
             SplitInstance inst = new SplitInstance((Varnode)null,rec.splitoffset);
             iter = data.beginLoc((int)rec.storage.size, addr);

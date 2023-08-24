@@ -39,7 +39,7 @@ namespace Sla.DECCORE
                 || (((TypePointer)ptrtype).getPtrTo().getSize() != valsize))
             {
                 string name = op.getOpcode().getName();
-                name[0] = toupper(name[0]);
+                name = name.Capitalize();
                 data.warning($"{name} size is inaccurate", op.getAddr());
             }
             if (ptrtype.getMetatype() == type_metatype.TYPE_PTR) {
@@ -48,7 +48,7 @@ namespace Sla.DECCORE
                     AddrSpace opSpc = op.getIn(0).getSpaceFromConst();
                     if (opSpc != spc && spc.getContain() != opSpc) {
                         string name = op.getOpcode().getName();
-                        name[0] = toupper(name[0]);
+                        name = name.Capitalize();
                         TextWriter s = new StringWriter();
                         s.Write($"{name} refers to '{opSpc.getName()}' but pointer attribute is '");
                         s.Write($"{spc.getName()}\'");

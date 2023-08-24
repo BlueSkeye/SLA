@@ -1,11 +1,4 @@
-﻿using ghidra;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static ghidra.FlowBlock;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -18,20 +11,20 @@ namespace Sla.DECCORE
     internal class BlockGoto : BlockGraph
     {
         /// The type of unstructured branch (f_goto_goto, f_break_goto, etc.)
-        private uint gototype;
+        private FlowBlock.block_flags gototype;
 
         /// Construct given target block
         public BlockGoto(FlowBlock bl)
         {
             gototarget = bl;
-            gototype = f_goto_goto;
+            gototype = FlowBlock.block_flags.f_goto_goto;
         }
 
         /// Get the target block of the goto
         public FlowBlock getGotoTarget() => gototarget;
 
         /// Get the type of unstructured branch
-        public uint getGotoType() => gototype;
+        public FlowBlock.block_flags getGotoType() => gototype;
 
         /// Should a formal goto statement be emitted
         /// Under rare circumstances, the emitter can place the target block of the goto immediately
@@ -55,9 +48,9 @@ namespace Sla.DECCORE
         {
             // Recurse
             @base.markUnstructured();
-            if (gototype == f_goto_goto) {
+            if (gototype == FlowBlock.block_flags.f_goto_goto) {
                 if (gotoPrints()) {
-                    markCopyBlock(gototarget, f_unstructured_targ);
+                    markCopyBlock(gototarget, FlowBlock.block_flags.f_unstructured_targ);
                 }
             }
         }
@@ -70,7 +63,7 @@ namespace Sla.DECCORE
             // Check if our goto hits the current loop exit
             if (curloopexit == gototarget.getIndex()) {
                 // If so, our goto is a break
-                gototype = f_break_goto;
+                gototype = FlowBlock.block_flags.f_break_goto;
             }
         }
 
@@ -87,11 +80,11 @@ namespace Sla.DECCORE
             lng.emitBlockGoto(this);
         }
 
-        public override FlowBlock getExitLeaf => getBlock(0).getExitLeaf();
+        public override FlowBlock? getExitLeaf() => getBlock(0).getExitLeaf();
 
         public override PcodeOp lastOp() => getBlock(0).lastOp();
 
-        public override FlowBlock nextFlowAfter(FlowBlock bl)
+        public override FlowBlock? nextFlowAfter(FlowBlock bl)
         {
             // Return the block containing the next statement in flow
             return getGotoTarget().getFrontLeaf();

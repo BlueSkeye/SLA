@@ -1,6 +1,6 @@
 ﻿using Sla.CORE;
 
-using VarnodeLocSet = System.Collections.Generic.HashSet<Sla.DECCORE.Varnode>; // VarnodeCompareLocDef : A set of Varnodes sorted by location (then by definition)
+using VarnodeLocSet = System.Collections.Generic.SortedSet<Sla.DECCORE.Varnode>; // VarnodeCompareLocDef : A set of Varnodes sorted by location (then by definition)
 
 namespace Sla.DECCORE
 {
@@ -117,7 +117,8 @@ namespace Sla.DECCORE
             Varnode outvn;
             if (vn.getTypeReadFacing(op).getMetatype() == type_metatype.TYPE_PTR) {
                 // Are we explicitly marked as a pointer
-                rampoint = glb.resolveConstant(spc, vn.getOffset(), vn.getSize(), op.getAddr(), fullEncoding);
+                rampoint = glb.resolveConstant(spc, vn.getOffset(), vn.getSize(), op.getAddr(),
+                    out fullEncoding);
                 needexacthit = false;
             }
             else {
@@ -171,7 +172,7 @@ namespace Sla.DECCORE
                 // Check if the constant looks like a single bit or mask
                 if (bit_transitions(vn.getOffset(), vn.getSize()) < 3)
                     return (SymbolEntry)null;
-                rampoint = glb.resolveConstant(spc, vn.getOffset(), vn.getSize(), op.getAddr(), fullEncoding);
+                rampoint = glb.resolveConstant(spc, vn.getOffset(), vn.getSize(), op.getAddr(), out fullEncoding);
             }
 
             if (rampoint.isInvalid()) return (SymbolEntry)null;
@@ -217,17 +218,15 @@ namespace Sla.DECCORE
                 return 0;
             localcount += 1;
 
-            VarnodeLocSet::const_iterator begiter, enditer;
-            Architecture* glb = data.getArch();
-            AddrSpace* cspc = glb.getConstantSpace();
-            SymbolEntry* entry;
+            Architecture glb = data.getArch();
+            AddrSpace cspc = glb.getConstantSpace();
+            SymbolEntry entry;
             Varnode vn;
 
-            begiter = data.beginLoc(cspc);
-            enditer = data.endLoc(cspc);
+            IEnumerator<Varnode> begiter = data.beginLoc(cspc);
+            IEnumerator<Varnode> enditer = data.endLoc(cspc);
 
-            while (begiter != enditer)
-            {
+            while (begiter != enditer) {
                 vn = *begiter++;
                 if (!vn.isConstant()) break; // New varnodes may get inserted between begiter and enditer
                 if (vn.getOffset() == 0) continue; // Never make constant 0 into spacebase

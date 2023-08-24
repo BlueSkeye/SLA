@@ -39,7 +39,7 @@ namespace Sla.DECCORE
             BlockBasic? bb = op.getParent();
             if (bb != (BlockBasic)null) {
                 Architecture glb = bb.getFuncdata().getArch();
-                int index = op.getIn(0).getOffset();
+                int index = (int)op.getIn(0).getOffset();
                 UserPcodeOp userop = glb.userops.getOp(index);
                 if (userop != (UserPcodeOp)null)
                     return userop.getOperatorName(op);

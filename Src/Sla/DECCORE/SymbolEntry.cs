@@ -56,13 +56,19 @@ namespace Sla.DECCORE
         public class EntryInitData
         {
             // friend class SymbolEntry;
-            internal AddrSpace space;       ///< The address space of the main SymbolEntry starting address
-            internal Symbol symbol;     ///< The symbol being mapped
-            internal Varnode.varnode_flags extraflags;       ///< Varnode flags specific to the storage location
-            internal int offset;        ///< Starting offset of the portion of the Symbol being covered
-            internal readonly RangeList uselimit = new RangeList();	///< Reference to the range of code addresses for which the storage is valid
+            // The address space of the main SymbolEntry starting address
+            internal AddrSpace space;
+            // The symbol being mapped
+            internal Symbol symbol;
+            // Varnode flags specific to the storage location
+            internal Varnode.varnode_flags extraflags;
+            // Starting offset of the portion of the Symbol being covered
+            internal int offset;
+            // Reference to the range of code addresses for which the storage is valid
+            internal readonly RangeList uselimit = new RangeList();
 
-            public EntryInitData(Symbol sym, Varnode.varnode_flags exfl, AddrSpace spc, int off, RangeList ul)
+            public EntryInitData(Symbol sym, Varnode.varnode_flags exfl, AddrSpace spc,
+                int off, RangeList ul)
             {
                 uselimit = ul;
                 symbol = sym;
@@ -78,24 +84,25 @@ namespace Sla.DECCORE
         public class EntrySubsort
         {
             // friend class SymbolEntry;
-            private int useindex;          ///< Index of the sub-sorting address space
-            private ulong useoffset;            ///< Offset into the sub-sorting address space
+            // Index of the sub-sorting address space
+            private int useindex;
+            // Offset into the sub-sorting address space
+            private ulong useoffset;
 
+            // Construct given a sub-sorting address
             public EntrySubsort(Address addr) {
                 useindex = addr.getSpace().getIndex();
                 useoffset = addr.getOffset();
             }
-            ///< Construct given a sub-sorting address
 
+            // Construct earliest possible sub-sort
             public EntrySubsort()
             {
                 useindex = 0;
                 useoffset = 0;
             }
-            ///< Construct earliest possible sub-sort
 
             /// \brief Given a boolean value, construct the earliest/latest possible sub-sort
-            ///
             /// \param val is \b true for the latest and \b false for the earliest possible sub-sort
             public EntrySubsort(bool val)
             {
@@ -143,7 +150,8 @@ namespace Sla.DECCORE
         /// \param off if the offset into the Symbol for this (piece of) storage
         /// \param sz is the size in bytes of this (piece of) storage
         /// \param rnglist is the set of code addresses where \b this SymbolEntry represents the Symbol
-        public SymbolEntry(Symbol sym, Varnode.varnode_flags exfl, ulong h, int off, int sz, RangeList rnglist)
+        public SymbolEntry(Symbol sym, Varnode.varnode_flags exfl, ulong h, int off,
+            int sz, RangeList rnglist)
         {
             symbol = sym;
             extraflags = exfl;
@@ -154,7 +162,7 @@ namespace Sla.DECCORE
             uselimit = rnglist;
         }
 
-        ///< Is \b this a high or low piece of the whole Symbol
+        // Is \b this a high or low piece of the whole Symbol
         public bool isPiece()
         {
             return ((extraflags & (Varnode.varnode_flags.precislo | Varnode.varnode_flags.precishi)) != 0);
@@ -187,9 +195,8 @@ namespace Sla.DECCORE
         public subsorttype getSubsort()
         {
             subsorttype res;        // Minimal subsort
-            if ((symbol.getFlags() & Varnode.varnode_flags.addrtied) == 0)
-            {
-                Range range = uselimit.getFirstRange();
+            if ((symbol.getFlags() & Varnode.varnode_flags.addrtied) == 0) {
+                Sla.CORE.Range? range = uselimit.getFirstRange();
                 if (range == null)
                     throw new LowlevelError("Map entry with empty uselimit");
                 res.useindex = range.getSpace().getIndex();
@@ -247,9 +254,9 @@ namespace Sla.DECCORE
         /// \return true if the data-type was changed
         public bool updateType(Varnode vn)
         {
-            if ((symbol.getFlags() & Varnode.varnode_flags.typelock) != 0)
-            { // Type will just get replaced if not locked
-                Datatype* dt = getSizedType(vn.getAddr(), vn.getSize());
+            if ((symbol.getFlags() & Varnode.varnode_flags.typelock) != 0) {
+                // Type will just get replaced if not locked
+                Datatype? dt = getSizedType(vn.getAddr(), vn.getSize());
                 if (dt != (Datatype)null)
                     return vn.updateType(dt, true, true);
             }
@@ -264,13 +271,8 @@ namespace Sla.DECCORE
         /// \return the matching data-type or NULL
         public Datatype getSizedType(Address addr, int sz)
         {
-            int off;
-
-            if (isDynamic())
-                off = offset;
-            else
-                off = (int)(inaddr.getOffset() - addr.getOffset()) + offset;
-            Datatype* cur = symbol.getType();
+            int off = (isDynamic()) ? offset : (int)(inaddr.getOffset() - addr.getOffset()) + offset;
+            Datatype cur = symbol.getType();
             return symbol.getScope().getArch().types.getExactPiece(cur, off, sz);
         }
 
@@ -323,7 +325,7 @@ namespace Sla.DECCORE
         /// \return the advanced iterator
         public void decode(Sla.CORE.Decoder decoder)
         {
-            uint elemId = decoder.peekElement();
+            ElementId elemId = decoder.peekElement();
             if (elemId == ElementId.ELEM_HASH) {
                 decoder.openElement();
                 hash = decoder.readUnsignedInteger(AttributeId.ATTRIB_VAL);

@@ -109,8 +109,8 @@ namespace Sla.DECCORE
                 }
                 else {
                     ulong newOff;
-                    curType = curType.getSubType(curOff, &newOff);
-                    curOff = newOff;
+                    curType = curType.getSubType(curOff, out newOff);
+                    curOff = (int)newOff;
                 }
             }
             if (curType != (Datatype)null && curType.getSize() == size)
@@ -129,8 +129,8 @@ namespace Sla.DECCORE
                 }
                 else {
                     ulong newOff;
-                    curType = curType.getSubType(curOff, newOff);
-                    curOff = newOff;
+                    curType = curType.getSubType(curOff, out newOff);
+                    curOff = (int)newOff;
                 }
             }
             if (curType != (Datatype)null && curType.getSize() == size)
