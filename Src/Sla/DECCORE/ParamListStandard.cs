@@ -607,7 +607,7 @@ namespace Sla.DECCORE
         /// Get the list of parameter entries
         public List<ParamEntry> getEntry() => entry;
 
-        public override uint getType() => p_standard;
+        public override Model getType() => Model.p_standard;
 
         public override void assignMap(List<Datatype> proto, TypeFactory typefactory, List<ParameterPieces> res)
         {

@@ -81,20 +81,18 @@ namespace Sla.SLEIGH
 
         public override void restoreXml(Element el, SleighBase trans)
         {
-            List list = el.getChildren();
-            List::const_iterator iter;
-            iter = list.begin();
-            patval = (PatternValue*)PatternExpression::restoreExpression(*iter, trans);
+            IEnumerator<Element> iter = el.getChildren().GetEnumerator();
+            if (!iter.MoveNext()) throw new ApplicationException();
+            patval = (PatternValue)PatternExpression.restoreExpression(iter.Current, trans)
+                ?? throw new ApplicationException();
             patval.layClaim();
-            ++iter;
-            while (iter != list.end())
-            {
-                Element subel = *iter;
+            while (iter.MoveNext()) {
+                Element subel = iter.Current;
                 if (subel.getNumAttributes() >= 1)
                     nametable.Add(subel.getAttributeValue("name"));
                 else
-                    nametable.Add("\t");      // TAB indicates an illegal index
-                ++iter;
+                    // TAB indicates an illegal index
+                    nametable.Add("\t");
             }
             checkTableFill();
         }

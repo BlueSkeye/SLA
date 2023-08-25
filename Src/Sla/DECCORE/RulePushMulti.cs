@@ -35,14 +35,17 @@ namespace Sla.DECCORE
             if (in1 == in2) return (PcodeOp)null;
             Varnode[] buf1 = new Varnode[2];
             Varnode[] buf2 = new Varnode[2];
-            if (0 != functionalEqualityLevel(in1, in2, buf1, buf2)) return (PcodeOp)null;
-            PcodeOp op1 = in1.getDef();   // in1 and in2 must be written to not be equal and pass functional equality test
+            if (0 != PcodeOpBank.functionalEqualityLevel(in1, in2, buf1, buf2)) return (PcodeOp)null;
+            // in1 and in2 must be written to not be equal and pass functional equality test
+            PcodeOp op1 = in1.getDef();
             PcodeOp op2 = in2.getDef();
             for (int i = 0; i < op1.numInput(); ++i) {
                 Varnode vn = op1.getIn(i);
                 if (vn.isConstant()) continue;
-                if (vn == op2.getIn(i))    // Find matching inputs to op1 and op2,
-                    return cseFindInBlock(op1, vn, bb, earliest); // search for cse of op1 in bb
+                if (vn == op2.getIn(i))
+                    // Find matching inputs to op1 and op2,
+                    // search for cse of op1 in bb
+                    return Funcdata.cseFindInBlock(op1, vn, bb, earliest);
             }
 
             return (PcodeOp)null;
@@ -83,14 +86,15 @@ namespace Sla.DECCORE
             if (in2.isSpacebase()) return 0;
             Varnode[] buf1 = new Varnode[2];
             Varnode[] buf2 = new Varnode[2];
-            int res = functionalEqualityLevel(in1, in2, buf1, buf2);
+            int res = PcodeOpBank.functionalEqualityLevel(in1, in2, buf1, buf2);
             if (res < 0) return 0;
             if (res > 1) return 0;
             PcodeOp op1 = in1.getDef() ?? throw new BugException();
             if (op1.code() == OpCode.CPUI_SUBPIECE) return 0; // SUBPIECE is pulled not pushed
 
             BlockBasic bl = op.getParent();
-            PcodeOp earliest = earliestUseInBlock(op.getOut(), bl);
+            PcodeOp earliest = Funcdata.earliestUseInBlock(op.getOut(), bl)
+                ?? throw new ApplicationException();
             if (op1.code() == OpCode.CPUI_COPY) {
                 // Special case of MERGE of 2 shadowing varnodes
                 if (res == 0) return 0;

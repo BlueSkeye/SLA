@@ -110,19 +110,24 @@ namespace Sla.DECCORE
         /// \param data is the function being analyzed
         /// \return the recovered symbol or NULL
         private static SymbolEntry? isPointer(AddrSpace spc, Varnode vn, PcodeOp op, int slot,
-            out Address rampoint, out ulong fullEncoding, Funcdata data)
+            out Address? rampoint, out ulong fullEncoding, Funcdata data)
         {
             bool needexacthit;
             Architecture glb = data.getArch();
             Varnode outvn;
             if (vn.getTypeReadFacing(op).getMetatype() == type_metatype.TYPE_PTR) {
                 // Are we explicitly marked as a pointer
-                rampoint = glb.resolveConstant(spc, vn.getOffset(), vn.getSize(), op.getAddr(),
+                rampoint = glb.resolveConstant(spc, vn.getOffset(), vn.getSize(), ref op.getAddr(),
                     out fullEncoding);
                 needexacthit = false;
             }
             else {
-                if (vn.isTypeLock()) return (SymbolEntry)null; // Locked as NOT a pointer
+                // Locked as NOT a pointer
+                if (vn.isTypeLock()) {
+                    fullEncoding = 0;
+                    rampoint = null;
+                    return (SymbolEntry)null;
+                }
                 needexacthit = true;
                 // Check if the constant is involved in a potential pointer expression
                 // as the base
@@ -131,10 +136,16 @@ namespace Sla.DECCORE
                     case OpCode.CPUI_CALL:
                     case OpCode.CPUI_CALLIND:
                         // A constant parameter or return value could be a pointer
-                        if (!glb.infer_pointers)
+                        if (!glb.infer_pointers) {
+                            fullEncoding = 0;
+                            rampoint = null;
                             return (SymbolEntry)null;
-                        if (slot == 0)
+                        }
+                        if (slot == 0) {
+                            fullEncoding = 0;
+                            rampoint = null;
                             return (SymbolEntry)null;
+                        }
                         break;
                     case OpCode.CPUI_PIECE:
                     // Pointers get concatenated in structures
@@ -149,33 +160,58 @@ namespace Sla.DECCORE
                         outvn = op.getOut();
                         if (outvn.getTypeDefFacing().getMetatype() == type_metatype.TYPE_PTR) {
                             // Is there another pointer base in this expression
-                            if (op.getIn(1 - slot).getTypeReadFacing(op).getMetatype() == type_metatype.TYPE_PTR)
-                                return (SymbolEntry)null; // If so, we are not a pointer
-                                                        // FIXME: need to fully explore additive tree
+                            if (op.getIn(1 - slot).getTypeReadFacing(op).getMetatype() == type_metatype.TYPE_PTR) {
+                                // If so, we are not a pointer
+                                fullEncoding = 0;
+                                rampoint = null;
+                                return (SymbolEntry)null;
+                            }
+                            // FIXME: need to fully explore additive tree
                             needexacthit = false;
                         }
-                        else if (!glb.infer_pointers)
+                        else if (!glb.infer_pointers) {
+                            fullEncoding = 0;
+                            rampoint = null;
                             return (SymbolEntry)null;
+                        }
                         break;
                     case OpCode.CPUI_STORE:
-                        if (slot != 2)
+                        if (slot != 2) {
+                            fullEncoding = 0;
+                            rampoint = null;
                             return (SymbolEntry)null;
+                        }
                         break;
                     default:
+                        fullEncoding = 0;
+                        rampoint = null;
                         return (SymbolEntry)null;
                 }
                 // Make sure the constant is in the expected range for a pointer
-                if (spc.getPointerLowerBound() > vn.getOffset())
+                if (spc.getPointerLowerBound() > vn.getOffset()) {
+                    fullEncoding = 0;
+                    rampoint = null;
                     return (SymbolEntry)null;
-                if (spc.getPointerUpperBound() < vn.getOffset())
+                }
+                if (spc.getPointerUpperBound() < vn.getOffset()) {
+                    fullEncoding = 0;
+                    rampoint = null;
                     return (SymbolEntry)null;
+                }
                 // Check if the constant looks like a single bit or mask
-                if (bit_transitions(vn.getOffset(), vn.getSize()) < 3)
+                if (Globals.bit_transitions(vn.getOffset(), vn.getSize()) < 3) {
+                    fullEncoding = 0;
+                    rampoint = null;
                     return (SymbolEntry)null;
-                rampoint = glb.resolveConstant(spc, vn.getOffset(), vn.getSize(), op.getAddr(), out fullEncoding);
+                }
+                rampoint = glb.resolveConstant(spc, vn.getOffset(), vn.getSize(), ref op.getAddr(), out fullEncoding);
             }
 
-            if (rampoint.isInvalid()) return (SymbolEntry)null;
+            if (rampoint.isInvalid()) {
+                fullEncoding = 0;
+                rampoint = null;
+                return (SymbolEntry)null;
+            }
             // Since we are looking for a global address
             // Assume it is address tied and use empty usepoint
             SymbolEntry? entry = data.getScopeLocal().getParent().queryContainer(rampoint, 1, new Address());
@@ -188,8 +224,10 @@ namespace Sla.DECCORE
                     if (ct.isCharPrint())
                         needexacthit = false;
                 }
-                if (needexacthit && entry.getAddr() != rampoint)
+                if (needexacthit && entry.getAddr() != rampoint) {
+                    rampoint = null;
                     return (SymbolEntry)null;
+                }
             }
             return entry;
         }
@@ -220,14 +258,13 @@ namespace Sla.DECCORE
 
             Architecture glb = data.getArch();
             AddrSpace cspc = glb.getConstantSpace();
-            SymbolEntry entry;
             Varnode vn;
 
             IEnumerator<Varnode> begiter = data.beginLoc(cspc);
-            IEnumerator<Varnode> enditer = data.endLoc(cspc);
+            // IEnumerator<Varnode> enditer = data.endLoc(cspc);
 
-            while (begiter != enditer) {
-                vn = *begiter++;
+            while (begiter.MoveNext()) {
+                vn = begiter.Current;
                 if (!vn.isConstant()) break; // New varnodes may get inserted between begiter and enditer
                 if (vn.getOffset() == 0) continue; // Never make constant 0 into spacebase
                 if (vn.isPtrCheck()) continue; // Have we checked this variable before
@@ -237,22 +274,20 @@ namespace Sla.DECCORE
 
                 PcodeOp op = vn.loneDescend();
                 if (op == (PcodeOp)null) continue;
-                AddrSpace* rspc = selectInferSpace(vn, op, glb.inferPtrSpaces);
+                AddrSpace? rspc = selectInferSpace(vn, op, glb.inferPtrSpaces);
                 if (rspc == (AddrSpace)null) continue;
                 int slot = op.getSlot(vn);
                 OpCode opc = op.code();
-                if (opc == OpCode.CPUI_INT_ADD)
-                {
+                if (opc == OpCode.CPUI_INT_ADD) {
                     if (op.getIn(1 - slot).isSpacebase()) continue; // Make sure other side is not a spacebase already
                 }
                 else if ((opc == OpCode.CPUI_PTRSUB) || (opc == OpCode.CPUI_PTRADD))
                     continue;
                 Address rampoint;
                 ulong fullEncoding;
-                entry = isPointer(rspc, vn, op, slot, rampoint, fullEncoding, data);
+                SymbolEntry? entry = isPointer(rspc, vn, op, slot, out rampoint, out fullEncoding, data);
                 vn.setPtrCheck();      // Set check flag AFTER searching for symbol
-                if (entry != (SymbolEntry)null)
-                {
+                if (entry != (SymbolEntry)null) {
                     data.spacebaseConstant(op, slot, entry, rampoint, fullEncoding, vn.getSize());
                     if ((opc == OpCode.CPUI_INT_ADD) && (slot == 1))
                         data.opSwapInput(op, 0, 1);

@@ -97,7 +97,7 @@ namespace Sla.DECCORE
                     && !vn.isTypeLock()
                     && entry.getSymbol().isTypeLocked())
                 {
-                    int curOff = (vn.getAddr().getOffset() - entry.getAddr().getOffset()) + entry.getOffset();
+                    int curOff = (vn.getAddr().getOffset() - entry.getAddr().getOffset()) + (uint)entry.getOffset();
                     ct = typegrp.getExactPiece(entry.getSymbol().getType(), curOff, vn.getSize());
                     if (ct == (Datatype)null || ct.getMetatype() == type_metatype.TYPE_UNKNOWN)    // If we can't resolve, or resolve to UNKNOWN
                         ct = vn.getLocalType(needsBlock);      // Let data-type float, even though parent symbol is type-locked
@@ -170,7 +170,8 @@ namespace Sla.DECCORE
 
             if (alttype.getMetatype() == type_metatype.TYPE_BOOL) {
                 // Only propagate boolean
-                if (outvn.getNZMask() > 1)         // If we know output can only take boolean values
+                if (outvn.getNZMask() > 1)
+                    // If we know output can only take boolean values
                     return false;
             }
 
@@ -178,7 +179,7 @@ namespace Sla.DECCORE
             if (newtype == (Datatype)null)
                 return false;
 
-            if (0 > newtype.typeOrder(*outvn.getTempType())) {
+            if (0 > newtype.typeOrder(outvn.getTempType())) {
 #if TYPEPROP_DEBUG
                 propagationDebug(typegrp.getArch(), outvn, newtype, op, inslot, (Varnode)null);
 #endif
@@ -253,7 +254,7 @@ namespace Sla.DECCORE
             int lastsize = ct.getSize();
             Datatype lastct = ct;
             while (iter != enditer) {
-                Varnode curvn = *iter;
+                Varnode curvn = iter.Current;
                 ++iter;
                 if (curvn.isAnnotation()) continue;
                 if ((!curvn.isWritten()) && curvn.hasNoDescend()) continue;
@@ -261,7 +262,7 @@ namespace Sla.DECCORE
                 if (curvn.getSymbolEntry() != (SymbolEntry)null) continue;
                 ulong curoff = curvn.getOffset() - off;
                 int cursize = curvn.getSize();
-                if (curoff + cursize > ct.getSize()) continue;
+                if (curoff + (uint)cursize > (uint)ct.getSize()) continue;
                 if ((cursize != lastsize) || (curoff != lastoff)) {
                     lastoff = curoff;
                     lastsize = cursize;
@@ -271,8 +272,7 @@ namespace Sla.DECCORE
 
                 // Try to propagate the reference type into a varnode that is pointed
                 // to by that reference
-                if (0 > lastct.typeOrder(*curvn.getTempType()))
-                {
+                if (0 > lastct.typeOrder(curvn.getTempType())) {
 #if TYPEPROP_DEBUG
                     propagationDebug(data.getArch(), curvn, lastct, (PcodeOp)null, 0, vn);
 #endif
@@ -293,7 +293,8 @@ namespace Sla.DECCORE
         /// \param spcvn is the spacebase register
         private static void propagateSpacebaseRef(Funcdata data, Varnode spcvn)
         {
-            Datatype spctype = spcvn.getType();   // This is an absolute property of the varnode, so not temptype
+            // This is an absolute property of the varnode, so not temptype
+            Datatype spctype = spcvn.getType();
             if (spctype.getMetatype() != type_metatype.TYPE_PTR) return;
             spctype = ((TypePointer)spctype).getPtrTo();
             if (spctype.getMetatype() != type_metatype.TYPE_SPACEBASE) return;

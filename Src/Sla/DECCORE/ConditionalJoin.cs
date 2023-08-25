@@ -111,7 +111,7 @@ namespace Sla.DECCORE
             }
             Varnode[] buf1 = new Varnode[2];
             Varnode[] buf2 = new Varnode[2];
-            int res = functionalEqualityLevel(vn1, vn2, buf1, buf2);
+            int res = PcodeOpBank.functionalEqualityLevel(vn1, vn2, buf1, buf2);
             if (res < 0) {
                 return false;
             }

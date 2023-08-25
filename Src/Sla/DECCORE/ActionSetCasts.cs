@@ -399,9 +399,9 @@ namespace Sla.DECCORE
             BlockGraph basicblocks = data.getBasicBlocks();
             for (int j = 0; j < basicblocks.getSize(); ++j) {
                 BlockBasic bb = (BlockBasic)basicblocks.getBlock(j);
-                IEnumerator<PcodeOp> iter = bb.beginOp();
-                while (iter.MoveNext()) {
-                    op = iter.Current;
+                LinkedListNode<PcodeOp>? iter = bb.beginOp();
+                while (null != iter) {
+                    op = iter.Value;
                     if (op.notPrinted()) continue;
                     OpCode opc = op.code();
                     if (opc == OpCode.CPUI_CAST) continue;

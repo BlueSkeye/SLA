@@ -138,7 +138,7 @@ namespace Sla.DECCORE
         }
 
         /// Get the number of parameters shifted
-        protected int getParamShift() => paramshift;
+        internal int getParamShift() => paramshift;
 
         /// Return \b true if p-code in the injection is generated dynamically
         internal bool isDynamic() => dynamic;

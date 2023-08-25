@@ -1,4 +1,5 @@
-﻿
+﻿using Sla.CORE;
+
 using PcodeOpTree = System.Collections.Generic.Dictionary<Sla.CORE.SeqNum, Sla.DECCORE.PcodeOp>;
 
 namespace Sla.DECCORE
@@ -30,12 +31,12 @@ namespace Sla.DECCORE
         /// \brief The sorting key for placing a Comment within a specific basic block
         private struct Subsort
         {
-            /// Either the basic block index or -1 for a function header
-            private int index;
-            /// The order index within the basic block
-            private uint order;
-            /// A final count to guarantee a unique sorting
-            private uint pos;
+            // Either the basic block index or -1 for a function header
+            internal int index;
+            // The order index within the basic block
+            internal HeaderCommentFlag order;
+            // A final count to guarantee a unique sorting
+            internal uint pos;
 
             /// \brief Compare comments based on basic block, then position within the block
             /// \param op2 is the other key to compare with \b this
@@ -52,7 +53,7 @@ namespace Sla.DECCORE
 
             /// \brief Initialize a key for a header comment
             /// \param headerType can be either \b header_basic or \b header_unplaced
-            public void setHeader(uint headerType)
+            public void setHeader(CommentSorter.HeaderCommentFlag headerType)
             {
                 // -1 indicates a header comment
                 index = -1;
@@ -97,7 +98,7 @@ namespace Sla.DECCORE
                 && (comm.getAddr() == fad))
             {
                 // If it is a header comment at the address associated with the beginning of the function
-                subsort.setHeader(header_basic);
+                subsort.setHeader(CommentSorter.HeaderCommentFlag.header_basic);
                 return true;
             }
 
@@ -150,7 +151,7 @@ namespace Sla.DECCORE
                 return true;
             }
             if (displayUnplacedComments) {
-                subsort.setHeader(header_unplaced);
+                subsort.setHeader(HeaderCommentFlag.header_unplaced);
                 return true;
             }
             // Basic block containing comment has been excised
@@ -169,7 +170,7 @@ namespace Sla.DECCORE
         /// \param fd is the given function
         /// \param db is the container of comments to collect from
         /// \param displayUnplaced is \b true if unplaced comments should be displayed in the header
-        public void setupFunctionList(uint tp, Funcdata fd, CommentDatabase db,
+        public void setupFunctionList(Comment.comment_type tp, Funcdata fd, CommentDatabase db,
             bool displayUnplaced)
         {
             commmap.Clear();
@@ -251,14 +252,14 @@ namespace Sla.DECCORE
         /// Return \b true if there are more comments to emit in the current set
         public bool hasNext()
         {
-            return (start!=opstop);
+            return (start != opstop);
         }
 
         /// Advance to the next comment
         public Comment getNext()
         {
-            Comment res = (*start).second;
-            ++start;
+            Comment res = start.Current.Value;
+            start.MoveNext();
             return res;
         }
     }

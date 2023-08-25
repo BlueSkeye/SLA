@@ -9,6 +9,9 @@ namespace Sla
 {
     internal static partial class Globals
     {
+        // #if defined (__x86_64__) || defined (__i386__)
+        internal const int HOST_ENDIAN = 0;
+
 #if UINTB4
         ulong[] uintbmasks = new ulong[] {
             0,
@@ -332,7 +335,7 @@ public static bool signbit_negative(ulong val, int size)
             }
             int res = 0;
             int sz = 4 * sizeof(ulong);
-            ulong mask = ~((ulong)0);
+            ulong mask = ulong.MaxValue;
             do {
                 mask >>= sz;
                 if ((mask & val) == 0) {
@@ -354,7 +357,7 @@ public static bool signbit_negative(ulong val, int size)
             }
             int res = 8 * sizeof(ulong) - 1;
             int sz = 4 * sizeof(ulong);
-            ulong mask = ~((ulong)0);
+            ulong mask = ulong.MaxValue;
             do {
                 mask <<= sz;
                 if ((mask & val) == 0) {
@@ -950,12 +953,11 @@ public static bool signbit_negative(ulong val, int size)
         /// \return the complementary OpCode or OpCode.CPUI_MAX if not given a comparison operation
         public static OpCode get_booleanflip(OpCode opc, out bool reorder)
         {
+            reorder = false;
             switch (opc) {
                 case OpCode.CPUI_INT_EQUAL:
-                    reorder = false;
                     return OpCode.CPUI_INT_NOTEQUAL;
                 case OpCode.CPUI_INT_NOTEQUAL:
-                    reorder = false;
                     return OpCode.CPUI_INT_EQUAL;
                 case OpCode.CPUI_INT_SLESS:
                     reorder = true;
@@ -970,13 +972,10 @@ public static bool signbit_negative(ulong val, int size)
                     reorder = true;
                     return OpCode.CPUI_INT_LESS;
                 case OpCode.CPUI_BOOL_NEGATE:
-                    reorder = false;
                     return OpCode.CPUI_COPY;
                 case OpCode.CPUI_FLOAT_EQUAL:
-                    reorder = false;
                     return OpCode.CPUI_FLOAT_NOTEQUAL;
                 case OpCode.CPUI_FLOAT_NOTEQUAL:
-                    reorder = false;
                     return OpCode.CPUI_FLOAT_EQUAL;
                 case OpCode.CPUI_FLOAT_LESS:
                     reorder = true;

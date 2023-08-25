@@ -29,7 +29,7 @@ namespace Sla.DECCORE
         /// Architecture to which this symbol table is attached
         private Architecture glb;
         /// Quick reference to the \e global Scope
-        private Scope globalscope;
+        private Scope? globalscope;
         /// Address to \e namespace map
         private ScopeResolve resolvemap;
         /// Map from id to Scope
@@ -183,17 +183,16 @@ namespace Sla.DECCORE
         public void deleteScope(Scope scope)
         {
             clearReferences(scope);
-            if (globalscope == scope)
-            {
+            if (globalscope == scope) {
                 globalscope = (Scope)null;
-                delete scope;
+                // delete scope;
             }
-            else
-            {
-                ScopeMap::iterator iter = scope.parent.children.find(scope.uniqueId);
-                if (iter == scope.parent.children.end())
-                    throw new CORE.LowlevelError("Could not remove parent reference to: " + scope.name);
-                scope.parent.detachScope(iter);
+            else {
+                Scope foundScope;
+                if (!scope.parent.children.TryGetValue(scope.uniqueId, out foundScope))
+                    throw new CORE.LowlevelError(
+                        $"Could not remove parent reference to: {scope.name}");
+                scope.parent.detachScope(foundScope);
             }
         }
 
@@ -202,15 +201,9 @@ namespace Sla.DECCORE
         /// \param scope is the given Scope
         public void deleteSubScopes(Scope scope)
         {
-            ScopeMap::iterator iter = scope.children.begin();
-            ScopeMap::iterator enditer = scope.children.end();
-            ScopeMap::iterator curiter;
-            while (iter != enditer)
-            {
-                curiter = iter;
-                ++iter;
-                clearReferences((*curiter).second);
-                scope.detachScope(curiter);
+            foreach (KeyValuePair<ulong, Scope> pair in scope.children) {
+                clearReferences(pair.Value);
+                scope.detachScope(pair.Key);
             }
         }
 
@@ -220,13 +213,9 @@ namespace Sla.DECCORE
         /// \param scope is the given Scope
         public void clearUnlocked(Scope scope)
         {
-            ScopeMap::iterator iter = scope.children.begin();
-            ScopeMap::iterator enditer = scope.children.end();
-            while (iter != enditer)
-            {
-                Scope* subscope = (*iter).second;
+            foreach (KeyValuePair<ulong, Scope> pair in scope.children) {
+                Scope subscope = pair.Value;
                 clearUnlocked(subscope);
-                ++iter;
             }
             scope.clearUnlocked();
         }
@@ -271,7 +260,7 @@ namespace Sla.DECCORE
         }
 
         /// Get the global Scope
-        public Scope getGlobalScope() => globalscope;
+        public Scope? getGlobalScope() => globalscope;
 
         /// Look-up a Scope by id
         /// Find a Scope object, given its global id.  Return null if id is not mapped to a Scope.
@@ -279,10 +268,8 @@ namespace Sla.DECCORE
         /// \return the matching Scope or null
         public Scope resolveScope(ulong id)
         {
-            ScopeMap::const_iterator iter = idmap.find(id);
-            if (iter != idmap.end())
-                return (*iter).second;
-            return (Scope)null;
+            Scope foundScope;
+            return (idmap.TryGetValue(id, out foundScope)) ? foundScope : (Scope)null;
         }
 
         /// \brief Get the Scope (and base name) associated with a qualified Symbol name
@@ -315,8 +302,11 @@ namespace Sla.DECCORE
                 else {
                     string scopename = fullname.Substring(mark, endmark - mark);
                     start = start.resolveScope(scopename, idByNameHash);
-                    if (start == (Scope)null) // Was the scope name bad
+                    if (start == (Scope)null) {
+                        // Was the scope name bad
+                        basename = string.Empty;
                         return (Scope)null;
+                    }
                 }
                 mark = endmark + delim.Length;
             }
@@ -389,9 +379,11 @@ namespace Sla.DECCORE
         /// \return a Scope to act as a starting point for a hierarchical search
         public Scope mapScope(Scope qpoint, Address addr, Address usepoint)
         {
-            if (resolvemap.empty()) // If there are no namespace scopes
-                return qpoint;      // Start querying from scope placing query
-            pair<ScopeResolve::const_iterator, ScopeResolve::const_iterator> res;
+            if (resolvemap.empty())
+                // If there are no namespace scopes
+                // Start querying from scope placing query
+                return qpoint;
+            Tuple<ScopeResolve::const_iterator, ScopeResolve::const_iterator> res;
             res = resolvemap.find(addr);
             if (res.first != res.second)
                 return (*res.first).getScope();
@@ -417,7 +409,7 @@ namespace Sla.DECCORE
             // DO NOT use MoveNext before reading
             IEnumerator<KeyValuePair<Address, Varnode.varnode_flags>> aiter =
                 flagbase.begin(addr1) ?? throw new BugException();
-            IEnumerator<KeyValuePair<Address, uint>>? biter;
+            IEnumerator<KeyValuePair<Address, Varnode.varnode_flags>>? biter;
 
             if (!addr2.isInvalid()) {
                 flagbase.split(addr2);
@@ -447,11 +439,12 @@ namespace Sla.DECCORE
             Address addr1 = range.getFirstAddr();
             Address addr2 = range.getLastAddrOpen(glb);
             flagbase.split(addr1);
-            IEnumerator<KeyValuePair<Address, uint>>? biter;
+            IEnumerator<KeyValuePair<Address, Varnode.varnode_flags>>? biter;
 
             // WARNING : The returned enumerator is already set on the first relevant record.
             // DO NOT use MoveNext before reading
-            IEnumerator<KeyValuePair<Address, uint>> aiter = flagbase.begin(addr1) ?? throw new BugException();
+            IEnumerator<KeyValuePair<Address, Varnode.varnode_flags>> aiter =
+                flagbase.begin(addr1) ?? throw new BugException();
             if (!addr2.isInvalid()) {
                 flagbase.split(addr2);
                 biter = flagbase.begin(addr2);
@@ -489,13 +482,14 @@ namespace Sla.DECCORE
             if (idByNameHash)
                 encoder.writeBool(AttributeId.ATTRIB_SCOPEIDBYNAME, true);
             // Save the property change points
-            IEnumerator<KeyValuePair<Address, uint>> piter = flagbase.begin() ?? throw new BugException();
+            IEnumerator<KeyValuePair<Address, Varnode.varnode_flags>> piter =
+                flagbase.begin() ?? throw new BugException();
             while (piter.MoveNext()) {
                 Address addr = piter.Current.Key;
-                uint val = piter.Current.Value;
+                Varnode.varnode_flags val = piter.Current.Value;
                 encoder.openElement(ElementId.ELEM_PROPERTY_CHANGEPOINT);
                 addr.getSpace().encodeAttributes(encoder, addr.getOffset());
-                encoder.writeUnsignedInteger(AttributeId.ATTRIB_VAL, val);
+                encoder.writeUnsignedInteger(AttributeId.ATTRIB_VAL, (uint)val);
                 encoder.closeElement(ElementId.ELEM_PROPERTY_CHANGEPOINT);
             }
 
@@ -531,8 +525,8 @@ namespace Sla.DECCORE
             while(true) {
                 ElementId subId = decoder.openElement();
                 if (subId != ElementId.ELEM_SCOPE) break;
-                string name;
-                string displayName;
+                string name = string.Empty;
+                string displayName = string.Empty;
                 ulong id = 0;
                 bool seenId = false;
                 while(true) {
@@ -549,7 +543,7 @@ namespace Sla.DECCORE
                 }
                 if (name.empty() || !seenId)
                     throw new DecoderError("Missing name and id attributes in scope");
-                Scope parentScope = (Scope)null;
+                Scope? parentScope = (Scope)null;
                 ElementId parentId = decoder.peekElement();
                 if (parentId == ElementId.ELEM_PARENT) {
                     parentScope = parseParentTag(decoder);

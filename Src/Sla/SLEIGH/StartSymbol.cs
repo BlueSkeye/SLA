@@ -30,7 +30,7 @@ namespace Sla.SLEIGH
             // Returns current instruction offset as a constant
             ConstTpl spc = new ConstTpl(const_space);
             ConstTpl off = new ConstTpl(ConstTpl.const_type.j_start);
-            ConstTpl sz_zero;
+            ConstTpl sz_zero = new ConstTpl();
             return new VarnodeTpl(spc, off, sz_zero);
         }
 

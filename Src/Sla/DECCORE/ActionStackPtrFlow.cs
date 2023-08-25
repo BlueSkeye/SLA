@@ -91,23 +91,23 @@ namespace Sla.DECCORE
         /// \param vn is the Varnode to check for relativeness
         /// \param constval is a reference for passing back the constant offset
         /// \return true if \b vn is stack relative
-        private static bool isStackRelative(Varnode spcbasein, Varnode vn, ulong constval)
+        private static bool isStackRelative(Varnode spcbasein, Varnode vn, out ulong constval)
         {
+            constval = 0;
             if (spcbasein == vn) {
-                constval = 0;
                 return true;
             }
             if (!vn.isWritten()) {
                 return false;
             }
-            PcodeOp addop = vn.getDef();
+            PcodeOp addop = vn.getDef() ?? throw new ApplicationException();
             if (addop.code() != OpCode.CPUI_INT_ADD) {
                 return false;
             }
             if (addop.getIn(0) != spcbasein) {
                 return false;
             }
-            Varnode constvn = addop.getIn(1);
+            Varnode constvn = addop.getIn(1) ?? throw new ApplicationException();
             if (!constvn.isConstant()) {
                 return false;
             }
@@ -123,7 +123,7 @@ namespace Sla.DECCORE
         /// \return true if the adjustment is successful
         private static bool adjustLoad(Funcdata data, PcodeOp loadop, PcodeOp storeop)
         {
-            Varnode vn = storeop.getIn(2);
+            Varnode vn = storeop.getIn(2) ?? throw new ApplicationException();
             if (vn.isConstant()) {
                 vn = data.newConstant(vn.getSize(), vn.getOffset());
             }
@@ -145,13 +145,13 @@ namespace Sla.DECCORE
         /// \param loadop is the given LOAD op
         /// \param constz is the stack relative offset of the LOAD pointer
         /// \return 1 if we successfully change LOAD to COPY, 0 otherwise
-        private static int repair(Funcdata data, AddrSpace id, Varnode spcbasein, PcodeOp loadop,
-            ulong constz)
+        private static int repair(Funcdata data, AddrSpace id, Varnode spcbasein,
+            PcodeOp loadop, ulong constz)
         {
             int loadsize = loadop.getOut().getSize();
             BlockBasic curblock = loadop.getParent();
-            IEnumerator<PcodeOp> begiter = curblock.beginOp();
-            IEnumerator<PcodeOp> iter = loadop.getBasicIter();
+            LinkedListNode<PcodeOp>? begiter = curblock.beginOp();
+            LinkedListNode<PcodeOp>? iter = loadop.getBasicIter();
             while(true) {
                 if (iter == begiter) {
                     if (curblock.sizeIn() != 1) {
@@ -164,23 +164,25 @@ namespace Sla.DECCORE
                     continue;
                 }
                 else {
-                    --iter;
+                    iter = iter.Previous;
                 }
-                PcodeOp curop = *iter;
+                PcodeOp curop = iter.Value;
                 if (curop.isCall()) {
                     // Don't try to trace aliasing through a call
                     return 0;
                 }
                 if (curop.code() == OpCode.CPUI_STORE) {
-                    Varnode ptrvn = curop.getIn(1);
-                    Varnode datavn = curop.getIn(2);
+                    Varnode ptrvn = curop.getIn(1) ?? throw new ApplicationException();
+                    Varnode datavn = curop.getIn(2) ?? throw new ApplicationException();
                     ulong constnew;
-                    if (isStackRelative(spcbasein, ptrvn, constnew)) {
+                    if (isStackRelative(spcbasein, ptrvn, out constnew)) {
                         if ((constnew == constz) && (loadsize == datavn.getSize())) {
                             // We found the matching store
                             return (adjustLoad(data, loadop, curop)) ? 1 : 0;
                         }
-                        else if ((constnew <= constz + (loadsize - 1)) && (constnew + (datavn.getSize() - 1) >= constz)) {
+                        else if (   (constnew <= constz + (uint)(loadsize - 1))
+                                 && (constnew + (uint)(datavn.getSize() - 1) >= constz))
+                        {
                             return 0;
                         }
                     }
@@ -212,32 +214,28 @@ namespace Sla.DECCORE
         {
             VarnodeData spacebasedata = id.getSpacebase(spcbase);
             Address spacebase = new Address(spacebasedata.space, spacebasedata.offset);
-            IEnumerator<Varnode> begiter, enditer;
             int clogcount = 0;
 
-            begiter = data.beginLoc(spacebasedata.size, spacebase);
-            enditer = data.endLoc(spacebasedata.size, spacebase);
+            IEnumerator<Varnode> begiter = data.beginLoc(spacebasedata.size, spacebase);
+            // IEnumerator<Varnode> enditer = data.endLoc(spacebasedata.size, spacebase);
 
-            Varnode spcbasein;
-            if (begiter == enditer) {
+            if (!begiter.MoveNext()) {
                 return clogcount;
             }
-            spcbasein = *begiter;
-            ++begiter;
+            Varnode spcbasein = begiter.Current;
             if (!spcbasein.isInput()) {
                 return clogcount;
             }
-            while (begiter != enditer) {
-                 outvn = *begiter;
-                ++begiter;
+            while (begiter.MoveNext()) {
+                Varnode outvn = begiter.Current;
                 if (!outvn.isWritten()) {
                     continue;
                 }
-                PcodeOp addop = outvn.getDef();
+                PcodeOp addop = outvn.getDef() ?? throw new ApplicationException();
                 if (addop.code() != OpCode.CPUI_INT_ADD) {
                     continue;
                 }
-                Varnode y = addop.getIn(1);
+                Varnode y = addop.getIn(1) ?? throw new ApplicationException();
                 if (!y.isWritten()) {
                     // y must not be a constant
                     continue;
@@ -245,27 +243,27 @@ namespace Sla.DECCORE
                 // is y is not constant than x (in position 0) isn't either
                 Varnode x = addop.getIn(0);
                 ulong constx;
-                if (!isStackRelative(spcbasein, x, constx)) {
+                if (!isStackRelative(spcbasein, x, out constx)) {
                     // If x is not stack relative
                     x = y;          // Swap x and y
                     y = addop.getIn(0);
-                    if (!isStackRelative(spcbasein, x, constx)) {
+                    if (!isStackRelative(spcbasein, x, out constx)) {
                         // Now maybe the new x is stack relative
                         continue;
                     }
                 }
-                PcodeOp loadop = y.getDef();
+                PcodeOp loadop = y.getDef() ?? throw new ApplicationException();
                 if (loadop.code() == OpCode.CPUI_INT_MULT) {
                     // If we multiply
-                    Varnode constvn = loadop.getIn(1);
+                    Varnode constvn = loadop.getIn(1) ?? throw new ApplicationException();
                     if (!constvn.isConstant()) {
                         continue;
                     }
-                    if (constvn.getOffset() != Globals.calc_mask(constvn.getSize())) {
+                    if (constvn.getOffset() != Globals.calc_mask((uint)constvn.getSize())) {
                         // Must multiply by -1
                         continue;
                     }
-                    y = loadop.getIn(0);
+                    y = loadop.getIn(0) ?? throw new ApplicationException();
                     if (!y.isWritten()) {
                         continue;
                     }
@@ -276,7 +274,7 @@ namespace Sla.DECCORE
                     }
                 Varnode ptrvn = loadop.getIn(1);
                 ulong constz;
-                if (!isStackRelative(spcbasein, ptrvn, constz)) {
+                if (!isStackRelative(spcbasein, ptrvn, out constz)) {
                     continue;
                 }
                clogcount += repair(data, id, spcbasein, loadop, constz);

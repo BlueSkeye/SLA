@@ -1,76 +1,116 @@
 ﻿using Sla.CORE;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Collections;
 
 namespace Sla.DECCORE
 {
     /// \brief Describes a (register) storage location and the ways it might be split into lanes
-    internal class LanedRegister
+    internal class LanedRegister : IEnumerable<int>
     {
         /// \brief Class for iterating over possible lane sizes
-        public class LanedIterator
+        private class LanedIterator : IEnumerator<int>
         {
-            /// Current lane size
+            private bool _completed;
+            private bool _disposed;
+            // Current lane size
             private int size;
-            /// Collection being iterated over
+            // Collection being iterated over
             private uint mask;
 
-            /// Normalize the iterator, after increment or initialization
-            private void normalize()
-            {
-                uint flag = 1;
-                flag <<= size;
-                while (flag <= mask)
-                {
-                    if ((flag & mask) != 0) return; // Found a valid lane size
-                    size += 1;
-                    flag <<= 1;
-                }
-                size = -1;      // Indicate ending iterator
-            }
-
-            public LanedIterator(LanedRegister lanedR)
+            internal LanedIterator(LanedRegister lanedR)
             {
                 size = 0;
                 mask = lanedR.sizeBitMask;
                 normalize();
             }
 
-            public LanedIterator()
+            internal LanedIterator()
             {
                 size = -1;
                 mask = 0;
+                _completed = false;
+            }
+
+            ///// Dereference operator
+            //public static int operator *() => size;
+            public int Current
+            {
+                get
+                {
+                    AssertNotDisposed();
+                    return size;
+                }
+            }
+
+            object IEnumerator.Current => this.Current;
+
+            private void AssertNotDisposed()
+            {
+                if (_disposed) throw new InvalidOperationException();
+            }
+
+            public void Dispose()
+            {
+                _disposed = true;
             }
 
             /// Preincrement operator
-            public static LanedIterator operator++(LanedIterator item)
+            public bool MoveNext()
             {
-                item.size += 1;
-                item.normalize();
-                return item;
+                AssertNotDisposed();
+                size += 1;
+                normalize();
+                return !_completed;
+            }
+            //public static LanedIterator operator ++(LanedIterator item)
+            //{
+            //    item.size += 1;
+            //    item.normalize();
+            //    return item;
+            //}
+
+            // Normalize the iterator, after increment or initialization
+            private void normalize()
+            {
+                uint flag = 1;
+                flag <<= size;
+                while (flag <= mask) {
+                    // Found a valid lane size
+                    if ((flag & mask) != 0) return;
+                    size += 1;
+                    flag <<= 1;
+                }
+                // Indicate ending iterator
+                size = -1;
+                _completed = true;
             }
 
-            /// Dereference operator
-            public static int operator *() => size;
+            public void Reset()
+            {
+                AssertNotDisposed();
+                throw new NotSupportedException();
+            }
 
             ///< Assignment
             public static LanedIterator operator=(LanedIterator op1, LanedIterator op2)
             {
                 op1.size = op2.size;
                 op1.mask = op2.mask;
-                return this;
+                return op1;
             }
 
-            /// Equal operator
-            public static bool operator ==(LanedIterator op1, LanedIterator op2) => (op1.size == op2.size);
+            // Equal operator
+            public static bool operator ==(LanedIterator op1, LanedIterator op2)
+            {
+                op1.AssertNotDisposed();
+                op2.AssertNotDisposed();
+                return (op1.size == op2.size);
+            }
 
-            /// Not-equal operator
-            public static bool operator !=(LanedIterator op1, LanedIterator op2) => (op1.size != op2.size); 
+            // Not-equal operator
+            public static bool operator !=(LanedIterator op1, LanedIterator op2)
+                => !(op1.size == op2.size); 
         }
+        
         /// Iterator over possible lane sizes for this register
         // typedef LanedIterator const_iterator;
 
@@ -98,8 +138,8 @@ namespace Sla.DECCORE
         /// \return \b true if the XML description provides lane sizes
         public bool decode(Sla.CORE.Decoder decoder)
         {
-            uint elemId = decoder.openElement(ElementId.ELEM_REGISTER);
-            string laneSizes;
+            ElementId elemId = decoder.openElement(ElementId.ELEM_REGISTER);
+            string laneSizes = string.Empty;
             while(true) {
                 AttributeId attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
@@ -123,7 +163,8 @@ namespace Sla.DECCORE
                 int nextPos = laneSizes.IndexOf(',', pos);
                 string value;
                 if (-1 == nextPos) {
-                    value = laneSizes.Substring(pos);  // To the end of the string
+                    // To the end of the string
+                    value = laneSizes.Substring(pos);
                     pos = nextPos;
                 }
                 else {
@@ -156,10 +197,17 @@ namespace Sla.DECCORE
         /// Is \e size among the allowed lane sizes
         public bool allowedLane(int size) => (((sizeBitMask >> size) &1) != 0);
 
-        /// Starting iterator over possible lane sizes
-        public const_iterator begin() => new LanedIterator(this);
+        ///// Starting iterator over possible lane sizes
+        //public const_iterator begin() => new LanedIterator(this);
 
-        /// Ending iterator over possible lane sizes
-        public const_iterator end() => new LanedIterator();
+        ///// Ending iterator over possible lane sizes
+        //public const_iterator end() => new LanedIterator();
+
+        public IEnumerator<int> GetEnumerator()
+        {
+            return new LanedIterator(this);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
     }
 }

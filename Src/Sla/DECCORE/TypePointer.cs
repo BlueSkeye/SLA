@@ -194,31 +194,34 @@ namespace Sla.DECCORE
         /// \param allowArrayWrap is \b true if the pointer should be treated as a pointer to an array
         /// \param typegrp is the factory producing the (possibly new) data-type
         /// \return a pointer datatype for the component or NULL
-        public virtual TypePointer downChain(ulong off, out TypePointer par, out ulong parOff,
+        public virtual TypePointer? downChain(ulong off, out TypePointer? par, out ulong parOff,
             bool allowArrayWrap, TypeFactory typegrp)
         {
+            par = null;
+            parOff = 0;
             int ptrtoSize = ptrto.getSize();
-            if (off >= ptrtoSize)
-            {   // Check if we are wrapping
-                if (ptrtoSize != 0 && !ptrto.isVariableLength())
-                {   // Check if pointed-to is wrappable
+            if (off >= ptrtoSize) {
+                // Check if we are wrapping
+                if (ptrtoSize != 0 && !ptrto.isVariableLength()) {
+                    // Check if pointed-to is wrappable
                     if (!allowArrayWrap)
                         return (TypePointer)null;
                     long signOff = (long)off;
-                    Globals.sign_extend(signOff, size * 8 - 1);
+                    Globals.sign_extend(ref signOff, size * 8 - 1);
                     signOff = signOff % ptrtoSize;
                     if (signOff < 0)
                         signOff = signOff + ptrtoSize;
-                    off = signOff;
-                    if (off == 0)       // If we've wrapped and are now at zero
-                        return this;        // consider this going down one level
+                    off = (ulong)signOff;
+                    if (off == 0)
+                        // If we've wrapped and are now at zero
+                        // consider this going down one level
+                        return this;
                 }
             }
 
             type_metatype meta = ptrto.getMetatype();
             bool isArray = (meta == type_metatype.TYPE_ARRAY);
-            if (isArray || meta == type_metatype.TYPE_STRUCT)
-            {
+            if (isArray || meta == type_metatype.TYPE_STRUCT) {
                 par = this;
                 parOff = off;
             }
@@ -264,7 +267,8 @@ namespace Sla.DECCORE
                 ResolvedUnion? res = fd.getUnionField(this, op, slot);
                 if (res != (ResolvedUnion)null)
                     return res.getDatatype();
-                ScoreUnionFields scoreFields = new ScoreUnionFields(*fd.getArch().types,this,op,slot);
+                ScoreUnionFields scoreFields = new ScoreUnionFields(fd.getArch().types,
+                    this,op,slot);
                 fd.setUnionField(this, op, slot, scoreFields.getResult());
                 return scoreFields.getResult().getDatatype();
             }

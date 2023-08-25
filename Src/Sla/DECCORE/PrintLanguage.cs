@@ -1,10 +1,4 @@
 ﻿using Sla.CORE;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.DECCORE
 {
@@ -90,12 +84,18 @@ namespace Sla.DECCORE
         /// \brief An entry on the reverse polish notation (RPN) stack
         public struct ReversePolish
         {
-            internal readonly OpToken tok;     ///< The operator token
-            internal int visited;       ///< The current stage of printing for the operator
-            internal bool paren;         ///< True if parentheses are required
-            internal readonly PcodeOp op;      ///< The PcodeOp associated with the operator token
-            internal int id;            ///< The id of the token group which \b this belongs to
-            internal /*mutable*/ int id2;		///< The id of the token group \b this surrounds (for surround operator tokens)
+            // The operator token
+            internal OpToken tok;
+            // The current stage of printing for the operator
+            internal int visited;
+            // True if parentheses are required
+            internal bool paren;
+            // The PcodeOp associated with the operator token
+            internal PcodeOp? op;
+            // The id of the token group which \b this belongs to
+            internal int id;
+            // The id of the token group \b this surrounds (for surround operator tokens)
+            internal /*mutable*/ int id2;
         }
 
         /// \brief A pending data-flow node; waiting to be placed on the reverse polish notation stack
@@ -229,9 +229,9 @@ namespace Sla.DECCORE
         // Currently active printing modifications
         protected modifiers mods;
         // Type of instruction comments to display
-        protected Comment.comment_type instr_comment_type;
+        internal Comment.comment_type instr_comment_type;
         // Type of header comments to display
-        protected Comment.comment_type head_comment_type;
+        internal Comment.comment_type head_comment_type;
         // How should namespace tokens be displayed
         protected namespace_strategy namespc_strategy;
 #if CPUI_DEBUG
@@ -546,25 +546,25 @@ namespace Sla.DECCORE
         protected void emitAtom(Atom atom)
         {
             switch (atom.type) {
-                case syntax:
+                case tagtype.syntax:
                     emit.print(atom.name, atom.highlight);
                     break;
-                case vartoken:
+                case tagtype.vartoken:
                     emit.tagVariable(atom.name, atom.highlight, atom.ptr_second.vn, atom.op);
                     break;
-                case functoken:
+                case tagtype.functoken:
                     emit.tagFuncName(atom.name, atom.highlight, atom.ptr_second.fd, atom.op);
                     break;
-                case optoken:
+                case tagtype.optoken:
                     emit.tagOp(atom.name, atom.highlight, atom.op);
                     break;
-                case typetoken:
+                case tagtype.typetoken:
                     emit.tagType(atom.name, atom.highlight, atom.ptr_second.ct);
                     break;
-                case fieldtoken:
+                case tagtype.fieldtoken:
                     emit.tagField(atom.name, atom.highlight, atom.ptr_second.ct, atom.offset, atom.op);
                     break;
-                case blanktoken:
+                case tagtype.blanktoken:
                     break;          // Print nothing
             }
         }
@@ -866,7 +866,7 @@ namespace Sla.DECCORE
             while (pos < text.size()) {
                 char tok = text[pos++];
                 if ((tok == ' ') || (tok == '\t')) {
-                    int4 count = 1;
+                    int count = 1;
                     while (pos < text.size()) {
                         tok = text[pos];
                         if ((tok != ' ') && (tok != '\t')) break;
@@ -879,10 +879,10 @@ namespace Sla.DECCORE
                     emit.tagLine();
                 else if (tok == '\r') {
                 }
-                else if (tok == '{' && pos < text.size() && text[pos] == '@') {
+                else if (tok == '{' && pos < text.Length && text[pos] == '@') {
                     // Comment annotation
-                    int4 count = 1;
-                    while (pos < text.size()) {
+                    int count = 1;
+                    while (pos < text.Length) {
                         tok = text[pos];
                         count += 1;
                         pos += 1;
@@ -894,19 +894,18 @@ namespace Sla.DECCORE
                 }
                 else
                 {
-                    int4 count = 1;
-                    while (pos < text.size())
-                    {
+                    int count = 1;
+                    while (pos < text.Length) {
                         tok = text[pos];
-                        if (isspace(tok)) break;
+                        if (char.IsWhiteSpace(tok)) break;
                         count += 1;
                         pos += 1;
                     }
                     string sub = text.Substring(pos - count, count);
-                    emit.tagComment(sub, EmitMarkup::comment_color, spc, off);
+                    emit.tagComment(sub, EmitMarkup.syntax_highlight.comment_color, spc, off);
                 }
             }
-            if (commentend.size() != 0)
+            if (commentend.Length != 0)
                 emit.tagComment(commentend, EmitMarkup::comment_color, spc, off);
             emit.stopComment(id);
             comm.setEmitted(true);
@@ -929,7 +928,7 @@ namespace Sla.DECCORE
         /// 0 for parameters, -1 for everything.
         /// \param symScope is the given Scope
         /// \param cat is the category of variable to declare
-        protected abstract bool emitScopeVarDecls(Scope symScope, int cat);
+        protected abstract bool emitScopeVarDecls(Scope symScope, Symbol.SymbolCategory cat);
 
         /// \brief Emit a full expression
         ///
@@ -968,9 +967,9 @@ namespace Sla.DECCORE
 
         ~PrintLanguage()
         {
-            delete emit;
-            if (castStrategy != (CastStrategy)null)
-                delete castStrategy;
+            //delete emit;
+            //if (castStrategy != (CastStrategy)null)
+            //    delete castStrategy;
         }
 
         ///< Get the language name
@@ -1072,9 +1071,9 @@ namespace Sla.DECCORE
         public void setFlat(bool val)
         {
             if (val)
-                mods |= flat;
+                mods |= modifiers.flat;
             else
-                mods &= ~flat;
+                mods &= ~modifiers.flat;
         }
 
         ///< Initialize architecture specific aspects of printer

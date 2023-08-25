@@ -1,12 +1,4 @@
 ﻿using Sla.CORE;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Sla.DECCORE
 {
@@ -95,23 +87,23 @@ namespace Sla.DECCORE
         /// Container for the control-flow graph
         private BlockGraph bblocks;
         /// The list of discovered sub-function call sites
-        private List<FuncCallSpecs> qlst;
+        private List<FuncCallSpecs> qlst; // Initialized in constructors
         /// PCodeOp factory (configured to allocate into \b data and \b obank)
         private PcodeEmitFd emitter;
         /// Addresses which are permanently unprocessed
         private List<Address> unprocessed;
         /// Addresses to which there is flow
-        private List<Address> addrlist;
+        private List<Address> addrlist = new List<Address>();
         /// List of BRANCHIND ops (preparing for jump table recovery)
-        private List<PcodeOp> tablelist;
+        private List<PcodeOp> tablelist = new List<PcodeOp>();
         /// List of p-code ops that need injection
-        private List<PcodeOp> injectlist;
+        private List<PcodeOp> injectlist = new List<PcodeOp>();
         /// Map of machine instructions that have been visited so far
-        private Dictionary<Address, VisitStat> visited;
+        private Dictionary<Address, VisitStat> visited; // Initialized in constructors
         /// Source p-code op (Edges between basic blocks)
-        private List<PcodeOp> block_edge1;
+        private List<PcodeOp> block_edge1 = new List<PcodeOp>();
         /// Destination p-code op (Edges between basic blocks)
-        private List<PcodeOp> block_edge2;
+        private List<PcodeOp> block_edge2 = new List<PcodeOp>();
         /// Number of instructions flowed through
         private uint insn_count;
         /// Maximum number of instructions
@@ -131,9 +123,9 @@ namespace Sla.DECCORE
         /// First function in the in-lining chain
         private Funcdata? inline_head;
         /// Active list of addresses for function that are in-lined
-        private HashSet<Address> inline_recursion;
+        private HashSet<Address>? inline_recursion = null;
         /// Storage for addresses of functions that are in-lined
-        private HashSet<Address> inline_base;
+        private HashSet<Address>? inline_base = null;
 
         /// Are there possible unreachable ops
         private bool hasPossibleUnreachable() => ((flags & FlowFlag.possible_unreachable)!=0);
@@ -678,13 +670,11 @@ namespace Sla.DECCORE
         {
             PcodeOp op;
             BlockBasic cur;
-            IEnumerator<PcodeOp> iter;
-            IEnumerator<PcodeOp> iterend;
 
-            iter = obank.beginDead();
-            iterend = obank.endDead();
-            if (iter == iterend) return;
-            op = *iter++;
+            IEnumerator<PcodeOp> iter = obank.beginDead();
+            // IEnumerator<PcodeOp> iterend = obank.endDead();
+            if (!iter.MoveNext()) return;
+            op = iter.Current;
             if (!op.isBlockStart())
                 throw new LowlevelError("First op not marked as entry point");
             cur = bblocks.newBlockBasic(data);
@@ -692,18 +682,16 @@ namespace Sla.DECCORE
             bblocks.setStartBlock(cur);
             Address start = op.getAddr();
             Address stop = start;
-            while (iter != iterend)
-            {
-                op = *iter++;
-                if (op.isBlockStart())
-                {
+            while (iter.MoveNext()) {
+                op = iter.Current;
+                if (op.isBlockStart()) {
                     data.setBasicBlockRange(cur, start, stop);
-                    cur = bblocks.newBlockBasic(data); // Set up the next basic block
+                    // Set up the next basic block
+                    cur = bblocks.newBlockBasic(data);
                     start = op.getSeqNum().getAddr();
                     stop = start;
                 }
-                else
-                {
+                else {
                     Address nextAddr = op.getAddr();
                     if (stop < nextAddr)
                         stop = nextAddr;
@@ -1088,9 +1076,8 @@ namespace Sla.DECCORE
         /// This situation is most likely due to a Position Indepent Code construction.
         private void checkContainedCall()
         {
-            IEnumerator<FuncCallSpecs> iter = qlst.GetEnumerator();
-            while (iter.MoveNext()) {
-                FuncCallSpecs fc = iter.Current;
+            for(int index = 0; index < qlst.Count; index++) {
+                FuncCallSpecs fc = qlst[index];
                 Funcdata? fd = fc.getFuncdata();
                 if (fd != (Funcdata)null) continue;
                 PcodeOp op = fc.getOp();
@@ -1118,9 +1105,9 @@ namespace Sla.DECCORE
                         data.opMarkStartBasic(oiter.Value);
                     // Restore original address
                     data.opSetInput(op, data.newCodeRef(addr), 0);
-                    iter = qlst.Remove(iter.Current);    // Delete the call
+                    qlst.RemoveAt(index--);
                     // delete fc;
-                    if (iter == qlst.end()) break;
+                    // if (iter == qlst.end()) break; // Handled in for loop
                 }
                 else {
                     data.warning("Call to offcut address within same function", op.getAddr());
@@ -1180,15 +1167,18 @@ namespace Sla.DECCORE
         /// \param fc is the given call site (which is freed by this method)
         private void deleteCallSpec(FuncCallSpecs fc)
         {
-            int i;
-            for (i = 0; i < qlst.size(); ++i)
-                if (qlst[i] == fc) break;
+            //int i;
+            //for (i = 0; i < qlst.size(); ++i)
+            //    if (qlst[i] == fc) break;
 
-            if (i == qlst.size())
+            //if (i == qlst.size())
+            //    throw new LowlevelError("Misplaced callspec");
+
+            //// delete fc;
+            //qlst.RemoveAt(i);
+
+            if (!qlst.Remove(fc))
                 throw new LowlevelError("Misplaced callspec");
-
-            // delete fc;
-            qlst.Remove(qlst.GetEnumerator() + i);
         }
 
         /// Treat indirect jump as indirect call that never returns
@@ -1235,7 +1225,7 @@ namespace Sla.DECCORE
             bblocks = b;
             qlst = q;
             baddr = new Address(d.getAddress().getSpace(), 0);
-            eaddr = new Address(d.getAddress().getSpace(), ~((ulong)0));
+            eaddr = new Address(d.getAddress().getSpace(), ulong.MaxValue);
             minaddr = d.getAddress();
             maxaddr = d.getAddress();
             glb = data.getArch();

@@ -106,16 +106,16 @@ namespace Sla.DECCORE
                         ulong val2 = (uint)mult2 * cvn2.getOffset();
                         if (val1 == val2)
                             return isPossibleAlias(op1.getIn(0), op2.getIn(0), depth);
-                        return !functionalEquality(op1.getIn(0), op2.getIn(0));
+                        return !PcodeOpBank.functionalEquality(op1.getIn(0), op2.getIn(0));
                     }
                     if (mult1 != mult2) return true;
-                    if (functionalEquality(op1.getIn(0), op2.getIn(0)))
+                    if (PcodeOpBank.functionalEquality(op1.getIn(0), op2.getIn(0)))
                         return isPossibleAlias(op1.getIn(1), op2.getIn(1), depth);
-                    if (functionalEquality(op1.getIn(1), op2.getIn(1)))
+                    if (PcodeOpBank.functionalEquality(op1.getIn(1), op2.getIn(1)))
                         return isPossibleAlias(op1.getIn(0), op2.getIn(0), depth);
-                    if (functionalEquality(op1.getIn(0), op2.getIn(1)))
+                    if (PcodeOpBank.functionalEquality(op1.getIn(0), op2.getIn(1)))
                         return isPossibleAlias(op1.getIn(1), op2.getIn(0), depth);
-                    if (functionalEquality(op1.getIn(1), op2.getIn(0)))
+                    if (PcodeOpBank.functionalEquality(op1.getIn(1), op2.getIn(0)))
                         return isPossibleAlias(op1.getIn(0), op2.getIn(1), depth);
                     break;
                 default:

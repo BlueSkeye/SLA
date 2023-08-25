@@ -173,7 +173,7 @@ namespace Sla.DECCORE
             // Look for a conflicting HighVariable
             IEnumerator<Varnode> iter = beginLoc(entry.getSize(), entry.getAddr());
             while (iter != endLoc()) {
-                otherVn = *iter;
+                otherVn = iter.Current;
                 if (otherVn.getSize() != entry.getSize()) break;
                 if (otherVn.getAddr() != entry.getAddr()) break;
                 HighVariable tmpHigh = otherVn.getHigh();
@@ -472,7 +472,7 @@ namespace Sla.DECCORE
                 if (jt != (JumpTable)null)
                     removeJumpTable(jt);
             }
-            IEnumerator<PcodeOp> iter;
+            LinkedListNode<PcodeOp>? iter;
             if (!unreachable) {
                 // Make sure data flow is preserved
                 pushMultiequals(bb);
@@ -482,12 +482,13 @@ namespace Sla.DECCORE
                     if (bbout.isDead()) continue;
                     blocknum = bbout.getInIndex(bb); // Get index of bb into bbout
                     iter = bbout.beginOp();
-                    while (iter.MoveNext()) {
-                        op = iter.Current;
+                    while (null != iter) {
+                        op = iter.Value;
+                        iter = iter.Next;
                         if (op.code() != OpCode.CPUI_MULTIEQUAL) continue;
-                        deadvn = op.getIn(blocknum);
+                        deadvn = op.getIn(blocknum) ?? throw new ApplicationException();
                         opRemoveInput(op, blocknum);    // Remove the deleted blocks branch
-                        deadop = deadvn.getDef();
+                        deadop = deadvn.getDef() ?? throw new ApplicationException();
                         if (   deadvn.isWritten()
                             && (deadop.code() == OpCode.CPUI_MULTIEQUAL)
                             && (deadop.getParent() == bb))
@@ -498,7 +499,8 @@ namespace Sla.DECCORE
                         }
                         else {
                             for (j = 0; j < bb.sizeIn(); ++j)
-                                opInsertInput(op, deadvn, op.numInput()); // Otherwise make copies
+                                // Otherwise make copies
+                                opInsertInput(op, deadvn, op.numInput());
                         }
                         opZeroMulti(op);
                     }
@@ -508,29 +510,34 @@ namespace Sla.DECCORE
 
             desc_warning = false;
             iter = bb.beginOp();
-            while (iter.MoveNext()) {
+            while (null != iter) {
                 // Finally remove all the ops
-                op = iter.Current;
+                op = iter.Value;
+                iter = iter.Next;
                 if (op.isAssignment()) {
                     // op still has some descendants
-                    deadvn = op.getOut();
+                    deadvn = op.getOut() ?? throw new ApplicationException();
                     if (unreachable) {
                         bool undef = descend2Undef(deadvn);
                         if (undef && !desc_warning) {
                             // Mark descendants as undefined
                             warningHeader("Creating undefined varnodes in (possibly) reachable block");
-                            desc_warning = true;    // Print the warning only once
+                            // Print the warning only once
+                            desc_warning = true;
                         }
                     }
-                    if (descendantsOutside(deadvn)) // If any descendants outside of bb
+                    if (descendantsOutside(deadvn))
+                        // If any descendants outside of bb
                         throw new LowlevelError("Deleting op with descendants\n");
                 }
                 if (op.isCall())
                     deleteCallSpecs(op);
                 // Increment iterator before unlinking
-                opDestroy(op);      // No longer has descendants
+                // No longer has descendants
+                opDestroy(op);
             }
-            bblocks.removeBlock(bb);    // Remove the block altogether
+            // Remove the block altogether
+            bblocks.removeBlock(bb);
         }
 
         /// \brief Remove an outgoing branch of the given basic block
@@ -551,9 +558,10 @@ namespace Sla.DECCORE
             bbout = (BlockBasic)bb.getOut(num);
             blocknum = bbout.getInIndex(bb);
             bblocks.removeEdge(bb, bbout); // Sever (one) connection between bb and bbout
-            IEnumerator<PcodeOp> iter = bbout.beginOp();
-            while (iter.MoveNext()) {
-                op = iter.Current;
+            LinkedListNode<PcodeOp>? iter = bbout.beginOp();
+            while (null != iter) {
+                op = iter.Value;
+                iter = iter.Next;
                 if (op.code() != OpCode.CPUI_MULTIEQUAL) continue;
                 opRemoveInput(op, blocknum);
                 opZeroMulti(op);
@@ -576,11 +584,12 @@ namespace Sla.DECCORE
             // Take first output block. If this is a donothing block, it is the only output block
             BlockBasic outblock = (BlockBasic)bb.getOut(0);
             int outblock_ind = bb.getOutRevIndex(0);
-            IEnumerator<PcodeOp> iter = bb.beginOp();
-            while (iter.MoveNext()) {
-                origop = iter.Current;
+            LinkedListNode<PcodeOp>? iter = bb.beginOp();
+            while (null != iter) {
+                origop = iter.Value;
+                iter = iter.Next;
                 if (origop.code() != OpCode.CPUI_MULTIEQUAL) continue;
-                origvn = origop.getOut();
+                origvn = origop.getOut() ?? throw new ApplicationException();
                 if (origvn.hasNoDescend()) continue;
                 bool needreplace = false;
                 bool neednewunique = false;
@@ -668,7 +677,8 @@ namespace Sla.DECCORE
         {
             List<FlowBlock> rootlist = new List<FlowBlock>();
 
-            flags &= ~Flags.blocks_unreachable;   // Clear any old blocks flag
+            // Clear any old blocks flag
+            flags &= ~Flags.blocks_unreachable;
             bblocks.structureLoops(rootlist);
             bblocks.calcForwardDominator(rootlist);
             if (rootlist.Count > 1)
@@ -878,7 +888,8 @@ namespace Sla.DECCORE
         {
             if (op.isBranch()) {
                 if (op.code() != OpCode.CPUI_BRANCH)
-                    throw new LowlevelError("Cannot duplicate 2-way or n-way branch in nodeplit");
+                    throw new LowlevelError(
+                        "Cannot duplicate 2-way or n-way branch in nodeplit");
                 return (PcodeOp)null;
             }
             PcodeOp dup = newOp(op.numInput(), op.getAddr());
@@ -917,10 +928,11 @@ namespace Sla.DECCORE
         private void nodeSplitRawDuplicate(BlockBasic b, BlockBasic bprime)
         {
             PcodeOp b_op, prime_op;
-            IEnumerator<PcodeOp> iter = b.beginOp();
+            LinkedListNode<PcodeOp>? iter = b.beginOp();
 
-            while (iter.MoveNext()) {
-                b_op = iter.Current;
+            while (null != iter) {
+                b_op = iter.Value;
+                iter = iter.Next;
                 prime_op = nodeSplitCloneOp(b_op);
                 if (prime_op == (PcodeOp)null) continue;
                 nodeSplitCloneVarnode(b_op, prime_op);
@@ -951,12 +963,12 @@ namespace Sla.DECCORE
             // slot within pop needing b input
             List<int> pslot = new List<int>();
 
-            IEnumerator<PcodeOp> biter = b.beginOp();
-            IEnumerator<PcodeOp> piter = bprime.beginOp();
+            LinkedListNode<PcodeOp>? biter = b.beginOp() ?? throw new ApplicationException();
+            LinkedListNode<PcodeOp>? piter = bprime.beginOp() ?? throw new ApplicationException();
 
-            while (piter != bprime.endOp()) {
-                bop = biter.Current;
-                pop = piter.Current;
+            while (null != piter) {
+                bop = biter.Value;
+                pop = piter.Value;
                 // Establish mapping
                 btop[bop] = pop;
                 if (bop.code() == OpCode.CPUI_MULTIEQUAL) {
@@ -1001,8 +1013,8 @@ namespace Sla.DECCORE
                         opSetInput(pop, pvn, i);
                     }
                 }
-                ++piter;
-                ++biter;
+                piter = piter.Next;
+                biter = biter.Next;
             }
 
             for (int i = 0; i < pind.size(); ++i) {
@@ -1140,7 +1152,7 @@ namespace Sla.DECCORE
         /// \param addr is the entry address for the function
         /// \param sym is the symbol representing the function
         /// \param sz is the number of bytes (of code) in the function body
-        public Funcdata(string nm, string disp, Scope conf, Address addr, FunctionSymbol sym, int sz = 0)
+        public Funcdata(string nm, string disp, Scope scope, Address addr, FunctionSymbol sym, int sz = 0)
         {
             baseaddr = addr;
             funcp = new FuncProto();
@@ -1661,11 +1673,10 @@ namespace Sla.DECCORE
             // Calculate iterator to first injected op
             if (deadempty)
                 deaditer = obank.beginDead();
-            else
-                ++deaditer;
-            while (deaditer != obank.endDead()) {
+            //else
+            //    ++deaditer;
+            while (deaditer.MoveNext()) {
                 PcodeOp op = deaditer.Current;
-                ++deaditer;
                 if (op.isCallOrBranch())
                     throw new LowlevelError("Illegal branching injection");
                 opInsert(op, bl, iter);
@@ -1905,9 +1916,10 @@ namespace Sla.DECCORE
                 encoder.openElement(ElementId.ELEM_BLOCK);
                 encoder.writeSignedInteger(AttributeId.ATTRIB_INDEX, bs.getIndex());
                 bs.encodeBody(encoder);
-                IEnumerator<PcodeOp> oiter = bs.beginOp();
-                while (oiter.MoveNext()) {
-                    op = oiter.Current;
+                LinkedListNode<PcodeOp>? oiter = bs.beginOp();
+                while (null != oiter) {
+                    op = oiter.Value;
+                    oiter = oiter.Next;
                     op.encode(encoder);
                 }
                 encoder.closeElement(ElementId.ELEM_BLOCK);
@@ -1979,24 +1991,22 @@ namespace Sla.DECCORE
         /// special data-type and is marked so that Varnode::isSpacebase() returns \b true.
         public void spacebase()
         {
-            IEnumerator<Varnode> iter, enditer;
-            int i, numspace;
-            Varnode vn;
+            
 
             for (int j = 0; j < glb.numSpaces(); ++j) {
                 AddrSpace? spc = glb.getSpace(j);
                 if (spc == (AddrSpace)null) continue;
-                numspace = spc.numSpacebase();
-                for (i = 0; i < numspace; ++i) {
+                int numspace = spc.numSpacebase();
+                for (int i = 0; i < numspace; ++i) {
                     VarnodeData point = spc.getSpacebase(i);
                     // Find input varnode at this size and location
                     Datatype ct = glb.types.getTypeSpacebase(spc, getAddress());
                     Datatype ptr = glb.types.getTypePointer((int)point.size, ct, spc.getWordSize());
 
-                    iter = vbank.beginLoc((int)point.size, new Address(point.space, point.offset));
-                    enditer = vbank.endLoc((int)point.size, new Address(point.space, point.offset));
-                    while (iter != enditer) {
-                        vn = *iter++;
+                    IEnumerator<Varnode> iter = vbank.beginLoc((int)point.size, new Address(point.space, point.offset));
+                    // IEnumerator<Varnode> enditer = vbank.endLoc((int)point.size, new Address(point.space, point.offset));
+                    while (iter.MoveNext()) {
+                        Varnode vn = iter.Current;
                         if (vn.isFree()) continue;
                         if (vn.isSpacebase()) {
                             // This has already been marked spacebase
@@ -2383,7 +2393,7 @@ namespace Sla.DECCORE
         {
             Datatype ct = glb.types.getBase(sizeof(op), type_metatype.TYPE_UNKNOWN);
             AddrSpace cspc = glb.getIopSpace();
-            Varnode vn = vbank.create(sizeof(op), new Address(cspc, (ulong)(ulong)op), ct);
+            Varnode vn = vbank.create(sizeof(op), new Address(cspc, (ulong)op), ct);
             assignHigh(vn);
             return vn;
         }
@@ -2411,7 +2421,7 @@ namespace Sla.DECCORE
         {
             Datatype ct = glb.types.getBase(sizeof(fc), type_metatype.TYPE_UNKNOWN);
             AddrSpace cspc = glb.getFspecSpace();
-            Varnode vn = vbank.create(sizeof(fc), new Address(cspc, (ulong)(ulong)fc), ct);
+            Varnode vn = vbank.create(sizeof(fc), new Address(cspc, (ulong)fc), ct);
             assignHigh(vn);
             return vn;
         }
@@ -2618,61 +2628,62 @@ namespace Sla.DECCORE
         //public VarnodeLocSet.Enumerator endLoc() => vbank.endLoc();
 
         /// \brief Start of Varnodes stored in a given address space
-        public VarnodeLocSet.Enumerator beginLoc(AddrSpace spaceid) => vbank.beginLoc(spaceid);
+        public IEnumerator<Varnode> beginLoc(AddrSpace spaceid) => vbank.beginLoc(spaceid);
 
         /// \brief End of Varnodes stored in a given address space
-        public VarnodeLocSet.Enumerator endLoc(AddrSpace spaceid) => vbank.endLoc(spaceid);
+        public IEnumerator<Varnode> endLoc(AddrSpace spaceid) => vbank.endLoc(spaceid);
 
         /// \brief Start of Varnodes at a storage address
-        public VarnodeLocSet.Enumerator beginLoc(Address addr) => vbank.beginLoc(addr);
+        public IEnumerator<Varnode> beginLoc(Address addr) => vbank.beginLoc(addr);
 
         /// \brief End of Varnodes at a storage address
-        public VarnodeLocSet.Enumerator endLoc(Address addr) => vbank.endLoc(addr);
+        public IEnumerator<Varnode> endLoc(Address addr) => vbank.endLoc(addr);
 
         /// \brief Start of Varnodes with given storage
-        public VarnodeLocSet.Enumerator beginLoc(int s, Address addr) => vbank.beginLoc(s, addr);
+        public IEnumerator<Varnode> beginLoc(int s, Address addr) => vbank.beginLoc(s, addr);
 
-        /// \brief End of Varnodes with given storage
-        public VarnodeLocSet.Enumerator endLoc(int s, Address addr) => vbank.endLoc(s, addr);
+        ///// \brief End of Varnodes with given storage
+        //public IEnumerator<Varnode> endLoc(int s, Address addr) => vbank.endLoc(s, addr);
 
         /// \brief Start of Varnodes matching storage and properties
-        public VarnodeLocSet.Enumerator beginLoc(int s, Address addr, Varnode.varnode_flags fl)
+        public IEnumerator<Varnode> beginLoc(int s, Address addr, Varnode.varnode_flags fl)
             => vbank.beginLoc(s, addr, fl);
 
         /// \brief End of Varnodes matching storage and properties
-        public VarnodeLocSet.Enumerator endLoc(int s, Address addr, Varnode.varnode_flags fl)
+        public IEnumerator<Varnode> endLoc(int s, Address addr, Varnode.varnode_flags fl)
             => vbank.endLoc(s, addr, fl);
 
-        /// \brief Start of Varnodes matching storage and definition address
-        public VarnodeLocSet.Enumerator beginLoc(int s, Address addr, Address pc, uint uniq = uint.MaxValue)
-            => vbank.beginLoc(s, addr, pc, uniq);
+        ///// \brief Start of Varnodes matching storage and definition address
+        //public IEnumerator<Varnode> beginLoc(int s, Address addr, Address pc, uint uniq = uint.MaxValue)
+        //    => vbank.beginLoc(s, addr, pc, uniq);
 
-        /// \brief End of Varnodes matching storage and definition address
-        public VarnodeLocSet.Enumerator endLoc(int s, Address addr, Address pc, uint uniq = uint.MaxValue)
-            => vbank.endLoc(s, addr, pc, uniq);
+        ///// \brief End of Varnodes matching storage and definition address
+        //public IEnumerator<Varnode> endLoc(int s, Address addr, Address pc, uint uniq = uint.MaxValue)
+        //    => vbank.endLoc(s, addr, pc, uniq);
 
         /// \brief Given start, return maximal range of overlapping Varnodes
-        public Varnode.varnode_flags overlapLoc(VarnodeLocSet.Enumerator iter, List<VarnodeLocSet.Enumerator> bounds)
+        public Varnode.varnode_flags overlapLoc(VarnodeLocSet.Enumerator iter,
+            List<VarnodeLocSet.Enumerator> bounds)
             => vbank.overlapLoc(iter, bounds);
 
         /// \brief Start of all Varnodes sorted by definition address
-        public VarnodeDefSet.Enumerator beginDef() => vbank.beginDef();
+        public IEnumerator<Varnode> beginDef() => vbank.beginDef();
 
         /// \brief End of all Varnodes sorted by definition address
-        public VarnodeDefSet.Enumerator endDef() => vbank.endDef();
+        public IEnumerator<Varnode> endDef() => vbank.endDef();
 
         /// \brief Start of Varnodes with a given definition property
-        public VarnodeDefSet.Enumerator beginDef(Varnode.varnode_flags fl) => vbank.beginDef(fl);
+        public IEnumerator<Varnode> beginDef(Varnode.varnode_flags fl) => vbank.beginDef(fl);
 
         /// \brief End of Varnodes with a given definition property
-        public VarnodeDefSet.Enumerator endDef(Varnode.varnode_flags fl) => vbank.endDef(fl);
+        public IEnumerator<Varnode> endDef(Varnode.varnode_flags fl) => vbank.endDef(fl);
 
         /// \brief Start of (input or free) Varnodes at a given storage address
-        public VarnodeDefSet.Enumerator beginDef(Varnode.varnode_flags fl, Address addr)
+        public IEnumerator<Varnode> beginDef(Varnode.varnode_flags fl, Address addr)
             => vbank.beginDef(fl, addr);
 
         /// \brief End of (input or free) Varnodes at a given storage address
-        public VarnodeDefSet.Enumerator endDef(Varnode.varnode_flags fl, Address addr)
+        public IEnumerator<Varnode> endDef(Varnode.varnode_flags fl, Address addr)
             => vbank.endDef(fl, addr);
 
         /// Check for a potential laned register
@@ -2682,7 +2693,7 @@ namespace Sla.DECCORE
         /// \param addr is the starting address of the storage range
         public void checkForLanedRegister(int sz, Address addr)
         {
-            LanedRegister lanedRegister = glb.getLanedRegister(addr, sz);
+            LanedRegister? lanedRegister = glb.getLanedRegister(addr, sz);
             if (lanedRegister == (LanedRegister)null)
                 return;
             VarnodeData storage = new VarnodeData();
@@ -2693,7 +2704,8 @@ namespace Sla.DECCORE
         }
 
         /// Beginning iterator over laned accesses
-        public Dictionary<VarnodeData, LanedRegister>.Enumerator beginLaneAccess() => lanedMap.GetEnumerator();
+        public Dictionary<VarnodeData, LanedRegister>.Enumerator beginLaneAccess()
+            => lanedMap.GetEnumerator();
 
         ///// Ending iterator over laned accesses
         //public Dictionary<VarnodeData, LanedRegister>.Enumerator endLaneAccess() => lanedMap.end();
@@ -2710,7 +2722,7 @@ namespace Sla.DECCORE
         /// part of the value of the Symbol, NULL is returned.
         /// \param nm is the name to search for
         /// \return the matching HighVariable or NULL
-        public HighVariable findHigh(string nm)
+        public HighVariable? findHigh(string nm)
         {
             List<Symbol> symList = new List<Symbol>();
             localmap.queryByName(nm, symList);
@@ -3098,7 +3110,7 @@ namespace Sla.DECCORE
             Varnode.varnode_flags fl;
 
             IEnumerator<Varnode> iter = vbank.beginLoc(lm.getSpaceId());
-            enditer = vbank.endLoc(lm.getSpaceId());
+            IEnumerator<Varnode> enditer = vbank.endLoc(lm.getSpaceId());
             while (iter != enditer) {
                 Varnode vnexemplar = iter.Current;
                 entry = lm.findOverlap(vnexemplar.getAddr(), vnexemplar.getSize());
@@ -3653,13 +3665,13 @@ namespace Sla.DECCORE
                 return vn;
             }
 
-            IEnumerator<Varnode> iter, enditer;
+            IEnumerator<Varnode> iter;
             Address usestart = entry.getFirstUseAddress();
-            enditer = vbank.endLoc(entry.getSize(), entry.getAddr());
+            IEnumerator<Varnode> enditer = vbank.endLoc(entry.getSize(), entry.getAddr());
 
             if (usestart.isInvalid()) {
                 iter = vbank.beginLoc(entry.getSize(), entry.getAddr());
-                if (iter == enditer)
+                if (!iter.MoveNext())
                     return (Varnode)null;
                 Varnode vn = iter.Current;
                 if (!vn.isAddrTied())
@@ -3692,8 +3704,8 @@ namespace Sla.DECCORE
             }
             else {
                 IEnumerator<Varnode> iter = beginLoc(entry.getSize(), entry.getAddr());
-                IEnumerator<Varnode> enditer = endLoc(entry.getSize(), entry.getAddr());
-                for (; iter != enditer; ++iter) {
+                // IEnumerator<Varnode> enditer = endLoc(entry.getSize(), entry.getAddr());
+                while (iter.MoveNext()) {
                     Varnode vn = iter.Current;
                     Address addr = vn.getUsePoint(this);
                     if (entry.inUse(addr)) {
@@ -5272,10 +5284,11 @@ namespace Sla.DECCORE
                 if (firstop.code() == OpCode.CPUI_MULTIEQUAL)
                     throw new LowlevelError("Splicing block with MULTIEQUAL");
                 firstop.clearFlag(PcodeOp.Flags.startbasic);
-                IEnumerator<PcodeOp> iter = outbl.beginOp();
+                LinkedListNode<PcodeOp>? iter = outbl.beginOp();
                 // Move ops into -bl-
-                while (iter.MoveNext()) {
-                    PcodeOp op = iter.Current;
+                while (null != iter) {
+                    PcodeOp op = iter.Value;
+                    iter = iter.Next;
                     // Reset ops parent to -bl-
                     op.setParent(bl);
                 }
@@ -5626,7 +5639,7 @@ namespace Sla.DECCORE
         /// \param op is the given PcodeOp
         /// \param fliplist is the array that will hold the ops to flip
         /// \return 0 if the change normalizes, 1 if the change is ambivalent, 2 if the change does not normalize
-        private static int opFlipInPlaceTest(PcodeOp op, List<PcodeOp> fliplist)
+        internal static int opFlipInPlaceTest(PcodeOp op, List<PcodeOp> fliplist)
         {
             Varnode vn;
             int subtest1, subtest2;
@@ -5685,7 +5698,7 @@ namespace Sla.DECCORE
         /// facilitate the flip.
         /// \param data is the function being modified
         /// \param fliplist is the list of PcodeOps to modify
-        private static void opFlipInPlaceExecute(Funcdata data, List<PcodeOp> fliplist)
+        internal static void opFlipInPlaceExecute(Funcdata data, List<PcodeOp> fliplist)
         {
             Varnode vn;
             for (int i = 0; i < fliplist.size(); ++i) {
@@ -5725,7 +5738,7 @@ namespace Sla.DECCORE
         /// \param vn is the Varnode to search for
         /// \param bl is the specified basic block in which to search
         /// \return the earliest PcodeOp reading the Varnode or NULL
-        private static PcodeOp? earliestUseInBlock(Varnode vn, BlockBasic bl)
+        internal static PcodeOp? earliestUseInBlock(Varnode vn, BlockBasic bl)
         {
             PcodeOp? res = (PcodeOp)null;
             IEnumerator<PcodeOp> iter = vn.beginDescend();
@@ -5751,7 +5764,7 @@ namespace Sla.DECCORE
         /// \param bl is the indicated basic block
         /// \param earliest is the specified op to be earlier than
         /// \return the discovered duplicate PcodeOp or NULL
-        private static PcodeOp cseFindInBlock(PcodeOp op, Varnode vn, BlockBasic bl, PcodeOp earliest)
+        internal static PcodeOp cseFindInBlock(PcodeOp op, Varnode vn, BlockBasic bl, PcodeOp earliest)
         {
             IEnumerator<PcodeOp> iter = vn.beginDescend();
 
@@ -5767,7 +5780,7 @@ namespace Sla.DECCORE
                 if (outvn2 == (Varnode)null) continue;
                 Varnode[] buf1 = new Varnode[2];
                 Varnode[] buf2 = new Varnode[2];
-                if (functionalEqualityLevel(outvn1, outvn2, buf1, buf2) == 0)
+                if (PcodeOpBank.functionalEqualityLevel(outvn1, outvn2, buf1, buf2) == 0)
                     return res;
             }
             return (PcodeOp)null;

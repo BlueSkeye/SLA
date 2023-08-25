@@ -26,7 +26,7 @@ namespace Sla.DECCORE
         }
 
         /// Get the type of parameter list
-        public abstract uint getType();
+        public abstract Model getType();
 
         /// \brief Given list of data-types, map the list positions to storage locations
         ///

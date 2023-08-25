@@ -256,7 +256,7 @@ namespace Sla.DECCORE
             int sz = proto.numParams();
 
             if ((sz == 0) && (!proto.isDotdotdot()))
-                pushAtom(new Atom(KEYWORD_VOID, syntax, EmitMarkup.syntax_highlight.keyword_color));
+                pushAtom(new Atom(KEYWORD_VOID, tagtype.syntax, EmitMarkup.syntax_highlight.keyword_color));
             else {
                 for (int i = 0; i < sz - 1; ++i)
                     pushOp(comma, (PcodeOp)null); // Print a comma for each parameter (above 1)
@@ -309,7 +309,7 @@ namespace Sla.DECCORE
                     pushOp(scope, (PcodeOp)null);
                 }
                 for (int i = scopedepth - 1; i >= 0; --i) {
-                    pushAtom(new Atom(scopeList[i].getDisplayName(), syntax,
+                    pushAtom(new Atom(scopeList[i].getDisplayName(), tagtype.syntax,
                         EmitMarkup.syntax_highlight.global_color, (PcodeOp)null, (Varnode)null));
                 }
             }
@@ -419,7 +419,7 @@ namespace Sla.DECCORE
                     }
                     else
                         // An empty list of parameters
-                        pushAtom(new Atom(EMPTY_STRING, blanktoken, EmitMarkup.syntax_highlight.no_color));
+                        pushAtom(new Atom(EMPTY_STRING, tagtype.blanktoken, EmitMarkup.syntax_highlight.no_color));
                 }
                 else
                     break;          // Some other anonymous type
@@ -438,9 +438,9 @@ namespace Sla.DECCORE
         protected void pushBoolConstant(ulong val, TypeBase ct, Varnode vn, PcodeOp op)
         {
             if (val != 0)
-                pushAtom(new Atom(KEYWORD_TRUE, vartoken, EmitMarkup.syntax_highlight.const_color, op, vn));
+                pushAtom(new Atom(KEYWORD_TRUE, tagtype.vartoken, EmitMarkup.syntax_highlight.const_color, op, vn));
             else
-                pushAtom(new Atom(KEYWORD_FALSE, vartoken, EmitMarkup.syntax_highlight.const_color, op, vn));
+                pushAtom(new Atom(KEYWORD_FALSE, tagtype.vartoken, EmitMarkup.syntax_highlight.const_color, op, vn));
         }
 
         /// \brief Push a single character constant to the RPN stack
@@ -501,7 +501,7 @@ namespace Sla.DECCORE
             else
                 printUnicode(t, (int)val);
             t.Write("'");
-            pushAtom(new Atom(t.str(), vartoken, EmitMarkup.syntax_highlight.const_color, op, vn));
+            pushAtom(new Atom(t.str(), tagtype.vartoken, EmitMarkup.syntax_highlight.const_color, op, vn));
         }
 
         protected override void pushConstant(ulong val, Datatype ct, Varnode vn, PcodeOp op)
@@ -537,7 +537,7 @@ namespace Sla.DECCORE
                 case type_metatype.TYPE_PTRREL:
                     if (option_NULL && (val == 0))
                     { // A null pointer
-                        pushAtom(new Atom(nullToken, vartoken, EmitMarkup.syntax_highlight.var_color, op, vn));
+                        pushAtom(new Atom(nullToken, tagtype.vartoken, EmitMarkup.syntax_highlight.var_color, op, vn));
                         return;
                     }
                     subtype = ((TypePointer)ct).getPtrTo();
@@ -591,11 +591,11 @@ namespace Sla.DECCORE
             bool complement = ct.getMatches(val, valnames);
             if (valnames.Count > 0) {
                 if (complement)
-                    pushOp(&bitwise_not, op);
+                    pushOp(bitwise_not, op);
                 for (int i = valnames.Count - 1; i > 0; --i)
-                    pushOp(&enum_cat, op);
+                    pushOp(enum_cat, op);
                 for (int i = 0; i < valnames.Count; ++i)
-                    pushAtom(new Atom(valnames[i], vartoken, EmitMarkup.syntax_highlight.const_color, op, vn));
+                    pushAtom(new Atom(valnames[i], tagtype.vartoken, EmitMarkup.syntax_highlight.const_color, op, vn));
             }
             else {
                 push_integer(val, ct.getSize(), false, vn, op);
@@ -622,7 +622,8 @@ namespace Sla.DECCORE
             Address point;
             if (op != (PcodeOp)null)
                 point = op.getAddr();
-            Address stringaddr = glb.resolveConstant(spc, val, ct.getSize(), point, fullEncoding);
+            Address stringaddr = glb.resolveConstant(spc, val, ct.getSize(), ref point,
+                out fullEncoding);
             if (stringaddr.isInvalid()) return false;
             if (!glb.symboltab.getGlobalScope().isReadOnly(stringaddr, 1, new Address()))
                 return false;        // Check that string location is readonly
@@ -632,7 +633,7 @@ namespace Sla.DECCORE
             if (!printCharacterConstant(str, stringaddr, subct))
                 return false;       // Can we get a nice ASCII string
 
-            pushAtom(new Atom(str.ToString(), vartoken, EmitMarkup.syntax_highlight.const_color, op, vn));
+            pushAtom(new Atom(str.ToString(), tagtype.vartoken, EmitMarkup.syntax_highlight.const_color, op, vn));
             return true;
         }
 
@@ -652,7 +653,7 @@ namespace Sla.DECCORE
             val = AddrSpace.addressToByte(val, spc.getWordSize());
             fd = glb.symboltab.getGlobalScope().queryFunction(new Address(spc, val));
             if (fd != (Funcdata)null) {
-                pushAtom(new Atom(fd.getDisplayName(), functoken, EmitMarkup.syntax_highlight.funcname_color, op, fd));
+                pushAtom(new Atom(fd.getDisplayName(), tagtype.functoken, EmitMarkup.syntax_highlight.funcname_color, op, fd));
                 return true;
             }
             return false;
@@ -713,7 +714,7 @@ namespace Sla.DECCORE
             if (iter.MoveNext()) {
                 while (true) {
                     pushTypeStart(iter.Current.type, false);
-                    pushAtom(new Atom(iter.Current.name, syntax, EmitMarkup.syntax_highlight.var_color));
+                    pushAtom(new Atom(iter.Current.name, tagtype.syntax, EmitMarkup.syntax_highlight.var_color));
                     pushTypeEnd(iter.Current.type);
                     if (!iter.MoveNext()) {
                         break;
@@ -827,7 +828,7 @@ namespace Sla.DECCORE
                     else {
                         // Emit type without name, if there is no backing symbol
                         pushTypeStart(param.getType(), true);
-                        pushAtom(new Atom(EMPTY_STRING, blanktoken, EmitMarkup.syntax_highlight.no_color));
+                        pushAtom(new Atom(EMPTY_STRING, tagtype.blanktoken, EmitMarkup.syntax_highlight.no_color));
                         pushTypeEnd(param.getType());
                         recurse();
                     }
@@ -899,42 +900,42 @@ namespace Sla.DECCORE
             OpToken tok;
             switch (op.code()) {
                 case OpCode.CPUI_INT_MULT:
-                    tok = &multequal;
+                    tok = multequal;
                     break;
                 case OpCode.CPUI_INT_DIV:
                 case OpCode.CPUI_INT_SDIV:
-                    tok = &divequal;
+                    tok = divequal;
                     break;
                 case OpCode.CPUI_INT_REM:
                 case OpCode.CPUI_INT_SREM:
-                    tok = &remequal;
+                    tok = remequal;
                     break;
                 case OpCode.CPUI_INT_ADD:
-                    tok = &plusequal;
+                    tok = plusequal;
                     break;
                 case OpCode.CPUI_INT_SUB:
-                    tok = &minusequal;
+                    tok = minusequal;
                     break;
                 case OpCode.CPUI_INT_LEFT:
-                    tok = &leftequal;
+                    tok = leftequal;
                     break;
                 case OpCode.CPUI_INT_RIGHT:
                 case OpCode.CPUI_INT_SRIGHT:
-                    tok = &rightequal;
+                    tok = rightequal;
                     break;
                 case OpCode.CPUI_INT_AND:
-                    tok = &andequal;
+                    tok = andequal;
                     break;
                 case OpCode.CPUI_INT_OR:
-                    tok = &orequal;
+                    tok = orequal;
                     break;
                 case OpCode.CPUI_INT_XOR:
-                    tok = &xorequal;
+                    tok = xorequal;
                     break;
                 default:
                     return false;
             }
-            Varnode vn = op.getIn(0);
+            Varnode vn = op.getIn(0) ?? throw new ApplicationException();
             if (op.getOut().getHigh() != vn.getHigh()) return false;
             pushOp(tok, op);
             pushVnExplicit(vn, op);
@@ -1224,7 +1225,7 @@ namespace Sla.DECCORE
             // Using function syntax but don't markup the name as
             // a normal function call
             string nm = op.getOpcode().getOperatorName(op);
-            pushAtom(new Atom(nm, optoken, EmitMarkup.syntax_highlight.no_color, op));
+            pushAtom(new Atom(nm, tagtype.optoken, EmitMarkup.syntax_highlight.no_color, op));
             if (op.numInput() > 0) {
                 for (int i = 0; i < op.numInput() - 1; ++i)
                     pushOp(comma, op);
@@ -1357,7 +1358,7 @@ namespace Sla.DECCORE
         /// \param ct is data-type attached to the value
         /// \param vn is the Varnode holding the value
         /// \param op is the PcodeOp using the value
-        protected override void pushConstant(ulong val, Datatype ct, Varnode vn, PcodeOp op)
+        protected override void pushCharConstant(ulong val, Datatype ct, Varnode vn, PcodeOp op)
         {
             Symbol.DisplayFlags displayFormat = 0;
             bool isSigned = (ct.getMetatype() == type_metatype.TYPE_INT);
@@ -1406,7 +1407,7 @@ namespace Sla.DECCORE
             else
                 printUnicode(t, (int)val);
             t.Write("'");
-            pushAtom(new Atom(t.ToString(), vartoken, EmitMarkup.syntax_highlight.const_color, op, vn));
+            pushAtom(new Atom(t.ToString(), tagtype.vartoken, EmitMarkup.syntax_highlight.const_color, op, vn));
         }
 
         protected override bool pushEquate(ulong val, int sz, EquateSymbol sym, Varnode vn, PcodeOp op)
@@ -1492,13 +1493,13 @@ namespace Sla.DECCORE
                     s.Write(formatString, AddrSpace.byteToAddress(vn.getOffset(), spc.getWordSize()));
                     regname = s.ToString();
                 }
-                pushAtom(new Atom(regname, vartoken, EmitMarkup.syntax_highlight.special_color, op, vn));
+                pushAtom(new Atom(regname, tagtype.vartoken, EmitMarkup.syntax_highlight.special_color, op, vn));
             }
         }
 
         protected override void pushSymbol(Symbol sym, Varnode vn, PcodeOp op)
         {
-            EmitMarkup.syntax_highlight.syntax_highlight tokenColor;
+            EmitMarkup.syntax_highlight tokenColor;
             if (sym.isVolatile())
                 tokenColor = EmitMarkup.syntax_highlight.special_color;
             else if (sym.getScope().isGlobal())
@@ -1513,17 +1514,17 @@ namespace Sla.DECCORE
                 if (high.isUnmerged()) {
                     StringWriter s = new StringWriter();
                     s.Write(sym.getDisplayName());
-                    SymbolEntry entry = high.getSymbolEntry();
+                    SymbolEntry? entry = high.getSymbolEntry();
                     if (entry != (SymbolEntry)null) {
                         s.Write($"${entry.getSymbol().getMapEntryPosition(entry)}");
                     }
                     else
                         s.Write("$$");
-                    pushAtom(new Atom(s.ToString(), vartoken, tokenColor, op, vn));
+                    pushAtom(new Atom(s.ToString(), tagtype.vartoken, tokenColor, op, vn));
                     return;
                 }
             }
-            pushAtom(new Atom(sym.getDisplayName(), vartoken, tokenColor, op, vn));
+            pushAtom(new Atom(sym.getDisplayName(), tagtype.vartoken, tokenColor, op, vn));
         }
 
         protected override void pushUnnamedLocation(Address addr, Varnode vn, PcodeOp op)
@@ -1531,7 +1532,7 @@ namespace Sla.DECCORE
             StringWriter s = new StringWriter();
             s.Write(addr.getSpace().getName());
             addr.printRaw(s);
-            pushAtom(new Atom(s.ToString(), vartoken, EmitMarkup.syntax_highlight.var_color, op, vn));
+            pushAtom(new Atom(s.ToString(), tagtype.vartoken, EmitMarkup.syntax_highlight.var_color, op, vn));
         }
 
         protected override void pushPartialSymbol(Symbol sym, int off, int sz, Varnode vn, PcodeOp op,
@@ -1556,7 +1557,7 @@ namespace Sla.DECCORE
                         if (outtype == ct)
                             break;  // Turns out we don't resolve to the field
                     }
-                    TypeField? field = ct.findTruncation(off, sz, op, inslot, off);
+                    TypeField? field = ct.findTruncation(off, sz, op, inslot, out off);
                     if (field != (TypeField)null) {
                         PartialSymbolEntry entry = new PartialSymbolEntry() {
                             token = object_member,
@@ -1588,7 +1589,7 @@ namespace Sla.DECCORE
                     }
                 }
                 else if (ct.getMetatype() == type_metatype.TYPE_UNION) {
-                    TypeField? field = ct.findTruncation(off, sz, op, inslot, off);
+                    TypeField? field = ct.findTruncation(off, sz, op, inslot, out off);
                     if (field != (TypeField)null) {
                         PartialSymbolEntry entry = new PartialSymbolEntry() {
                             token = object_member,
@@ -1607,7 +1608,7 @@ namespace Sla.DECCORE
                 else if (inslot >= 0) {
                     Datatype outtype = vn.getHigh().getType();
                     if (castStrategy.isSubpieceCastEndian(outtype, ct, (uint)off,
-                        sym.getFirstWholeMap().getAddr().getSpace().isBigEndian()))
+                            sym.getFirstWholeMap().getAddr().getSpace().isBigEndian()))
                     {
                         // Treat truncation as SUBPIECE style cast
                         finalcast = outtype;
@@ -1632,7 +1633,7 @@ namespace Sla.DECCORE
             }
 
             if ((finalcast != (Datatype)null) && (!option_nocasts)) {
-                pushOp(&typecast, op);
+                pushOp(typecast, op);
                 pushType(finalcast);
             }
             // Push these on the RPN stack in reverse order
@@ -1642,9 +1643,9 @@ namespace Sla.DECCORE
             for (int i = 0; i < stack.Count; ++i) {
                 TypeField field = stack[i].field;
                 if (field == (TypeField)null)
-                    pushAtom(new Atom(stack[i].fieldname, syntax, stack[i].hilite, op));
+                    pushAtom(new Atom(stack[i].fieldname, tagtype.syntax, stack[i].hilite, op));
                 else
-                    pushAtom(new Atom(stack[i].fieldname, fieldtoken, stack[i].hilite, stack[i].parent, field.ident, op));
+                    pushAtom(new Atom(stack[i].fieldname, tagtype.fieldtoken, stack[i].hilite, stack[i].parent, field.ident, op));
             }
         }
 
@@ -1659,7 +1660,7 @@ namespace Sla.DECCORE
                 // We prepend an underscore to indicate a close
                 // but not quite match
                 string nm = '_' + sym.getDisplayName();
-                pushAtom(new Atom(nm, vartoken, EmitMarkup.syntax_highlight.var_color, op, vn));
+                pushAtom(new Atom(nm, tagtype.vartoken, EmitMarkup.syntax_highlight.var_color, op, vn));
             }
             else
                 pushUnnamedLocation(vn.getAddr(), vn, op);
@@ -1668,7 +1669,7 @@ namespace Sla.DECCORE
         protected override void pushImpliedField(Varnode vn, PcodeOp op)
         {
             bool proceed = false;
-            Datatype parent = vn.getHigh().getType();
+            Datatype parent = vn.getHigh().getType() ?? throw new ApplicationException();
             TypeField field;
             if (parent.needsResolution() && parent.getMetatype() != type_metatype.TYPE_PTR) {
                 Funcdata fd = op.getParent().getFuncdata();
@@ -1676,7 +1677,7 @@ namespace Sla.DECCORE
                 ResolvedUnion? res = fd.getUnionField(parent, op, slot);
                 if (res != (ResolvedUnion)null && res.getFieldNum() >= 0) {
                     if (parent.getMetatype() == type_metatype.TYPE_STRUCT && res.getFieldNum() == 0) {
-                        field = &(*((TypeStruct)parent).beginField());
+                        field = ((TypeStruct)parent).beginField().Current;
                         proceed = true;
                     }
                     else if (parent.getMetatype() == type_metatype.TYPE_UNION) {
@@ -1692,9 +1693,9 @@ namespace Sla.DECCORE
                 defOp.getOpcode().push(this, defOp, op);
                 return;
             }
-            pushOp(&object_member, op);
+            pushOp(object_member, op);
             defOp.getOpcode().push(this, defOp, op);
-            pushAtom(new Atom(field.name, fieldtoken, EmitMarkup.syntax_highlight.no_color, parent,
+            pushAtom(new Atom(field.name, tagtype.fieldtoken, EmitMarkup.syntax_highlight.no_color, parent,
                 field.ident, op));
         }
 
@@ -1735,7 +1736,7 @@ namespace Sla.DECCORE
             }
             if (sign && displayFormat != Symbol.DisplayFlags.force_char) {
                 // Print the constant as signed
-                ulong mask = Globals.calc_mask(sz);
+                ulong mask = Globals.calc_mask((uint)sz);
                 ulong flip = val ^ mask;
                 print_negsign = (flip < val);
                 if (print_negsign)
@@ -1750,10 +1751,10 @@ namespace Sla.DECCORE
             if (displayFormat != 0) {
                 // Format is forced by the Symbol
             }
-            else if ((mods & force_hex) != 0) {
+            else if ((mods & modifiers.force_hex) != 0) {
                 displayFormat = Symbol.DisplayFlags.force_hex;
             }
-            else if ((val <= 10) || ((mods & force_dec))) {
+            else if ((val <= 10) || ((mods & modifiers.force_dec))) {
                 displayFormat = Symbol.DisplayFlags.force_dec;
             }
             else {
@@ -1817,7 +1818,7 @@ namespace Sla.DECCORE
             }
             else {
                 FloatFormat.floatclass type;
-                double floatval = format.getHostFloat(val, &type);
+                double floatval = format.getHostFloat(val, out type);
                 if (type == FloatFormat.floatclass.infinity) {
                     if (format.extractSign(val))
                         token = "-INFINITY";
@@ -1832,7 +1833,7 @@ namespace Sla.DECCORE
                 }
                 else {
                     StringWriter t = new StringWriter();
-                    if ((mods & force_scinote) != 0) {
+                    if ((mods & modifiers.force_scinote) != 0) {
                         t.setf(ios::scientific); // Set to scientific notation
                         t.precision(format.getDecimalPrecision() - 1);
                         t.Write(floatval);
@@ -1859,9 +1860,9 @@ namespace Sla.DECCORE
                 }
             }
             if (vn == (Varnode)null)
-                pushAtom(new Atom(token, syntax, EmitMarkup.syntax_highlight.const_color, op));
+                pushAtom(new Atom(token, tagtype.syntax, EmitMarkup.syntax_highlight.const_color, op));
             else
-                pushAtom(new Atom(token, vartoken, EmitMarkup.syntax_highlight.const_color, op, vn));
+                pushAtom(new Atom(token, tagtype.vartoken, EmitMarkup.syntax_highlight.const_color, op, vn));
         }
 
         protected override void printUnicode(TextWriter s, int onechar)
@@ -1913,7 +1914,7 @@ namespace Sla.DECCORE
         protected override void pushType(Datatype ct)
         {
             pushTypeStart(ct, true);                // Print type (as if for a cast)
-            pushAtom(new Atom(EMPTY_STRING, blanktoken, EmitMarkup.syntax_highlight.no_color));
+            pushAtom(new Atom(EMPTY_STRING, tagtype.blanktoken, EmitMarkup.syntax_highlight.no_color));
             pushTypeEnd(ct);
         }
 
@@ -1966,14 +1967,14 @@ namespace Sla.DECCORE
             Varnode? outvn = op.getOut();
             if (outvn != (Varnode)null) {
                 if (option_inplace_ops && emitInplaceOp(op)) return;
-                pushOp(&assignment, op);
+                pushOp(assignment, op);
                 pushSymbolDetail(outvn, op, false);
             }
             else if (op.doesSpecialPrinting()) {
                 // Printing of constructor syntax
                 PcodeOp newop = op.getIn(1).getDef();
                 outvn = newop.getOut();
-                pushOp(&assignment, newop);
+                pushOp(assignment, newop);
                 pushSymbolDetail(outvn, newop, false);
                 opConstructor(op, true);
                 recurse();
@@ -2102,7 +2103,7 @@ namespace Sla.DECCORE
         /// definition is emitted so that name associated with data-type object
         /// will be associated with the definition (in anything that parses it)
         /// \param ct is the given data-type
-        protected override void emitTypeDefinition(Datatype ct)
+        protected virtual void emitTypeDefinition(Datatype ct)
         {
 #if CPUI_DEBUG
             if (!isStackEmpty()) {
@@ -2124,9 +2125,10 @@ namespace Sla.DECCORE
         {
             if (!vn.isImplied()) return false;
             if (!vn.isWritten()) return false;
-            PcodeOp op = vn.getDef();
+            PcodeOp op = vn.getDef() ?? throw new ApplicationException();
             bool reorder = false;
-            OpCode opc = Globals.get_booleanflip(op.code(), reorder); // This is the set of ops that can be negated as a token
+            // This is the set of ops that can be negated as a token
+            OpCode opc = Globals.get_booleanflip(op.code(), out reorder);
             if (opc == OpCode.CPUI_MAX)
                 return false;
             return true;
@@ -2139,23 +2141,24 @@ namespace Sla.DECCORE
         /// \param op is is the PTRSUB op
         protected void pushTypePointerRel(PcodeOp op)
         {
-            pushOp(&function_call, op);
-            pushAtom(new Atom(typePointerRelToken, optoken, EmitMarkup.syntax_highlight.funcname_color, op));
+            pushOp(function_call, op);
+            pushAtom(new Atom(typePointerRelToken, tagtype.optoken, EmitMarkup.syntax_highlight.funcname_color, op));
         }
 
         /// \param g is the Architecture owning this c-language emitter
         /// \param nm is the name assigned to this emitter
         public PrintC(Architecture g, string nm = "c-language")
+            : base(g, nm)
         {
             nullToken = "NULL";
 
             // Set the flip tokens
-            less_than.negate = &greater_equal;
-            less_equal.negate = &greater_than;
-            greater_than.negate = &less_equal;
-            greater_equal.negate = &less_than;
-            equal.negate = &not_equal;
-            not_equal.negate = &equal;
+            less_than.negate = greater_equal;
+            less_equal.negate = greater_than;
+            greater_than.negate = less_equal;
+            greater_equal.negate = less_than;
+            equal.negate = not_equal;
+            not_equal.negate = equal;
 
             castStrategy = new CastStrategyC();
             resetDefaultsPrintC();
@@ -2332,9 +2335,9 @@ namespace Sla.DECCORE
             }
             else {
                 separator = false;
-                IEnumerator<PcodeOp> iter = bb.beginOp();
-                while (iter.MoveNext()) {
-                    inst = iter.Current;
+                LinkedListNode<PcodeOp>? iter = bb.beginOp();
+                while (null != iter) {
+                    inst = iter.Value;
                     if (inst.notPrinted()) continue;
                     if (inst.isBranch()) {
                         if (isSet(modifiers.no_branch)) continue;
@@ -2342,7 +2345,7 @@ namespace Sla.DECCORE
                         // the block classes
                         if (inst.code() == OpCode.CPUI_BRANCH) continue;
                     }
-                    Varnode vn = inst.getOut();
+                    Varnode? vn = inst.getOut();
                     if ((vn != (Varnode)null) && (vn.isImplied()))
                         continue;
                     if (separator) {
@@ -2365,7 +2368,7 @@ namespace Sla.DECCORE
                 // If we are printing flat structure and there
                 // is no longer a normal fallthru, print a goto
                 if (isSet(modifiers.flat) && isSet(modifiers.nofallthru)) {
-                    inst = bb.lastOp();
+                    inst = bb.lastOp() ?? throw new ApplicationException();
                     emit.tagLine();
                     int id = emit.beginStatement(inst);
                     emit.print(KEYWORD_GOTO, EmitMarkup.syntax_highlight.keyword_color);
@@ -2381,7 +2384,8 @@ namespace Sla.DECCORE
                     emit.print(SEMICOLON);
                     emit.endStatement(id);
                 }
-                emitCommentGroup((PcodeOp)null); // Any remaining comments
+                // Any remaining comments
+                emitCommentGroup((PcodeOp)null);
             }
         }
 
@@ -2464,9 +2468,11 @@ namespace Sla.DECCORE
                 emit.endBlock(id2);
             }
             popMod();
-            subbl = bl.getBlock(i);        // The final block
+            // The final block
+            subbl = bl.getBlock(i);
             int id3 = emit.beginBlock(subbl);
-            subbl.emit(this);      // Pass original no_branch state
+            // Pass original no_branch state
+            subbl.emit(this);
             emit.endBlock(id3);
         }
 
@@ -2491,10 +2497,7 @@ namespace Sla.DECCORE
                 ReversePolish pol = new ReversePolish();
                 pol.op = (PcodeOp)null;
                 pol.visited = 1;
-                if (bl.getOpcode() == OpCode.CPUI_BOOL_AND)
-                    pol.tok = boolean_and;
-                else
-                    pol.tok = &boolean_or;
+                pol.tok = (bl.getOpcode() == OpCode.CPUI_BOOL_AND) ? boolean_and : boolean_or;
                 emitOp(pol);
 
                 int id2 = emit.openParen(OPEN_PAREN);
@@ -2508,7 +2511,7 @@ namespace Sla.DECCORE
         public override void emitBlockIf(BlockIf bl)
         {
             PcodeOp op;
-            PendingBrace pendingBrace;
+            PendingBrace pendingBrace = new PendingBrace();
 
             if (isSet(modifiers.pending_brace))
                 emit.setPendingPrint(pendingBrace);
@@ -2844,7 +2847,7 @@ namespace Sla.DECCORE
                 }
             }
             if (booleanflip)
-                pushOp(&boolean_not, op);
+                pushOp(boolean_not, op);
             pushVn(op.getIn(1), op, m);
             // Make sure stack is clear before emitting more
             recurse();
@@ -2873,20 +2876,21 @@ namespace Sla.DECCORE
 
         public override void opCall(PcodeOp op)
         {
-            pushOp(&function_call, op);
-            Varnode callpoint = op.getIn(0);
-            FuncCallSpecs fc;
+            pushOp(function_call, op);
+            Varnode callpoint = op.getIn(0) ?? throw new ApplicationException();
             if (callpoint.getSpace().getType() == spacetype.IPTR_FSPEC) {
-                fc = FuncCallSpecs::getFspecFromConst(callpoint.getAddr());
+                FuncCallSpecs fc = FuncCallSpecs.getFspecFromConst(callpoint.getAddr());
                 if (fc.getName().Length == 0) {
                     string nm = genericFunctionName(fc.getEntryAddress());
-                    pushAtom(new Atom(nm, functoken, EmitMarkup.syntax_highlight.funcname_color, op, (Funcdata)null));
+                    pushAtom(new Atom(nm, tagtype.functoken,
+                        EmitMarkup.syntax_highlight.funcname_color, op, (Funcdata)null));
                 }
                 else {
                     Funcdata? fd = fc.getFuncdata();
                     if (fd != (Funcdata)null)
                         pushSymbolScope(fd.getSymbol());
-                    pushAtom(new Atom(fc.getName(), functoken, EmitMarkup.syntax_highlight.funcname_color, op, (Funcdata)null));
+                    pushAtom(new Atom(fc.getName(), tagtype.functoken,
+                        EmitMarkup.syntax_highlight.funcname_color, op, (Funcdata)null));
                 }
             }
             else {
@@ -2902,7 +2906,7 @@ namespace Sla.DECCORE
             count -= (skip < 0) ? 0 : 1;        // Subtract one if "this" is hidden
             if (count > 0) {
                 for (int i = 0; i < count - 1; ++i)
-                    pushOp(&comma, op);
+                    pushOp(comma, op);
                 // implied vn's pushed on in reverse order for efficiency
                 // see PrintLanguage::pushVnImplied
                 for (int i = op.numInput() - 1; i >= 1; --i) {
@@ -2911,13 +2915,14 @@ namespace Sla.DECCORE
                 }
             }
             else                // Push empty token for void
-                pushAtom(new Atom(EMPTY_STRING, blanktoken, EmitMarkup.syntax_highlight.no_color));
+                pushAtom(new Atom(EMPTY_STRING, tagtype.blanktoken,
+                    EmitMarkup.syntax_highlight.no_color));
         }
 
         public override void opCallind(PcodeOp op)
         {
-            pushOp(&function_call, op);
-            pushOp(&dereference, op);
+            pushOp(function_call, op);
+            pushOp(dereference, op);
             Funcdata fd = op.getParent().getFuncdata();
             FuncCallSpecs? fc = fd.getCallSpecs(op);
             if (fc == (FuncCallSpecs)null)
@@ -2929,7 +2934,7 @@ namespace Sla.DECCORE
                 // Multiple parameters
                 pushVn(op.getIn(0), op, mods);
                 for (int i = 0; i < count - 1; ++i)
-                    pushOp(&comma, op);
+                    pushOp(comma, op);
                 // implied vn's pushed on in reverse order for efficiency
                 // see PrintLanguage::pushVnImplied
                 for (int i = op.numInput() - 1; i >= 1; --i) {
@@ -2939,16 +2944,14 @@ namespace Sla.DECCORE
             }
             else if (count == 1) {
                 // One parameter
-                if (skip == 1)
-                    pushVn(op.getIn(2), op, mods);
-                else
-                    pushVn(op.getIn(1), op, mods);
+                pushVn((skip == 1) ? op.getIn(2) : op.getIn(1), op, mods);
                 pushVn(op.getIn(0), op, mods);
             }
             else {
                 // A void function
                 pushVn(op.getIn(0), op, mods);
-                pushAtom(new Atom(EMPTY_STRING, tagtype.blanktoken, EmitMarkup.syntax_highlight.no_color));
+                pushAtom(new Atom(EMPTY_STRING, tagtype.blanktoken,
+                    EmitMarkup.syntax_highlight.no_color));
             }
         }
 
@@ -2996,7 +2999,7 @@ namespace Sla.DECCORE
                 dt = outvn.getTypeDefFacing();
             }
             else {
-                Varnode thisvn = op.getIn(1);
+                Varnode thisvn = op.getIn(1) ?? throw new ApplicationException();
                 dt = thisvn.getType();
             }
             if (dt.getMetatype() == type_metatype.TYPE_PTR) {
@@ -3028,8 +3031,9 @@ namespace Sla.DECCORE
         {
             string nm;
             switch (op.getHaltType()) {
-                default:            // The most common case, plain return
-                                    // FIXME:  This routine shouldn't emit directly
+                default:
+                    // The most common case, plain return
+                    // FIXME:  This routine shouldn't emit directly
                     emit.tagOp(KEYWORD_RETURN, EmitMarkup.syntax_highlight.keyword_color, op);
                     if (op.numInput() > 1) {
                         emit.spaces(1);
@@ -3088,7 +3092,7 @@ namespace Sla.DECCORE
         public override void opIntZext(PcodeOp op, PcodeOp readOp)
         {
             if (castStrategy.isZextCast(op.getOut().getHighTypeDefFacing(),
-                op.getIn(0).getHighTypeReadFacing(op)))
+                    op.getIn(0).getHighTypeReadFacing(op)))
             {
                 if (option_hide_exts && castStrategy.isExtensionCastImplied(op, readOp))
                     opHiddenFunc(op);
@@ -3102,7 +3106,7 @@ namespace Sla.DECCORE
         public override void opIntSext(PcodeOp op, PcodeOp readOp)
         {
             if (castStrategy.isSextCast(op.getOut().getHighTypeDefFacing(),
-                op.getIn(0).getHighTypeReadFacing(op)))
+                    op.getIn(0).getHighTypeReadFacing(op)))
             {
                 if (option_hide_exts && castStrategy.isExtensionCastImplied(op, readOp))
                     opHiddenFunc(op);
@@ -3209,8 +3213,10 @@ namespace Sla.DECCORE
         {
             if (isSet(modifiers.negatetoken)) {
                 // Check if we are negated by a previous BOOL_NEGATE
-                unsetMod(modifiers.negatetoken);  // If so, mark that negatetoken is consumed
-                pushVn(op.getIn(0), op, mods); // Don't print ourselves, but print our input unmodified
+                // If so, mark that negatetoken is consumed
+                unsetMod(modifiers.negatetoken);
+                // Don't print ourselves, but print our input unmodified
+                pushVn(op.getIn(0), op, mods);
             }
             else if (checkPrintNegation(op.getIn(0))) {
                 // If the next operator can be flipped
@@ -3352,7 +3358,9 @@ namespace Sla.DECCORE
                 if (ct.isPieceStructured()) {
                     int offset;
                     int byteOff = TypeOpSubpiece.computeByteOffsetForComposite(op);
-                    TypeField? field = ct.findTruncation(byteOff, op.getOut().getSize(), op, 1, offset);   // Use artificial slot
+                    // Use artificial slot
+                    TypeField? field = ct.findTruncation(byteOff, op.getOut().getSize(), op, 1,
+                        out offset);
                     if (field != (TypeField)null && offset == 0) {
                         // A formal structure field
                         pushOp(object_member, op);
@@ -3432,15 +3440,13 @@ namespace Sla.DECCORE
         public override void opPtrsub(PcodeOp op)
         {
             TypePointer ptype;
-            TypePointerRel ptrel;
+            TypePointerRel? ptrel;
             Datatype ct;
-            Varnode in0;
-            ulong in1const;
             bool valueon, flex, arrayvalue;
             modifiers m;
 
-            in0 = op.getIn(0);
-            in1const = op.getIn(1).getOffset();
+            Varnode in0 = op.getIn(0);
+            ulong in1const = op.getIn(1).getOffset();
             ptype = (TypePointer)in0.getHighTypeReadFacing(op);
             if (ptype.getMetatype() != type_metatype.TYPE_PTR) {
                 clear();
@@ -3462,8 +3468,8 @@ namespace Sla.DECCORE
             if (ct.getMetatype() == type_metatype.TYPE_STRUCT || ct.getMetatype() == type_metatype.TYPE_UNION) {
                 ulong suboff = in1const;    // How far into container
                 if (ptrel != (TypePointerRel)null) {
-                    suboff += ptrel.getPointerOffset();
-                    suboff &= Globals.calc_mask(ptype.getSize());
+                    suboff += (uint)ptrel.getPointerOffset();
+                    suboff &= Globals.calc_mask((uint)ptype.getSize());
                     if (suboff == 0) {
                         // Special case where we do not print a field
                         pushTypePointerRel(op);
@@ -3493,7 +3499,7 @@ namespace Sla.DECCORE
                 }
                 else {
                     // type_metatype.TYPE_STRUCT
-                    TypeField? fld = ct.findTruncation((int)suboff, 0, op, 0, newoff);
+                    TypeField? fld = ct.findTruncation((int)suboff, 0, op, 0, out newoff);
                     if (fld == (TypeField)null) {
                         if (ct.getSize() <= suboff) {
                             clear();
@@ -3570,10 +3576,10 @@ namespace Sla.DECCORE
             }
             else if (ct.getMetatype() == type_metatype.TYPE_SPACEBASE) {
                 HighVariable high = op.getIn(1).getHigh();
-                Symbol symbol = high.getSymbol();
+                Symbol? symbol = high.getSymbol();
                 arrayvalue = false;
                 if (symbol != (Symbol)null) {
-                    ct = symbol.getType();
+                    ct = symbol.getType() ?? throw new ApplicationException();
                     // The '&' is dropped if the output type is an array
                     if (ct.getMetatype() == type_metatype.TYPE_ARRAY) {
                         arrayvalue = valueon;   // If printing value, use [0]
@@ -3708,7 +3714,7 @@ namespace Sla.DECCORE
                             EmitMarkup.syntax_highlight.type_color, op, outvn));
                         break;
                     case CPoolRecord.ConstantPoolTagTypes.instance_of: {
-                            Datatype dt = rec.getType();
+                            Datatype dt = rec.getType() ?? throw new ApplicationException();
                             while (dt.getMetatype() == type_metatype.TYPE_PTR) {
                                 dt = ((TypePointer)dt).getPtrTo();
                             }
@@ -3727,7 +3733,7 @@ namespace Sla.DECCORE
                     case CPoolRecord.ConstantPoolTagTypes.array_length:
                     case CPoolRecord.ConstantPoolTagTypes.check_cast:
                     default: {
-                            Datatype ct = rec.getType();
+                            Datatype ct = rec.getType() ?? throw new ApplicationException();
                             EmitMarkup.syntax_highlight color = EmitMarkup.syntax_highlight.var_color;
                             if (ct.getMetatype() == type_metatype.TYPE_PTR) {
                                 ct = ((TypePointer)ct).getPtrTo();
@@ -3754,14 +3760,15 @@ namespace Sla.DECCORE
             Varnode? outvn = op.getOut();
             Varnode vn0 = op.getIn(0);
             if (op.numInput() == 2) {
-                Varnode vn1 = op.getIn(1);
+                Varnode vn1 = op.getIn(1) ?? throw new ApplicationException();
                 if (!vn0.isConstant()) {
                     // Array allocation form
                     pushOp(new_op, op);
                     pushAtom(new Atom(KEYWORD_NEW, tagtype.optoken,
                         EmitMarkup.syntax_highlight.keyword_color, op, outvn));
                     string nm;
-                    if (outvn == (Varnode)null) {   // Its technically possible, for new result to be unused
+                    if (outvn == (Varnode)null) {
+                        // Its technically possible, for new result to be unused
                         nm = "<unused>";
                     }
                     else {
@@ -3790,7 +3797,8 @@ namespace Sla.DECCORE
 
         public override void opExtractOp(PcodeOp op)
         {
-            opFunc(op); // If no other way to print it, print as functional operator
+            // If no other way to print it, print as functional operator
+            opFunc(op);
         }
 
         public override void opPopcountOp(PcodeOp op)

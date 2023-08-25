@@ -1,16 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Sla.SLEIGH
 {
-    internal class SymbolCompare
+    internal class SymbolCompare : IComparer<SleighSymbol>
     {
-        internal bool operator/*()*/(SleighSymbol a, SleighSymbol b)
+        internal static readonly SymbolCompare Instance = new SymbolCompare();
+
+        private SymbolCompare() { }
+
+        public int Compare(SleighSymbol? a, SleighSymbol? b)
         {
-            return (a.getName() < b.getName());
+            if (null == a) throw new ArgumentNullException();
+            if (null == b) throw new ArgumentNullException();
+            return string.Compare(a.getName(), b.getName());
         }
     }
 }

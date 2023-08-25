@@ -265,7 +265,6 @@ namespace Sla.SLEIGH
         {
             // Indicater character for operand
             string operstring = "\n ";
-            operstring.Capitalize
             operstring[1] = ('A' + operands.size()); // Encode index of operand
             operands.Add(sym);
             printpiece.Add(operstring); // Placeholder for operand's string
@@ -517,8 +516,8 @@ namespace Sla.SLEIGH
             minimumlength = int.Parse(el.getAttributeValue("length"));
             string src_and_line = el.getAttributeValue("line");
             int pos = src_and_line.IndexOf(":");
-            src_index = stoi(src_and_line.Substring(0, pos), NULL, 10);
-            lineno = stoi(src_and_line.Substring(pos + 1, src_and_line.length()), NULL, 10);
+            src_index = stoi(src_and_line.Substring(0, pos), null, 10);
+            lineno = stoi(src_and_line.Substring(pos + 1, src_and_line.length()), null, 10);
             IEnumerator<Element> iter = el.getChildren().begin();
             while (iter.MoveNext()) {
                 if (iter.Current.getName() == "oper") {

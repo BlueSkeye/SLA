@@ -94,7 +94,7 @@ namespace Sla.DECCORE
                     Address addr = outparam.getAddress();
                     data.newVarnodeOut(sz, addr, callop);
                     VarnodeData vdata;
-                    OpCode res = fc.assumedOutputExtension(addr, sz, vdata);
+                    OpCode res = fc.assumedOutputExtension(addr, sz, out vdata);
                     if (res == OpCode.CPUI_PIECE) {
                         // Pick an extension based on type
                         if (outtype.getMetatype() == type_metatype.TYPE_INT)

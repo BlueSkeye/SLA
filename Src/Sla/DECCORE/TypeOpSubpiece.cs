@@ -24,34 +24,37 @@ namespace Sla.DECCORE
             Datatype ct = op.getIn(0).getHighTypeReadFacing(op);
             int offset;
             int byteOff = computeByteOffsetForComposite(op);
-            field = ct.findTruncation(byteOff, outvn.getSize(), op, 1, offset);   // Use artificial slot
+            // Use artificial slot
+            field = ct.findTruncation(byteOff, outvn.getSize(), op, 1, out offset);
             if (field != (TypeField)null) {
                 if (outvn.getSize() == field.type.getSize())
                     return field.type;
             }
-            Datatype dt = outvn.getHighTypeDefFacing();   // SUBPIECE prints as cast to whatever its output is
+            // SUBPIECE prints as cast to whatever its output is
+            Datatype dt = outvn.getHighTypeDefFacing();
             if (dt.getMetatype() != type_metatype.TYPE_UNKNOWN)
                 return dt;
-            return tlst.getBase(outvn.getSize(), type_metatype.TYPE_INT);   // If output is unknown, treat as cast to int
+            // If output is unknown, treat as cast to int
+            return tlst.getBase(outvn.getSize(), type_metatype.TYPE_INT);
         }
 
-        public override Datatype propagateType(Datatype alttype, PcodeOp op, Varnode invn, Varnode outvn,
+        public override Datatype? propagateType(Datatype alttype, PcodeOp op, Varnode invn, Varnode outvn,
             int inslot, int outslot)
         {
-            if (inslot != 0 || outslot != -1) return (Datatype)null;  // Propagation must be from in0 to out
-            int byteOff;
+            // Propagation must be from in0 to out
+            if (inslot != 0 || outslot != -1) return (Datatype)null;
             int newoff;
-            TypeField field;
+            TypeField? field;
             type_metatype meta = alttype.getMetatype();
             if (meta == type_metatype.TYPE_UNION || meta == type_metatype.TYPE_PARTIALUNION) {
                 // NOTE: We use an artificial slot here to store the field being truncated to
                 // as the facing data-type for slot 0 is already to the parent (this type_metatype.TYPE_UNION)
-                byteOff = computeByteOffsetForComposite(op);
-                field = alttype.resolveTruncation(byteOff, op, 1, newoff);
+                int byteOff = computeByteOffsetForComposite(op);
+                field = alttype.resolveTruncation(byteOff, op, 1, out newoff);
             }
             else if (alttype.getMetatype() == type_metatype.TYPE_STRUCT) {
                 int byteOff = computeByteOffsetForComposite(op);
-                field = alttype.findTruncation(byteOff, outvn.getSize(), op, 1, newoff);
+                field = alttype.findTruncation(byteOff, outvn.getSize(), op, 1, out newoff);
             }
             else
                 return (Datatype)null;

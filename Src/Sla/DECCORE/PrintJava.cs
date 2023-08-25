@@ -1,13 +1,5 @@
-﻿using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static ghidra.XmlScan;
+﻿using Sla.CORE;
+using Sla.DECCORE;
 
 namespace Sla.DECCORE
 {
@@ -87,7 +79,7 @@ namespace Sla.DECCORE
         {
             option_NULL = true;         // Automatically use 'null' token
             option_convention = false;      // Automatically hide convention name
-            mods |= hide_thisparam;     // turn on hiding of 'this' parameter
+            mods |= modifiers.hide_thisparam;     // turn on hiding of 'this' parameter
         }
 
         protected override void printUnicode(TextWriter s, int onechar)
@@ -194,13 +186,13 @@ namespace Sla.DECCORE
                 // Check for anonymous type
                 // We could support a struct or enum declaration here
                 string nm = genericTypeName(ct);
-                pushAtom(new Atom(nm, typetoken, EmitMarkup.syntax_highlight.type_color, ct));
+                pushAtom(new Atom(nm, tagtype.typetoken, EmitMarkup.syntax_highlight.type_color, ct));
             }
             else {
-                pushAtom(new Atom(ct.getDisplayName(), typetoken, EmitMarkup.syntax_highlight.type_color, ct));
+                pushAtom(new Atom(ct.getDisplayName(), tagtype.typetoken, EmitMarkup.syntax_highlight.type_color, ct));
             }
             for (int i = 0; i < arrayCount; ++i)
-                pushAtom(new Atom(EMPTY_STRING, blanktoken, EmitMarkup.syntax_highlight.no_color));     // Fill in the blank array index
+                pushAtom(new Atom(EMPTY_STRING, tagtype.blanktoken, EmitMarkup.syntax_highlight.no_color));     // Fill in the blank array index
         }
 
         protected override void pushTypeEnd(Datatype ct)
@@ -219,7 +211,7 @@ namespace Sla.DECCORE
 
         public override void opLoad(PcodeOp op)
         {
-            uint m = mods | print_load_value;
+            modifiers m = mods | modifiers.print_load_value;
             bool printArrayRef = needZeroArray(op.getIn(1));
             if (printArrayRef)
                 pushOp(subscript, op);
@@ -230,7 +222,7 @@ namespace Sla.DECCORE
 
         public override void opStore(PcodeOp op)
         {
-            uint m = mods | print_store_value; // Inform sub-tree that we are storing
+            modifiers m = mods | modifiers.print_store_value; // Inform sub-tree that we are storing
             pushOp(assignment, op);    // This is an assignment
             if (needZeroArray(op.getIn(1))) {
                 pushOp(subscript, op);
@@ -279,7 +271,7 @@ namespace Sla.DECCORE
             else {
                 // A void function
                 pushVn(op.getIn(0), op, mods);
-                pushAtom(new Atom(EMPTY_STRING, blanktoken, EmitMarkup.syntax_highlight.no_color));
+                pushAtom(new Atom(EMPTY_STRING, tagtype.blanktoken, EmitMarkup.syntax_highlight.no_color));
             }
         }
 
@@ -292,7 +284,7 @@ namespace Sla.DECCORE
                 refs.Add(op.getIn(i).getOffset());
             CPoolRecord rec = glb.cpool.getRecord(refs);
             if (rec == (CPoolRecord)null) {
-                pushAtom(new Atom("UNKNOWNREF", syntax, EmitMarkup.syntax_highlight.const_color, op, outvn));
+                pushAtom(new Atom("UNKNOWNREF", tagtype.syntax, EmitMarkup.syntax_highlight.const_color, op, outvn));
             }
             else {
                 switch (rec.getTag()) {
@@ -308,12 +300,12 @@ namespace Sla.DECCORE
                             else {
                                 str.Write("...\"");
                             }
-                            pushAtom(new Atom(str.str(), vartoken,
+                            pushAtom(new Atom(str.ToString(), tagtype.vartoken,
                                 EmitMarkup.syntax_highlight.const_color, op, outvn));
                             break;
                         }
                     case CPoolRecord.ConstantPoolTagTypes.class_reference:
-                        pushAtom(new Atom(rec.getToken(), vartoken,
+                        pushAtom(new Atom(rec.getToken(), tagtype.vartoken,
                             EmitMarkup.syntax_highlight.type_color, op, outvn));
                         break;
                     case CPoolRecord.ConstantPoolTagTypes.instance_of: {
@@ -323,7 +315,7 @@ namespace Sla.DECCORE
                             }
                             pushOp(instanceof, op);
                             pushVn(vn0, op, mods);
-                            pushAtom(new Atom(dt.getDisplayName(), syntax,
+                            pushAtom(new Atom(dt.getDisplayName(), tagtype.syntax,
                                 EmitMarkup.syntax_highlight.type_color, op, outvn));
                             break;
                         }
@@ -342,14 +334,15 @@ namespace Sla.DECCORE
                             }
                             if (vn0.isConstant()) {
                                 // If this is NOT relative to an object reference
-                                pushAtom(new Atom(rec.getToken(), vartoken, color, op, outvn));
+                                pushAtom(new Atom(rec.getToken(), tagtype.vartoken, color, op, outvn));
                             }
                             else {
                                 pushOp(object_member, op);
                                 pushVn(vn0, op, mods);
-                                pushAtom(new Atom(rec.getToken(), syntax, color, op, outvn));
+                                pushAtom(new Atom(rec.getToken(), tagtype.syntax, color, op, outvn));
                             }
                         }
+                        break;
                 }
             }
         }

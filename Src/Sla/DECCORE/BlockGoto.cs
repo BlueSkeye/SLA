@@ -10,14 +10,16 @@ namespace Sla.DECCORE
     /// otherwise removing the edge from the structured view of the graph.
     internal class BlockGoto : BlockGraph
     {
-        /// The type of unstructured branch (f_goto_goto, f_break_goto, etc.)
-        private FlowBlock.block_flags gototype;
+        // The target block of the unstructured branch
+        private FlowBlock gototarget;
+        // The type of unstructured branch (f_goto_goto, f_break_goto, etc.)
+        private block_flags gototype;
 
         /// Construct given target block
         public BlockGoto(FlowBlock bl)
         {
             gototarget = bl;
-            gototype = FlowBlock.block_flags.f_goto_goto;
+            gototype = block_flags.f_goto_goto;
         }
 
         /// Get the target block of the goto
@@ -47,7 +49,7 @@ namespace Sla.DECCORE
         public override void markUnstructured()
         {
             // Recurse
-            @base.markUnstructured();
+            base.markUnstructured();
             if (gototype == FlowBlock.block_flags.f_goto_goto) {
                 if (gotoPrints()) {
                     markCopyBlock(gototarget, FlowBlock.block_flags.f_unstructured_targ);
@@ -70,7 +72,7 @@ namespace Sla.DECCORE
         public override void printHeader(TextWriter s)
         {
             s.Write("Plain goto block ");
-            @base.printHeader(s);
+            base.printHeader(s);
         }
 
         public override void printRaw(TextWriter s) => getBlock(0).printRaw(s);
@@ -92,7 +94,7 @@ namespace Sla.DECCORE
 
         public override void encodeBody(Encoder encoder)
         {
-            @base.encodeBody(encoder);
+            base.encodeBody(encoder);
             encoder.openElement(ElementId.ELEM_TARGET);
             FlowBlock leaf = gototarget.getFrontLeaf();
             int depth = gototarget.calcDepth(leaf);

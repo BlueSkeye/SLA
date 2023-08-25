@@ -45,7 +45,7 @@ namespace Sla.DECCORE
             if (!maskvn.isConstant()) return 0;
             ulong val = maskvn.getOffset();
             ulong testmask = Globals.calc_mask(maskvn.getSize());
-            ulong slide = ~((ulong)0);
+            ulong slide = ulong.MaxValue;
             slide <<= align;
             if ((testmask & slide) == val)
             { // 1-bit encoding

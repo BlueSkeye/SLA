@@ -50,7 +50,7 @@ namespace Sla.EXTRA
         ///
         /// It defines a disjoint range within the common refinement of all ranges
         /// in the container. It also knows about its containing range and \b recordtype.
-        private class AddrRange
+        internal class AddrRange
         {
             //friend class rangemap<_recordtype>;
             //friend class PartIterator;
@@ -92,7 +92,7 @@ namespace Sla.EXTRA
         /// \b recordtype.  Iteration occurs over the disjoint sub-ranges, thus the same \b recordtype
         /// may be visited multiple times by the iterator, depending on how much it overlaps other
         /// \b recordtypes. The sub-ranges are sorted in linear order, then depending on the \b subsorttype.
-        public class PartIterator
+        public class PartIterator : IEnumerator<AddrRange>
         {
             /// The underlying multiset iterator
             private /*typename*/ IEnumerator<AddrRange> iter;
@@ -114,10 +114,9 @@ namespace Sla.EXTRA
             }
 
             /// Pre-increment the iterator
-            public static PartIterator operator ++()
+            public static PartIterator? operator ++(PartIterator iterator)
             {
-                ++iter;
-                return this;
+                return iterator.iter.MoveNext() ? iterator : null;
             }
 
             /// Post-increment the iterator
@@ -129,37 +128,39 @@ namespace Sla.EXTRA
             }
 
             /// Pre-decrement the iterator
-            public static PartIterator operator --()
+            public static PartIterator? operator --(PartIterator iterator)
             {
-                --iter;
-                return this;
+                throw new NotImplementedException();
+                //--iter;
+                //return iterator;
             }
 
             /// Post-decrement the iterator
             public static PartIterator operator --(int i)
             {
-                PartIterator orig = new PartIterator(iter);
-                --iter;
-                return orig;
+                throw new NotImplementedException();
+                //PartIterator orig = new PartIterator(iter);
+                //--iter;
+                //return orig;
             }
 
             /// Assign to the iterator
-            public static PartIterator operator=(PartIterator op2)
+            public static PartIterator operator=(PartIterator op1, PartIterator op2)
             {
-                iter = op2.iter;
-                return this;
+                op1.iter = op2.iter;
+                return op1;
             }
 
             /// Test equality of iterators
             public static bool operator ==(PartIterator op1, PartIterator op2)
             {
-                return (iter == op2.iter);
+                return (op1.iter == op2.iter);
             }
 
             /// Test inequality of iterators
             public static bool operator !=(PartIterator op1, PartIterator op2)
             {
-                return (iter != op2.iter);
+                return (op1.iter != op2.iter);
             }
 
             /// Get the \b recordtype iterator
@@ -233,10 +234,10 @@ namespace Sla.EXTRA
         //public /*typename*/ IEnumerator<_recordtype> end_list() => record.end();
 
         /// Beginning of sub-ranges
-        public const_iterator begin() => new PartIterator(tree.begin());
+        internal IEnumerator<AddrRange> begin() => new PartIterator(tree.begin());
 
         /// Ending of sub-ranges
-        public const_iterator end() => new PartIterator(tree.end());
+        internal IEnumerator<AddrRange> end() => new PartIterator(tree.end());
 
         /// \brief Find sub-ranges intersecting the given boundary point
         /// \param point is the given boundary point
@@ -282,7 +283,7 @@ namespace Sla.EXTRA
         /// \brief Find beginning of sub-ranges that contain the given boundary point
         /// \param point is the given boundary point
         /// \return iterator to first sub-range of intersects the boundary point
-        public const_iterator find_begin(linetype point)
+        public IEnumerator<AddrRange> find_begin(linetype point)
         {
             AddrRange addrrange = new AddrRange(point);
             /*typename*/ IEnumerator<AddrRange> iter;
@@ -294,7 +295,7 @@ namespace Sla.EXTRA
         /// \brief Find ending of sub-ranges that contain the given boundary point
         /// \param point is the given boundary point
         /// \return iterator to first sub-range after that does not intersect the boundary point
-        public const_iterator find_end(linetype point)
+        public IEnumerator<AddrRange> find_end(linetype point)
         {
             AddrRange addrend = new AddrRange(point, subsorttype(true));
             /*typename*/ IEnumerator<AddrRange> iter;
@@ -314,7 +315,7 @@ namespace Sla.EXTRA
         /// \param point is the start of interval to test
         /// \param end is the end of the interval to test
         /// \return iterator to first sub-range of an intersecting record (or \b end)
-        public const_iterator find_overlap(linetype point, linetype end)
+        public IEnumerator<AddrRange> find_overlap(linetype point, linetype end)
         {
             AddrRange addrrange = new AddrRange(point);
             /*typename*/ IEnumerator<AddrRange> iter;
@@ -437,7 +438,7 @@ namespace Sla.EXTRA
         }
 
         /// \brief Erase a record given an iterator
-        public void erase(const_iterator iter)
+        public void erase(IEnumerator<AddrRange> iter)
         {
             erase(iter.getValueIter());
         }

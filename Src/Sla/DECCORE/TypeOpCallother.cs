@@ -62,7 +62,8 @@ namespace Sla.DECCORE
                 Address addr = op.getIn(1).getAddr(); // Address of volatile memory
                 int size = op.getIn(2).getSize(); // Size of memory being written
                 uint vflags = 0;
-                SymbolEntry? entry = glb.symboltab.getGlobalScope().queryProperties(addr, size, op.getAddr(), vflags);
+                SymbolEntry? entry = glb.symboltab.getGlobalScope().queryProperties(addr, size, op.getAddr(),
+                    out vflags);
                 if (entry != (SymbolEntry)null) {
                     Datatype? res = entry.getSizedType(addr, size);
                     if (res != (Datatype)null)
@@ -82,7 +83,8 @@ namespace Sla.DECCORE
                 Address addr = op.getIn(1).getAddr(); // Address of volatile memory
                 int size = op.getOut().getSize(); // Size of memory being written
                 uint vflags = 0;
-                SymbolEntry? entry = glb.symboltab.getGlobalScope().queryProperties(addr, size, op.getAddr(), vflags);
+                SymbolEntry? entry = glb.symboltab.getGlobalScope().queryProperties(addr, size, op.getAddr(),
+                    out vflags);
                 if (entry != (SymbolEntry)null) {
                     Datatype? res = entry.getSizedType(addr, size);
                     if (res != (Datatype)null)

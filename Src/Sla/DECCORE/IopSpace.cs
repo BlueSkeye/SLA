@@ -31,10 +31,10 @@ namespace Sla.DECCORE
         /// \param t is the associated processor translator
         /// \param ind is the associated index
         public IopSpace(AddrSpaceManager m, Translate t, int ind)
-            : base(m, t, spacetype.IPTR_IOP, NAME,sizeof(void*),1, ind,0,1)
+            : base(m, t, spacetype.IPTR_IOP, NAME, (uint)IntPtr.Size,1, ind,0,1)
         {
             clearFlags(Properties.heritaged | Properties.does_deadcode | Properties.big_endian);
-            if (HOST_ENDIAN == 1)       // Endianness always set to host
+            if (Globals.HOST_ENDIAN == 1)       // Endianness always set to host
                 setFlags(Properties.big_endian);
         }
 

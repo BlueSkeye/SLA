@@ -135,7 +135,7 @@ namespace Sla.DECCORE
         /// Size of the Varnode in bytes
         internal int size;
         /// A unique one-up index assigned to Varnode at its creation
-        private uint create_index;
+        internal uint create_index;
         /// Which group of forced merges does this Varnode belong to
         private short mergegroup;
         /// Additional flags

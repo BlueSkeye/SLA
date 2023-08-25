@@ -683,7 +683,8 @@ namespace Sla.CORE {
         {
             ulong offset = 0;
             bool foundoffset = false;
-            while(true) {
+            size = 0;
+            while (true) {
                 AttributeId attribId = decoder.getNextAttributeId();
                 if (0 == attribId) {
                     break;
@@ -807,7 +808,7 @@ namespace Sla.CORE {
         public virtual void decode(Sla.CORE.Decoder decoder)
         {
             // Multiple tags: <space>, <space_other>, <space_unique>
-            uint elemId = decoder.openElement();
+            ElementId elemId = decoder.openElement();
             decodeBasicAttributes(decoder);
             decoder.closeElement(elemId);
         }

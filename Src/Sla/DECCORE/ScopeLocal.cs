@@ -211,7 +211,7 @@ namespace Sla.DECCORE
                 }
                 if (!locked)
                 {
-                    Address usepoint;
+                    Address usepoint = new Address();
                     //      if (!vn.addrtied())
                     // 	usepoint = vn.getUsePoint(*fd);
                     // Double check to make sure vn doesn't already have a
@@ -220,7 +220,8 @@ namespace Sla.DECCORE
                     // corresponding varnodes won't get typelocked
                     if (lockedinputs != 0) {
                         uint vflags = 0;
-                        SymbolEntry entry = queryProperties(vn.getAddr(), vn.getSize(), usepoint, vflags);
+                        SymbolEntry entry = queryProperties(vn.getAddr(), vn.getSize(), usepoint,
+                            out vflags);
                         if (entry != (SymbolEntry)null) {
                             if (entry.getSymbol().getCategory() == Symbol.SymbolCategory.function_parameter)
                                 continue;       // Found a matching symbol

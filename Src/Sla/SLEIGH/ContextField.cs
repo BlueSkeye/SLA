@@ -41,7 +41,7 @@ namespace Sla.SLEIGH
 
         public override long getValue(ParserWalker walker)
         {
-            long res = getContextBytes(walker, startbyte, endbyte);
+            long res = walker.getContextBytes(startbyte, endbyte);
             res >>= shift;
             if (signbit)
                 Globals.sign_extend(ref res, endbit - startbit);

@@ -1,12 +1,4 @@
-﻿using ghidra;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static ghidra.FlowBlock;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -46,7 +38,7 @@ namespace Sla.DECCORE
             s.Write("Condition block(");
             s.Write((opc == OpCode.CPUI_BOOL_AND) ? "&&" : "||");
             s.Write(") ");
-            @base.printHeader(s);
+            base.printHeader(s);
         }
 
         public override void emit(PrintLanguage lng)
@@ -62,7 +54,7 @@ namespace Sla.DECCORE
             bool res2 = getBlock(1).negateCondition(false);
             opc = (opc == OpCode.CPUI_BOOL_AND) ? OpCode.CPUI_BOOL_OR : OpCode.CPUI_BOOL_AND;
             // Flip order of outofthis
-            @base.negateCondition(toporbottom);
+            base.negateCondition(toporbottom);
             return (res1 || res2);
         }
 
@@ -111,9 +103,9 @@ namespace Sla.DECCORE
             return null;
         }
 
-        public override void encodeHeader(Encoder encoder)
+        public override void encodeHeader(Sla.CORE.Encoder encoder)
         {
-            @base.encodeHeader(encoder);
+            base.encodeHeader(encoder);
             string nm = Globals.get_opname(opc);
             encoder.writeString(AttributeId.ATTRIB_OPCODE, nm);
         }

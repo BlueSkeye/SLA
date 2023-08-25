@@ -26,10 +26,10 @@ namespace Sla.DECCORE
         /// \param t is the associated processor translator
         /// \param ind is the index associated with the space
         public FspecSpace(AddrSpaceManager m, Translate t, int ind)
-            : base(m, t, spacetype.IPTR_FSPEC, NAME, sizeof(void*), 1, ind, 0, 1)
+            : base(m, t, spacetype.IPTR_FSPEC, NAME, (uint)IntPtr.Size, 1, ind, 0, 1)
         {
             clearFlags(Properties.heritaged | Properties.does_deadcode | Properties.big_endian);
-            if (HOST_ENDIAN == 1)       // Endianness always set by host
+            if (Globals.HOST_ENDIAN == 1)       // Endianness always set by host
                 setFlags(Properties.big_endian);
         }
 

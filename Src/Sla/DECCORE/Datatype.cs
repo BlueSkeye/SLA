@@ -365,8 +365,9 @@ namespace Sla.DECCORE
         /// \param slot is the index of the Varnode being accessed, -1 for the output, >=0 for an input
         /// \param newoff points to the renormalized offset to pass back
         /// \return the containing field or NULL if the range is not contained
-        public virtual TypeField? findTruncation(int off, int sz, PcodeOp op, int slot, int newoff)
+        public virtual TypeField? findTruncation(int off, int sz, PcodeOp op, int slot, out int newoff)
         {
+            newoff = 0;
             return (TypeField)null;
         }
 
@@ -530,8 +531,9 @@ namespace Sla.DECCORE
         /// \param slot is either the input slot of the reading PcodeOp or the artificial SUBPIECE slot: 1
         /// \param newoff is used to pass back how much offset is left to resolve
         /// \return the field of the union best associated with the truncation or null
-        public virtual TypeField? resolveTruncation(int offset, PcodeOp op, int slot, int newoff)
+        public virtual TypeField? resolveTruncation(int offset, PcodeOp op, int slot, out int newoff)
         {
+            newoff = 0;
             return (TypeField)null;
         }
 

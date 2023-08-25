@@ -100,23 +100,23 @@ namespace Sla.DECCORE
         }
 
         /// Collection of block_flags
-        private block_flags flags;
+        internal block_flags flags;
         /// The parent block to which \b this belongs
         private FlowBlock parent;
         /// Immediate dominating block
-        private FlowBlock immed_dom;
+        internal FlowBlock immed_dom;
         /// Back reference to a BlockCopy of \b this
-        private FlowBlock copymap;
+        internal FlowBlock copymap;
         /// Reference index for this block (reverse post order)
-        private int index;
+        internal int index;
         /// A count of visits of this node for various algorithms
-        private int visitcount;
+        internal int visitcount;
         /// Number of descendants of this block in spanning tree (+1)
-        private int numdesc;
+        internal int numdesc;
         /// Blocks which (can) fall into this block
-        private List<BlockEdge> intothis = new List<BlockEdge>();
+        internal List<BlockEdge> intothis = new List<BlockEdge>();
         /// Blocks into which this block (can) fall
-        private List<BlockEdge> outofthis = new List<BlockEdge>();
+        internal List<BlockEdge> outofthis = new List<BlockEdge>();
 
         // If there are two possible outputs as the
         // result of a conditional branch
@@ -136,7 +136,7 @@ namespace Sla.DECCORE
         /// Add an edge coming into \b this
         /// \param b is the FlowBlock coming in
         /// \param lab is a label for the edge
-        private void addInEdge(FlowBlock b, edge_flags lab)
+        internal void addInEdge(FlowBlock b, edge_flags lab)
         {
             int ourrev = b.outofthis.Count;
             int brev = intothis.Count;
@@ -196,7 +196,7 @@ namespace Sla.DECCORE
 
         /// Remove an incoming edge
         /// \param slot is the index of the incoming edge to remove
-        private void removeInEdge(int slot)
+        internal void removeInEdge(int slot)
         {
             FlowBlock b = intothis[slot].point;
             int rev = intothis[slot].reverse_index;
@@ -210,7 +210,7 @@ namespace Sla.DECCORE
 
         /// Remove an outgoing edge
         /// \param slot is the index of the outgoing edge to remove
-        private void removeOutEdge(int slot)
+        internal void removeOutEdge(int slot)
         {
             FlowBlock b = outofthis[slot].point;
             int rev = outofthis[slot].reverse_index;
@@ -226,7 +226,7 @@ namespace Sla.DECCORE
         /// The original edge, which must exist, is replaced.
         /// \param num is the index of the incoming edge
         /// \param b is the new incoming block
-        private void replaceInEdge(int num, FlowBlock b)
+        internal void replaceInEdge(int num, FlowBlock b)
         {
             FlowBlock oldb = intothis[num].point;
             oldb.halfDeleteOutEdge(intothis[num].reverse_index);
@@ -244,7 +244,7 @@ namespace Sla.DECCORE
         /// The original edge, which must exist is replaced.
         /// \param num is the index of the outgoing edge
         /// \param b is the new outgoing block
-        private void replaceOutEdge(int num, FlowBlock b)
+        internal void replaceOutEdge(int num, FlowBlock b)
         {
             FlowBlock oldb = outofthis[num].point;
             oldb.halfDeleteInEdge(outofthis[num].reverse_index);
@@ -264,7 +264,7 @@ namespace Sla.DECCORE
         /// position in the in/out edge lists.
         /// \param in is the index of the incoming block
         /// \param out is the index of the outgoing block
-        private void replaceEdgesThru(int @in, int @out)
+        internal void replaceEdgesThru(int @in, int @out)
         {
             FlowBlock inb = intothis[@in].point;
             int inblock_outslot = intothis[@in].reverse_index;
@@ -307,7 +307,7 @@ namespace Sla.DECCORE
         /// Apply an \e out edge label
         /// \param i is the index of the outgoing edge
         /// \param lab is the new edge label
-        private void setOutEdgeFlag(int i, edge_flags lab)
+        internal void setOutEdgeFlag(int i, edge_flags lab)
         {
             FlowBlock bbout = outofthis[i].point;
             outofthis[i].label |= lab;
@@ -432,7 +432,7 @@ namespace Sla.DECCORE
         /// Update references to other blocks using getCopyMap()
         /// Run through incoming and outgoing edges and replace FlowBlock references with
         /// the FlowBlock accessed via the getCopyMap() method.
-        private void replaceUsingMap()
+        internal void replaceUsingMap()
         {
             replaceEdgeMap(intothis);
             replaceEdgeMap(outofthis);

@@ -47,7 +47,8 @@ namespace Sla.DECCORE
                 ulong offset = AddrSpace.addressToByte(op.getIn(1).getOffset(), ptype.getWordSize());
                 ulong unusedOffset;
                 TypePointer unusedParent;
-                Datatype rettype = ptype.downChain(offset, unusedParent, unusedOffset, false, tlst);
+                Datatype rettype = ptype.downChain(offset, out unusedParent, out unusedOffset,
+                    false, tlst);
                 if ((offset == 0) && (rettype != (Datatype)null))
                     return rettype;
                 rettype = tlst.getBase(1, type_metatype.TYPE_UNKNOWN);
@@ -59,18 +60,21 @@ namespace Sla.DECCORE
         public override Datatype propagateType(Datatype alttype, PcodeOp op, Varnode invn, Varnode outvn,
             int inslot, int outslot)
         {
-            if ((inslot != -1) && (outslot != -1)) return (Datatype)null; // Must propagate input <. output
+            // Must propagate input <. output
+            if ((inslot != -1) && (outslot != -1)) return (Datatype)null;
             type_metatype metain = alttype.getMetatype();
             if (metain != type_metatype.TYPE_PTR) return (Datatype)null;
             Datatype newtype;
-            if (inslot == -1)       // Propagating output to input
-                newtype = op.getIn(outslot).getTempType();    // Don't propagate pointer types this direction
+            if (inslot == -1)
+                // Propagating output to input
+                // Don't propagate pointer types this direction
+                newtype = op.getIn(outslot).getTempType();
             else
                 newtype = TypeOpIntAdd.propagateAddIn2Out(alttype, tlst, op, inslot);
             return newtype;
         }
 
-        public override push(PrintLanguage lng, PcodeOp op, PcodeOp readOp)
+        public override void push(PrintLanguage lng, PcodeOp op, PcodeOp readOp)
         {
             lng.opPtrsub(op);
         }

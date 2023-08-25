@@ -93,8 +93,8 @@ namespace Sla.DECCORE
         public void foldIn(ProtoModel model)
         {
             if (model.glb != glb) throw new LowlevelError("Mismatched architecture");
-            if ((model.input.getType() != ParamList::p_standard) &&
-                (model.input.getType() != ParamList::p_register))
+            if ((model.input.getType() != ParamList.Model.p_standard) &&
+                (model.input.getType() != ParamList.Model.p_register))
                 throw new LowlevelError("Can only resolve between standard prototype models");
             if (input == (ParamList)null) {
                 // First fold in

@@ -633,7 +633,7 @@ namespace Sla.DECCORE
             if (loadpoints != (List<LoadTable>)null)
                 emul.setLoadCollect(true);
 
-            ulong mask = ~((ulong)0);
+            ulong mask = ulong.MaxValue;
             int bit = fd.getArch().funcptr_align;
             if (bit != 0) {
                 mask = (mask >> bit) << bit;

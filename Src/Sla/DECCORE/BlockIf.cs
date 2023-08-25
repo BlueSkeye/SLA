@@ -51,7 +51,7 @@ namespace Sla.DECCORE
         {
             base.markUnstructured(); // Recurse
             if ((gototarget != null) && (gototype == block_flags.f_goto_goto)) {
-                markCopyBlock(gototarget, f_unstructured_targ);
+                markCopyBlock(gototarget, edge_flags.f_unstructured_targ);
             }
         }
         public override void scopeBreak(int curexit, int curloopexit)
@@ -94,7 +94,7 @@ namespace Sla.DECCORE
                 return false;
             }
             split.flipInPlaceExecute();
-            opFlipInPlaceExecute(data, fliplist);
+            Funcdata.opFlipInPlaceExecute(data, fliplist);
             swapBlocks(1, 2);
             return true;
         }

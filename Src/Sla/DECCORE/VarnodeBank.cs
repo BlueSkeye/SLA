@@ -125,7 +125,7 @@ namespace Sla.DECCORE
         public Varnode createDef(int s, Address m, Datatype ct, PcodeOp op)
         {
             Varnode vn = new Varnode(s, m, ct) {
-                create_index = create_index++,
+                create_index = create_index + 1,
                 setDef(op)
             };
             return xref(vn);
@@ -138,9 +138,12 @@ namespace Sla.DECCORE
         /// \param ct is the data-type to assign (must not be NULL)
         public Varnode createUnique(int s, Datatype ct)
         {
-            Address addr = new Address(uniq_space, uniqid); // Generate a unique address
-            uniqid += s;            // Update counter for next call
-            return create(s, addr, ct); // Build varnode with our generated address
+            // Generate a unique address
+            Address addr = new Address(uniq_space, uniqid);
+            // Update counter for next call
+            uniqid += (uint)s;
+            // Build varnode with our generated address
+            return create(s, addr, ct);
         }
 
         /// Create a temporary Varnode as output of a PcodeOp
@@ -154,7 +157,7 @@ namespace Sla.DECCORE
         {
             // Create unique varnode as output of op
             Address addr = new Address(uniq_space, uniqid);
-            uniqid += s;
+            uniqid += (uint)s;
             return createDef(s, addr, ct, op);
         }
 
@@ -298,13 +301,10 @@ namespace Sla.DECCORE
         /// \return the match Varnode object or NULL
         public Varnode? findInput(int s, Address loc)
         {
-            IEnumerator<Varnode> iter;
-            Varnode vn;
-
-            iter = beginLoc(s, loc, Varnode.varnode_flags.input);
-            if (iter != loc_tree.end()) {
+            IEnumerator<Varnode> iter = beginLoc(s, loc, Varnode.varnode_flags.input);
+            if (iter.MoveNext()) {
                 // There is only one possible varnode matching this
-                vn = *iter;
+                Varnode vn = iter.Current;
                 if (vn.isInput() && (vn.getSize() == s) && (vn.getAddr() == loc))
                     return vn;
             }
@@ -319,7 +319,7 @@ namespace Sla.DECCORE
         /// \return the Varnode object or NULL if no Varnode met the conditions
         public Varnode? findCoveredInput(int s, Address loc)
         {
-            VarnodeDefSet::const_iterator iter, enditer;
+            IEnumerator<Varnode> iter, enditer;
             Varnode vn;
             ulong highest = loc.getSpace().getHighest();
             ulong end = loc.getOffset() + s - 1;
@@ -348,7 +348,7 @@ namespace Sla.DECCORE
         /// \param loc is the starting address of the range
         public Varnode? findCoveringInput(int s, Address loc)
         {
-            VarnodeDefSet::const_iterator iter;
+            IEnumerator<Varnode> iter;
             Varnode vn;
             iter = beginDef(Varnode.varnode_flags.input, loc);
             if (iter != def_tree.end()) {
@@ -420,7 +420,6 @@ namespace Sla.DECCORE
         }
 
         /// \brief Beginning of Varnodes of given size and starting address sorted by location
-        ///
         /// \param s is the given size
         /// \param addr is the given starting address
         /// \return the beginning iterator
@@ -428,13 +427,14 @@ namespace Sla.DECCORE
         {
             searchvn.size = s;
             searchvn.loc = addr;
-            IEnumerator<Varnode> iter = loc_tree.lower_bound(searchvn);
-            searchvn.size = 0;      // Return size to 0
+            IEnumerator<Varnode> iter = loc_tree.GetViewBetween(searchvn, searchvn).GetEnumerator();
+            // IEnumerator<Varnode> iter = loc_tree.lower_bound(searchvn);
+            // Return size to 0
+            searchvn.size = 0;
             return iter;
         }
 
         /// \brief End of Varnodes of given size and starting address sorted by location
-        ///
         /// \param s is the given size
         /// \param addr is the given starting address
         /// \return the ending iterator
@@ -463,8 +463,7 @@ namespace Sla.DECCORE
             SeqNum sq;
             PcodeOp searchop;
 
-            switch (fl)
-            {
+            switch (fl) {
                 case Varnode.varnode_flags.input:
                     searchvn.size = s;
                     searchvn.loc = addr;
@@ -632,10 +631,10 @@ namespace Sla.DECCORE
         }
 
         /// Beginning of Varnodes sorted by definition
-        public VarnodeDefSet::const_iterator beginDef() => def_tree.begin();
+        public IEnumerator<Varnode> beginDef() => def_tree.GetEnumerator();
 
         /// End of Varnodes sorted by definition
-        public VarnodeDefSet::const_iterator endDef() => def_tree.end();
+        public IEnumerator<Varnode> endDef() => def_tree.end();
 
         /// \brief Beginning of varnodes with set definition property
         ///
@@ -646,17 +645,22 @@ namespace Sla.DECCORE
         ///    - 0 for \e free Varnodes
         /// \param fl is the property restriction
         /// \return the beginning iterator
-        public VarnodeDefSet::const_iterator beginDef(Varnode.varnode_flags fl)
+        public IEnumerator<Varnode> beginDef(Varnode.varnode_flags fl)
         {
-            VarnodeDefSet::const_iterator iter;
+            IEnumerator<Varnode> iter;
+            PcodeOp searchop;
+            SeqNum sq;
 
             if (fl == Varnode.varnode_flags.input)
-                return def_tree.begin();    // Inputs occur first with def_tree
-            else if (fl == Varnode.varnode_flags.written) {
-                searchvn.loc = new Address(Address.mach_extreme.m_minimal); // Lowest possible location
+                // Inputs occur first with def_tree
+                return def_tree.begin();
+            if (fl == Varnode.varnode_flags.written) {
+                // Lowest possible location
+                searchvn.loc = new Address(Address.mach_extreme.m_minimal);
                 searchvn.flags = Varnode.varnode_flags.written;
-                SeqNum sq = new SeqNum(Address.mach_extreme.m_minimal); // Lowest possible seqnum
-                PcodeOp searchop = new PcodeOp(0,sq);
+                // Lowest possible seqnum
+                sq = new SeqNum(Address.mach_extreme.m_minimal);
+                searchop = new PcodeOp(0,sq);
                 searchvn.def = searchop;
                 iter = def_tree.lower_bound(searchvn);
                 searchvn.flags = Varnode.varnode_flags.input; // Reset flags
@@ -664,10 +668,12 @@ namespace Sla.DECCORE
             }
 
             // Find the start of the frees
-            searchvn.loc = new Address(Address.mach_extreme.m_maximal); // Maximal possible location
+            // Maximal possible location
+            searchvn.loc = new Address(Address.mach_extreme.m_maximal);
             searchvn.flags = Varnode.varnode_flags.written;
-            SeqNum sq = new SeqNum(Address.mach_extreme.m_maximal); // Maximal seqnum
-            PcodeOp searchop = new PcodeOp(0,sq);
+            // Maximal seqnum
+            sq = new SeqNum(Address.mach_extreme.m_maximal);
+            searchop = new PcodeOp(0,sq);
             searchvn.def = searchop;
             iter = def_tree.upper_bound(searchvn);
             searchvn.flags = Varnode.varnode_flags.input; // Reset flags
@@ -683,12 +689,12 @@ namespace Sla.DECCORE
         ///    - 0 for \e free Varnodes
         /// \param fl is the property restriction
         /// \return the ending iterator
-        public VarnodeDefSet::const_iterator endDef(Varnode.varnode_flags fl)
+        public IEnumerator<Varnode> endDef(Varnode.varnode_flags fl)
         {
-            VarnodeDefSet::const_iterator iter;
+            IEnumerator<Varnode> iter;
 
-            if (fl == Varnode.varnode_flags.input)
-            {   // Highest input is lowest written
+            if (fl == Varnode.varnode_flags.input) {
+                // Highest input is lowest written
                 searchvn.loc = new Address(Address.mach_extreme.m_minimal); // Lowest possible location
                 searchvn.flags = Varnode.varnode_flags.written;
                 SeqNum sq = new SeqNum(Address.mach_extreme.m_minimal); // Lowest possible seqnum
@@ -723,10 +729,10 @@ namespace Sla.DECCORE
         /// \param fl is the property restriction
         /// \param addr is the given starting address
         /// \return the beginning iterator
-        public VarnodeDefSet::const_iterator beginDef(Varnode.varnode_flags fl, Address addr)
+        public IEnumerator<Varnode> beginDef(Varnode.varnode_flags fl, Address addr)
         {
             // Get varnodes with addr and with definition type
-            VarnodeDefSet::const_iterator iter;
+            IEnumerator<Varnode> iter;
 
             if (fl == Varnode.varnode_flags.written)
                 throw new LowlevelError("Cannot get contiguous written AND addressed");
@@ -757,9 +763,9 @@ namespace Sla.DECCORE
         /// \param fl is the property restriction
         /// \param addr is the given starting address
         /// \return the ending iterator
-        public VarnodeDefSet::const_iterator endDef(Varnode.varnode_flags fl,Address addr)
+        public IEnumerator<Varnode> endDef(Varnode.varnode_flags fl,Address addr)
         {
-            VarnodeDefSet::const_iterator iter;
+            IEnumerator<Varnode> iter;
 
             if (fl == Varnode.varnode_flags.written)
                 throw new LowlevelError("Cannot get contiguous written AND addressed");

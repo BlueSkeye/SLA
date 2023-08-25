@@ -58,7 +58,7 @@ namespace Sla.DECCORE
         /// \param proto is the function prototype to use as a prototype model
         private void deriveBoundaries(FuncProto proto)
         {
-            localExtreme = ~((ulong)0);         // Default settings
+            localExtreme = ulong.MaxValue;         // Default settings
             localBoundary = 0x1000000;
             if (direction == -1)
                 localExtreme = localBoundary;

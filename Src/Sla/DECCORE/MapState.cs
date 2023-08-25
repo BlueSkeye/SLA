@@ -86,7 +86,7 @@ namespace Sla.DECCORE
             if (!range.inRange(new Address(spaceid, st), sz))
                 return;
             long sst = (long)AddrSpace.byteToAddress(st, spaceid.getWordSize());
-            Globals.sign_extend(sst, (int)spaceid.getAddrSize() * 8 - 1);
+            Globals.sign_extend(ref sst, (int)spaceid.getAddrSize() * 8 - 1);
             sst = (long)AddrSpace.addressToByte(sst, spaceid.getWordSize());
             RangeHint newRange = new RangeHint(st, sz, sst, ct, fl, rt, hi);
             maplist.Add(newRange);

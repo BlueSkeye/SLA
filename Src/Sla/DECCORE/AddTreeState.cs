@@ -140,7 +140,7 @@ namespace Sla.DECCORE
             }
 
             ulong distBefore = offBefore;
-            ulong distAfter = -offAfter;
+            ulong distAfter = (ulong)(-(long)offAfter);
             if (arrayHint != 1) {
                 if (elSizeBefore != arrayHint)
                     distBefore += 0x1000;
@@ -335,7 +335,7 @@ namespace Sla.DECCORE
                 ulong extra;
                 uint arrayHint = findArrayHint();
                 // Get offset into mapped variable
-                if (!hasMatchingSubType(nonmultbytes, arrayHint, extra)) {
+                if (!hasMatchingSubType(nonmultbytes, arrayHint, out extra)) {
                     valid = false;      // Cannot find mapped variable but nonmult is non-empty
                     return;
                 }
@@ -348,7 +348,7 @@ namespace Sla.DECCORE
                 ulong extra;
                 uint arrayHint = findArrayHint();
                 // Get offset into field in structure
-                if (!hasMatchingSubType(nonmultbytes, arrayHint, extra)) {
+                if (!hasMatchingSubType(nonmultbytes, arrayHint, out extra)) {
                     if (nonmultbytes >= baseType.getSize()) {
                         // Compare as bytes! not address units
                         valid = false; // Out of structure's bounds

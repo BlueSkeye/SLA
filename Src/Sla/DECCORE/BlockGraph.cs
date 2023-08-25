@@ -1,15 +1,4 @@
-﻿using ghidra;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Reflection;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
-using static ghidra.FlowBlock;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -55,7 +44,7 @@ namespace Sla.DECCORE
             }
 #endif
             while (sizeOut() < i) {
-                addInEdge(this, f_loop_edge | f_back_edge);
+                addInEdge(this, edge_flags.f_loop_edge | edge_flags.f_back_edge);
             }
         }
 
@@ -103,7 +92,7 @@ namespace Sla.DECCORE
                         }
                         if (mybl.isSwitchOut()) {
                             // Check for indirect branch out
-                            setFlag(f_switch_out);
+                            setFlag(edge_flags.f_switch_out);
                         }
                     }
                 }
@@ -128,8 +117,9 @@ namespace Sla.DECCORE
                 iter.setMark();
                 // Maintain order of blocks
                 ident.addBlock(iter);
-                ident.flags |= (iter.flags & (f_interior_gotoout | f_interior_gotoin));
+                ident.flags |= (iter.flags & (block_flags.f_interior_gotoout | block_flags.f_interior_gotoin));
             }
+            List<FlowBlock> newlist = new List<FlowBlock>();
             foreach (FlowBlock iter in list) {
                 // Remove -nodes- from our list
                 if (!iter.isMark()) {
@@ -145,7 +135,7 @@ namespace Sla.DECCORE
 
         /// Clear a set of properties from all edges in the graph
         /// \param fl is the set of boolean properties
-        private void clearEdgeFlags(uint fl)
+        private void clearEdgeFlags(edge_flags fl)
         {
             fl = ~fl;
             int size = list.Count;
@@ -296,7 +286,7 @@ namespace Sla.DECCORE
 
                             if (childbl.visitcount == -1) {
                                 // If we haven't visited this node before
-                                curbl.setOutEdgeFlag(edgenum, f_tree_edge);
+                                curbl.setOutEdgeFlag(edgenum, edge_flags.f_tree_edge);
                                 state.Add(childbl);
                                 istate.Add(0);
                                 childbl.visitcount = preorder.Count;
@@ -305,14 +295,14 @@ namespace Sla.DECCORE
                             }
                             else if (childbl.index == -1) {
                                 // childbl is already on stack
-                                curbl.setOutEdgeFlag(edgenum, f_back_edge | f_loop_edge);
+                                curbl.setOutEdgeFlag(edgenum, edge_flags.f_back_edge | edge_flags.f_loop_edge);
                             }
                             else if (curbl.visitcount < childbl.visitcount) {
                                 // childbl processing is already done
-                                curbl.setOutEdgeFlag(edgenum, f_forward_edge);
+                                curbl.setOutEdgeFlag(edgenum, edge_flags.f_forward_edge);
                             }
                             else {
-                                curbl.setOutEdgeFlag(edgenum, f_cross_edge);
+                                curbl.setOutEdgeFlag(edgenum, edge_flags.f_cross_edge);
                             }
                         }
                     }
@@ -401,14 +391,14 @@ namespace Sla.DECCORE
                             // The original Tarjan algorithm reports reducibility failure at this point
                             irreduciblecount += 1;
                             int edgeout = t.getInRevIndex(i);
-                            y.setOutEdgeFlag(edgeout, f_irreducible);
+                            y.setOutEdgeFlag(edgeout, edge_flags.f_irreducible);
                             if (t.isTreeEdgeIn(i)) {
                                 // If a tree edge is irreducible, we need to rebuild the spanning tree
                                 needrebuild = true;
                             }
                             else {
                                 // Otherwise we can pretend the edge was already marked irreducible
-                                y.clearOutEdgeFlag(edgeout, f_cross_edge | f_forward_edge);
+                                y.clearOutEdgeFlag(edgeout, edge_flags.f_cross_edge | edge_flags.f_forward_edge);
                             }
                         }
                         else if ((!yprime.isMark()) && (yprime != x)) {
@@ -466,7 +456,7 @@ namespace Sla.DECCORE
         /// set its properties
         /// \param bl is the given BlockGraph
         /// \param fl is the property to set
-        protected static void markCopyBlock(FlowBlock bl, uint fl)
+        protected static void markCopyBlock(FlowBlock bl, block_flags fl)
         {
             bl.getFrontLeaf().flags |= fl;
         }
@@ -498,7 +488,7 @@ namespace Sla.DECCORE
             return list[i] ;
         }
 
-        public override block_type getType() => t_graph;
+        public override block_type getType() => block_type.t_graph;
 
         public override FlowBlock subBlock(int i)
         {
@@ -516,7 +506,7 @@ namespace Sla.DECCORE
         public override void markLabelBumpUp(bool bump)
         {
             // Mark ourselves if true
-            @base.markLabelBumpUp(bump);
+            base.markLabelBumpUp(bump);
             if (0 == list.Count) {
                 return;
             }
@@ -527,7 +517,7 @@ namespace Sla.DECCORE
             }
             iter.Current.markLabelBumpUp(bump);
             while(iter.MoveNext()) {
-                iter.markLabelBumpUp(false);
+                iter.Current.markLabelBumpUp(false);
             }
         }
 
@@ -548,7 +538,7 @@ namespace Sla.DECCORE
 
         public override void printTree(TextWriter s, int level)
         {
-            @base.printTree(s, level);
+            base.printTree(s, level);
             foreach (FlowBlock iter in list) {
                 iter.printTree(s, level + 1);
             }
@@ -584,7 +574,7 @@ namespace Sla.DECCORE
                 return getParent().nextFlowAfter(this);
             }
             // The next block after bl (to be emitted)
-            FlowBlock nextbl = iter.Current;
+            FlowBlock? nextbl = iter.Current;
             if (null != nextbl) {
                 nextbl = nextbl.getFrontLeaf();
             }
@@ -599,7 +589,7 @@ namespace Sla.DECCORE
             }
         }
 
-        public virtual void finalizePrinting(Funcdata data)
+        public override void finalizePrinting(Funcdata data)
         {
             // Recurse into all the substructures
             foreach (FlowBlock iter in list) {
@@ -607,9 +597,9 @@ namespace Sla.DECCORE
             }
         }
 
-        public virtual void encodeBody(Encoder encoder)
+        public override void encodeBody(Sla.CORE.Encoder encoder)
         {
-            @base.encodeBody(encoder);
+            base.encodeBody(encoder);
             for (int i = 0; i < list.Count; ++i) {
                 FlowBlock bl = list[i];
                 encoder.openElement(ElementId.ELEM_BHEAD);
@@ -640,19 +630,20 @@ namespace Sla.DECCORE
             }
         }
 
-        public virtual void decodeBody(Decoder decoder)
+        public override void decodeBody(Sla.CORE.Decoder decoder)
         {
             BlockMap newresolver;
             List<FlowBlock> tmplist = new List<FlowBlock>();
 
             while (true) {
-                uint subId = decoder.peekElement();
+                ElementId subId = decoder.peekElement();
                 if (subId != ElementId.ELEM_BHEAD) {
                     break;
                 }
                 decoder.openElement();
-                int newindex = decoder.readSignedInteger(AttributeId.ATTRIB_INDEX);
-                FlowBlock bl = newresolver.createBlock(decoder.readString(AttributeId.ATTRIB_TYPE));
+                int newindex = (int)decoder.readSignedInteger(AttributeId.ATTRIB_INDEX);
+                FlowBlock bl = newresolver.createBlock(decoder.readString(AttributeId.ATTRIB_TYPE))
+                    ?? throw new ApplicationException();
                 // Need to set index here for sort
                 bl.index = newindex;
                 tmplist.Add(bl);
@@ -673,8 +664,8 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         public void decode(Sla.CORE.Decoder decoder)
         {
-            BlockMap resolver;
-            @base.decode(decoder, resolver);
+            BlockMap resolver = new BlockMap();
+            base.decode(decoder, resolver);
             // Restore goto references here
         }
 
@@ -706,7 +697,7 @@ namespace Sla.DECCORE
             //  i = begin.OutIndex(end);
             // using OutIndex did not necessarily get the right edge
             // if there were multiple outedges to the same block
-            begin.setOutEdgeFlag(outindex, f_loop_edge);
+            begin.setOutEdgeFlag(outindex, edge_flags.f_loop_edge);
         }
 
         /// Remove an edge between component FlowBlocks
@@ -881,9 +872,9 @@ namespace Sla.DECCORE
                     "Can only splice a block with 1 output to a block with 1 input");
             }
             // Flags from the input block that we keep
-            uint fl1 = bl.flags & (f_unstructured_targ | f_entry_point);
+            block_flags fl1 = bl.flags & (block_flags.f_unstructured_targ | block_flags.f_entry_point);
             // Flags from the output block that we keep
-            uint fl2 = outbl.flags & f_switch_out;
+            block_flags fl2 = outbl.flags & block_flags.f_switch_out;
             bl.removeOutEdge(0);
             // Move every out edge of -outbl- to -bl-
             int szout = outbl.sizeOut();
@@ -905,13 +896,13 @@ namespace Sla.DECCORE
                 throw new LowlevelError("Bad set start");
             }
 #endif
-            if ((list[0].flags & f_entry_point) != 0) {
+            if ((list[0].flags & block_flags.f_entry_point) != 0) {
                 if (bl == list[0]) {
                     // Already set as start block
                     return;
                 }
                 // Remove old entry point
-                list[0].flags &= ~f_entry_point;
+                list[0].flags &= ~block_flags.f_entry_point;
             }
 
             int i;
@@ -926,7 +917,7 @@ namespace Sla.DECCORE
                 list[j] = list[j - 1];
             }
             list[0] = bl;
-            bl.flags |= f_entry_point;
+            bl.flags |= block_flags.f_entry_point;
         }
 
         /// Get the entry point FlowBlock
@@ -934,7 +925,7 @@ namespace Sla.DECCORE
         /// \return the entry point FlowBlock
         public FlowBlock getStartBlock()
         {
-            if (list.empty() || ((list[0].flags & f_entry_point) == 0)) {
+            if (list.empty() || ((list[0].flags & block_flags.f_entry_point) == 0)) {
                 throw new LowlevelError("No start block registered");
             }
             return list[0];
@@ -981,7 +972,7 @@ namespace Sla.DECCORE
             ret.flags |= bl.flags;
             if (ret.outofthis.size() > 2) {
                 // Make sure switch is marked (even if not produced by INDIRECT) as it is needed for structuring
-                ret.flags |= f_switch_out;
+                ret.flags |= block_flags.f_switch_out;
             }
             addBlock(ret);
             return ret;
@@ -1015,7 +1006,7 @@ namespace Sla.DECCORE
             BlockMultiGoto ret;
             FlowBlock targetbl = bl.getOut(outedge);
             bool isdefaultedge = bl.isDefaultBranch(outedge);
-            if (bl.getType() == t_multigoto) {
+            if (bl.getType() == block_flags.t_multigoto) {
                 // Already one goto edge from this same block, we add to existing structure
                 ret = (BlockMultiGoto)bl;
                 ret.addEdge(targetbl);
@@ -1206,7 +1197,7 @@ namespace Sla.DECCORE
             FlowBlock rootbl = cs[0];
             BlockSwitch ret = new BlockSwitch(rootbl);
             FlowBlock? leafbl = rootbl.getExitLeaf();
-            if ((null == leafbl)|| (leafbl.getType() != FlowBlock::t_copy)) {
+            if ((null == leafbl)|| (leafbl.getType() != FlowBlock.block_type.t_copy)) {
                 throw new LowlevelError("Could not get switch leaf");
             }
             // Must be called before the identifyInternal
@@ -1218,7 +1209,7 @@ namespace Sla.DECCORE
                 ret.forceOutputNum(1);
             }
             // Don't consider this as being a switch "out"
-            ret.clearFlag(f_switch_out);
+            ret.clearFlag(block_flags.f_switch_out);
             return ret;
         }
 
@@ -1451,9 +1442,7 @@ namespace Sla.DECCORE
         public void calcLoop()
         {
             // Look for directed cycles in graph
-            // Mark edges (loopedges) that can be removed
-            // to prevent looping
-            IEnumerator<FlowBlock> iter;
+            // Mark edges (loopedges) that can be removed to prevent looping
             FlowBlock bl;
             FlowBlock nextbl;
             int i;
@@ -1471,14 +1460,14 @@ namespace Sla.DECCORE
             // No children visited yet
             state.Add(0);
             // Mark this node as visited and on path
-            list[0].setFlag(f_mark | f_mark2);
+            list[0].setFlag(block_flags.f_mark | block_flags.f_mark2);
             while (0 != path.Count) {
                 bl = path[path.Count - 1];
                 i = state[state.Count - 1];
                 if (i >= bl.sizeOut()) {
                     // Visited everything below this node, POP
                     // Mark this node as no longer on the path
-                    bl.clearFlag(f_mark2);
+                    bl.clearFlag(block_flags.f_mark2);
                     path.RemoveAt(path.Count - 1);
                     state.RemoveAt(state.Count - 1);
                 }
@@ -1489,15 +1478,15 @@ namespace Sla.DECCORE
                         continue;
                     }
                     nextbl = bl.getOut(i);
-                    if ((nextbl.flags & f_mark2) != 0) {
+                    if ((nextbl.flags & block_flags.f_mark2) != 0) {
                         // We found a cycle!
                         // Technically we should never reach here if the reducibility algorithms work
                         addLoopEdge(bl, i);
                         //	throw new LowlevelError("Found a new loop despite irreducibility");
                     }
-                    else if ((nextbl.flags & f_mark) == 0) {
+                    else if ((nextbl.flags & block_flags.f_mark) == 0) {
                         // Fresh node
-                        nextbl.setFlag(f_mark | f_mark2);
+                        nextbl.setFlag(block_flags.f_mark | block_flags.f_mark2);
                         path.Add(nextbl);
                         state.Add(0);
                     }
@@ -1505,7 +1494,7 @@ namespace Sla.DECCORE
             }
             foreach (FlowBlock iter in list) {
                 // Clear our marks
-                iter.clearFlag(f_mark | f_mark2);
+                iter.clearFlag(block_flags.f_mark | block_flags.f_mark2);
             }
         }
 
@@ -1538,7 +1527,7 @@ namespace Sla.DECCORE
             }
             if (un) {
                 // Anything not marked is unreachable
-                res.clear();
+                res.Clear();
                 for (int i = 0; i < list.Count; ++i) {
                     blk = list[i];
                     if (blk.isMark()) {
@@ -1573,7 +1562,10 @@ namespace Sla.DECCORE
                 findSpanningTree(preorder, rootlist);
                 needrebuild = findIrreducible(preorder, irreduciblecount);
                 if (needrebuild) {
-                    clearEdgeFlags(f_tree_edge | f_forward_edge | f_cross_edge | f_back_edge | f_loop_edge); // Clear the spanning tree
+                    // Clear the spanning tree
+                    clearEdgeFlags(edge_flags.f_tree_edge | edge_flags.f_forward_edge |
+                        edge_flags.f_cross_edge | edge_flags.f_back_edge |
+                        edge_flags.f_loop_edge);
                     preorder.Clear();
                     rootlist.Clear();
                 }

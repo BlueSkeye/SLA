@@ -1,4 +1,5 @@
-﻿
+﻿using Sla.CORE;
+
 namespace Sla.DECCORE
 {
     /// \brief An Address range associated with the symbol Scope that owns it

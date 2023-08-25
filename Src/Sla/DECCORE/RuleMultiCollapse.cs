@@ -79,7 +79,9 @@ namespace Sla.DECCORE
                         nofunc = true;      // Unwritten cannot match by functional equal
                 }
                 else if (defcopyr == copyr) continue; // A matching branch
-                else if ((defcopyr != copyr) && (!nofunc) && functionalEquality(defcopyr, copyr)) {
+                else if (   (defcopyr != copyr)
+                         && !nofunc
+                         && PcodeOpBank.functionalEquality(defcopyr, copyr)) {
                     // Cannot match MULTIEQUAL by functional equality
                     //      if (nofunc) return 0;	// Not allowed to match by func equal
                     func_eq = true;     // Now matching by functional equality
@@ -107,13 +109,15 @@ namespace Sla.DECCORE
                     op = copyr.getDef();
                     if (func_eq) {
                         // We have only functional equality
-                        PcodeOp earliest = earliestUseInBlock(op.getOut(), op.getParent());
-                        newop = defcopyr.getDef(); // We must copy newop (defcopyr)
+                        PcodeOp earliest = Funcdata.earliestUseInBlock(op.getOut(), op.getParent())
+                            ?? throw new ApplicationException();
+                        // We must copy newop (defcopyr)
+                        newop = defcopyr.getDef();
                         PcodeOp substitute = (PcodeOp)null;
                         for (int i = 0; i < newop.numInput(); ++i) {
                             Varnode invn = newop.getIn(i);
                             if (!invn.isConstant()) {
-                                substitute = cseFindInBlock(newop, invn, op.getParent(), earliest); // Has newop already been copied in this block
+                                substitute = Funcdata.cseFindInBlock(newop, invn, op.getParent(), earliest); // Has newop already been copied in this block
                                 break;
                             }
                         }

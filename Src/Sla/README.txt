@@ -60,6 +60,10 @@ yytype_int16 --> short
 
 Other aliases :
 
+// A set of data-types sorted by function
+using DatatypeSet = System.Collections.Generic.HashSet<Sla.DECCORE.Datatype>; // sorted by DatatypeCompare
+// A set of data-types sorted by name
+using  DatatypeNameSet = System.Collections.Generic.HashSet<Datatype>; // sorted by DatatypeNameCompare
 using EntryMap = Sla.EXTRA.rangemap<Sla.DECCORE.SymbolEntry>;
 using ParamEntryResolver = Sla.EXTRA.rangemap<Sla.DECCORE.ParamEntryRange>;
 using PcodeOpTree = System.Collections.Generic.Dictionary<Sla.CORE.SeqNum, Sla.DECCORE.PcodeOp>;

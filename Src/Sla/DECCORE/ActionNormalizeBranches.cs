@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -45,10 +39,10 @@ namespace Sla.DECCORE
                     continue;
                 }
                 fliplist.Clear();
-                if (opFlipInPlaceTest(cbranch, fliplist) != 0){
+                if (Funcdata.opFlipInPlaceTest(cbranch, fliplist) != 0){
                     continue;
                 }
-                opFlipInPlaceExecute(data, fliplist);
+                Funcdata.opFlipInPlaceExecute(data, fliplist);
                 bb.flipInPlaceExecute();
                 // Indicate a change was made
                 count += 1;

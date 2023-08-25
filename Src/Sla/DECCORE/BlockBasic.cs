@@ -246,13 +246,15 @@ namespace Sla.DECCORE
 
         public override FlowBlock getSplitPoint() => (sizeOut() != 2) ? null : this;
 
-        public virtual int flipInPlaceTest(List<PcodeOp> fliplist)
+        public override int flipInPlaceTest(List<PcodeOp> fliplist)
         {
             if (0 == op.Count) {
                 return 2;
             }
             PcodeOp lastop = op[op.Count - 1];
-            return (lastop.code() != OpCode.CPUI_CBRANCH) ? 2 : opFlipInPlaceTest(lastop, fliplist);
+            return (lastop.code() != OpCode.CPUI_CBRANCH)
+                ? 2
+                : Funcdata.opFlipInPlaceTest(lastop, fliplist);
         }
 
         public override void flipInPlaceExecute()
@@ -284,7 +286,7 @@ namespace Sla.DECCORE
             // before it must be considered an explicit variable
             maxref = data.getArch().max_implied_ref;
             foreach (PcodeOp iter in op) {
-                inst = *iter;
+                inst = iter;
                 if (inst.isMarker()) {
                     continue;
                 }
@@ -353,7 +355,6 @@ namespace Sla.DECCORE
             FlowBlock bl;
             PcodeOp multiop;
             PcodeOp othermulti;
-            IEnumerator<PcodeOp> iter;
             Varnode vnremove;
             Varnode vnredund;
 
@@ -381,10 +382,12 @@ namespace Sla.DECCORE
                     bl = biter;
                     // One of the redundant varnodes
                     vnredund = multiop.getIn(blout.getInIndex(bl));
-                    vnremove = multiop.getIn(blout.getInIndex(this));
+                    vnremove = multiop.getIn(blout.getInIndex(this)) ?? throw new ApplicationException();
                     if (vnremove.isWritten()) {
-                        othermulti = vnremove.getDef();
-                        if ((othermulti.code() == OpCode.CPUI_MULTIEQUAL) && (othermulti.getParent() == this)) {
+                        othermulti = vnremove.getDef() ?? throw new ApplicationException();
+                        if ((othermulti.code() == OpCode.CPUI_MULTIEQUAL)
+                            && (othermulti.getParent() == this))
+                        {
                             vnremove = othermulti.getIn(getInIndex(bl));
                         }
                     }

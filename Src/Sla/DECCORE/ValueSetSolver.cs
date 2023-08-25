@@ -355,7 +355,7 @@ namespace Sla.DECCORE
         {
             while (startVn != endVn) {
                 Varnode constVn;
-                startVn = lift.pullBack(startVn.getDef(), constVn, false);
+                startVn = lift.pullBack(startVn.getDef(), out constVn, false);
                 if (startVn == (Varnode)null) return; // Couldn't pull all the way back to our value set
             }
             while(true) {
@@ -364,7 +364,7 @@ namespace Sla.DECCORE
                 if (!endVn.isWritten()) break;
                 PcodeOp op = endVn.getDef();
                 if (op.isCall() || op.isMarker()) break;
-                endVn = lift.pullBack(op, constVn, false);
+                endVn = lift.pullBack(op, out constVn, false);
                 if (endVn == (Varnode)null) break;
                 if (!endVn.isMark()) break;
             }

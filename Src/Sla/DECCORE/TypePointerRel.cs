@@ -186,21 +186,28 @@ namespace Sla.DECCORE
             encoder.closeElement(ElementId.ELEM_TYPE);
         }
 
-        public override TypePointer? downChain(ulong off, out TypePointer par, out ulong parOff,
+        public override TypePointer? downChain(ulong off, out TypePointer? par, out ulong parOff,
             bool allowArrayWrap, TypeFactory typegrp)
         {
             type_metatype ptrtoMeta = ptrto.getMetatype();
-            if (off < ptrto.getSize() && (ptrtoMeta == type_metatype.TYPE_STRUCT || ptrtoMeta == type_metatype.TYPE_ARRAY))
+            if (   off < (uint)ptrto.getSize()
+                && (ptrtoMeta == type_metatype.TYPE_STRUCT || ptrtoMeta == type_metatype.TYPE_ARRAY))
             {
                 return base.downChain(off, out par, out parOff, allowArrayWrap, typegrp);
             }
-            ulong relOff = (off + offset) & Globals.calc_mask(size);        // Convert off to be relative to the parent container
-            if (relOff >= parent.getSize())
-                return (TypePointer)null;         // Don't let pointer shift beyond original container
-
+            // Convert off to be relative to the parent container
+            ulong relOff = (off + (uint)offset) & Globals.calc_mask((uint)size);
+            if (relOff >= (uint)parent.getSize()) {
+                par = null;
+                parOff = 0;
+                // Don't let pointer shift beyond original container
+                return (TypePointer)null;
+            }
             TypePointer origPointer = typegrp.getTypePointer(size, parent, wordsize);
             off = relOff;
             // Recovering the start of the parent is still downchaining, even though the parent may be the container
+            par = null;
+            parOff = 0;
             return (relOff == 0 && offset != 0)
                 // So we return the pointer to the parent and don't drill down to field at offset 0
                 ? origPointer

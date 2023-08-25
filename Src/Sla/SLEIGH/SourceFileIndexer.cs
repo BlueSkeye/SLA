@@ -53,7 +53,7 @@ namespace Sla.SLEIGH
             IEnumerator<Element> iter = el.getChildren().GetEnumerator();
             while (iter.MoveNext()) {
                 string filename = iter.Current.getAttributeValue("name");
-                int index = stoi(iter.Current.getAttributeValue("index"), NULL, 10);
+                int index = stoi(iter.Current.getAttributeValue("index"), null, 10);
                 fileToIndex[filename] = index;
                 indexToFile[index] = filename;
             }

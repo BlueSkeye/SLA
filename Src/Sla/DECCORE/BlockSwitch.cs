@@ -1,18 +1,4 @@
-﻿using ghidra;
-using Sla.DECCORE;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using static ghidra.FlowBlock;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -69,11 +55,11 @@ namespace Sla.DECCORE
         /// \param switchbl is the underlying switch statement block
         /// \param bl is the new block to make into a case
         /// \param gt gives the unstructured branch type if the switch edge to the new case was unstructured (zero otherwise)
-        private void addCase(FlowBlock switchbl, FlowBlock bl, uint gt)
+        private void addCase(FlowBlock switchbl, FlowBlock bl, FlowBlock.block_flags gt)
         {
             CaseOrder curcase = new CaseOrder();
             caseblocks.Add(curcase);
-            FlowBlock basicbl = bl.getFrontLeaf().subBlock(0);
+            FlowBlock basicbl = bl.getFrontLeaf().subBlock(0) ?? throw new ApplicationException();
             curcase.block = bl;
             curcase.basicblock = basicbl;
             curcase.label = 0;
@@ -137,7 +123,7 @@ namespace Sla.DECCORE
                 BlockMultiGoto? gotoedgeblock = (BlockMultiGoto)cs[0];
                 int numgoto = gotoedgeblock.numGotos();
                 for (int i = 0; i < numgoto; ++i) {
-                    addCase(switchbl, gotoedgeblock.getGoto(i), f_goto_goto);
+                    addCase(switchbl, gotoedgeblock.getGoto(i), block_flags.f_goto_goto);
                 }
             }
         }
@@ -187,8 +173,8 @@ namespace Sla.DECCORE
         {
             base.markUnstructured();
             for (int i = 0; i < caseblocks.size(); ++i) {
-                if (caseblocks[i].gototype ==  f_goto_goto)
-                    markCopyBlock(caseblocks[i].block, f_unstructured_targ);
+                if (caseblocks[i].gototype == block_flags.f_goto_goto)
+                    markCopyBlock(caseblocks[i].block, block_flags.f_unstructured_targ);
             }
         }
 
@@ -197,10 +183,12 @@ namespace Sla.DECCORE
             // New scope, current loop exit = curexit
             getBlock(0).scopeBreak(-1, curexit); // Top block has multiple exits
             for (int i = 0; i < caseblocks.size(); ++i) {
-                FlowBlock bl = caseblocks[i].block;
-                if (caseblocks[i].gototype != 0) {
-                    if (bl.getIndex() == curexit) // A goto that goes straight to exit, print is (empty) break
-                        caseblocks[i].gototype = f_break_goto;
+                CaseOrder thisCase = caseblocks[i];
+                FlowBlock bl = thisCase.block;
+                if (thisCase.gototype != 0) {
+                    if (bl.getIndex() == curexit)
+                        // A goto that goes straight to exit, print is (empty) break
+                        thisCase.gototype = block_flags.f_break_goto;
                 }
                 else {
                     // All case blocks are either plaingotos (curexit doesn't matter)
@@ -228,7 +216,8 @@ namespace Sla.DECCORE
 
             // Can only evaluate this if bl is a case block that falls through to another case block.
             // Otherwise there is a break statement in the flow
-            if (bl.getType() != t_goto)    // Fallthru must be a goto block
+            if (bl.getType() != block_type.t_goto)
+                // Fallthru must be a goto block
                 return (FlowBlock)null;
             int i;
             // Look for block to find flow after
@@ -249,20 +238,21 @@ namespace Sla.DECCORE
             // Make sure to still recurse
             // We need to order the cases based on the label
             // First populate the label and depth fields of the CaseOrder objects
-            @base.finalizePrinting(data);
+            base.finalizePrinting(data);
             for (int i = 0; i < caseblocks.Count; ++i) {
                 // Construct the depth parameter, to sort fall-thru cases
                 CaseOrder curcase = caseblocks[i];
                 int j = curcase.chain;
                 while (j != -1) {
+                    CaseOrder otherCase = caseblocks[j];
                     // Run through the fall-thru chain
-                    if (caseblocks[j].depth != 0) {
+                    if (otherCase.depth != 0) {
                         // Break any possible loops (already visited this node)
                         break;
                     }
                     // Mark non-roots of chains
-                    caseblocks[j].depth = -1;
-                    j = caseblocks[j].chain;
+                    otherCase.depth = -1;
+                    j = otherCase.chain;
                 }
             }
             for (int i = 0; i < caseblocks.Count; ++i) {
@@ -275,13 +265,14 @@ namespace Sla.DECCORE
                         int j = curcase.chain;
                         int depthcount = 1;
                         while (j != -1) {
-                            if (caseblocks[j].depth > 0) {
+                            CaseOrder otherCase = caseblocks[j];
+                            if (otherCase.depth > 0) {
                                 // Has this node had its depth set. Break any possible loops.
                                 break;
                             }
-                            caseblocks[j].depth = depthcount++;
-                            caseblocks[j].label = curcase.label;
-                            j = caseblocks[j].chain;
+                            otherCase.depth = depthcount++;
+                            otherCase.label = curcase.label;
+                            j = otherCase.chain;
                         }
                     }
                 }

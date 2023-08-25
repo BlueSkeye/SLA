@@ -103,7 +103,7 @@ namespace Sla.DECCORE
             for (int i = 0; i < numInputs; ++i)
                 inputs.Add(assistOp.getIn(i + 1).getOffset());
 
-            ulong mask = ~((ulong)0);
+            ulong mask = ulong.MaxValue;
             int bit = fd.getArch().funcptr_align;
             if (bit != 0) {
                 mask = (mask >> bit) << bit;

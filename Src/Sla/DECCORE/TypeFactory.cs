@@ -1,6 +1,11 @@
 ﻿using Sla.CORE;
 using Sla.DECCORE;
 
+/// A set of data-types sorted by function
+using DatatypeSet = System.Collections.Generic.HashSet<Sla.DECCORE.Datatype>; // sorted by DatatypeCompare
+// A set of data-types sorted by name
+using DatatypeNameSet = System.Collections.Generic.HashSet<Sla.DECCORE.Datatype>; // sorted by DatatypeNameCompare
+
 namespace Sla.DECCORE
 {
     /// \brief Container class for all Datatype objects in an Architecture
@@ -48,12 +53,7 @@ namespace Sla.DECCORE
         /// \return the matching Datatype or NULL
         private Datatype? findNoName(Datatype ct)
         {
-            DatatypeSet::const_iterator iter;
-            Datatype? res = (Datatype)null;
-            iter = tree.find(&ct);
-            if (iter != tree.end())
-                res = *iter;
-            return res;
+            return (tree.Contains(ct)) ? ct : null;
         }
 
         /// Insert pointer into the cross-reference sets
@@ -61,19 +61,18 @@ namespace Sla.DECCORE
         /// \param newtype is the new pointer
         private void insert(Datatype newtype)
         {
-            pair<DatatypeSet::iterator, bool> insres = tree.insert(newtype);
-            if (!insres.second) {
+            if (tree.Contains(newtype)) {
                 StringWriter s = new StringWriter();
                 s.WriteLine($"Shared type id: {newtype.getId():X}");
                 s.Write("  ");
                 newtype.printRaw(s);
                 s.Write(" : ");
-                (*insres.first).printRaw(s);
+                newtype.printRaw(s);
                 // delete newtype;
                 throw new LowlevelError(s.ToString());
             }
             if (newtype.id != 0)
-                nametree.insert(newtype);
+                nametree.Add(newtype);
         }
 
         /// Find data-type in this container or add it
@@ -114,9 +113,9 @@ namespace Sla.DECCORE
         /// \param mark is a "marking" container to prevent cycles
         /// \param ct is the data-type to have written out
         private void orderRecurse(List<Datatype> deporder, DatatypeSet mark, Datatype ct)
-        {               // Make sure dependants of ct are in order, then add ct
-            pair<DatatypeSet::iterator, bool> res = mark.insert(ct);
-            if (!res.second) return;    // Already inserted before
+        {
+            // Make sure dependants of ct are in order, then add ct
+            if (mark.Contains(ct)) return;    // Already inserted before
             if (ct.typedefImm != (Datatype)null)
                 orderRecurse(deporder, mark, ct.typedefImm);
             int size = ct.numDepend();
@@ -462,22 +461,22 @@ namespace Sla.DECCORE
         /// \param sub is the type of pointer to search for
         private void recalcPointerSubmeta(Datatype @base, sub_metatype sub)
         {
-            DatatypeSet::const_iterator iter;
-            TypePointer top = new TypePointer(1,@base,0);      // This will calculate the current proper sub-meta for pointers to base
+            // This will calculate the current proper sub-meta for pointers to base
+            TypePointer top = new TypePointer(1, @base, 0);
             sub_metatype curSub = top.submeta;
             if (curSub == sub) return;      // Don't need to search for pointers with correct submeta
             top.submeta = sub;          // Search on the incorrect submeta
-            iter = tree.lower_bound(&top);
-            while (iter != tree.end()) {
+            IEnumerator<Datatype> iter = tree.lower_bound(top);
+            while (iter.MoveNext()) {
                 TypePointer ptr = (TypePointer)iter.Current;
                 if (ptr.getMetatype() != type_metatype.TYPE_PTR) break;
                 if (ptr.ptrto != @base) break;
-                ++iter;
-                if (ptr.submeta == sub)
-                {
-                    tree.erase(ptr);
-                    ptr.submeta = curSub;      // Change to correct submeta
-                    tree.insert(ptr);           // Reinsert
+                if (ptr.submeta == sub) {
+                    tree.Remove(ptr);
+                    // Change to correct submeta
+                    ptr.submeta = curSub;
+                    // Reinsert
+                    tree.Add(ptr);
                 }
             }
         }
@@ -577,8 +576,8 @@ namespace Sla.DECCORE
             //DatatypeSet::iterator iter;
             //for (iter = tree.begin(); iter != tree.end(); ++iter)
             //    delete* iter;
-            tree.clear();
-            nametree.clear();
+            tree.Clear();
+            nametree.Clear();
             clearCache();
         }
 
@@ -586,17 +585,17 @@ namespace Sla.DECCORE
         /// Delete anything that isn't a core type
         public void clearNoncore()
         {
-            DatatypeSet::iterator iter;
-
-            iter = tree.begin();
-            while (iter != tree.end()) {
-                Datatype ct = *iter;
-                if (ct.isCoreType()) {
-                    ++iter;
-                    continue;
+            IEnumerator<Datatype> iter = tree.GetEnumerator();
+            List<Datatype> removed = new List<Datatype>();
+            while (iter.MoveNext()) {
+                Datatype ct = iter.Current;
+                if (!ct.isCoreType()) {
+                    removed.Add(ct);
                 }
-                nametree.erase(ct);
-                tree.erase(iter++);
+            }
+            foreach(Datatype item in removed) {
+                nametree.Remove(item);
+                tree.Remove(item);
                 // delete ct;
             }
         }
@@ -1296,11 +1295,11 @@ namespace Sla.DECCORE
         /// \param deporder will hold the generated dependency list of data-types
         public void dependentOrder(List<Datatype> deporder)
         {
-            DatatypeSet mark;
-            DatatypeSet::const_iterator iter;
+            DatatypeSet mark = new DatatypeSet();
+            IEnumerator<Datatype> iter = tree.GetEnumerator();
 
-            for (iter = tree.begin(); iter != tree.end(); ++iter)
-                orderRecurse(deporder, mark, *iter);
+            while (iter.MoveNext())
+                orderRecurse(deporder, mark, iter.Current);
         }
 
         /// Encode \b this container to stream
@@ -1338,12 +1337,12 @@ namespace Sla.DECCORE
         /// \param encoder is the stream encoder
         public void encodeCoreTypes(Encoder encoder)
         {
-            DatatypeSet::const_iterator iter;
+            IEnumerator<Datatype> iter = tree.GetEnumerator();
             Datatype ct;
 
             encoder.openElement(ElementId.ELEM_CORETYPES);
-            for (iter = tree.begin(); iter != tree.end(); ++iter) {
-                ct = *iter;
+            while (iter.MoveNext()) {
+                ct = iter.Current   ;
                 if (!ct.isCoreType()) continue;
                 type_metatype meta = ct.getMetatype();
                 if ((meta == type_metatype.TYPE_PTR) || (meta == type_metatype.TYPE_ARRAY) ||

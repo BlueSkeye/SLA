@@ -47,11 +47,11 @@ namespace Sla.DECCORE
         /// Range of data addresses \e owned by \b this scope
         internal RangeList rangetree;
         /// The parent scope
-        private Scope? parent;
+        internal Scope? parent;
         /// Scope using \b this as a cache
         private Scope owner;
         /// Sorted list of child scopes
-        private ScopeMap children;
+        internal ScopeMap children;
 
         /// Attach a new child Scope to \b this
         /// Attach the child as an immediate sub-scope of \b this.
@@ -67,7 +67,7 @@ namespace Sla.DECCORE
         /// Detach a child Scope from \b this
         /// The indicated child Scope is deleted
         /// \param iter points to the Scope to delete
-        private void detachScope(ulong scopeId)
+        internal void detachScope(ulong scopeId)
         {
             Scope child = children[scopeId];
             children.Remove(scopeId);
@@ -98,7 +98,7 @@ namespace Sla.DECCORE
         /// Architecture of \b this scope
         protected Architecture glb;
         /// Name of \b this scope
-        protected string name;
+        internal string name;
         /// Name to display in output
         protected string displayName;
         /// (If non-null) the function which \b this is the local Scope for
@@ -319,7 +319,7 @@ namespace Sla.DECCORE
         /// \param spc is the address space of the range
         /// \param first is the offset of the first byte in the range
         /// \param last is the offset of the last byte in the range
-        protected virtual void addRange(AddrSpace spc, ulong first, ulong last)
+        internal virtual void addRange(AddrSpace spc, ulong first, ulong last)
         {
             rangetree.insertRange(spc, first, last);
         }
@@ -328,7 +328,7 @@ namespace Sla.DECCORE
         /// \param spc is the address space of the range
         /// \param first is the offset of the first byte in the range
         /// \param last is the offset of the last byte in the range
-        protected virtual void removeRange(AddrSpace spc, ulong first, ulong last)
+        internal virtual void removeRange(AddrSpace spc, ulong first, ulong last)
         {
             rangetree.removeRange(spc, first, last);
         }

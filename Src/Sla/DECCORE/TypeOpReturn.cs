@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -12,7 +7,7 @@ namespace Sla.DECCORE
     {
         public TypeOpReturn(TypeFactory t)
         {
-            opflags = PcodeOp.Flags.special | PcodeOp::returns | PcodeOp.Flags.nocollapse | PcodeOp::no_copy_propagation;
+            opflags = PcodeOp.Flags.special | PcodeOp.Flags.returns | PcodeOp.Flags.nocollapse | PcodeOp::no_copy_propagation;
             behave = new OpBehavior(OpCode.CPUI_RETURN, false, true); // Dummy behavior
         }
 
@@ -48,7 +43,7 @@ namespace Sla.DECCORE
                 return base.getInputLocal(op, slot);
 
             // Get data-types of return input parameters
-            BlockBasic bb = op.getParent();
+            BlockBasic? bb = op.getParent();
             if (bb == (BlockBasic)null)
                 return base.getInputLocal(op, slot);
 

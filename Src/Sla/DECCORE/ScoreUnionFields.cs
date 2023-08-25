@@ -1,5 +1,4 @@
 ﻿using Sla.CORE;
-using Sla.DECCORE;
 
 namespace Sla.DECCORE
 {
@@ -31,9 +30,9 @@ namespace Sla.DECCORE
                 fit_up
             }
             /// The Varnode we are testing for data-type fit
-            private Varnode vn;
+            internal Varnode vn;
             /// The PcodeOp reading the Varnode (or null)
-            private PcodeOp op;
+            internal PcodeOp op;
             /// The slot reading the Varnode (or -1)
             internal int inslot;
             /// Direction to push fit.  0=down 1=up
@@ -101,24 +100,22 @@ namespace Sla.DECCORE
             /// \return \b true if \b this should be ordered before \b op2
             public static bool operator <(VisitMark op1, VisitMark op2)
             {
-                if (op1.vn != op2.vn)
-                    return (op1.vn < op2.vn);
-                return (op1.index < op2.index);
+                return (op1.vn != op2.vn) ? (op1.vn < op2.vn) : (op1.index < op2.index);
             }
         }
 
         /// The factory containing data-types
         private TypeFactory typegrp;
         /// Score for each field, indexed by fieldNum + 1 (whole union is index=0)
-        private List<int> scores;
+        private List<int> scores = new List<int>();
         /// Field corresponding to each score
-        private List<Datatype> fields;
+        private List<Datatype> fields = new List<Datatype>();
         /// Places that have already been visited
-        private HashSet<VisitMark> visited;
+        private HashSet<VisitMark> visited = new HashSet<VisitMark>();
         /// Current trials being pushed
-        private List<Trial> trialCurrent;
+        private List<Trial> trialCurrent = new List<Trial>();
         /// Next set of trials
-        private List<Trial> trialNext;
+        private List<Trial> trialNext = new List<Trial>();
         /// The best result
         private ResolvedUnion result;
         /// Number of trials evaluated so far
@@ -139,7 +136,7 @@ namespace Sla.DECCORE
         private bool testArrayArithmetic(PcodeOp op, int inslot)
         {
             if (op.code() == OpCode.CPUI_INT_ADD) {
-                Varnode vn = op.getIn(1 - inslot);
+                Varnode vn = op.getIn(1 - inslot) ?? throw new ApplicationException();
                 if (vn.isConstant()) {
                     if (vn.getOffset() >= result.baseType.getSize())
                         return true;        // Array with union elements
@@ -170,10 +167,12 @@ namespace Sla.DECCORE
         private bool testSimpleCases(PcodeOp op, int inslot, Datatype parent)
         {
             if (op.isMarker())
-                return true;        // Propagate raw union across MULTIEQUAL and INDIRECT
+                // Propagate raw union across MULTIEQUAL and INDIRECT
+                return true;
             if (parent.getMetatype() == type_metatype.TYPE_PTR) {
                 if (inslot < 0)
-                    return true;        // Don't resolve pointers "up", there's only 1 possibility for assignment
+                    // Don't resolve pointers "up", there's only 1 possibility for assignment
+                    return true;
                 if (testArrayArithmetic(op, inslot))
                     return true;
             }
@@ -197,7 +196,8 @@ namespace Sla.DECCORE
             int score = 0;
 
             if (lockType == ct)
-                score += 5;     // Perfect match
+                // Perfect match
+                score += 5;
 
             while (ct.getMetatype() == type_metatype.TYPE_PTR) {
                 if (lockType.getMetatype() != type_metatype.TYPE_PTR) break;
@@ -302,11 +302,13 @@ namespace Sla.DECCORE
         private void newTrialsDown(Varnode vn, Datatype ct, int scoreIndex, bool isArray)
         {
             VisitMark mark = new VisitMark(vn, scoreIndex);
-            if (!visited.insert(mark).second)
-                return;             // Already visited this Varnode
+            if (visited.Contains(mark))
+                // Already visited this Varnode
+                return;
             if (vn.isTypeLock()) {
                 scores[scoreIndex] += scoreLockedType(ct, vn.getType());
-                return;             // Don't propagate through locked Varnode
+                // Don't propagate through locked Varnode
+                return;
             }
             IEnumerator<PcodeOp> piter = vn.beginDescend();
             while (piter.MoveNext()) {
@@ -324,21 +326,25 @@ namespace Sla.DECCORE
         /// \param isArray is \b true if the data-type to fit is a pointer to an array
         private void newTrials(PcodeOp op, int slot, Datatype ct, int scoreIndex, bool isArray)
         {
-            Varnode vn = op.getIn(slot);
+            Varnode vn = op.getIn(slot) ?? throw new ApplicationException();
             VisitMark mark = new VisitMark(vn, scoreIndex);
-            if (!visited.insert(mark).second)
-                return;             // Already visited this Varnode
+            if (visited.Contains(mark))
+                // Already visited this Varnode
+                return;
             if (vn.isTypeLock()) {
                 scores[scoreIndex] += scoreLockedType(ct, vn.getType());
-                return;             // Don't propagate through locked Varnode
+                // Don't propagate through locked Varnode
+                return;
             }
-            trialNext.Add(new Trial(vn, ct, scoreIndex, isArray));    // Try to fit up
+            // Try to fit up
+            trialNext.Add(new Trial(vn, ct, scoreIndex, isArray));
             IEnumerator<PcodeOp> iter = vn.beginDescend();
             while (iter.MoveNext()) {
                 PcodeOp readOp = iter.Current;
                 int inslot = readOp.getSlot(vn);
                 if (readOp == op && inslot == slot)
-                    continue;           // Don't go down PcodeOp we came from
+                    // Don't go down PcodeOp we came from
+                    continue;
                 trialNext.Add(new Trial(readOp, inslot, ct, scoreIndex, isArray));
             }
         }
@@ -354,15 +360,18 @@ namespace Sla.DECCORE
         private void scoreTrialDown(Trial trial, bool lastLevel)
         {
             if (trial.direction == Trial.dir_type.fit_up)
-                return;             // Trial doesn't push in this direction
-            Datatype? resType = (Datatype)null;   // Assume by default we don't propagate
+                // Trial doesn't push in this direction
+                return;
+            // Assume by default we don't propagate
+            Datatype? resType = (Datatype)null;
             type_metatype meta = trial.fitType.getMetatype();
             int score = 0;
             switch (trial.op.code()) {
                 case OpCode.CPUI_COPY:
                 case OpCode.CPUI_MULTIEQUAL:
                 case OpCode.CPUI_INDIRECT:
-                    resType = trial.fitType;        // No score, but we can propagate
+                    // No score, but we can propagate
+                    resType = trial.fitType;
                     break;
                 case OpCode.CPUI_LOAD:
                     resType = derefPointer(trial.fitType, trial.op.getOut(), score);
@@ -470,7 +479,7 @@ namespace Sla.DECCORE
                                 ulong off = vn.getOffset();
                                 ulong parOff;
                                 TypePointer par;
-                                resType = baseType.downChain(off, par, parOff, trial.array, typegrp);
+                                resType = baseType.downChain(off, out par, out parOff, trial.array, typegrp);
                                 if (resType != (Datatype)null)
                                     score = 5;
                             }
@@ -479,9 +488,9 @@ namespace Sla.DECCORE
                                     score = 1;
                                     int elSize = 1;
                                     if (vn.isWritten()) {
-                                        PcodeOp multOp = vn.getDef();
+                                        PcodeOp multOp = vn.getDef() ?? throw new ApplicationException();
                                         if (multOp.code() == OpCode.CPUI_INT_MULT) {
-                                            Varnode multVn = multOp.getIn(1);
+                                            Varnode multVn = multOp.getIn(1) ?? throw new ApplicationException();
                                             if (multVn.isConstant())
                                                 elSize = (int)multVn.getOffset();
                                         }
@@ -493,7 +502,8 @@ namespace Sla.DECCORE
                                     }
                                 }
                                 else
-                                    score = 5;  // Indexing into something that is not an array
+                                    // Indexing into something that is not an array
+                                    score = 5;
                             }
                         }
                     }
@@ -680,22 +690,26 @@ namespace Sla.DECCORE
         private void scoreTrialUp(Trial trial, bool lastLevel)
         {
             if (trial.direction == Trial.dir_type.fit_down)
-                return;             // Trial doesn't push in this direction
+                // Trial doesn't push in this direction
+                return;
             int score = 0;
             if (!trial.vn.isWritten()) {
                 if (trial.vn.isConstant())
                     scoreConstantFit(trial);
-                return;     // Nothing to propagate up through
+                // Nothing to propagate up through
+                return;
             }
-            Datatype? resType = (Datatype)null;   // Assume by default we don't propagate
+            // Assume by default we don't propagate
+            Datatype? resType = (Datatype)null;
             int newslot = 0;
             type_metatype meta = trial.fitType.getMetatype();
-            PcodeOp def = trial.vn.getDef();
+            PcodeOp def = trial.vn.getDef() ?? throw new ApplicationException();
             switch (def.code()) {
                 case OpCode.CPUI_COPY:
                 case OpCode.CPUI_MULTIEQUAL:
                 case OpCode.CPUI_INDIRECT:
-                    resType = trial.fitType;        // No score, but we can propagate
+                    // No score, but we can propagate
+                    resType = trial.fitType;
                     newslot = 0;
                     break;
                 case OpCode.CPUI_LOAD:
@@ -878,13 +892,15 @@ namespace Sla.DECCORE
         /// \param offset is the number of bytes truncated off the start of the data-type
         /// \param scoreIndex is the field being scored
         /// \return the data-type to recurse or null
-        private Datatype scoreTruncation(Datatype ct, Varnode vn, int offset, int scoreIndex)
+        private Datatype? scoreTruncation(Datatype ct, Varnode vn, int offset, int scoreIndex)
         {
             int score;
             if (ct.getMetatype() == type_metatype.TYPE_UNION) {
                 TypeUnion unionDt = (TypeUnion)ct;
-                ct = (Datatype)null;          // Don't recurse a data-type from truncation of a union
-                score = -10;            // Negative score if the union has no field matching the size
+                // Don't recurse a data-type from truncation of a union
+                ct = (Datatype)null;
+                // Negative score if the union has no field matching the size
+                score = -10;
                 int num = unionDt.numDepend();
                 for (int i = 0; i < num; ++i) {
                     TypeField field = unionDt.getField(i);
@@ -897,12 +913,14 @@ namespace Sla.DECCORE
                 }
             }
             else {
-                ulong off = offset;
-                score = 10;     // If we can find a size match for the truncation
+                ulong off = (ulong)offset;
+                // If we can find a size match for the truncation
+                score = 10;
                 while (ct != (Datatype)null && (off != 0 || ct.getSize() != vn.getSize())) {
                     if (ct.getMetatype() == type_metatype.TYPE_INT || ct.getMetatype() == type_metatype.TYPE_UINT) {
-                        if (ct.getSize() >= vn.getSize() + off) {
-                            score = 1;  // Size doesn't match, but still possibly a reasonable operation
+                        if ((uint)ct.getSize() >= (uint)vn.getSize() + off) {
+                            // Size doesn't match, but still possibly a reasonable operation
+                            score = 1;
                             break;
                         }
                     }
@@ -945,7 +963,7 @@ namespace Sla.DECCORE
                     AddrSpace spc = typegrp.getArch().getDefaultDataSpace();
                     bool looksLikePointer = false;
                     if (val >= spc.getPointerLowerBound() && val <= spc.getPointerUpperBound()) {
-                        if (bit_transitions(val, size) >= 3) {
+                        if (Globals.bit_transitions(val, size) >= 3) {
                             looksLikePointer = true;
                         }
                     }
@@ -972,7 +990,8 @@ namespace Sla.DECCORE
             while (iter.MoveNext()) {
                 trialCount += 1;
                 if (trialCount > maxTrials)
-                    return;             // Absolute number of trials reached
+                    // Absolute number of trials reached
+                    return;
                 Trial trial = iter.Current;
                 scoreTrialDown(trial, lastPass);
                 scoreTrialUp(trial, lastPass);
@@ -990,7 +1009,8 @@ namespace Sla.DECCORE
                     bestIndex = i;
                 }
             }
-            result.fieldNum = bestIndex - 1;    // Renormalize score index to field index
+            // Renormalize score index to field index
+            result.fieldNum = bestIndex - 1;
             result.resolve = fields[bestIndex];
         }
 
@@ -1005,7 +1025,8 @@ namespace Sla.DECCORE
                 if (trialCurrent.empty())
                     break;
                 if (trialCount > threshold)
-                    break;              // Threshold reached, don't score any more trials
+                    // Threshold reached, don't score any more trials
+                    break;
                 if (pass + 1 == maxPasses)
                     runOneLevel(true);
                 else {
@@ -1030,27 +1051,29 @@ namespace Sla.DECCORE
             result = new ResolvedUnion(parentType);
             if (testSimpleCases(op, slot, parentType))
                 return;
-            int wordSize = (parentType.getMetatype() == type_metatype.TYPE_PTR) ? ((TypePointer)parentType).getWordSize() : 0;
+            int wordSize = (parentType.getMetatype() == type_metatype.TYPE_PTR)
+                ? (int)((TypePointer)parentType).getWordSize()
+                : 0;
             int numFields = result.baseType.numDepend();
             scores.resize(numFields + 1, 0);
             fields.resize(numFields + 1, (Datatype)null);
             Varnode vn;
             if (slot < 0) {
-                vn = op.getOut();
+                vn = op.getOut() ?? throw new ApplicationException();
                 if (vn.getSize() != parentType.getSize())
                     scores[0] -= 10;        // Data-type does not even match size of Varnode
                 else
                     trialCurrent.Add(new Trial(vn, parentType, 0, false));
             }
             else {
-                vn = op.getIn(slot);
+                vn = op.getIn(slot) ?? throw new ApplicationException();
                 if (vn.getSize() != parentType.getSize())
                     scores[0] -= 10;
                 else
                     trialCurrent.Add(new Trial(op, slot, parentType, 0, false));
             }
             fields[0] = parentType;
-            visited.insert(VisitMark(vn, 0));
+            visited.Add(new VisitMark(vn, 0));
             for (int i = 0; i < numFields; ++i) {
                 Datatype fieldType = result.baseType.getDepend(i);
                 bool isArray = false;
@@ -1068,7 +1091,7 @@ namespace Sla.DECCORE
                     trialCurrent.Add(new Trial(op, slot, fieldType, i + 1, isArray));
                 }
                 fields[i + 1] = fieldType;
-                visited.insert(new VisitMark(vn, i + 1));
+                visited.Add(new VisitMark(vn, i + 1));
             }
             run();
             computeBestIndex();
@@ -1133,13 +1156,13 @@ namespace Sla.DECCORE
                 TypeField unionField = unionType.getField(i);
                 fields[i + 1] = unionField.type;
                 // Score the implied truncation
-                Datatype ct = scoreTruncation(unionField.type, vn, offset - unionField.offset, i + 1);
+                Datatype? ct = scoreTruncation(unionField.type, vn, offset - unionField.offset, i + 1);
                 if (ct != (Datatype)null) {
                     if (slot < 0)
                         trialCurrent.Add(new Trial(vn, ct, i + 1, false));        // Try to flow backward
                     else
                         trialCurrent.Add(new Trial(op, slot, ct, i + 1, false));  // Flow downward
-                    visited.insert(VisitMark(vn, i + 1));
+                    visited.Add(new VisitMark(vn, i + 1));
                 }
             }
             if (trialCurrent.size() > 1)

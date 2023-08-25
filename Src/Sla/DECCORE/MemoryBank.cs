@@ -50,7 +50,7 @@ namespace Sla.DECCORE
             if ((endaddr & ((ulong)(wordsize - 1))) != 0)
                 endalign += wordsize;
 
-            bool bswap = ((HOST_ENDIAN == 1) != space.isBigEndian());
+            bool bswap = ((Globals.HOST_ENDIAN == 1) != space.isBigEndian());
             byte* ptr;
             uint resOffset = 0;
             do {
@@ -96,7 +96,7 @@ namespace Sla.DECCORE
                 endalign += wordsize;
 
             ulong curval;
-            bool bswap = ((HOST_ENDIAN == 1) != space.isBigEndian());
+            bool bswap = ((Globals.HOST_ENDIAN == 1) != space.isBigEndian());
             byte* ptr;
             do {
                 ptr = (byte*)&curval;

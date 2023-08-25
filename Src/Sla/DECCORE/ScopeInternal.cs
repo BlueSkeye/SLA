@@ -1,6 +1,7 @@
 ﻿using Sla.CORE;
 using Sla.DECCORE;
 using Sla.EXTRA;
+using System.Globalization;
 
 using EntryMap = Sla.EXTRA.rangemap<Sla.DECCORE.SymbolEntry>;
 
@@ -152,7 +153,8 @@ namespace Sla.DECCORE
                 throw new LowlevelError(msg);
             }
 
-            IEnumerator<SymbolEntry> iter = rangemap.insert(initdata, addr.getOffset(), lastaddress.getOffset());
+            IEnumerator<SymbolEntry> iter = rangemap.insert(initdata, addr.getOffset(),
+                lastaddress.getOffset());
             // Store reference to map in symbol
             sym.mapentry.Add(iter);
             if (sz == sym.type.getSize()) {
@@ -160,7 +162,7 @@ namespace Sla.DECCORE
                 if (sym.wholeCount == 2)
                     multiEntrySet.Add(sym);
             }
-            return iter;
+            return iter.Current;
         }
 
         protected override SymbolEntry addDynamicMapInternal(Symbol sym, Varnode.varnode_flags exfl, ulong hash,
@@ -169,7 +171,8 @@ namespace Sla.DECCORE
             dynamicentry.Add(new SymbolEntry(sym, exfl, hash, off, sz, uselim));
             IEnumerator<SymbolEntry> iter = dynamicentry.end();
             --iter;
-            sym.mapentry.Add(iter); // Store reference to map entry in symbol
+            // Store reference to map entry in symbol
+            sym.mapentry.Add(iter);
             if (sz == sym.type.getSize()) {
                 sym.wholeCount += 1;
                 if (sym.wholeCount == 2)
@@ -397,15 +400,15 @@ namespace Sla.DECCORE
 
         public override void removeSymbolMappings(Symbol symbol)
         {
-            IEnumerator<IEnumerator<SymbolEntry>> iter;
-
             if (symbol.wholeCount > 1)
                 multiEntrySet.Remove(symbol);
             // Remove each mapping of the symbol
-            for (iter = symbol.mapentry.begin(); iter != symbol.mapentry.end(); ++iter) {
-                AddrSpace spc = (*(*iter)).getAddr().getSpace();
-                if (spc == (AddrSpace)null) // A null address indicates a dynamic mapping
-                    dynamicentry.Remove(iter.Current);
+            IEnumerator<IEnumerator<SymbolEntry>> iter = symbol.mapentry.GetEnumerator();
+            while (iter.MoveNext()) {
+                AddrSpace? spc = iter.Current.Current.getAddr().getSpace();
+                if (spc == (AddrSpace)null)
+                    // A null address indicates a dynamic mapping
+                    dynamicentry.Remove(iter.Current.Current);
                 else {
                     EntryMap rangemap = maptable[spc.getIndex()];
                     rangemap.erase(iter.Current);
@@ -535,7 +538,7 @@ namespace Sla.DECCORE
                     res = rangemap.find(addr.getOffset(), EntryMap::subsorttype(false),
                         EntryMap::subsorttype(usepoint));
                 int oldsize = -1;
-                ulong end = addr.getOffset() + size - 1;
+                ulong end = addr.getOffset() + (uint)size - 1;
                 while (res.Item1 != res.Item2) {
                     --res.second;
                     SymbolEntry entry = res.Item2;
@@ -656,7 +659,7 @@ namespace Sla.DECCORE
             EntryMap? rangemap = maptable[addr.getSpace().getIndex()];
             if (rangemap != (EntryMap)null) {
                 EntryMap::const_iterator iter;
-                iter = rangemap.find_overlap(addr.getOffset(), addr.getOffset() + size - 1);
+                iter = rangemap.find_overlap(addr.getOffset(), addr.getOffset() + (uint)size - 1);
                 if (iter != rangemap.end())
                     return &(*iter);
             }
@@ -677,7 +680,7 @@ namespace Sla.DECCORE
         public override bool isNameUsed(string nm, Scope? op2)
         {
             Symbol sym = new Symbol((Scope)null,nm,(Datatype)null);
-            SymbolNameTree::const_iterator iter = nametree.lower_bound(sym);
+            IEnumerator<Symbol> iter = nametree.lower_bound(sym);
             if (iter != nametree.end()) {
                 if ((*iter).getName() == nm)
                     return true;
@@ -798,15 +801,14 @@ namespace Sla.DECCORE
 
             Symbol testsym = new Symbol((Scope)null, "$$undefz", (Datatype)null);
 
-            iter = nametree.lower_bound(&testsym);
+            iter = nametree.lower_bound(testsym);
             if (iter != nametree.begin())
                 --iter;
             if (iter != nametree.end()) {
                 string symname = iter.Current.getName();
                 if ((symname.Length == 15) && symname.StartsWith("$$undef")) {
-                    istringstream s = new istringstream(symname.Substring(7,8) );
                     uint uniq = uint.MaxValue;
-                    s >> hex >> uniq;
+                    uint.TryParse(symname.Substring(7, 8), NumberStyles.HexNumber, null, out uniq);
                     if (uniq == uint.MaxValue)
                         throw new LowlevelError("Error creating undefined name");
                     uniq += 1;
@@ -823,7 +825,7 @@ namespace Sla.DECCORE
 
             Symbol boundsym = new Symbol((Scope)null,nm + "_x99999",(Datatype)null);
             boundsym.nameDedup = 0xffffffff;
-            IEnumerator<Symbol> iter2 = nametree.lower_bound(&boundsym);
+            IEnumerator<Symbol> iter2 = nametree.lower_bound(boundsym);
             uint uniqid;
             do {
                 uniqid = 0xffffffff;
@@ -893,7 +895,7 @@ namespace Sla.DECCORE
 
             if (!nametree.empty()) {
                 encoder.openElement(ElementId.ELEM_SYMBOLLIST);
-                SymbolNameTree::const_iterator iter;
+                IEnumerator<Symbol> iter;
                 for (iter = nametree.begin(); iter != nametree.end(); ++iter) {
                     Symbol sym = iter.Current;
                     int symbolType = 0;
@@ -999,8 +1001,10 @@ namespace Sla.DECCORE
 
         public override void setCategory(Symbol sym, Symbol.SymbolCategory cat, int ind)
         {
+            List<Symbol?> list;
+
             if (sym.category >= 0) {
-                List<Symbol> list = category[(int)sym.category];
+                list = category[(int)sym.category];
                 list[sym.catindex] = (Symbol)null;
                 while ((!list.empty()) && (list.GetLastItem() == (Symbol)null))
                     list.RemoveLastItem();
@@ -1011,7 +1015,7 @@ namespace Sla.DECCORE
             if (cat < 0) return;
             while (category.size() <= (int)sym.category)
                 category.Add(new List<Symbol>());
-            List<Symbol?> list = category[(int)sym.category];
+            list = category[(int)sym.category];
             while (list.size() <= sym.catindex)
                 list.Add((Symbol)null);
             list[sym.catindex] = sym;
@@ -1023,7 +1027,7 @@ namespace Sla.DECCORE
         /// \param base is the base index to start at for generating generic names
         public override void assignDefaultNames(int @base)
         {
-            SymbolNameTree::const_iterator iter;
+            IEnumerator<Symbol> iter;
 
             Symbol testsym = new Symbol((Scope)null, "$$undef", (Datatype)null);
 
@@ -1038,9 +1042,9 @@ namespace Sla.DECCORE
         }
 
         /// Start of symbols with more than one entry
-        public IEnumerator<Symbol> beginMultiEntry() => multiEntrySet.begin();
+        public IEnumerator<Symbol> beginMultiEntry() => multiEntrySet.GetEnumerator();
 
-        /// End of symbols with more than one entry
-        public IEnumerator<Symbol> endMultiEntry() => multiEntrySet.end();
+        ///// End of symbols with more than one entry
+        //public IEnumerator<Symbol> endMultiEntry() => multiEntrySet.end();
     }
 }

@@ -43,7 +43,7 @@ namespace Sla.DECCORE
 
             loadimage.loadFill((byte*)&res, sizeof(ulong), new Address(spc, offset));
 
-            if ((HOST_ENDIAN == 1) != spc.isBigEndian())
+            if ((Globals.HOST_ENDIAN == 1) != spc.isBigEndian())
                 res = Globals.byte_swap(res, sizeof(ulong));
             if (spc.isBigEndian() && (sz < sizeof(ulong)))
                 res >>= (sizeof(ulong) - sz) * 8;

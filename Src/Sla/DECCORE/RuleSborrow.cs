@@ -77,9 +77,9 @@ namespace Sla.DECCORE
                 addop = signop.getIn(1 - zside).getDef();
                 if (addop.code() == OpCode.CPUI_INT_ADD) {
                     avn = op.getIn(0);
-                    if (functionalEquality(avn, addop.getIn(0)))
+                    if (PcodeOpBank.functionalEquality(avn, addop.getIn(0)))
                         bvn = addop.getIn(1);
-                    else if (functionalEquality(avn, addop.getIn(1)))
+                    else if (PcodeOpBank.functionalEquality(avn, addop.getIn(1)))
                         bvn = addop.getIn(0);
                     else
                         continue;
@@ -100,7 +100,7 @@ namespace Sla.DECCORE
                     }
                     else if (otherop.code() == OpCode.CPUI_INT_2COMP)
                         bvn = otherop.getIn(0);
-                    if (!functionalEquality(bvn, op.getIn(1))) continue;
+                    if (!PcodeOpBank.functionalEquality(bvn, op.getIn(1))) continue;
                 }
                 else
                     continue;

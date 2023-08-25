@@ -243,13 +243,13 @@ namespace Sla.DECCORE
                 case OpCode.CPUI_INT_LEFT: {
                         Varnode cvn = op.getIn(1);
                         if (!cvn.isConstant()) return false;
-                        if (cvn.getOffset() != laneDescription.getSize(0) * 8) return false;
+                        if (cvn.getOffset() != (uint)laneDescription.getSize(0) * 8) return false;
                         Varnode invn = op.getIn(0) ?? throw new ApplicationException();
                         if (!invn.isWritten()) return false;
                         PcodeOp zextOp = invn.getDef() ?? throw new ApplicationException();
                         if (zextOp.code() != OpCode.CPUI_INT_ZEXT) return false;
                         invn = zextOp.getIn(0);
-                        if (invn.getSize() != laneDescription.getSize(1)) return false;
+                        if (invn.getSize() != (uint)laneDescription.getSize(1)) return false;
                         if (invn.isFree()) return false;
                         TransformOp loOp = newOpReplace(1, OpCode.CPUI_COPY, op);
                         TransformOp hiOp = newOpReplace(1, OpCode.CPUI_COPY, op);

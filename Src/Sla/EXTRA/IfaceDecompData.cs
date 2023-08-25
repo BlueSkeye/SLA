@@ -140,7 +140,7 @@ namespace Sla.EXTRA
             if (fd == (Funcdata)null)
                 throw new IfaceExecutionError("No function selected");
 
-            Address pc;
+            Address pc = new Address();
             Address loc = new Address(parse_varnode(s, defsize, pc, uq, conf.types));
             if (loc.getSpace().getType() == spacetype.IPTR_CONSTANT) {
                 if (pc.isInvalid() || (uq == uint.MaxValue))
@@ -162,11 +162,10 @@ namespace Sla.EXTRA
             else if ((!pc.isInvalid()) && (uq != uint.MaxValue))
                 vn = fd.findVarnodeWritten(defsize, loc, pc, uq);
             else {
-                IEnumerator<Varnode> iter, enditer;
-                iter = fd.beginLoc(defsize, loc);
-                enditer = fd.endLoc(defsize, loc);
-                while (iter != enditer) {
-                    vn = *iter++;
+                IEnumerator<Varnode> iter = fd.beginLoc(defsize, loc);
+                // IEnumerator<Varnode> enditer = fd.endLoc(defsize, loc);
+                while (iter.MoveNext()) {
+                    vn = iter.Current;
                     if (vn.isFree()) continue;
                     if (vn.isWritten()) {
                         if ((!pc.isInvalid()) && (vn.getDef().getAddr() == pc)) break;
@@ -189,7 +188,7 @@ namespace Sla.EXTRA
         {
             Scope scope = (fd == (Funcdata)null) ? conf.symboltab.getGlobalScope() : fd.getScopeLocal();
             string basename;
-            scope = conf.symboltab.resolveScopeFromSymbolName(name, "::", basename, scope);
+            scope = conf.symboltab.resolveScopeFromSymbolName(name, "::", out basename, scope);
             if (scope == (Scope)null)
                 throw new IfaceParseError("Bad namespace for symbol: " + name);
             scope.queryByName(basename, res);

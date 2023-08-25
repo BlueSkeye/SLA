@@ -1,12 +1,4 @@
 ﻿using Sla.CORE;
-using ghidra;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.DECCORE
 {
@@ -18,13 +10,13 @@ namespace Sla.DECCORE
     /// \e case block and how to label the value.
     internal class JumpTable
     {
-        /// \brief An address table index and its corresponding out-edge
+        // \brief An address table index and its corresponding out-edge
         internal struct IndexPair
         {
-            /// Out-edge index for the basic-block
+            // Out-edge index for the basic-block
             internal int blockPosition;
-            /// Index of address targeting the basic-block
-            private int addressIndex;
+            // Index of address targeting the basic-block
+            internal int addressIndex;
             
             internal IndexPair(int pos, int index)
             {
@@ -237,7 +229,7 @@ namespace Sla.DECCORE
             jmodel = (JumpModel)null;
             origmodel = (JumpModel)null;
             indirect = (PcodeOp)null;
-            switchVarConsume = ~((ulong)0);
+            switchVarConsume = ulong.MaxValue;
             defaultBlock = -1;
             lastBlock = -1;
             maxaddsub = 1;
@@ -256,7 +248,7 @@ namespace Sla.DECCORE
             jmodel = (JumpModel)null;
             origmodel = (JumpModel)null;
             indirect = (PcodeOp)null;
-            switchVarConsume = ~((ulong)0);
+            switchVarConsume = ulong.MaxValue;
             defaultBlock = -1;
             lastBlock = op2.lastBlock;
             maxaddsub = op2.maxaddsub;
@@ -299,7 +291,7 @@ namespace Sla.DECCORE
         internal int numEntries() => addresstable.Count;
 
         /// Get bits of switch variable consumed by \b this table
-        private ulong getSwitchVarConsume() => switchVarConsume;
+        internal ulong getSwitchVarConsume() => switchVarConsume;
 
         /// Get the out-edge corresponding to the \e default switch destination
         internal int getDefaultBlock() => defaultBlock;
@@ -350,7 +342,7 @@ namespace Sla.DECCORE
         ///
         /// \param bl is the given basic-block
         /// \return the count of entries
-        private int numIndicesByBlock(FlowBlock bl)
+        internal int numIndicesByBlock(FlowBlock bl)
         {
             IndexPair val = new IndexPair(block2Position(bl),0);
             Tuple<IEnumerator<IndexPair>, IEnumerator<IndexPair>> range;
@@ -368,56 +360,55 @@ namespace Sla.DECCORE
         {
             IndexPair val = new IndexPair(block2Position(bl),0);
             int count = 0;
-            IEnumerator<IndexPair> iter = lower_bound(block2addr.begin(), block2addr.end(), val, IndexPair::compareByPosition);
-            while (iter != block2addr.end()) {
-                if ((*iter).blockPosition == val.blockPosition) {
+            IEnumerator<IndexPair> iter = lower_bound(block2addr.begin(), block2addr.end(), val, IndexPair.compareByPosition);
+            while (iter.MoveNext()) {
+                if (iter.Current.blockPosition == val.blockPosition) {
                     if (count == i)
-                        return (*iter).addressIndex;
+                        return iter.Current.addressIndex;
                     count += 1;
                 }
-                ++iter;
             }
             throw new LowlevelError("Could not get jumptable index for block");
         }
 
-        /// Get the i-th address table entry
+        // Get the i-th address table entry
         internal Address getAddressByIndex(int i) => addresstable[i];
 
-        /// Set the most common jump-table target to be the last address in the table
+        // Set the most common jump-table target to be the last address in the table
         internal void setLastAsMostCommon()
         {
             defaultBlock = lastBlock;
         }
 
-        /// Set out-edge of the switch destination considered to be \e default
+        // Set out-edge of the switch destination considered to be \e default
         internal void setDefaultBlock(int bl)
         {
             defaultBlock = bl;
         }
 
-        /// Set whether LOAD records should be collected
+        // Set whether LOAD records should be collected
         internal void setLoadCollect(bool val)
         {
             collectloads = val;
         }
 
-        /// Force a given basic-block to be a switch destination
-        /// This is used to add address targets from guard branches if they are
-        /// not already in the address table. A specific case label for the block
-        /// can also be provided. The new target is appended directly to the end of the table.
-        /// \param bl is the given basic-block
-        /// \param lab is the case label for the block
+        // Force a given basic-block to be a switch destination
+        // This is used to add address targets from guard branches if they are
+        // not already in the address table. A specific case label for the block
+        // can also be provided. The new target is appended directly to the end of the table.
+        // \param bl is the given basic-block
+        // \param lab is the case label for the block
         internal void addBlockToSwitch(BlockBasic bl, ulong lab)
         {
             addresstable.Add(bl.getStart());
-            lastBlock = indirect.getParent().sizeOut();       // The block WILL be added to the end of the out-edges
+            // The block WILL be added to the end of the out-edges
+            lastBlock = indirect.getParent().sizeOut();
             block2addr.Add(new IndexPair(lastBlock, addresstable.size() - 1));
             label.Add(lab);
         }
 
         /// Convert absolute addresses to block indices
         /// Convert addresses in \b this table to actual targeted basic-blocks.
-        ///
         /// This constructs a map from each out-edge from the basic-block containing the BRANCHIND
         /// to addresses in the table targetting that out-block. The most common
         /// address table entry is also calculated here.
@@ -447,16 +438,18 @@ namespace Sla.DECCORE
             lastBlock = block2addr.GetLastItem().blockPosition;
             block2addr.Sort();
 
-            defaultBlock = -1;          // There is no default case initially
-            int maxcount = 1;          // If the maxcount is less than 2
+            // There is no default case initially
+            defaultBlock = -1;
+            // If the maxcount is less than 2
+            int maxcount = 1;
             IEnumerator<IndexPair> iter = block2addr.GetEnumerator();
             while (iter.MoveNext()) {
                 int curPos = iter.Current.blockPosition;
                 IEnumerator<IndexPair> nextiter = iter;
                 int count = 0;
-                while (nextiter != block2addr.end() && (*nextiter).blockPosition == curPos) {
+                while (iter.Current.blockPosition == curPos) {
                     count += 1;
-                    ++nextiter;
+                    if (!iter.MoveNext()) break;
                 }
                 iter = nextiter;
                 if (count > maxcount) {
@@ -466,7 +459,7 @@ namespace Sla.DECCORE
             }
         }
 
-        /// Given a \e case index, get its label
+        // Given a \e case index, get its label
         internal ulong getLabelByIndex(int index) => label[index];
 
         /// Hide the normalization code for the switch
@@ -486,37 +479,40 @@ namespace Sla.DECCORE
                         PcodeOp op = switchvn.getDef();
                         if (op.code() == OpCode.CPUI_INT_SEXT) {
                             // Check for a signed extension
-                            switchVarConsume = Globals.calc_mask(op.getIn(0).getSize());  // Assume the extension is not consumed
+                            // Assume the extension is not consumed
+                            switchVarConsume = Globals.calc_mask((uint)op.getIn(0).getSize());
                         }
                     }
                 }
             }
         }
 
-        /// Hide any guard code for \b this switch
+        // Hide any guard code for \b this switch
         private bool foldInGuards(Funcdata fd) => jmodel.foldInGuards(fd, this);
 
-        /// Recover the raw jump-table addresses (the address table)
-        /// The addresses that the raw BRANCHIND op might branch to itself are recovered,
-        /// not including other targets of the final model, like guard addresses.  The normalized switch
-        /// variable and the guards are identified in the process however.
-        ///
-        /// Generally this method is run during flow analysis when we only have partial information about
-        /// the function (and possibly the switch itself).  The Funcdata instance is a partial clone of the
-        /// function and is different from the final instance that will hold the fully recovered jump-table.
-        /// The final instance inherits the addresses recovered here, but recoverModel() will need to be
-        /// run on it separately.
-        ///
-        /// A sanity check is also run, which might truncate the original set of addresses.
-        /// \param fd is the function containing the switch
+        // Recover the raw jump-table addresses (the address table)
+        // The addresses that the raw BRANCHIND op might branch to itself are recovered,
+        // not including other targets of the final model, like guard addresses.  The normalized switch
+        // variable and the guards are identified in the process however.
+        //
+        // Generally this method is run during flow analysis when we only have partial information about
+        // the function (and possibly the switch itself).  The Funcdata instance is a partial clone of the
+        // function and is different from the final instance that will hold the fully recovered jump-table.
+        // The final instance inherits the addresses recovered here, but recoverModel() will need to be
+        // run on it separately.
+        //
+        // A sanity check is also run, which might truncate the original set of addresses.
+        // \param fd is the function containing the switch
         internal void recoverAddresses(Funcdata fd)
         {
             recoverModel(fd);
             if (jmodel == (JumpModel)null) {
-                throw new LowlevelError($"Could not recover jumptable at {opaddress}. Too many branches");
+                throw new LowlevelError(
+                    $"Could not recover jumptable at {opaddress}. Too many branches");
             }
             if (jmodel.getTableSize() == 0) {
-                throw new JumptableNotReachableError($"Impossible to reach jumptable at {opaddress}");
+                throw new JumptableNotReachableError(
+                    $"Impossible to reach jumptable at {opaddress}");
             }
             //  if (sz < 2)
             //    fd.warning("Jumptable has only one branch",opaddress);
@@ -527,9 +523,9 @@ namespace Sla.DECCORE
             sanityCheck(fd);
         }
 
-        /// Recover jump-table addresses keeping track of a possible previous stage
-        /// Do a normal recoverAddresses, but save off the old JumpModel, and if we fail recovery, put back the old model.
-        /// \param fd is the function containing the switch
+        // Recover jump-table addresses keeping track of a possible previous stage
+        // Do a normal recoverAddresses, but save off the old JumpModel, and if we fail recovery, put back the old model.
+        //\param fd is the function containing the switch
         internal void recoverMultistage(Funcdata fd)
         {
             //if (origmodel != (JumpModel)null)
@@ -634,9 +630,9 @@ namespace Sla.DECCORE
             if (recoverystage != 0) return false;
             if (indirect == (PcodeOp)null) return false;
 
-            if (fd.getOverride().queryMultistageJumptable(indirect.getAddr()))
-            {
-                recoverystage = 1;      // Mark that we need additional recovery
+            if (fd.getOverride().queryMultistageJumptable(indirect.getAddr())) {
+                // Mark that we need additional recovery
+                recoverystage = 1;
                 return true;
             }
             return false;
@@ -707,12 +703,11 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         internal void decode(Sla.CORE.Decoder decoder)
         {
-            uint elemId = decoder.openElement(ElementId.ELEM_JUMPTABLE);
+            ElementId elemId = decoder.openElement(ElementId.ELEM_JUMPTABLE);
             opaddress = Address.decode(decoder);
             bool missedlabel = false;
-            while(true)
-            {
-                uint subId = decoder.peekElement();
+            while(true) {
+                ElementId subId = decoder.peekElement();
                 if (subId == 0) break;
                 if (subId == ElementId.ELEM_DEST) {
                     decoder.openElement();

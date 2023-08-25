@@ -358,14 +358,14 @@ namespace Sla.DECCORE
             List<int> slotlist, PcodeOp op)
         {
             int blk = op.getParent().getIndex();
-            IEnumerator<Varnode> viter;
-            IEnumerator<PcodeOp> oiter;
             Varnode vn;
             PcodeOp edgeop;
             int slot, bound;
-            uint opuindex = CoverBlock.getUIndex(op);
+            uint opuindex = (int)CoverBlock.getUIndex(op);
+            IEnumerator<Varnode> viter = vlist.begin();
+            IEnumerator<PcodeOp> oiter;
 
-            for (viter = vlist.begin(); viter != vlist.end(); ++viter) {
+            while (viter.MoveNext()) {
                 vn = viter.Current;
                 bound = vn.getCover().getCoverBlock(blk).boundary(op);
                 if (bound == 0) return false;
@@ -817,22 +817,21 @@ namespace Sla.DECCORE
         private void mergeLinear(List<HighVariable> highvec)
         {
             List<HighVariable> highstack = new List<HighVariable>();
-            IEnumerator<HighVariable> initer, outiter;
             HighVariable high;
 
             if (highvec.size() <= 1) return;
             foreach (HighVariable variable in highvec)
                 testCache.updateHigh(variable);
             highvec.Sort(compareHighByBlock);
-            for (initer = highvec.begin(); initer != highvec.end(); ++initer)
-            {
-                high = *initer;
-                for (outiter = highstack.begin(); outiter != highstack.end(); ++outiter)
-                {
-                    if (mergeTestSpeculative(*outiter, high))
-                        if (merge(*outiter, high, true)) break;
+            IEnumerator<HighVariable> initer = highvec.GetEnumerator();
+            while (initer.MoveNext()) {
+                high = initer.Current;
+                IEnumerator<HighVariable> outiter = highstack.GetEnumerator();
+                while (outiter.MoveNext()) {
+                    if (mergeTestSpeculative(outiter.Current, high))
+                        if (merge(outiter.Current, high, true)) break;
                 }
-                if (outiter == highstack.end())
+                if (!outiter.MoveNext())
                     highstack.Add(high);
             }
         }
@@ -1156,9 +1155,10 @@ namespace Sla.DECCORE
                     VariablePiece otherPiece = piece.getIntersection(i);
                     HighVariable otherHigh = otherPiece.getHigh();
                     int off = otherPiece.getOffset() - piece.getOffset();
-                    for (int i = 0; i < otherHigh.numInstances(); ++i) {
-                        Varnode b = otherHigh.getInstance(i);
-                        if (b.partialCopyShadow(a, off)) continue; // Intersection with partial shadow of a is allowed
+                    for (int j = 0; j < otherHigh.numInstances(); ++j) {
+                        Varnode b = otherHigh.getInstance(j);
+                        // Intersection with partial shadow of a is allowed
+                        if (b.partialCopyShadow(a, off)) continue;
                         if (2 == b.getCover().intersect(highCover))
                             return true;
                     }
@@ -1217,25 +1217,24 @@ namespace Sla.DECCORE
         public void mergeOpcode(OpCode opc)
         {
             BlockBasic bl;
-            IEnumerator<PcodeOp> iter;
-            PcodeOp op;
-            Varnode vn1;
-            Varnode vn2;
             BlockGraph bblocks = data.getBasicBlocks();
 
             for (int i = 0; i < bblocks.getSize(); ++i) {
                 // Do merges in linear block order
                 bl = (BlockBasic)bblocks.getBlock(i);
-                for (iter = bl.beginOp(); iter != bl.endOp(); ++iter) {
-                    op = iter.Current;
+                LinkedListNode<PcodeOp>? iter = bl.beginOp(); ;
+                while (null != iter) {
+                    PcodeOp op = iter.Value;
+                    iter = iter.Next;
                     if (op.code() != opc) continue;
-                    vn1 = op.getOut();
+                    Varnode vn1 = op.getOut() ?? throw new ApplicationException();
                     if (!mergeTestBasic(vn1)) continue;
                     for (int j = 0; j < op.numInput(); ++j) {
-                        vn2 = op.getIn(j);
+                        Varnode vn2 = op.getIn(j) ?? throw new ApplicationException();
                         if (!mergeTestBasic(vn2)) continue;
                         if (mergeTestRequired(vn1.getHigh(), vn2.getHigh()))
-                            merge(vn1.getHigh(), vn2.getHigh(), false);   // This is a required merge
+                            // This is a required merge
+                            merge(vn1.getHigh(), vn2.getHigh(), false);
                     }
                 }
             }
@@ -1409,11 +1408,11 @@ namespace Sla.DECCORE
         /// These Varnodes need to be merged to properly represent a single variable.
         public void mergeMultiEntry()
         {
-            SymbolNameTree::const_iterator iter = data.getScopeLocal().beginMultiEntry();
-            SymbolNameTree::const_iterator enditer = data.getScopeLocal().endMultiEntry();
-            for (; iter != enditer; ++iter) {
+            IEnumerator<Symbol> iter = data.getScopeLocal().beginMultiEntry();
+            /// IEnumerator<Symbol> enditer = data.getScopeLocal().endMultiEntry();
+            while (iter.MoveNext()) {
                 List<Varnode> mergeList = new List<Varnode>();
-                Symbol symbol = *iter;
+                Symbol symbol = iter.Current;
                 int numEntries = symbol.numEntries();
                 int mergeCount = 0;
                 int skipCount = 0;
@@ -1425,7 +1424,8 @@ namespace Sla.DECCORE
                         continue;
                     data.findLinkedVarnodes(entry, mergeList);
                     if (mergeList.size() == prevSize)
-                        skipCount += 1;     // Did not discover any Varnodes corresponding to a particular SymbolEntry
+                        // Did not discover any Varnodes corresponding to a particular SymbolEntry
+                        skipCount += 1;
                 }
                 if (mergeList.empty()) continue;
                 HighVariable high = mergeList[0].getHigh();

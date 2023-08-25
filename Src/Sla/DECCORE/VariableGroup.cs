@@ -1,5 +1,6 @@
 ﻿using Sla.CORE;
 using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace Sla.DECCORE
 {
@@ -15,24 +16,30 @@ namespace Sla.DECCORE
         // friend class VariablePiece;
 
         /// \brief Compare two VariablePiece pointers by offset then by size
-        internal struct PieceCompareByOffset
+        internal class PieceCompareByOffset : IComparer<VariablePiece>
         {
+            internal static readonly PieceCompareByOffset Instance = new PieceCompareByOffset();
+
+            private PieceCompareByOffset() { }
+
             /// Comparison operator
             /// Compare by offset within the group, then by size.
             /// \param a is the first piece to compare
             /// \param b is the other piece to compare
             /// \return \b true if \b a should be ordered before the \b b
-            internal static bool operator/*()*/(VariablePiece a, VariablePiece b)
+            public int Compare(VariablePiece? a, VariablePiece? b) // operator/*()*/(VariablePiece a, VariablePiece b)
             {
-              if (a.getOffset() != b.getOffset())
-                return (a.getOffset() < b.getOffset());
-              return (a.getSize() < b.getSize());
+                if (null == a) throw new NullReferenceException();
+                if (null == b) throw new NullReferenceException();
+                return (a.getOffset() != b.getOffset())
+                    ? a.getOffset().CompareTo(b.getOffset())
+                    : a.getSize().CompareTo(b.getSize());
             }
         }
 
         /// The set of VariablePieces making up \b this group
         internal SortedSet<VariablePiece> pieceSet =
-            new SortedSet<VariablePiece>(VariableGroup.PieceCompareByOffset);
+            new SortedSet<VariablePiece>(PieceCompareByOffset.Instance);
         /// Number of contiguous bytes covered by the whole group
         private int size;
         /// Byte offset of \b this group within its containing Symbol
@@ -53,8 +60,9 @@ namespace Sla.DECCORE
         public void addPiece(VariablePiece piece)
         {
             piece.group = this;
-            if (!pieceSet.insert(piece).second)
+            if (pieceSet.Contains(piece))
                 throw new LowlevelError("Duplicate VariablePiece");
+            pieceSet.Add(piece);
             int pieceMax = piece.getOffset() + piece.getSize();
             if (pieceMax > size)
                 size = pieceMax;

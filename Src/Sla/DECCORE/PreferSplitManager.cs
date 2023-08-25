@@ -424,20 +424,18 @@ namespace Sla.DECCORE
         private void splitRecord(PreferSplitRecord rec)
         {
             Address addr = rec.storage.getAddr();
-            IEnumerator<Varnode> iter, enditer;
 
             SplitInstance inst = new SplitInstance((Varnode)null,rec.splitoffset);
-            iter = data.beginLoc((int)rec.storage.size, addr);
-            enditer = data.endLoc((int)rec.storage.size, addr);
-            while (iter != enditer) {
-                inst.vn = *iter;
-                ++iter;
+            IEnumerator<Varnode> iter = data.beginLoc((int)rec.storage.size, addr);
+            // IEnumerator<Varnode> enditer = data.endLoc((int)rec.storage.size, addr);
+            while (iter.MoveNext()) {
+                inst.vn = iter.Current;
                 inst.lo = (Varnode)null;
                 inst.hi = (Varnode)null;
                 if (splitVarnode(inst)) {
                     // If we found something, regenerate iterators, as they may be stale
                     iter = data.beginLoc((int)rec.storage.size, addr);
-                    enditer = data.endLoc((int)rec.storage.size, addr);
+                    // enditer = data.endLoc((int)rec.storage.size, addr);
                 }
             }
         }

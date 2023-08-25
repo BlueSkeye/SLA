@@ -31,7 +31,7 @@ namespace Sla.DECCORE
         /// \param worklist is the current work-list
         private static void pushConsumed(ulong val, Varnode vn, List<Varnode> worklist)
         {
-            ulong newval = (val | vn.getConsume()) & Globals.calc_mask(vn.getSize());
+            ulong newval = (val | vn.getConsume()) & Globals.calc_mask((uint)vn.getSize());
             if ((newval == vn.getConsume()) && vn.isConsumeVacuous()) return;
             vn.setConsumeVacuous();
             if (!vn.isConsumeList())
@@ -56,21 +56,18 @@ namespace Sla.DECCORE
             ulong outc = vn.getConsume();
             vn.clearConsumeList();
 
-            PcodeOp op = vn.getDef(); // Assume vn is written
+            PcodeOp op = vn.getDef() ?? throw new ApplicationException(); // Assume vn is written
 
             int sz;
             ulong a, b;
 
-            switch (op.code())
-            {
+            switch (op.code()) {
                 case OpCode.CPUI_INT_MULT:
                     b = Globals.coveringmask(outc);
-                    if (op.getIn(1).isConstant())
-                    {
+                    if (op.getIn(1).isConstant()) {
                         int leastSet = Globals.leastsigbit_set(op.getIn(1).getOffset());
-                        if (leastSet >= 0)
-                        {
-                            a = Globals.calc_mask(vn.getSize()) >> leastSet;
+                        if (leastSet >= 0) {
+                            a = Globals.calc_mask((uint)vn.getSize()) >> leastSet;
                             a &= b;
                         }
                         else
@@ -83,45 +80,46 @@ namespace Sla.DECCORE
                     break;
                 case OpCode.CPUI_INT_ADD:
                 case OpCode.CPUI_INT_SUB:
-                    a = Globals.coveringmask(outc); // Make sure value is filled out as a contiguous mask
+                    // Make sure value is filled out as a contiguous mask
+                    a = Globals.coveringmask(outc);
                     pushConsumed(a, op.getIn(0), worklist);
                     pushConsumed(a, op.getIn(1), worklist);
                     break;
                 case OpCode.CPUI_SUBPIECE:
-                    sz = op.getIn(1).getOffset();
-                    if (sz >= sizeof(ulong))    // If we are truncating beyond the precision of the consume field
-                        a = 0;          // this tells us nothing about consuming bits within the field
+                    sz = (int)op.getIn(1).getOffset();
+                    if (sz >= sizeof(ulong))
+                        // If we are truncating beyond the precision of the consume field
+                        // this tells us nothing about consuming bits within the field
+                        a = 0;
                     else
                         a = outc << (sz * 8);
-                    if ((a == 0) && (outc != 0) && (op.getIn(0).getSize() > sizeof(ulong)))
-                    {
+                    if ((a == 0) && (outc != 0) && (op.getIn(0).getSize() > sizeof(ulong))) {
                         // If the consumed mask is zero because
                         // it isn't big enough to cover the whole varnode and
                         // there are still upper bits that are consumed
-                        a = ~((ulong)0);
-                        a = a ^ (a >> 1);       // Set the highest bit possible in the mask to indicate some consumption
+                        a = ulong.MaxValue;
+                        // Set the highest bit possible in the mask to indicate some consumption
+                        a = a ^ (a >> 1);
                     }
-                    b = (outc == 0) ? 0 : ~((ulong)0);
+                    b = (outc == 0) ? 0 : ulong.MaxValue;
                     pushConsumed(a, op.getIn(0), worklist);
                     pushConsumed(b, op.getIn(1), worklist);
                     break;
                 case OpCode.CPUI_PIECE:
                     sz = op.getIn(1).getSize();
-                    if (vn.getSize() > sizeof(ulong))
-                    { // If the concatenation goes beyond the consume precision
-                        if (sz >= sizeof(ulong))
-                        {
-                            a = ~((ulong)0);    // Assume the bits not in the consume field are consumed
+                    if (vn.getSize() > sizeof(ulong)) {
+                        // If the concatenation goes beyond the consume precision
+                        if (sz >= sizeof(ulong)) {
+                            // Assume the bits not in the consume field are consumed
+                            a = ulong.MaxValue;
                             b = outc;
                         }
-                        else
-                        {
-                            a = (outc >> (sz * 8)) ^ ((~((ulong)0)) << 8 * (sizeof(ulong) - sz));
+                        else {
+                            a = (outc >> (sz * 8)) ^ ((ulong.MaxValue) << 8 * (sizeof(ulong) - sz));
                             b = outc ^ (a << (sz * 8));
                         }
                     }
-                    else
-                    {
+                    else {
                         a = outc >> (sz * 8);
                         b = outc ^ (a << (sz * 8));
                     }
@@ -130,16 +128,13 @@ namespace Sla.DECCORE
                     break;
                 case OpCode.CPUI_INDIRECT:
                     pushConsumed(outc, op.getIn(0), worklist);
-                    if (op.getIn(1).getSpace().getType() == spacetype.IPTR_IOP)
-                    {
+                    if (op.getIn(1).getSpace().getType() == spacetype.IPTR_IOP) {
                         PcodeOp indop = PcodeOp.getOpFromConst(op.getIn(1).getAddr());
-                        if (!indop.isDead())
-                        {
-                            if (indop.code() == OpCode.CPUI_COPY)
-                            {
-                                if (indop.getOut().characterizeOverlap(*op.getOut()) > 0)
-                                {
-                                    pushConsumed(~((ulong)0), indop.getOut(), worklist);   // Mark the copy as consumed
+                        if (!indop.isDead()) {
+                            if (indop.code() == OpCode.CPUI_COPY) {
+                                if (indop.getOut().characterizeOverlap(op.getOut()) > 0) {
+                                    // Mark the copy as consumed
+                                    pushConsumed(ulong.MaxValue, indop.getOut(), worklist);
                                     indop.setIndirectSource();
                                 }
                                 // If we reach here, there isn't a true block of INDIRECT (RuleIndirectCollapse will convert it to COPY)
@@ -159,14 +154,12 @@ namespace Sla.DECCORE
                     pushConsumed(outc, op.getIn(1), worklist);
                     break;
                 case OpCode.CPUI_INT_AND:
-                    if (op.getIn(1).isConstant())
-                    {
+                    if (op.getIn(1).isConstant()) {
                         ulong val = op.getIn(1).getOffset();
                         pushConsumed(outc & val, op.getIn(0), worklist);
                         pushConsumed(outc, op.getIn(1), worklist);
                     }
-                    else
-                    {
+                    else {
                         pushConsumed(outc, op.getIn(0), worklist);
                         pushConsumed(outc, op.getIn(1), worklist);
                     }
@@ -186,52 +179,53 @@ namespace Sla.DECCORE
                     pushConsumed(a, op.getIn(0), worklist);
                     break;
                 case OpCode.CPUI_INT_LEFT:
-                    if (op.getIn(1).isConstant())
-                    {
+                    if (op.getIn(1).isConstant()) {
                         sz = vn.getSize();
-                        int sa = op.getIn(1).getOffset();
-                        if (sz > sizeof(ulong))
-                        {   // If there exists bits beyond the precision of the consume field
+                        int sa = (int)op.getIn(1).getOffset();
+                        if (sz > sizeof(ulong)) {
+                            // If there exists bits beyond the precision of the consume field
                             if (sa >= 8 * sizeof(ulong))
-                                a = ~((ulong)0);    // Make sure we assume one bits where we shift in unrepresented bits
+                                // Make sure we assume one bits where we shift in unrepresented bits
+                                a = ulong.MaxValue;
                             else
-                                a = (outc >> sa) ^ ((~((ulong)0)) << (8 * sizeof(ulong) - sa));
+                                a = (outc >> sa) ^ ((ulong.MaxValue) << (8 * sizeof(ulong) - sa));
                             sz = 8 * sz - sa;
-                            if (sz < 8 * sizeof(ulong))
-                            {
-                                ulong mask = ~((ulong)0);
+                            if (sz < 8 * sizeof(ulong)) {
+                                ulong mask = ulong.MaxValue;
                                 mask <<= sz;
-                                a = a & ~mask;  // Make sure high bits that are left shifted out are not marked consumed
+                                // Make sure high bits that are left shifted out are not marked consumed
+                                a = a & ~mask;
                             }
                         }
                         else
-                            a = outc >> sa;     // Most cases just do this
-                        b = (outc == 0) ? 0 : ~((ulong)0);
+                            // Most cases just do this
+                            a = outc >> sa;
+                        b = (outc == 0) ? 0 : ulong.MaxValue;
                         pushConsumed(a, op.getIn(0), worklist);
                         pushConsumed(b, op.getIn(1), worklist);
                     }
-                    else
-                    {
-                        a = (outc == 0) ? 0 : ~((ulong)0);
+                    else {
+                        a = (outc == 0) ? 0 : ulong.MaxValue;
                         pushConsumed(a, op.getIn(0), worklist);
                         pushConsumed(a, op.getIn(1), worklist);
                     }
                     break;
                 case OpCode.CPUI_INT_RIGHT:
-                    if (op.getIn(1).isConstant())
-                    {
-                        int sa = op.getIn(1).getOffset();
-                        if (sa >= 8 * sizeof(ulong)) // If the shift is beyond the precision of the consume field
-                            a = 0;          // We know nothing about the low order consumption of the input bits
+                    if (op.getIn(1).isConstant()) {
+                        int sa = (int)op.getIn(1).getOffset();
+                        if (sa >= 8 * sizeof(ulong))
+                            // If the shift is beyond the precision of the consume field
+                            // We know nothing about the low order consumption of the input bits
+                            a = 0;
                         else
-                            a = outc << sa;     // Most cases just do this
-                        b = (outc == 0) ? 0 : ~((ulong)0);
+                            // Most cases just do this
+                            a = outc << sa;
+                        b = (outc == 0) ? 0 : ulong.MaxValue;
                         pushConsumed(a, op.getIn(0), worklist);
                         pushConsumed(b, op.getIn(1), worklist);
                     }
-                    else
-                    {
-                        a = (outc == 0) ? 0 : ~((ulong)0);
+                    else {
+                        a = (outc == 0) ? 0 : ulong.MaxValue;
                         pushConsumed(a, op.getIn(0), worklist);
                         pushConsumed(a, op.getIn(1), worklist);
                     }
@@ -242,7 +236,8 @@ namespace Sla.DECCORE
                 case OpCode.CPUI_INT_NOTEQUAL:
                     if (outc == 0)
                         a = 0;
-                    else            // Anywhere we know is zero, is not getting "consumed"
+                    else
+                        // Anywhere we know is zero, is not getting "consumed"
                         a = op.getIn(0).getNZMask() | op.getIn(1).getNZMask();
                     pushConsumed(a, op.getIn(0), worklist);
                     pushConsumed(a, op.getIn(1), worklist);
@@ -254,7 +249,7 @@ namespace Sla.DECCORE
                     pushConsumed(a, op.getIn(1), worklist);
                     a <<= (int)op.getIn(2).getOffset();
                     pushConsumed(outc & ~a, op.getIn(0), worklist);
-                    b = (outc == 0) ? 0 : ~((ulong)0);
+                    b = (outc == 0) ? 0 : ulong.MaxValue;
                     pushConsumed(b, op.getIn(2), worklist);
                     pushConsumed(b, op.getIn(3), worklist);
                     break;
@@ -265,27 +260,31 @@ namespace Sla.DECCORE
                     a &= outc;  // Consumed bits of mask
                     a <<= (int)op.getIn(1).getOffset();
                     pushConsumed(a, op.getIn(0), worklist);
-                    b = (outc == 0) ? 0 : ~((ulong)0);
+                    b = (outc == 0) ? 0 : ulong.MaxValue;
                     pushConsumed(b, op.getIn(1), worklist);
                     pushConsumed(b, op.getIn(2), worklist);
                     break;
                 case OpCode.CPUI_POPCOUNT:
                 case OpCode.CPUI_LZCOUNT:
-                    a = 16 * op.getIn(0).getSize() - 1;   // Mask for possible bits that could be set
-                    a &= outc;                  // Of the bits that could be set, which are consumed
-                    b = (a == 0) ? 0 : ~((ulong)0);     // if any consumed, treat all input bits as consumed
+                    // Mask for possible bits that could be set
+                    a = (uint)(16 * op.getIn(0).getSize() - 1);
+                    // Of the bits that could be set, which are consumed
+                    a &= outc;
+                    // if any consumed, treat all input bits as consumed
+                    b = (a == 0) ? 0 : ulong.MaxValue;
                     pushConsumed(b, op.getIn(0), worklist);
                     break;
                 case OpCode.CPUI_CALL:
                 case OpCode.CPUI_CALLIND:
-                    break;      // Call output doesn't indicate consumption of inputs
+                    // Call output doesn't indicate consumption of inputs
+                    break;
                 default:
-                    a = (outc == 0) ? 0 : ~((ulong)0); // all or nothing
+                    // all or nothing
+                    a = (outc == 0) ? 0 : ulong.MaxValue;
                     for (int i = 0; i < op.numInput(); ++i)
                         pushConsumed(a, op.getIn(i), worklist);
                     break;
             }
-
         }
 
         /// \brief Deal with unconsumed Varnodes
@@ -297,12 +296,13 @@ namespace Sla.DECCORE
         /// \return true if the Varnode was eliminated
         private static bool neverConsumed(Varnode vn, Funcdata data)
         {
-            if (vn.getSize() > sizeof(ulong)) return false; // Not enough precision to really tell
+            // Not enough precision to really tell
+            if (vn.getSize() > sizeof(ulong)) return false;
             PcodeOp op;
             IEnumerator<PcodeOp> iter = vn.beginDescend();
-            while (iter.MoveNext())
-            {
-                op = iter.Current;       // Advance before ref is removed
+            while (iter.MoveNext()) {
+                // Advance before ref is removed
+                op = iter.Current;
                 int slot = op.getSlot(vn);
                 // Replace vn with 0 whereever it is read
                 // We don't worry about putting a constant in a marker
@@ -328,19 +328,18 @@ namespace Sla.DECCORE
         private static void markConsumedParameters(FuncCallSpecs fc, List<Varnode> worklist)
         {
             PcodeOp callOp = fc.getOp();
-            pushConsumed(~((ulong)0), callOp.getIn(0), worklist);      // In all cases the first operand is fully consumed
-            if (fc.isInputLocked() || fc.isInputActive())
-            {       // If the prototype is locked in, or in active recovery
+            pushConsumed(ulong.MaxValue, callOp.getIn(0), worklist);      // In all cases the first operand is fully consumed
+            if (fc.isInputLocked() || fc.isInputActive()) {
+                // If the prototype is locked in, or in active recovery
                 for (int i = 1; i < callOp.numInput(); ++i)
-                    pushConsumed(~((ulong)0), callOp.getIn(i), worklist);  // Treat all parameters as fully consumed
+                    pushConsumed(ulong.MaxValue, callOp.getIn(i), worklist);  // Treat all parameters as fully consumed
                 return;
             }
-            for (int i = 1; i < callOp.numInput(); ++i)
-            {
+            for (int i = 1; i < callOp.numInput(); ++i) {
                 Varnode vn = callOp.getIn(i);
                 ulong consumeVal;
                 if (vn.isAutoLive())
-                    consumeVal = ~((ulong)0);
+                    consumeVal = ulong.MaxValue;
                 else
                     consumeVal = Globals.minimalmask(vn.getNZMask());
                 int bytesConsumed = fc.getInputBytesConsumed(i);
@@ -360,7 +359,7 @@ namespace Sla.DECCORE
         private static ulong gatherConsumedReturn(Funcdata data)
         {
             if (data.getFuncProto().isOutputLocked() || data.getActiveOutput() != (ParamActive)null)
-                return ~((ulong)0);
+                return ulong.MaxValue;
             IEnumerator<PcodeOp> iter = data.beginOp(OpCode.CPUI_RETURN);
             ulong consumeVal = 0;
             while (iter.MoveNext()) {
@@ -394,15 +393,13 @@ namespace Sla.DECCORE
             if (vn.isConstant()) return true;
             if (!vn.isWritten()) return false;
             PcodeOp op = vn.getDef();
-            while (op.code() == OpCode.CPUI_COPY)
-            {
+            while (op.code() == OpCode.CPUI_COPY) {
                 vn = op.getIn(0);
                 if (vn.isConstant()) return true;
                 if (!vn.isWritten()) return false;
                 op = vn.getDef();
             }
-            switch (op.code())
-            {
+            switch (op.code()) {
                 case OpCode.CPUI_INT_ADD:
                     if (addCount > 0) return false;
                     if (!isEventualConstant(op.getIn(0), addCount + 1, loadCount))
@@ -471,7 +468,6 @@ namespace Sla.DECCORE
             PcodeOp op;
             Varnode vn;
             ulong returnConsume;
-            List<Varnode> worklist;
             AddrSpaceManager manage = data.getArch();
             AddrSpace spc;
 
@@ -487,15 +483,16 @@ namespace Sla.DECCORE
             }
 
             // Set pre-live registers
+            List<Varnode> worklist = new List<Varnode>();
             for (i = 0; i < manage.numSpaces(); ++i) {
                 spc = manage.getSpace(i);
                 if (spc == (AddrSpace)null || !spc.doesDeadcode()) continue;
                 if (data.deadRemovalAllowed(spc)) continue; // Mark consumed if we have NOT heritaged
                 viter = data.beginLoc(spc);
-                endviter = data.endLoc(spc);
-                while (viter != endviter) {
-                    vn = *viter++;
-                    pushConsumed(~((ulong)0), vn, worklist);
+                // endviter = data.endLoc(spc);
+                while (viter.MoveNext()) {
+                    vn = viter.Current;
+                    pushConsumed(ulong.MaxValue, vn, worklist);
                 }
             }
 
@@ -508,52 +505,47 @@ namespace Sla.DECCORE
                     // Postpone setting consumption on CALL and CALLIND inputs
                     if (op.isCallWithoutSpec()) {
                         for (i = 0; i < op.numInput(); ++i)
-                            pushConsumed(~((ulong)0), op.getIn(i), worklist);
+                            pushConsumed(ulong.MaxValue, op.getIn(i), worklist);
                     }
                     if (!op.isAssignment())
                         continue;
                     if (op.holdOutput())
-                        pushConsumed(~((ulong)0), op.getOut(), worklist);
+                        pushConsumed(ulong.MaxValue, op.getOut(), worklist);
                 }
                 else if (!op.isAssignment())
                 {
                     OpCode opc = op.code();
-                    if (opc == OpCode.CPUI_RETURN)
-                    {
-                        pushConsumed(~((ulong)0), op.getIn(0), worklist);
+                    if (opc == OpCode.CPUI_RETURN) {
+                        pushConsumed(ulong.MaxValue, op.getIn(0), worklist);
                         for (i = 1; i < op.numInput(); ++i)
                             pushConsumed(returnConsume, op.getIn(i), worklist);
                     }
-                    else if (opc == OpCode.CPUI_BRANCHIND)
-                    {
-                        JumpTable* jt = data.findJumpTable(op);
+                    else if (opc == OpCode.CPUI_BRANCHIND) {
+                        JumpTable? jt = data.findJumpTable(op);
                         ulong mask;
                         if (jt != (JumpTable)null)
                             mask = jt.getSwitchVarConsume();
                         else
-                            mask = ~((ulong)0);
+                            mask = ulong.MaxValue;
                         pushConsumed(mask, op.getIn(0), worklist);
                     }
-                    else
-                    {
+                    else {
                         for (i = 0; i < op.numInput(); ++i)
-                            pushConsumed(~((ulong)0), op.getIn(i), worklist);
+                            pushConsumed(ulong.MaxValue, op.getIn(i), worklist);
                     }
                     // Postpone setting consumption on RETURN input
                     continue;
                 }
-                else
-                {
-                    for (i = 0; i < op.numInput(); ++i)
-                    {
-                        vn = op.getIn(i);
+                else {
+                    for (i = 0; i < op.numInput(); ++i) {
+                        vn = op.getIn(i) ?? throw new ApplicationException();
                         if (vn.isAutoLive())
-                            pushConsumed(~((ulong)0), vn, worklist);
+                            pushConsumed(ulong.MaxValue, vn, worklist);
                     }
                 }
-                vn = op.getOut();
+                vn = op.getOut() ?? throw new ApplicationException();
                 if (vn.isAutoLive())
-                    pushConsumed(~((ulong)0), vn, worklist);
+                    pushConsumed(ulong.MaxValue, vn, worklist);
             }
 
             // Mark consumption of call parameters
@@ -564,29 +556,27 @@ namespace Sla.DECCORE
             while (!worklist.empty())
                 propagateConsumed(worklist);
 
-            if (lastChanceLoad(data, worklist))
-            {
+            if (lastChanceLoad(data, worklist)) {
                 while (!worklist.empty())
                     propagateConsumed(worklist);
             }
 
-            for (i = 0; i < manage.numSpaces(); ++i)
-            {
+            for (i = 0; i < manage.numSpaces(); ++i) {
                 spc = manage.getSpace(i);
                 if (spc == (AddrSpace)null || !spc.doesDeadcode()) continue;
-                if (!data.deadRemovalAllowed(spc)) continue; // Don't eliminate if we haven't heritaged
+                // Don't eliminate if we haven't heritaged
+                if (!data.deadRemovalAllowed(spc)) continue;
                 viter = data.beginLoc(spc);
-                endviter = data.endLoc(spc);
+                // endviter = data.endLoc(spc);
                 int changecount = 0;
-                while (viter != endviter)
-                {
-                    vn = *viter++;      // Advance iterator BEFORE (possibly) deleting varnode
+                while (viter.MoveNext()) {
+                    vn = viter.Current;      // Advance iterator BEFORE (possibly) deleting varnode
                     if (!vn.isWritten()) continue;
                     bool vacflag = vn.isConsumeVacuous();
                     vn.clearConsumeList();
                     vn.clearConsumeVacuous();
-                    if (!vacflag)
-                    {       // Not even vacuously consumed
+                    if (!vacflag) {
+                        // Not even vacuously consumed
                         op = vn.getDef();
                         changecount += 1;
                         if (op.isCall())
@@ -594,19 +584,18 @@ namespace Sla.DECCORE
                         else
                             data.opDestroy(op); // Otherwise completely remove the op
                     }
-                    else
-                    {
+                    else {
                         // Check for values that are never used, but bang around
                         // for a while
-                        if (vn.getConsume() == 0)
-                        {
+                        if (vn.getConsume() == 0) {
                             if (neverConsumed(vn, data))
                                 changecount += 1;
                         }
                     }
                 }
                 if (changecount != 0)
-                    data.seenDeadcode(spc); // Record that we have seen dead code for this space
+                    // Record that we have seen dead code for this space
+                    data.seenDeadcode(spc);
             }
 #if OPACTION_DEBUG
             data.debugModPrint(getName()); // Print dead ops before freeing them

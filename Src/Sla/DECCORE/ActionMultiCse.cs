@@ -81,7 +81,7 @@ namespace Sla.DECCORE
                         if (in2.isWritten() && (in2.getDef().code() == OpCode.CPUI_COPY))
                             in2 = in2.getDef().getIn(0);
                         if (in1 == in2) continue;
-                        if (0 != functionalEqualityLevel(in1, in2, buf1, buf2))
+                        if (0 != PcodeOpBank.functionalEqualityLevel(in1, in2, buf1, buf2))
                             break;
                     }
                     if (j == numinput)      // We have found a redundancy

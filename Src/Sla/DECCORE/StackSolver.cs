@@ -124,19 +124,17 @@ namespace Sla.DECCORE
         {
             VarnodeData spacebasedata = id.getSpacebase(spcbase);
             spacebase = new Address(spacebasedata.space, spacebasedata.offset);
-            VarnodeLocSet.Enumerator begiter, enditer;
 
-            begiter = data.beginLoc(spacebasedata.size, spacebase);
-            enditer = data.endLoc(spacebasedata.size, spacebase);
+            VarnodeLocSet.Enumerator begiter = data.beginLoc(spacebasedata.size, spacebase);
+            // VarnodeLocSet.Enumerator enditer = data.endLoc(spacebasedata.size, spacebase);
 
-            while (begiter != enditer) {
+            while (begiter.MoveNext()) {
                 // All instances of the spacebase
-                if ((*begiter).isFree()) {
+                if (begiter.Current.isFree()) {
                     break;
                 }
-                vnlist.Add(*begiter);
+                vnlist.Add(begiter.Current);
                 companion.Add(-1);
-                ++begiter;
             }
             missedvariables = 0;
             if (0 == vnlist.Count) {
@@ -172,7 +170,7 @@ namespace Sla.DECCORE
                     iter = lower_bound(vnlist.begin(), vnlist.end(), othervn, Varnode::comparePointers);
                     eqn.var1 = i;
                     eqn.var2 = iter - vnlist.begin();
-                    eqn.rhs = constvn.getOffset();
+                    eqn.rhs = (int)constvn.getOffset();
                     eqs.Add(eqn);
                 }
                 else if (op.code() == OpCode.CPUI_COPY) {

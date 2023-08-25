@@ -71,7 +71,7 @@ namespace Sla.DECCORE
         private bool processVarnode(Funcdata data, Varnode vn, LanedRegister lanedRegister, int mode)
         {
             // Lanes we are going to try, initialized to no lanes
-            LanedRegister checkLanes;
+            LanedRegister checkLanes = new LanedRegister();
             bool allowDowncast = (mode > 0);
             if (mode < 2) {
                 collectLaneSizes(vn, lanedRegister, checkLanes);
@@ -79,8 +79,9 @@ namespace Sla.DECCORE
             else {
                 checkLanes.addLaneSize(4);      // Default lane size
             }
-            foreach (LanedRegister iter in checkLanes) {
-                int curSize = iter;
+            IEnumerator<int> laneIterator = checkLanes.GetEnumerator();
+            while (laneIterator.MoveNext()) {
+                int curSize = laneIterator.Current;
                 // Lane scheme dictated by curSize
                 LaneDescription description = new LaneDescription(lanedRegister.getWholeSize(),
                     curSize);
@@ -97,7 +98,7 @@ namespace Sla.DECCORE
 
         /// Constructor
         public ActionLaneDivide(string g)
-            : base(rule_onceperfunc,"lanedivide", g)
+            : base(ruleflags.rule_onceperfunc,"lanedivide", g)
         {
         }
 
@@ -115,19 +116,18 @@ namespace Sla.DECCORE
                     LanedRegister lanedReg = iter.Current.Value;
                     Address addr = iter.Current.Key.getAddr();
                     uint sz = iter.Current.Key.size;
-                    IEnumerator<Varnode> viter = data.beginLoc(sz, addr);
-                    IEnumerator<Varnode> venditer = data.endLoc(sz, addr);
+                    IEnumerator<Varnode> viter = data.beginLoc((int)sz, addr);
+                    // IEnumerator<Varnode> venditer = data.endLoc(sz, addr);
                     bool allVarnodesProcessed = true;
-                    while (viter != venditer) {
+                    while (viter.MoveNext()) {
                         Varnode vn = viter.Current;
                         if (processVarnode(data, vn, lanedReg, mode)) {
-                            viter = data.beginLoc((int)sz, addr);
                             // Recalculate bounds
-                            venditer = data.endLoc((int)sz, addr);
+                            viter = data.beginLoc((int)sz, addr);
+                            // venditer = data.endLoc((int)sz, addr);
                             allVarnodesProcessed = true;
                         }
                         else {
-                            ++viter;
                             allVarnodesProcessed = false;
                         }
                     }

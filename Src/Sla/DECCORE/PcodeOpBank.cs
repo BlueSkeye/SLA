@@ -529,7 +529,7 @@ namespace Sla.DECCORE
         {
             Varnode[] buf1 = new Varnode[2];
             Varnode[] buf2 = new Varnode[2];
-            return (functionalEqualityLevel(vn1, vn2, buf1, buf2) == 0);
+            return (PcodeOpBank.functionalEqualityLevel(vn1, vn2, buf1, buf2) == 0);
         }
 
         /// \brief Return true if vn1 and vn2 are verifiably different values

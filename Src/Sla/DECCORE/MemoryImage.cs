@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -35,15 +31,15 @@ namespace Sla.DECCORE
             try
             {
                 byte* ptr = (byte*)&res;
-                ptr += (HOST_ENDIAN == 1) ? (sizeof(ulong) - getWordSize()) : 0;
-                loader.loadFill(ptr, getWordSize(), Address(spc, addr));
+                ptr += (Globals.HOST_ENDIAN == 1) ? (sizeof(ulong) - getWordSize()) : 0;
+                loader.loadFill(ptr, getWordSize(), new Address(spc, addr));
             }
             catch (DataUnavailError err)
             {
                 // Pages not mapped in the load image, are assumed to be zero
                 res = 0;
             }
-            if ((HOST_ENDIAN == 1) != spc.isBigEndian())
+            if ((Globals.HOST_ENDIAN == 1) != spc.isBigEndian())
                 res = Globals.byte_swap(res, getWordSize());
             return res;
         }
