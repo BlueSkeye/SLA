@@ -1,10 +1,6 @@
 ﻿using Sla.CORE;
 using Sla.EXTRA;
-
-using PcodeOpTree = System.Collections.Generic.Dictionary<Sla.CORE.SeqNum, Sla.DECCORE.PcodeOp>;
-using ScopeMap = System.Collections.Generic.Dictionary<ulong, Sla.DECCORE.Scope>;
-using VarnodeLocSet = System.Collections.Generic.SortedSet<Sla.DECCORE.Varnode>; // VarnodeCompareLocDef : A set of Varnodes sorted by location (then by definition)
-using VarnodeDefSet = System.Collections.Generic.SortedSet<Sla.DECCORE.Varnode>; // VarnodeDefSet : A set of Varnodes sorted by definition (then location)
+using System.Collections.Generic;
 
 namespace Sla.DECCORE
 {
@@ -121,8 +117,8 @@ namespace Sla.DECCORE
             if (!vn.isMapped()) {
                 // One more chance to find entry, now that we know usepoint
                 Varnode.varnode_flags vflags;
-                SymbolEntry? entry = localmap.queryProperties(vn.getAddr(), vn.getSize(), vn.getUsePoint(this),
-                    out vflags);
+                SymbolEntry? entry = localmap.queryProperties(vn.getAddr(), vn.getSize(),
+                    vn.getUsePoint(this), out vflags);
                 if (entry != (SymbolEntry)null) // Let entry try to force type
                     vn.setSymbolProperties(entry);
                 else
@@ -193,66 +189,74 @@ namespace Sla.DECCORE
             return vn.getSymbolEntry().getSymbol();
         }
 
-        /// \brief Update Varnode properties based on (new) Symbol information
+        /// \brief Update properties (and the data-type) for a set of Varnodes associated with one Symbol
         ///
-        /// Boolean properties \b addrtied, \b addrforce, and \b nolocalalias
-        /// for Varnodes are updated based on new Symbol information they map to.
-        /// The caller can elect to update data-type information as well, where Varnodes
-        /// and their associated HighVariables have their data-type finalized based symbols.
-        /// \param lm is the Symbol scope within which to search for mapped Varnodes
-        /// \param updateDatatypes is \b true if the caller wants to update data-types
-        /// \param unmappedAliasCheck is \b true if an alias check should be performed on unmapped Varnodes
-        /// \return \b true if any Varnode was updated
-        private bool syncVarnodesWithSymbol(ScopeLocal lm, bool updateDatatypes, bool unmappedAliasCheck)
+        /// The set of Varnodes with the same size and address all have their boolean properties
+        /// updated to the given values. The set is specified by providing an iterator reference
+        /// to the first Varnode in the set assuming a 'loc' ordering. This iterator is updated
+        /// to point to the first Varnode after the affected set.
+        ///
+        /// The only properties that can be effectively changed with this
+        /// routine are \b mapped, \b addrtied, \b addrforce, and \b nolocalalias.
+        /// HighVariable splits must occur if \b addrtied is cleared.
+        ///
+        /// If the given data-type is non-null, an attempt is made to update all the Varnodes
+        /// to this data-type. The \b typelock and \b namelock properties cannot be changed here.
+        /// \param iter points to the first Varnode in the set
+        /// \param fl holds the new set of boolean properties
+        /// \param ct is the given data-type to set (or NULL)
+        /// \return \b true if at least one Varnode was modified
+        private bool syncVarnodesWithSymbol(VarnodeLocSet.Enumerator iter,
+            Varnode.varnode_flags fl, Datatype ct)
         {
+            Varnode.varnode_flags vnflags;
             bool updateoccurred = false;
-            IEnumerator<Varnode> iter, enditer;
-            Datatype? ct;
-            SymbolEntry? entry;
-            Varnode.varnode_flags fl;
+            // These are the flags we are going to try to update
+            Varnode.varnode_flags mask = Varnode.varnode_flags.mapped;
+            // We take special care with the addrtied flag
+            // as we cannot set it here if it is clear
+            // We can CLEAR but not SET the addrtied flag
+            // If addrtied is cleared, so should addrforce
+            if ((fl & Varnode.varnode_flags.addrtied) == 0) // Is the addrtied flags cleared
+                mask |= Varnode.varnode_flags.addrtied | Varnode.varnode_flags.addrforce;
+            // We can set the nolocalalias flag, but not clear it
+            // If nolocalalias is set, then addrforce should be cleared
+            if ((fl & Varnode.varnode_flags.nolocalalias) != 0)
+                mask |= Varnode.varnode_flags.nolocalalias | Varnode.varnode_flags.addrforce;
+            fl &= mask;
 
-            iter = vbank.beginLoc(lm.getSpaceId());
-            enditer = vbank.endLoc(lm.getSpaceId());
-            while (iter != enditer) {
-                Varnode vnexemplar = *iter;
-                entry = lm.findOverlap(vnexemplar.getAddr(), vnexemplar.getSize());
-                ct = (Datatype)null;
-                if (entry != (SymbolEntry)null) {
-                    fl = entry.getAllFlags();
-                    if (entry.getSize() >= vnexemplar.getSize()) {
-                        if (updateDatatypes) {
-                            ct = entry.getSizedType(vnexemplar.getAddr(), vnexemplar.getSize());
-                            if (ct != (Datatype)null && ct.getMetatype() == type_metatype.TYPE_UNKNOWN)
-                                ct = (Datatype)null;
-                        }
-                    }
-                    else {
-                        // Overlapping but not containing
-                        // This is usual indicative of a small locked symbol
-                        // getting put in a bigger register
-                        // Don't try to figure out type
-                        // Don't keep typelock and namelock
-                        fl &= ~(Varnode.varnode_flags.typelock | Varnode.varnode_flags.namelock);
-                        // we do particularly want to keep the nolocalalias
+            Varnode vn = iter.Current;
+            IEnumerator<Varnode> enditer = vbank.endLoc(vn.getSize(), vn.getAddr());
+            do {
+                vn = iter.Current;
+                if (vn.isFree()) continue;
+                vnflags = vn.getFlags();
+                if (vn.mapentry != (SymbolEntry)null) {
+                    // If there is already an attached SymbolEntry (dynamic)
+                    // Make sure 'mapped' bit is unchanged
+                    Varnode.varnode_flags localMask = mask & ~Varnode.varnode_flags.mapped;
+                    Varnode.varnode_flags localFlags = fl & localMask;
+                    if ((vnflags & localMask) != localFlags) {
+                        updateoccurred = true;
+                        vn.setFlags(localFlags);
+                        vn.clearFlags((~localFlags) & localMask);
                     }
                 }
-                else {
-                    // Could not find any symbol
-                    if (lm.inScope(vnexemplar.getAddr(), vnexemplar.getSize(), vnexemplar.getUsePoint(this))) {
-                        // This is technically an error, there should be some
-                        // kind of symbol, if we are in scope
-                        fl = Varnode.varnode_flags.mapped | Varnode.varnode_flags.addrtied;
-                    }
-                    else if (unmappedAliasCheck) {
-                        // If the varnode is not in scope, check if we should treat as unaliased
-                        fl = lm.isUnmappedUnaliased(vnexemplar) ? Varnode.varnode_flags.nolocalalias : 0;
-                    }
-                    else
-                        fl = 0;
-                }
-                if (syncVarnodesWithSymbol(iter, fl, ct))
+                else if ((vnflags & mask) != fl) {
+                    // We have a change
                     updateoccurred = true;
-            }
+                    vn.setFlags(fl);
+                    vn.clearFlags((~fl) & mask);
+                }
+                if (ct != (Datatype)null) {
+                    if (vn.updateType(ct, false, false))
+                        updateoccurred = true;
+                    // Permanently set the data-type on the HighVariable
+                    vn.getHigh().finalizeDatatype(ct);
+                }
+                // TODO Should compare with enditer current instance.
+                throw new NotImplementedException();
+            } while (iter.MoveNext());
             return updateoccurred;
         }
 
@@ -1113,16 +1117,18 @@ namespace Sla.DECCORE
         /// \param findcall is \b true if the caller expects to see CALL or CALLIND
         /// \param findreturn is \b true if the caller expects to see RETURN
         /// \return the first branching PcodeOp that matches the criteria or NULL
-        private static PcodeOp? findPrimaryBranch(PcodeOpTree::const_iterator iter, PcodeOpTree::const_iterator enditer,
-            bool findbranch, bool findcall, bool findreturn)
+        private static PcodeOp? findPrimaryBranch(IEnumerator<PcodeOp> iter,
+            /*PcodeOpTree.Enumerator enditer,*/ bool findbranch, bool findcall,
+            bool findreturn)
         {
-            while (iter != enditer) {
-                PcodeOp op = (*iter).second;
+            while (iter.MoveNext()) {
+                PcodeOp op = iter.Current;
                 switch (op.code()) {
                     case OpCode.CPUI_BRANCH:
                     case OpCode.CPUI_CBRANCH:
                         if (findbranch) {
-                            if (!op.getIn(0).isConstant()) // Make sure this is not an internal branch
+                            if (!op.getIn(0).isConstant())
+                                // Make sure this is not an internal branch
                                 return op;
                         }
                         break;
@@ -1156,7 +1162,7 @@ namespace Sla.DECCORE
         {
             baseaddr = addr;
             funcp = new FuncProto();
-            vbank = new VarnodeBank(conf.getArch());
+            vbank = new VarnodeBank(scope.getArch());
             heritage = new Heritage(this);
             covermerge = new Merge(this);
             // Initialize high-level properties of
@@ -1594,8 +1600,8 @@ namespace Sla.DECCORE
         /// \param type is the Override type
         public void overrideFlow(Address addr, Override.Branching type)
         {
-            PcodeOpTree::const_iterator iter = beginOp(addr);
-            PcodeOpTree::const_iterator enditer = endOp(addr);
+            PcodeOpTree.Enumerator iter = beginOp(addr);
+            PcodeOpTree.Enumerator enditer = endOp(addr);
 
             PcodeOp? op = (PcodeOp)null;
             if (type == Override.Branching.BRANCH)
@@ -1654,7 +1660,8 @@ namespace Sla.DECCORE
         /// \param addr is the address at the point of injection
         /// \param bl is the given basic block holding the new ops
         /// \param iter indicates the point of insertion
-        public void doLiveInject(InjectPayload payload, Address addr, BlockBasic bl, IEnumerator<PcodeOp> pos)
+        public void doLiveInject(InjectPayload payload, Address addr, BlockBasic bl,
+            LinkedListNode<PcodeOp>? iter)
         {
             PcodeEmitFd emitter = new PcodeEmitFd();
             InjectContext context = glb.pcodeinjectlib.getCachedContext();
@@ -1714,12 +1721,9 @@ namespace Sla.DECCORE
         /// \param s is the output stream
         public void printVarnodeTree(TextWriter s)
         {
-            VarnodeDefSet::const_iterator iter, enditer;
-
-            iter = vbank.beginDef();
-            enditer = vbank.endDef();
-            while (iter != enditer) {
-                Varnode vn = *iter++;
+            IEnumerator<Varnode> iter = vbank.beginDef();
+            while (iter.MoveNext()) {
+                Varnode vn = iter.Current;
                 vn.printInfo(s);
             }
         }
@@ -2478,8 +2482,8 @@ namespace Sla.DECCORE
 
             if (vn.isInput()) return vn;   // Already an input
                                             // First we check if it overlaps any other varnode
-            VarnodeDefSet::const_iterator iter;
-            iter = vbank.beginDef(Varnode.varnode_flags.input, vn.getAddr() + vn.getSize());
+            IEnumerator<Varnode> iter =
+                vbank.beginDef(Varnode.varnode_flags.input, vn.getAddr() + vn.getSize());
 
             // Iter points at first varnode AFTER vn
             if (iter != vbank.beginDef()) {
@@ -2518,11 +2522,11 @@ namespace Sla.DECCORE
         {
             Address endaddr = addr + (sz - 1);
             List<Varnode> inlist = new List<Varnode>();
-            VarnodeDefSet::const_iterator iter, enditer;
-            iter = vbank.beginDef(Varnode.varnode_flags.input, addr);
-            enditer = vbank.endDef(Varnode.varnode_flags.input, endaddr);
-            while (iter != enditer)
-            {
+            VarnodeDefSet.Enumerator iter =
+                vbank.beginDef(Varnode.varnode_flags.input, addr);
+            VarnodeDefSet.Enumerator enditer =
+                vbank.endDef(Varnode.varnode_flags.input, endaddr);
+            while (iter != enditer) {
                 Varnode vn = iter.Current;
                 ++iter;
                 if (vn.getOffset() + (uint)(vn.getSize() - 1) > endaddr.getOffset())
@@ -2570,23 +2574,26 @@ namespace Sla.DECCORE
         /// \param vn is the given Varnode
         /// \param sz is used to pass back the size of the resulting range
         /// \return the starting address of the resulting range
-        public Address findDisjointCover(Varnode vn, int sz)
+        public Address findDisjointCover(Varnode vn, out int sz)
         {
             Address addr = vn.getAddr();
             Address endaddr = addr + vn.getSize();
-            IEnumerator<Varnode> iter = vn.lociter;
+            // IEnumerator<Varnode> iter = vn.lociter;
+            IEnumerator<Varnode> iter = vbank.beginReverseLoc(vn);
 
-            while (iter != beginLoc()) {
-                --iter;
+            // Skip current varnode itself.
+            if (!iter.MoveNext()) throw new ApplicationException();
+            while (iter.MoveNext()) {
                 Varnode curvn = iter.Current;
                 Address curEnd = curvn.getAddr() + curvn.getSize();
                 if (curEnd <= addr) break;
                 addr = curvn.getAddr();
             }
-            iter = vn.lociter;
-            while (iter != endLoc()) {
-                Varnode curvn = iter;
-                ++iter;
+            iter = vbank.beginLoc(vn);
+            // Skip current varnode itself.
+            if (!iter.MoveNext()) throw new ApplicationException();
+            while (iter.MoveNext()) {
+                Varnode curvn = iter.Current;
                 if (endaddr <= curvn.getAddr()) break;
                 endaddr = curvn.getAddr() + curvn.getSize();
             }
@@ -2663,14 +2670,14 @@ namespace Sla.DECCORE
 
         /// \brief Given start, return maximal range of overlapping Varnodes
         public Varnode.varnode_flags overlapLoc(VarnodeLocSet.Enumerator iter,
-            List<VarnodeLocSet.Enumerator> bounds)
+            List<IEnumerator<VarnodeLocSet>> bounds)
             => vbank.overlapLoc(iter, bounds);
 
         /// \brief Start of all Varnodes sorted by definition address
         public IEnumerator<Varnode> beginDef() => vbank.beginDef();
 
-        /// \brief End of all Varnodes sorted by definition address
-        public IEnumerator<Varnode> endDef() => vbank.endDef();
+        //// End of all Varnodes sorted by definition address
+        //public IEnumerator<Varnode> endDef() => vbank.endDef();
 
         /// \brief Start of Varnodes with a given definition property
         public IEnumerator<Varnode> beginDef(Varnode.varnode_flags fl) => vbank.beginDef(fl);
@@ -3130,7 +3137,7 @@ namespace Sla.DECCORE
                         // getting put in a bigger register
                         // Don't try to figure out type
                         // Don't keep typelock and namelock
-                        fl &= ~(Varnode.varnode_flags.typelock | Varnode.varnode_flagsnamelock);
+                        fl &= ~(Varnode.varnode_flags.typelock | Varnode.varnode_flags.namelock);
                         // we do particularly want to keep the nolocalalias
                     }
                 }
@@ -3315,10 +3322,8 @@ namespace Sla.DECCORE
         /// isIndirectOnly() returns \b true.
         public void markIndirectOnly()
         {
-            VarnodeDefSet::const_iterator iter, enditer;
-
-            iter = beginDef(Varnode.varnode_flags.input);
-            enditer = endDef(Varnode.varnode_flags.input);
+            VarnodeDefSet.Enumerator iter = beginDef(Varnode.varnode_flags.input);
+            VarnodeDefSet.Enumerator enditer = endDef(Varnode.varnode_flags.input);
             for (; iter != enditer; ++iter) {
                 // Loop over all inputs
                 Varnode vn = iter.Current;
@@ -3449,6 +3454,21 @@ namespace Sla.DECCORE
                     if (vn.isFree())
                         vbank.destroy(vn);
                 }
+            }
+        }
+
+        internal IEnumerator<Varnode> GetLocationEnumerator(Varnode? startsWith,
+            bool reverse = false)
+        {
+            if (startsWith == null)  {
+                return reverse
+                    ? vbank.beginReverseLoc()
+                    : vbank.beginLoc();
+            }
+            else {
+                return reverse
+                    ? vbank.beginReverseLoc(startsWith)
+                    : vbank.beginLoc(startsWith);
             }
         }
 
@@ -4122,7 +4142,7 @@ namespace Sla.DECCORE
             if (opactdbg_active)
                 debugModCheck(op);
 #endif
-            obank.changeOpcode(op, glb.inst[opc]);
+            obank.changeOpcode(op, glb.inst[(int)opc]);
         }
 
         /// Mark given OpCode.CPUI_RETURN op as a \e special halt

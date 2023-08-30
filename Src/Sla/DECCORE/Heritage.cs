@@ -3,7 +3,6 @@
 /// Container holding the stack system for the renaming algorithm.  Every disjoint address
 /// range (indexed by its initial address) maps to its own Varnode stack.
 using VariableStack = System.Collections.Generic.Dictionary<Sla.CORE.Address, System.Collections.Generic.List<Sla.DECCORE.Varnode>>;
-using VarnodeLocSet = System.Collections.Generic.SortedSet<Sla.DECCORE.Varnode>; // VarnodeCompareLocDef : A set of Varnodes sorted by location (then by definition)
 
 namespace Sla.DECCORE
 {

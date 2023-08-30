@@ -1,7 +1,4 @@
 ﻿using Sla.CORE;
-using System.Collections.Generic;
-
-using PcodeOpTree = System.Collections.Generic.Dictionary<Sla.CORE.SeqNum, Sla.DECCORE.PcodeOp>;
 
 namespace Sla.DECCORE
 {

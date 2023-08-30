@@ -1,7 +1,5 @@
 ﻿using Sla.CORE;
 
-using PcodeOpTree = System.Collections.Generic.Dictionary<Sla.CORE.SeqNum, Sla.DECCORE.PcodeOp>;
-
 namespace Sla.DECCORE
 {
     /// \brief A class for sorting comments into and within basic blocks
@@ -29,7 +27,7 @@ namespace Sla.DECCORE
         }
 
         /// \brief The sorting key for placing a Comment within a specific basic block
-        private struct Subsort
+        private class Subsort
         {
             // Either the basic block index or -1 for a function header
             internal int index;
@@ -68,21 +66,47 @@ namespace Sla.DECCORE
                 index = i;
                 order = ord;
             }
+
+            internal class Comparer : IComparer<Subsort>
+            {
+                internal static Comparer Instance = new Comparer();
+
+                private Comparer() { }
+
+                /// \brief Compare comments based on basic block, then position within the block
+                /// \param op2 is the other key to compare with \b this
+                /// \return \b true if \b this gets ordered before the other key
+                public int Compare(Subsort? x, Subsort? y)
+                {
+                    if (null == x) throw new ArgumentNullException();
+                    if (null == y) throw new ArgumentNullException();
+                    if (x.index == y.index) {
+                        return (x.order == y.order)
+                            ? (x.pos.CompareTo(y.pos))
+                            : (x.order.CompareTo(y.order));
+                    }
+                    return x.index.CompareTo(y.index);
+                }
+            }
         }
 
         /// Comments for the current function, sorted by block
-        private Dictionary<Subsort, Comment> commmap;
+        private SortedDictionary<Subsort, Comment> commmap =
+            new SortedDictionary<Subsort, Comment>(Subsort.Comparer.Instance);
 
-        private /*mutable*/ Dictionary<Subsort, Comment >.Enumerator start;  ///< Iterator to current comment being walked
+        // Iterator to current comment being walked
+        private /*mutable*/ Dictionary<Subsort, Comment >.Enumerator start;
 
-        private Dictionary<Subsort, Comment>.Enumerator stop;        ///< Last comment in current set being walked
-        
-        private Dictionary<Subsort, Comment>.Enumerator opstop;  ///< Statement landmark within current set of comments
+        // Last comment in current set being walked
+        private Dictionary<Subsort, Comment>.Enumerator stop;
 
-        /// True if unplaced comments should be displayed (in the header)
+        // Statement landmark within current set of comments
+        private Dictionary<Subsort, Comment>.Enumerator opstop;
+
+        // True if unplaced comments should be displayed (in the header)
         private bool displayUnplacedComments;
 
-        /// Establish sorting key for a Comment
+        // Establish sorting key for a Comment
         /// Figure out position of given Comment and initialize its key.
         /// \param subsort is a reference to the key to be initialized
         /// \param comm is the given Comment
@@ -207,7 +231,7 @@ namespace Sla.DECCORE
                 pos = 0
             };
             start = commmap.lower_bound(subsort);
-            subsort.order = 0xffffffff;
+            unchecked { subsort.order = (HeaderCommentFlag)0xffffffff; }
             subsort.pos = 0xffffffff;
             stop = commmap.upper_bound(subsort);
         }
@@ -228,7 +252,7 @@ namespace Sla.DECCORE
             }
             Subsort subsort = new Subsort() {
                 index = op.getParent().getIndex(),
-                order = (uint)op.getSeqNum().getOrder(),
+                order = (HeaderCommentFlag)op.getSeqNum().getOrder(),
                 pos = 0xffffffff
             };
             opstop = commmap.upper_bound(subsort);
@@ -237,7 +261,7 @@ namespace Sla.DECCORE
         /// Prepare to walk comments in the header
         /// Header comments are grouped together. Set up iterators.
         /// \param headerType selects either \b header_basic or \b header_unplaced comments
-        public void setupHeader(uint headerType)
+        public void setupHeader(HeaderCommentFlag headerType)
         {
             Subsort subsort = new Subsort() {
                 index = -1,

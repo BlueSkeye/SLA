@@ -173,7 +173,7 @@ namespace Sla.DECCORE
             if (outparam.getAddress().isInvalid())
                 addressesdetermined = false;
 
-            uint elemId = decoder.openElement(ElementId.ELEM_INTERNALLIST);
+            ElementId elemId = decoder.openElement(ElementId.ELEM_INTERNALLIST);
             while (true) {
                 // This is only the input params
                 uint subId = decoder.openElement();        // <retparam> or <param>

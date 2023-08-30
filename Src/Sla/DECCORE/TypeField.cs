@@ -25,7 +25,7 @@ namespace Sla.DECCORE
         /// \param typegrp is the TypeFactory for parsing data-type info
         public TypeField(Sla.CORE.Decoder decoder, TypeFactory typegrp)
         {
-            uint elemId = decoder.openElement(ElementId.ELEM_FIELD);
+            ElementId elemId = decoder.openElement(ElementId.ELEM_FIELD);
             ident = -1;
             offset = -1;
             while(true)

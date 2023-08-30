@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Sla.DECCORE
 {
     /// \brief Compare two Varnode pointers by location then definition
@@ -36,8 +31,7 @@ namespace Sla.DECCORE
             else if (f1 == 0)
                 // both are free
                 //    return (a < b);		// compare pointers
-                (a.getCreateIndex().CompareTo(b.getCreateIndex());
-
+                return a.getCreateIndex().CompareTo(b.getCreateIndex());
             return 0;
         }
     }

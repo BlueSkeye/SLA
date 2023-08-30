@@ -47,14 +47,14 @@ namespace Sla.DECCORE
 
         public override void decode(Sla.CORE.Decoder decoder)
         {
-            uint elemId = decoder.openElement(ElementId.ELEM_JUMPASSIST);
+            ElementId elemId = decoder.openElement(ElementId.ELEM_JUMPASSIST);
             name = decoder.readString(AttributeId.ATTRIB_NAME);
             index2case = -1;    // Mark as not present until we see a tag
             index2addr = -1;
             defaultaddr = -1;
             calcsize = -1;
             while(true) {
-                uint subId = decoder.peekElement();
+                ElementId subId = decoder.peekElement();
                 if (subId == 0) break;
                 if (subId == ElementId.ELEM_CASE_PCODE) {
                     if (index2case != -1)

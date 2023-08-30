@@ -1,8 +1,5 @@
 ﻿using Sla.CORE;
 
-using VarnodeDefSet = System.Collections.Generic.SortedSet<Sla.DECCORE.Varnode>; // VarnodeDefSet : A set of Varnodes sorted by definition (then location)
-using VarnodeLocSet = System.Collections.Generic.SortedSet<Sla.DECCORE.Varnode>; // VarnodeCompareLocDef : A set of Varnodes sorted by location (then by definition)
-
 namespace Sla.DECCORE
 {
     /// \brief A low-level variable or contiguous set of bytes described by an Address and a size
@@ -149,13 +146,13 @@ namespace Sla.DECCORE
         /// High-level variable of which this is an instantiation
         private HighVariable? high;
         /// cached SymbolEntry associated with Varnode
-        private SymbolEntry mapentry;
+        internal SymbolEntry mapentry;
         /// Datatype associated with this varnode
         private Datatype? type;
         /// Iterator into VarnodeBank sorted by location
-        internal VarnodeLocSet::iterator lociter;
+        internal VarnodeLocSet.Enumerator lociter;
         /// Iterator into VarnodeBank sorted by definition
-        internal VarnodeDefSet::iterator defiter;
+        internal VarnodeDefSet.Enumerator defiter;
         /// List of every op using this varnode as input
         internal List<PcodeOp> descend;
         /// Addresses covered by the def.use of this Varnode
@@ -741,8 +738,10 @@ namespace Sla.DECCORE
         ///
         /// \param op2 is the Varnode to compare \b this to
         /// \return true if they are equivalent
-        public static bool operator ==(Varnode op1, Varnode op2)
+        public static bool operator ==(Varnode? op1, Varnode? op2)
         {
+            if (null == op1) throw new ApplicationException();
+            if (null == op2) throw new ApplicationException();
             // Compare two varnodes
             if (op1.loc != op2.loc) return false;
             if (op1.size != op2.size) return false;

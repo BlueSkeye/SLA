@@ -16,7 +16,7 @@ namespace Sla.EXTRA
         /// \param decoder is the XML stream decoder
         protected void decodeBody(Decoder decoder)
         {
-            uint elemId = decoder.openElement();       // Tag may not be present
+            ElementId elemId = decoder.openElement();       // Tag may not be present
             if (elemId == ElementId.ELEM_BODY) {
                 parsestring = decoder.readString(AttributeId.ATTRIB_CONTENT);
                 decoder.closeElement(elemId);
@@ -63,7 +63,7 @@ namespace Sla.EXTRA
         internal override void decode(Sla.CORE.Decoder decoder)
         {
             // Restore a raw <pcode> tag.  Used for uponentry, uponreturn
-            uint elemId = decoder.openElement(ElementId.ELEM_PCODE);
+            ElementId elemId = decoder.openElement(ElementId.ELEM_PCODE);
             decodePayloadAttributes(decoder);
             decodePayloadParams(decoder);
             decodeBody(decoder);

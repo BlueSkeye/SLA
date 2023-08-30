@@ -1,14 +1,5 @@
 ﻿using Sla.CORE;
 using Sla.EXTRA;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Xml;
-
-using ScopeMap = System.Collections.Generic.Dictionary<ulong, Sla.DECCORE.Scope>;
-using ScopeResolve = Sla.EXTRA.rangemap<Sla.DECCORE.ScopeMapper>;
 
 namespace Sla.DECCORE
 {
@@ -52,12 +43,10 @@ namespace Sla.DECCORE
 
             while (iter.MoveNext()) {
                 Sla.CORE.Range rng = iter.Current;
-                pair<ScopeResolve::const_iterator, ScopeResolve::const_iterator> res;
+                Tuple<ScopeResolve.PartIterator, ScopeResolve.PartIterator> res;
                 res = resolvemap.find(rng.getFirstAddr());
-                while (res.first != res.second)
-                {
-                    if ((*res.first).scope == scope)
-                    {
+                while (res.first != res.second) {
+                    if ((*res.first).scope == scope) {
                         resolvemap.erase(res.first);
                         break;
                     }
@@ -70,14 +59,11 @@ namespace Sla.DECCORE
         /// \param scope is the given Scope to clear
         private void clearReferences(Scope scope)
         {
-            ScopeMap::const_iterator iter = scope.children.begin();
-            ScopeMap::const_iterator enditer = scope.children.end();
-            while (iter != enditer)
-            {
-                clearReferences((*iter).second);
-                ++iter;
+            ScopeMap.Enumerator iter = scope.children.GetEnumerator();
+            while (iter.MoveNext()) {
+                clearReferences(iter.Current.Value);
             }
-            idmap.erase(scope.uniqueId);
+            idmap.Remove(scope.uniqueId);
             clearResolve(scope);
         }
 
@@ -139,10 +125,9 @@ namespace Sla.DECCORE
         /// configuration, which may have changed since the initial scopes were created.
         public void adjustCaches()
         {
-            ScopeMap::iterator iter;
-            for (iter = idmap.begin(); iter != idmap.end(); ++iter)
-            {
-                (*iter).second.adjustCaches();
+            IEnumerator<Scope> iter = idmap.Values.GetEnumerator();
+            while (iter.MoveNext()) {
+                iter.Current.adjustCaches();
             }
         }
 
@@ -165,11 +150,10 @@ namespace Sla.DECCORE
                 idmap[globalscope.uniqueId] = globalscope;
                 return;
             }
-            if (newscope.name.size() == 0)
+            if (newscope.name.Length == 0) {
                 throw new CORE.LowlevelError("Non-global scope has empty name");
-            pair<ScopeMap::iterator, bool> res;
-            res = idmap.Add(newscope.uniqueId, newscope);
-            if (res.second == false) {
+            }
+            if (!idmap.TryAdd(newscope.uniqueId, newscope)) {
                 StringWriter s = new StringWriter();
                 s.Write($"Duplicate scope id: {newscope.getFullName()}");
                 // delete newscope;
@@ -383,7 +367,7 @@ namespace Sla.DECCORE
                 // If there are no namespace scopes
                 // Start querying from scope placing query
                 return qpoint;
-            Tuple<ScopeResolve::const_iterator, ScopeResolve::const_iterator> res;
+            Tuple<ScopeResolve.PartIterator, ScopeResolve.PartIterator> res;
             res = resolvemap.find(addr);
             if (res.first != res.second)
                 return (*res.first).getScope();
@@ -464,13 +448,14 @@ namespace Sla.DECCORE
             }
         }
 
-        public void setProperties(partmap<Address, uint> newflags)
+        ///< Replace the property map
+        public void setProperties(partmap<Address, Varnode.varnode_flags> newflags)
         {
             flagbase = newflags;
-        }    ///< Replace the property map
+        }
 
         /// Get the entire property map
-        public partmap<Address, uint> getProperties() => flagbase;
+        public partmap<Address, Varnode.varnode_flags> getProperties() => flagbase;
 
         /// Encode the whole Database to a stream
         /// Encode a single \<db> element to the stream, which contains child elements
@@ -515,7 +500,8 @@ namespace Sla.DECCORE
                 ElementId subId = decoder.peekElement();
                 if (subId != ElementId.ELEM_PROPERTY_CHANGEPOINT) break;
                 decoder.openElement();
-                uint val = (uint)decoder.readUnsignedInteger(AttributeId.ATTRIB_VAL);
+                Varnode.varnode_flags val =
+                    (Varnode.varnode_flags)decoder.readUnsignedInteger(AttributeId.ATTRIB_VAL);
                 VarnodeData vData = VarnodeData.decodeFromAttributes(decoder);
                 Address addr = vData.getAddr();
                 decoder.closeElement(subId);

@@ -53,7 +53,7 @@ namespace Sla.DECCORE
         /// \param resolver is used to cross-reference the edge's FlowBlock endpoints
         internal void decode(Sla.CORE.Decoder decoder, BlockMap resolver)
         {
-            uint elemId = decoder.openElement(ElementId.ELEM_EDGE);
+            ElementId elemId = decoder.openElement(ElementId.ELEM_EDGE);
             // Tag does not currently contain info about label
             label = 0;
             int endIndex = (int)decoder.readSignedInteger(AttributeId.ATTRIB_END);

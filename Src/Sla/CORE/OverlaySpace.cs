@@ -42,7 +42,7 @@ namespace Sla.CORE
         
         public virtual void decode(ref Decoder decoder)
         {
-            uint elemId = decoder.openElement(ElementId.ELEM_SPACE_OVERLAY);
+            ElementId elemId = decoder.openElement(ElementId.ELEM_SPACE_OVERLAY);
             name = decoder.readString(AttributeId.ATTRIB_NAME);
             index = (int)decoder.readSignedInteger(AttributeId.ATTRIB_INDEX);
             baseSpace = decoder.readSpace(AttributeId.ATTRIB_BASE);

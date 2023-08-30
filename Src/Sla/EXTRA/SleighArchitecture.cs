@@ -52,9 +52,9 @@ namespace Sla.EXTRA
                 return;
             }
 
-            uint elemId = decoder.openElement(ElementId.ELEM_LANGUAGE_DEFINITIONS);
+            ElementId elemId = decoder.openElement(ElementId.ELEM_LANGUAGE_DEFINITIONS);
             while (true) {
-                uint subId = decoder.peekElement();
+                ElementId subId = decoder.peekElement();
                 if (subId == 0) break;
                 if (subId == ElementId.ELEM_LANGUAGE) {
                     LanguageDescription newDescription = new LanguageDescription();

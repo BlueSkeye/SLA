@@ -119,7 +119,7 @@ namespace Sla.DECCORE
         /// \param res is the parameter storage to pass back
         /// \return the extension operator (INT_ZEXT INT_SEXT) or INT_COPY if there is no extension.
         /// INT_PIECE indicates the extension is determined by the specific prototype.
-        public abstract OpCode assumedExtension(Address addr,int size, VarnodeData res);
+        public abstract OpCode assumedExtension(Address addr, int size, out VarnodeData res);
 
         /// \brief Get the address space associated with any stack based parameters in \b this list.
         /// \return the stack address space, if \b this models parameters passed on the stack, NULL otherwise
@@ -142,7 +142,8 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         /// \param effectlist is a container collecting EffectRecords across all parameters
         /// \param normalstack is \b true if parameters are pushed on the stack in the normal order
-        public abstract void decode(Sla.CORE.Decoder decoder, List<EffectRecord> effectlist, bool normalstack);
+        public abstract void decode(Sla.CORE.Decoder decoder, LinkedList<EffectRecord> effectlist,
+            bool normalstack);
 
         /// Clone this parameter list model
         public abstract ParamList clone();

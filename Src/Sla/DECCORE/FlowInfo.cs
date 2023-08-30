@@ -99,7 +99,7 @@ namespace Sla.DECCORE
         /// List of p-code ops that need injection
         private List<PcodeOp> injectlist = new List<PcodeOp>();
         /// Map of machine instructions that have been visited so far
-        private Dictionary<Address, VisitStat> visited; // Initialized in constructors
+        private SortedDictionary<Address, VisitStat> visited; // Initialized in constructors
         /// Source p-code op (Edges between basic blocks)
         private List<PcodeOp> block_edge1 = new List<PcodeOp>();
         /// Destination p-code op (Edges between basic blocks)
@@ -1236,6 +1236,7 @@ namespace Sla.DECCORE
             insn_count = 0;
             insn_max = uint.MaxValue;
             flowoverride_present = data.getOverride().hasFlowOverride();
+            visited = new SortedDictionary<Address, VisitStat>();
         }
 
         /// Cloning constructor
@@ -1270,8 +1271,9 @@ namespace Sla.DECCORE
                 inline_base = op2.inline_base;
                 inline_recursion = inline_base;
             }
-            else
+            else {
                 inline_recursion = (HashSet<Address>)null;
+            }
             insn_count = op2.insn_count;
             insn_max = op2.insn_max;
             flowoverride_present = data.getOverride().hasFlowOverride();

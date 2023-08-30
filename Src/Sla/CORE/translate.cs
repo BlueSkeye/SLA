@@ -89,7 +89,7 @@ namespace Sla.CORE {
         ///< Restore \b this from a stream
         public void decode(Sla.CORE.Decoder decoder)
         {
-            uint elemId = decoder.openElement(ElementId.ELEM_TRUNCATE_SPACE);
+            ElementId elemId = decoder.openElement(ElementId.ELEM_TRUNCATE_SPACE);
             spaceName = decoder.readString(AttributeId.ATTRIB_SPACE);
             size = (uint)decoder.readUnsignedInteger(AttributeId.ATTRIB_SIZE);
             decoder.closeElement(elemId);
@@ -137,7 +137,7 @@ namespace Sla.CORE {
             VarnodeData[] invar = new VarnodeData[16];
             VarnodeData? outptr; //  = ref outvar;
 
-            uint elemId = decoder.openElement(ElementId.ELEM_OP);
+            ElementId elemId = decoder.openElement(ElementId.ELEM_OP);
             isize = (int)decoder.readSignedInteger(AttributeId.ATTRIB_SIZE);
             if (isize <= 16) {
                 opcode = PcodeOpRaw.decode(decoder, isize, invar, out outptr);
@@ -335,7 +335,7 @@ namespace Sla.CORE {
 
         public virtual void decode(ref Decoder decoder)
         {
-            uint elemId = decoder.openElement(ElementId.ELEM_SPACE_BASE);
+            ElementId elemId = decoder.openElement(ElementId.ELEM_SPACE_BASE);
             decodeBasicAttributes(decoder);
             contain = decoder.readSpace(AttributeId.ATTRIB_CONTAIN);
             decoder.closeElement(elemId);
@@ -582,7 +582,7 @@ namespace Sla.CORE {
             // The first space should always be the constant space
             insertSpace(new ConstantSpace(this, trans));
 
-            uint elemId = decoder.openElement(ElementId.ELEM_SPACES);
+            ElementId elemId = decoder.openElement(ElementId.ELEM_SPACES);
             string defname = decoder.readString(AttributeId.ATTRIB_DEFAULTSPACE);
             while (decoder.peekElement() != 0) {
                 insertSpace(decodeSpace(decoder, trans));

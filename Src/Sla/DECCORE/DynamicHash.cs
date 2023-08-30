@@ -1,7 +1,5 @@
 ﻿using Sla.CORE;
 
-using PcodeOpTree = System.Collections.Generic.Dictionary<Sla.CORE.SeqNum, Sla.DECCORE.PcodeOp>;
-
 namespace Sla.DECCORE
 {
     /// \brief A hash utility to uniquely identify a temporary Varnode in data-flow

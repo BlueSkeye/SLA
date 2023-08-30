@@ -389,7 +389,7 @@ namespace Sla.DECCORE
             int maxiterIndex = iterIndex;
             ++iterIndex;
             while (iterIndex < badedgelist.Count) {
-                if (badedgelist[maxiterIndex].compareFinal(badedgelist[iterIndex]) {
+                if (badedgelist[maxiterIndex].compareFinal(badedgelist[iterIndex])) {
                     maxiterIndex = iterIndex;
                 }
                 ++iterIndex;

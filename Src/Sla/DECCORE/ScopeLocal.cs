@@ -1,9 +1,6 @@
 ﻿using Sla.CORE;
 using Sla.DECCORE;
 
-using EntryMap = Sla.EXTRA.rangemap<Sla.DECCORE.SymbolEntry>;
-using VarnodeDefSet = System.Collections.Generic.SortedSet<Sla.DECCORE.Varnode>; // VarnodeDefSet : A set of Varnodes sorted by definition (then location)
-
 namespace Sla.DECCORE
 {
     /// \brief A Symbol scope for \e local variables of a particular function.

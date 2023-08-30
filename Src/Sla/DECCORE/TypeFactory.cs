@@ -134,7 +134,7 @@ namespace Sla.DECCORE
             ulong id = 0;
             string nm = string.Empty;
             uint format = 0;       // No forced display format by default
-                                    //  uint elemId = decoder.openElement();
+                                    //  ElementId elemId = decoder.openElement();
             while (true) {
                 AttributeId attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
@@ -155,7 +155,7 @@ namespace Sla.DECCORE
             Datatype defedType = decodeType(decoder);
             //  decoder.closeElement(elemId);
             if (defedType.isVariableLength()) {
-                id = Datatype.hashSize(id, defedType.size());
+                id = Datatype.hashSize(id, defedType.size);
             }
             if (defedType.getMetatype() == type_metatype.TYPE_STRUCT || defedType.getMetatype() == type_metatype.TYPE_UNION)
             {
@@ -191,7 +191,7 @@ namespace Sla.DECCORE
         private Datatype decodeStruct(Decoder decoder, bool forcecore)
         {
             TypeStruct ts = new TypeStruct();
-            //  uint elemId = decoder.openElement();
+            //  ElementId elemId = decoder.openElement();
             ts.decodeBasic(decoder);
             if (forcecore)
                 ts.flags |= Datatype.Properties.coretype;
@@ -224,7 +224,7 @@ namespace Sla.DECCORE
         private Datatype decodeUnion(Decoder decoder, bool forcecore)
         {
             TypeUnion tu = new TypeUnion();
-            //  uint elemId = decoder.openElement();
+            //  ElementId elemId = decoder.openElement();
             tu.decodeBasic(decoder);
             if (forcecore)
                 tu.flags |= Datatype.Properties.coretype;
@@ -259,7 +259,7 @@ namespace Sla.DECCORE
         private Datatype decodeCode(Decoder decoder, bool isConstructor, bool isDestructor, bool forcecore)
         {
             TypeCode tc = new TypeCode();
-            //  uint elemId = decoder.openElement();
+            //  ElementId elemId = decoder.openElement();
             tc.decodeStub(decoder);
             if (tc.getMetatype() != type_metatype.TYPE_CODE) {
                 throw new LowlevelError("Expecting metatype=\"code\"");
@@ -489,25 +489,25 @@ namespace Sla.DECCORE
         /// \param n is the name of the data-type
         /// \param id is the type id of the data-type
         /// \return the matching Datatype object
-        protected Datatype findByIdLocal(string nm, ulong id)
-        {               // Get type of given name
-            DatatypeNameSet::const_iterator iter;
-
+        protected Datatype? findByIdLocal(string nm, ulong id)
+        {
+            // Get type of given name
             TypeBase ct = new TypeBase(1, type_metatype.TYPE_UNKNOWN, nm);
-            if (id != 0)
-            {       // Search for an exact type
+            if (id != 0) {
+                // Search for an exact type
                 ct.id = id;
-                iter = nametree.find((Datatype)ct);
-                if (iter == nametree.end()) return (Datatype)null; // Didn't find it
+                Datatype? result;
+                // Didn't find it
+                if (!nametree.TryGetValue((Datatype)ct, out result)) return (Datatype)null;
+                return result;
             }
-            else
-            {           // Allow for the fact that the name may not be unique
-                ct.id = 0;
-                iter = nametree.lower_bound((Datatype)&ct);
-                if (iter == nametree.end()) return (Datatype)null; // Didn't find it
-                if ((*iter).getName() != nm) return (Datatype)null; // Found at least one datatype with this name
-            }
-            return *iter;
+            // Allow for the fact that the name may not be unique
+            ct.id = 0;
+            IEnumerator<Datatype>? iter = nametree.lower_bound((Datatype)ct);
+            if (null == iter) return (Datatype)null; // Didn't find it
+            // Found at least one datatype with this name
+            if (iter.Current.getName() != nm) return (Datatype)null;
+            return iter.Current;
         }
 
         /// Search by \e name and/or \e id

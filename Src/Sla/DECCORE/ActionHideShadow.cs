@@ -1,6 +1,4 @@
 ﻿
-using VarnodeDefSet = System.Collections.Generic.SortedSet<Sla.DECCORE.Varnode>; // VarnodeDefSet : A set of Varnodes sorted by definition (then location)
-
 namespace Sla.DECCORE
 {
     /// \brief Locate \e shadow Varnodes and adjust them so they are hidden

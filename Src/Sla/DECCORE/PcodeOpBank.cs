@@ -1,7 +1,5 @@
 ﻿using Sla.CORE;
 
-using PcodeOpTree = System.Collections.Generic.Dictionary<Sla.CORE.SeqNum, Sla.DECCORE.PcodeOp>;
-
 namespace Sla.DECCORE
 {
     /// <summary>Container class for PcodeOps associated with a single function.
@@ -305,7 +303,7 @@ namespace Sla.DECCORE
         /// \return the targeted PcodeOp (or NULL)
         public PcodeOp? target(Address addr)
         {
-            PcodeOpTree::const_iterator iter = optree.lower_bound(new SeqNum(addr, 0));
+            PcodeOpTree.Enumerator iter = optree.lower_bound(new SeqNum(addr, 0));
             if (iter == optree.end()) return (PcodeOp)null;
             return (*iter).second.target();
         }
@@ -352,7 +350,7 @@ namespace Sla.DECCORE
                         max = iter.Value.getSeqNum();
                     iter = iter.Next;
                 }
-                PcodeOpTree::const_iterator nextiter = optree.upper_bound(max);
+                PcodeOpTree.Enumerator nextiter = optree.upper_bound(max);
                 if (nextiter == optree.end()) return (PcodeOp)null;
                 retop = (*nextiter).second;
                 return retop;
@@ -361,19 +359,19 @@ namespace Sla.DECCORE
         }
 
         /// \brief Start of all PcodeOps in sequence number order
-        public PcodeOpTree::const_iterator beginAll() => optree.begin();
+        public IEnumerator<KeyValuePair<SeqNum, PcodeOp>> beginAll() => optree.GetEnumerator();
 
         /// \brief End of all PcodeOps in sequence number order
-        public PcodeOpTree::const_iterator endAll() => optree.end();
+        public PcodeOpTree.Enumerator endAll() => optree.end();
 
         /// \brief Start of all PcodeOps at one Address
-        public PcodeOpTree::const_iterator begin(Address addr)
+        public PcodeOpTree.Enumerator begin(Address addr)
         {
             return optree.lower_bound(new SeqNum(addr, 0));
         }
 
         /// \brief End of all PcodeOps at one Address
-        public PcodeOpTree::const_iterator end(Address addr)
+        public PcodeOpTree.Enumerator end(Address addr)
         {
             return optree.upper_bound(new SeqNum(addr, uint.MaxValue));
         }

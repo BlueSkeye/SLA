@@ -157,25 +157,20 @@ namespace Sla.DECCORE
         /// \return the address of the original entry point instruction for \b this block
         public Address getEntryAddr()
         {
-            Sla.CORE.Range? range;
-
             if (cover.numRanges() == 1) {
                 // If block consists of 1 range
                 // return the start of range
-                range = cover.getFirstRange();
+                return cover.getFirstRange().getFirstAddr();
             }
-            else {
-                if (op.empty()) {
-                    return new Address();
-                }
-                // Find range of first op
-                Address addr = new Address(op.front().getAddr());
-                range = cover.getRange(addr.getSpace(), addr.getOffset());
-                if (range == null) {
-                    return op.front().getAddr();
-                }
+            if (op.empty()) {
+                return new Address();
             }
-            return range.getFirstAddr();
+            // Find range of first op
+            Address addr = op.First.Value.getAddr();
+            Sla.CORE.Range? range = cover.getRange(addr.getSpace(), addr.getOffset());
+            return (range == null) 
+                ? op.First.Value.getAddr()
+                : range.getFirstAddr();
         }
 
         public override Address getStart()
@@ -229,11 +224,11 @@ namespace Sla.DECCORE
   
         public override FlowBlock getExitLeaf() => this;
 
-        public override PcodeOp? lastOp() => (0 == op.Count) ? null : op[op.Count - 1];
+        public override PcodeOp? lastOp() => (0 == op.Count) ? null : op.Last.Value;
 
         public override bool negateCondition(bool toporbottom)
         {
-            PcodeOp lastop = op[op.Count - 1];
+            PcodeOp lastop = op.Last.Value;
             // Flip the meaning of condition
             lastop.flipFlag(PcodeOp.Flags.boolean_flip);
             // Flip whether fall-thru block is true/false
@@ -251,7 +246,7 @@ namespace Sla.DECCORE
             if (0 == op.Count) {
                 return 2;
             }
-            PcodeOp lastop = op[op.Count - 1];
+            PcodeOp lastop = op.Last.Value;
             return (lastop.code() != OpCode.CPUI_CBRANCH)
                 ? 2
                 : Funcdata.opFlipInPlaceTest(lastop, fliplist);
@@ -259,7 +254,7 @@ namespace Sla.DECCORE
 
         public override void flipInPlaceExecute()
         {
-            PcodeOp lastop = op[op.Count - 1];
+            PcodeOp lastop = op.Last.Value;
             // This is similar to negateCondition but we don't need to set the boolean_flip flag on lastop
             // because it is getting explicitly changed
             // Flip whether the fallthru block is true/false
@@ -351,7 +346,7 @@ namespace Sla.DECCORE
         /// \return true if there is no implied COPY
         public bool unblockedMulti(int outslot)
         {
-            BlockBasic blout = getOut(outslot);
+            BlockBasic blout = (BlockBasic)getOut(outslot);
             FlowBlock bl;
             PcodeOp multiop;
             PcodeOp othermulti;

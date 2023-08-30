@@ -1,7 +1,5 @@
 ﻿using Sla.CORE;
 
-using VarnodeLocSet = System.Collections.Generic.SortedSet<Sla.DECCORE.Varnode>; // VarnodeCompareLocDef : A set of Varnodes sorted by location (then by definition)
-
 namespace Sla.DECCORE
 {
     /// \brief Mark all the \e implied Varnode objects, which will have no explicit token in the output

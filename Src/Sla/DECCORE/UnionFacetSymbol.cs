@@ -54,7 +54,7 @@ namespace Sla.DECCORE
 
         public override void decode(Sla.CORE.Decoder decoder)
         {
-            uint elemId = decoder.openElement(ElementId.ELEM_FACETSYMBOL);
+            ElementId elemId = decoder.openElement(ElementId.ELEM_FACETSYMBOL);
             decodeHeader(decoder);
             fieldNum = decoder.readSignedInteger(AttributeId.ATTRIB_FIELD);
 

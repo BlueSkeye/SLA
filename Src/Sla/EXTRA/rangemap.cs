@@ -1,4 +1,6 @@
 ﻿
+using System.Collections;
+
 namespace Sla.EXTRA
 {
     /// \brief An interval map container
@@ -39,47 +41,65 @@ namespace Sla.EXTRA
     /// distinct \b recordtype that overlaps that sub-range.  The sub-range multiset is updated
     /// with every insertion or deletion of \b recordtype objects into the container, which
     /// may insert new or delete existing boundary points separating the disjoint subranges.
-    internal class rangemap<_recordtype>
+    internal class rangemap<_recordtype, linetype, subsorttype, inittype>
         where _recordtype : new()
+        where linetype : IComparable<linetype>
+        where subsorttype : IComparable<subsorttype>
     {
-        //typedef typename _recordtype::linetype linetype;  ///< Integer data-type defining the linear domain
-        //typedef typename _recordtype::subsorttype subsorttype;  ///< The data-type used for subsorting
-        //typedef typename _recordtype::inittype inittype;    ///< The data-type containing initialization data for records
+        // Integer data-type defining the linear domain
+        //typedef typename _recordtype::linetype linetype;
+        // The data-type used for subsorting
+        //typedef typename _recordtype::subsorttype subsorttype;
+        // The data-type containing initialization data for records
+        //typedef typename _recordtype::inittype inittype;
 
         /// \brief The internal \e sub-range object for the interval map
-        ///
         /// It defines a disjoint range within the common refinement of all ranges
         /// in the container. It also knows about its containing range and \b recordtype.
         internal class AddrRange
         {
             //friend class rangemap<_recordtype>;
             //friend class PartIterator;
-            internal /*mutable*/ linetype first; ///< Start of the disjoint sub-range
-            internal linetype last;      ///< End of the disjoint sub-range
-            internal /*mutable*/ linetype a;     ///< Start of full range occupied by the entire \b recordtype
-            internal /*mutable*/ linetype b;     ///< End of full range occupied by the entire \b recordtype
-            private /*mutable*/ subsorttype subsort;    ///< How \b this should be sub-sorted
-            internal /*mutable*/ /*typename*/ IEnumerator<_recordtype> value;    ///< Iterator pointing at the actual \b recordtype
+            // Start of the disjoint sub-range
+            internal /*mutable*/ linetype first;
+            // End of the disjoint sub-range
+            internal linetype last;
+            // Start of full range occupied by the entire \b recordtype
+            internal /*mutable*/ linetype a;
+            // End of full range occupied by the entire \b recordtype
+            internal /*mutable*/ linetype b;
+            // How \b this should be sub-sorted
+            private /*mutable*/ subsorttype subsort;
+            // How \b this should be sub-sorted
+            internal /*mutable*/ /*typename*/ IEnumerator<_recordtype> value;
 
             /// (Partial) constructor
-            internal AddrRange(linetype l)
+            internal AddrRange(linetype l,
+                IRangemapSubsortTypeInstantiator<subsorttype> subsorttypeInstantiator)
             {
-                subsort = new subsorttype(false);
+                subsort = subsorttypeInstantiator.Create(false);
                 last = l;
             }
 
             /// (Partial) constructor given a subsort
-            internal AddrRange(linetype l, subsorttype s)
+            internal AddrRange(linetype l, subsorttype s,
+                IRangemapSubsortTypeInstantiator<subsorttype> subsorttypeInstantiator)
             {
-                subsort = new subsorttype(s);
+                subsort = subsorttypeInstantiator.Create(s);
                 last = l;
             }
 
-            ///< Comparison method based on ending boundary point
+            // Comparison method based on ending boundary point
             public static bool operator <(AddrRange op1, AddrRange op2)
             {
-                if (op1.last != op2.last) return (op1.last < op2.last);
-                return (op1.subsort < op2.subsort);
+                return (op1.last.Equals(op2.last)) 
+                    ? (0 > op1.subsort.CompareTo(op2.subsort))
+                    : (0 > op1.last.CompareTo(op2.last));
+            }
+
+            public static bool operator>(AddrRange op1, AddrRange op2)
+            {
+                throw new NotImplementedException();
             }
 
             /// Retrieve the \b recordtype
@@ -108,9 +128,14 @@ namespace Sla.EXTRA
             }
 
             /// Dereference to the \b recordtype object
-            public static _recordtype operator *()
+            public rangemap<_recordtype, linetype, subsorttype, inittype>.AddrRange Current
+                => iter.Current;
+
+            object IEnumerator.Current => this.Current;
+
+            public bool MoveNext()
             {
-                return iter.Current.value;
+                throw new NotImplementedException();
             }
 
             /// Pre-increment the iterator
@@ -119,13 +144,13 @@ namespace Sla.EXTRA
                 return iterator.iter.MoveNext() ? iterator : null;
             }
 
-            /// Post-increment the iterator
-            public static PartIterator operator ++(int i)
-            {
-                PartIterator orig = new PartIterator(iter);
-                ++iter;
-                return orig;
-            }
+            ///// Post-increment the iterator
+            //public static PartIterator operator ++(int i)
+            //{
+            //    PartIterator orig = new PartIterator(iter);
+            //    ++iter;
+            //    return orig;
+            //}
 
             /// Pre-decrement the iterator
             public static PartIterator? operator --(PartIterator iterator)
@@ -165,13 +190,35 @@ namespace Sla.EXTRA
 
             /// Get the \b recordtype iterator
             public /*typename*/ IEnumerator<_recordtype> getValueIter()  => (iter).getValue();
+
+            public void Reset()
+            {
+                throw new NotImplementedException();
+            }
+
+            public void Dispose()
+            {
+                throw new NotImplementedException();
+            }
         }
 
         // typedef PartIterator const_iterator;		///< The main sub-range iterator data-type
 
-        private std::multiset<AddrRange> tree;    ///< The underlying multiset of sub-ranges
-        private List<_recordtype> record;  ///< Storage for the actual record objects
+        // The underlying multiset of sub-ranges
+        private std::multiset<AddrRange> tree;
+        // Storage for the actual record objects
+        private List<_recordtype> record;
+        private IRangemapSubsortTypeInstantiator<subsorttype> subsortTypeInstatiator;
+        private IEqualityComparer<linetype> linetypeEqualityComparer;
+        private IComparer<linetype> linetypeComparer;
 
+        protected rangemap(IRangemapSubsortTypeInstantiator<subsorttype> subsortTypeInstatiator,
+            IComparer<linetype> linetypeComparer)
+        {
+            this.subsortTypeInstatiator = subsortTypeInstatiator;
+            this.linetypeComparer = linetypeComparer;
+        }
+        
         /// Remove the given partition boundary
         /// All sub-ranges that end with the given boundary point are deleted, and all sub-ranges
         /// that begin with the given boundary point (+1) are extended to cover the deleted sub-range.
@@ -181,12 +228,12 @@ namespace Sla.EXTRA
         private void zip(linetype i, /*typename*/ IEnumerator<AddrRange> iter)
         {
             linetype f = iter.Current.first;
-            while (iter.Current.last == i) {
+            while (0 == linetypeComparer.Compare(iter.Current.last, i)) {
                 tree.erase(iter.Current);
                 iter.MoveNext();
             }
             i = i + 1;
-            while (iter.Current.first == i) {
+            while (0 == linetypeComparer.Compare(iter.Current.first, i)) {
                 iter.Current.first = f;
                 if (!iter.MoveNext()) break;
             }
@@ -201,10 +248,12 @@ namespace Sla.EXTRA
         private void unzip(linetype i, /*typename*/ IEnumerator<AddrRange> iter)
         {
             /*typename*/ IEnumerator<AddrRange> hint = iter;
-            if (iter.Current.last == i) return; // Can't split size 1 (i.e. split already present)
+            if (0 == linetypeComparer.Compare(iter.Current.last, i))
+                // Can't split size 1 (i.e. split already present)
+                return;
             linetype f;
             linetype plus1 = i + 1;
-            while (iter.Current.first <= i) {
+            while (0 < linetypeComparer.Compare(iter.Current.first, i)) {
                 f = iter.Current.first;
                 iter.Current.first = plus1;
                 /*typename*/ IEnumerator<AddrRange> newiter = tree.insert(hint, new AddrRange(i, iter.Current.subsort));
@@ -250,13 +299,15 @@ namespace Sla.EXTRA
 
             iter1 = tree.lower_bound(addrrange);
             // Check for no intersection
-            if ((iter1 == tree.end()) || (point < iter1.Current.first))
+            if ((iter1 == tree.end()) || (0 > linetypeComparer.Compare(point, iter1.Current.first)))
                 return new Tuple<PartIterator, PartIterator>(new PartIterator(iter1), new PartIterator(iter1));
 
-            AddrRange addrend = new AddrRange(iter1.Current.last, subsorttype(true));
+            AddrRange addrend = new AddrRange(iter1.Current.last,
+                subsortTypeInstatiator.Create(true), subsortTypeInstatiator);
             iter2 = tree.upper_bound(addrend);
 
-            return new Tuple<PartIterator, PartIterator>(new PartIterator(iter1), new PartIterator(iter2));
+            return new Tuple<PartIterator, PartIterator>(
+                new PartIterator(iter1), new PartIterator(iter2));
         }
 
         /// \brief Find sub-ranges intersecting given boundary point, and between given \e subsorts
@@ -266,15 +317,15 @@ namespace Sla.EXTRA
         /// \return begin/end iterators over all intersecting and bounded sub-ranges
         public Tuple<PartIterator, PartIterator> find(linetype point, subsorttype subsort1, subsorttype subsort2)
         {
-            AddrRange addrrange = new AddrRange(point, subsort1);
+            AddrRange addrrange = new AddrRange(point, subsort1, subsortTypeInstatiator);
             /*typename*/ IEnumerator<AddrRange> iter1;
             /*typename*/ IEnumerator<AddrRange> iter2;
 
             iter1 = tree.lower_bound(addrrange);
-            if ((iter1 == tree.end()) || (point < iter1.Current.first))
+            if ((iter1 == tree.end()) || (0 > linetypeComparer.Compare(point, iter1.Current.first)))
                 return new Tuple<PartIterator, PartIterator>(new PartIterator(iter1), new PartIterator(iter1));
 
-            AddrRange addrend = new AddrRange(iter1.last, subsort2);
+            AddrRange addrend = new AddrRange(iter1.last, subsort2, subsortTypeInstatiator);
             iter2 = tree.upper_bound(addrend);
 
             return new Tuple<PartIterator, PartIterator>(new PartIterator(iter1), new PartIterator(iter2));
@@ -285,7 +336,7 @@ namespace Sla.EXTRA
         /// \return iterator to first sub-range of intersects the boundary point
         public IEnumerator<AddrRange> find_begin(linetype point)
         {
-            AddrRange addrrange = new AddrRange(point);
+            AddrRange addrrange = new AddrRange(point, subsortTypeInstatiator);
             /*typename*/ IEnumerator<AddrRange> iter;
 
             iter = tree.lower_bound(addrrange);
@@ -297,17 +348,19 @@ namespace Sla.EXTRA
         /// \return iterator to first sub-range after that does not intersect the boundary point
         public IEnumerator<AddrRange> find_end(linetype point)
         {
-            AddrRange addrend = new AddrRange(point, subsorttype(true));
+            AddrRange addrend = new AddrRange(point,
+                subsortTypeInstatiator.Create(true), subsortTypeInstatiator);
             /*typename*/ IEnumerator<AddrRange> iter;
 
             iter = tree.upper_bound(addrend);
-            if ((iter == tree.end()) || (point < iter.Current.first))
+            if ((iter == tree.end()) || (0 > linetypeComparer.Compare(point, iter.Current.first)))
                 return iter;
 
             // If we reach here, (*iter).last is bigger than point (as per upper_bound) but
             // point >= than iter.Current.Key, i.e. point is contained in the sub-range.
             // So we have to do one more search for first sub-range after the containing sub-range.
-            AddrRange addrbeyond = new AddrRange(iter.Current.last, subsorttype(true));
+            AddrRange addrbeyond = new AddrRange(iter.Current.last,
+                subsortTypeInstatiator.Create(true), subsortTypeInstatiator);
             return tree.upper_bound(addrbeyond);
         }
 
@@ -317,13 +370,13 @@ namespace Sla.EXTRA
         /// \return iterator to first sub-range of an intersecting record (or \b end)
         public IEnumerator<AddrRange> find_overlap(linetype point, linetype end)
         {
-            AddrRange addrrange = new AddrRange(point);
+            AddrRange addrrange = new AddrRange(point, subsortTypeInstatiator);
             /*typename*/ IEnumerator<AddrRange> iter;
 
             // First range where right boundary is equal to or past point
             iter = tree.lower_bound(addrrange);
             if (iter == tree.end()) return iter;
-            if (iter.Current.first <= end)
+            if (0 < linetypeComparer.Compare(iter.Current.first, end))
                 return iter;
             return tree.end();
         }
@@ -337,11 +390,14 @@ namespace Sla.EXTRA
         {
             linetype f = a;
             /*typename*/ IEnumerator<_recordtype> liter;
-            /*typename*/ IEnumerator<AddrRange> low = tree.lower_bound(new AddrRange(f));
+            /*typename*/ IEnumerator<AddrRange> low = tree.lower_bound(
+                             new AddrRange(f, subsortTypeInstatiator));
 
             if (low != tree.end()) {
-                if (low.Current.first < f)   // Check if left boundary refines existing partition
-                    unzip(f - 1, low);      // If so do the refinement
+                if (0 > linetypeComparer.Compare(low.Current.first, f))
+                    // Check if left boundary refines existing partition
+                    // If so do the refinement
+                    unzip(f - 1, low);
             }
 
             _recordtype newItem = new AddrRange(data, a, b);
@@ -354,26 +410,31 @@ namespace Sla.EXTRA
             addrrange.value = liter;
             /*typename*/ IEnumerator<AddrRange> spot = tree.lower_bound(addrrange);
             // Where does the new record go in full list, insert it
-            record.splice((spot == tree.end()) ? record.end() : spot.Current.value, record, liter);
+            record.splice((spot == tree.end())
+                ? record.end()
+                : spot.Current.value, record, liter);
 
-            while ((low != tree.end()) && (low.Current.first <= b)) {
-                if (f <= low.Current.last) {   // Do we overlap at all
-                    if (f < low.Current.first) {
+            while ((low != tree.end()) && (0 < linetypeComparer.Compare(low.Current.first, b))) {
+                if (0 < linetypeComparer.Compare(f, low.Current.last)) {
+                    // Do we overlap at all
+                    if (0 > linetypeComparer.Compare(f, low.Current.first)) {
                         // Assume the hint makes this insert an O(1) op
                         addrrange.first = f;
                         addrrange.last = low.Current.first - 1;
                         tree.insert(low, addrrange);
                         f = low.Current.first;
                     }
-                    if (low.Current.last <= b) {
+                    if (0 < linetypeComparer.Compare(low.Current.last, b)) {
                         // Insert as much of interval as we can
                         addrrange.first = f;
                         addrrange.last = low.Current.last;
                         tree.insert(low, addrrange);
-                        if (low.Current.last == b) break; // Did we manage to insert it all
+                        if (0 == linetypeComparer.Compare(low.Current.last, b))
+                            // Did we manage to insert it all
+                            break;
                         f = low.Current.last + 1;
                     }
-                    else if (b < low.Current.last) {
+                    else if (0 > linetypeComparer.Compare(b, low.Current.last)) {
                         // We can insert everything left, but must refine
                         unzip(b, low);
                         break;
@@ -381,7 +442,7 @@ namespace Sla.EXTRA
                 }
                 ++low;
             }
-            if (f <= b) {
+            if (0 < linetypeComparer.Compare(f, b)) {
                 addrrange.first = f;
                 addrrange.last = b;
                 tree.insert(addrrange);
@@ -399,14 +460,15 @@ namespace Sla.EXTRA
             bool rightsew = true;
             bool rightoverlap = false;
             bool leftoverlap = false;
-            IEnumerator<AddrRange> low = tree.lower_bound(new AddrRange(a));
+            IEnumerator<AddrRange> low = tree.lower_bound(
+                new AddrRange(a, subsortTypeInstatiator));
             IEnumerator<AddrRange> uplow = low;
 
             linetype aminus1 = a - 1;
             while (uplow != tree.begin()) {
                 --uplow;
-                if (uplow.Current.last != aminus1) break;
-                if (uplow.Current.b == aminus1) {
+                if (0 != linetypeComparer.Compare(uplow.Current.last, aminus1)) break;
+                if (0 == linetypeComparer.Compare(uplow.Current.b, aminus1)) {
                     leftsew = false;        // Still a split between a-1 and a
                     break;
                 }
@@ -415,25 +477,25 @@ namespace Sla.EXTRA
                 if (low.Current.value == v)
                     tree.erase(low++);
                 else {
-                    if (low.Current.a < a)
+                    if (0 > linetypeComparer.Compare(low.Current.a, a))
                         leftoverlap = true; // a splits somebody else
-                    else if (low.Current.a == a)
+                    else if (0 == linetypeComparer.Compare(low.Current.a, a))
                         leftsew = false;    // Somebody else splits at a (in addition to v)
-                    if (b < low.Current.b)
+                    if (0 > linetypeComparer.Compare(b, low.Current.b))
                         rightoverlap = true;    // b splits somebody else
-                    else if (low.Current.b == b)
+                    else if (0 == linetypeComparer.Compare(low.Current.b, b))
                         rightsew = false;   // Somebody else splits at b (in addition to v)
                     low++;
                 }
-            } while ((low != tree.end()) && (low.Current.first <= b));
+            } while ((low != tree.end()) && (0 < linetypeComparer.Compare(low.Current.first, b)));
             if (low != tree.end()) {
                 if (low.Current.a - 1 == b)
                     rightsew = false;
             }
             if (leftsew && leftoverlap)
-                zip(a - 1, tree.lower_bound(new AddrRange(a - 1)));
+                zip(a - 1, tree.lower_bound(new AddrRange(a - 1, subsortTypeInstatiator)));
             if (rightsew && rightoverlap)
-                zip(b, tree.lower_bound(new AddrRange(b)));
+                zip(b, tree.lower_bound(new AddrRange(b, subsortTypeInstatiator)));
             record.Remove(v.Current);
         }
 

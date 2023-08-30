@@ -22,9 +22,9 @@ namespace Sla.DECCORE
         {
             // friend class ParamEntryRange;
             /// Position (within the full list) being assigned to the ParamEntryRange
-            private int position;
+            internal int position;
             /// Underlying ParamEntry being assigned to the ParamEntryRange
-            private ParamEntry entry;
+            internal ParamEntry entry;
             
             public InitData(int pos, ParamEntry e)
             {
@@ -62,7 +62,7 @@ namespace Sla.DECCORE
         }
 
         /// Initialize the range
-        public ParamEntryRange(inittype data, ulong f, ulong l)
+        public ParamEntryRange(/*inittype*/InitData data, ulong f, ulong l)
         {
             first = f; last = l; position = data.position; entry = data.entry;
         }
@@ -74,7 +74,7 @@ namespace Sla.DECCORE
         public ulong getLast() => last;
 
         /// Get the sub-subsort object
-        public subsorttype getSubsort() => new SubsortPosition(position);
+        public /*subsorttype*/ SubsortPosition getSubsort() => new SubsortPosition(position);
 
         /// Get pointer to actual ParamEntry
         public ParamEntry getParamEntry() => entry;

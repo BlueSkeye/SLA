@@ -55,7 +55,8 @@ namespace Sla.DECCORE
         internal ProtoModel? compatModel;
         /// List of side-effects
         internal LinkedList<EffectRecord> effectlist = new LinkedList<EffectRecord>();
-        /// Storage locations potentially carrying \e trash values
+        // Storage locations potentially carrying \e trash values
+        // TODO : Make it a sorted list.
         internal List<VarnodeData> likelytrash = new List<VarnodeData>();
         /// Id of injection to perform at beginning of function (-1 means not used)
         internal int injectUponEntry;
@@ -299,6 +300,8 @@ namespace Sla.DECCORE
         public void assignParameterStorage(List<Datatype> typelist, List<ParameterPieces> res,
             bool ignoreOutputError)
         {
+            if (null == input) throw new ApplicationException();
+            if (null == output) throw new ApplicationException();
             if (ignoreOutputError) {
                 try {
                     output.assignMap(typelist, glb.types, res);
@@ -372,6 +375,9 @@ namespace Sla.DECCORE
 
         /// Get an iterator to the first \e likelytrash
         public IEnumerator<VarnodeData> trashBegin() => likelytrash.GetEnumerator();
+
+        // TODO : Once likelytrash is a sorted list, use a binary search.
+        public bool trashContains(VarnodeData candidate) => likelytrash.Contains(candidate);
 
         ///// Get an iterator to the last \e likelytrash
         //public IEnumerator<VarnodeData> trashEnd() => likelytrash.end();
@@ -587,7 +593,7 @@ namespace Sla.DECCORE
             injectUponEntry = -1;
             injectUponReturn = -1;
             likelytrash.Clear();
-            uint elemId = decoder.openElement(ElementId.ELEM_PROTOTYPE);
+            ElementId elemId = decoder.openElement(ElementId.ELEM_PROTOTYPE);
             while(true) {
                 AttributeId attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
@@ -619,7 +625,7 @@ namespace Sla.DECCORE
             buildParamList(strategystring); // Allocate input and output ParamLists
             while(true)
             {
-                uint subId = decoder.peekElement();
+                ElementId subId = decoder.peekElement();
                 if (subId == 0) break;
                 if (subId == ElementId.ELEM_INPUT) {
                     input.decode(decoder, effectlist, stackgrowsnegative);
@@ -637,7 +643,7 @@ namespace Sla.DECCORE
                     while (decoder.peekElement() != 0) {
                         EffectRecord newEffect = new EffectRecord();
                         newEffect.decode(EffectRecord.EffectType.unaffected, decoder);
-                        effectlist.Add(newEffect);
+                        effectlist.AddLast(newEffect);
                     }
                     decoder.closeElement(subId);
                 }
@@ -646,7 +652,7 @@ namespace Sla.DECCORE
                     while (decoder.peekElement() != 0) {
                         EffectRecord newEffect = new EffectRecord();
                         newEffect.decode(EffectRecord.EffectType.killedbycall, decoder);
-                        effectlist.Add(newEffect);
+                        effectlist.AddLast(newEffect);
                     }
                     decoder.closeElement(subId);
                 }
@@ -701,7 +707,7 @@ namespace Sla.DECCORE
             decoder.closeElement(elemId);
             if (!sawretaddr && (glb.defaultReturnAddr.space != (AddrSpace)null)) {
                 // Provide the default return address, if there isn't a specific one for the model
-                effectlist.Add(new EffectRecord(glb.defaultReturnAddr, EffectRecord.EffectType.return_address));
+                effectlist.AddLast(new EffectRecord(glb.defaultReturnAddr, EffectRecord.EffectType.return_address));
             }
             effectlist.Sort(EffectRecord.compareByAddress);
             likelytrash.Sort();
@@ -755,8 +761,8 @@ namespace Sla.DECCORE
         /// \param addr is the starting Address of the record to find
         /// \param size is the size of the record to find
         /// \return the index of the matching record or a negative number
-        public static int lookupRecord(List<EffectRecord> efflist, int listSize, Address addr,
-            int size)
+        public static int lookupRecord(LinkedList<EffectRecord> efflist, int listSize,
+            Address addr, int size)
         {
             if (listSize == 0) return -1;
             EffectRecord cur = new EffectRecord(addr, size);

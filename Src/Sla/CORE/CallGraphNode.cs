@@ -76,7 +76,7 @@ namespace Sla.CORE
 
         public static void decode(Sla.CORE.Decoder decoder, CallGraph graph)
         {
-            uint elemId = decoder.openElement(ElementId.ELEM_NODE);
+            ElementId elemId = decoder.openElement(ElementId.ELEM_NODE);
             string? name = null;
             while(true) {
                 AttributeId attribId = decoder.getNextAttributeId();

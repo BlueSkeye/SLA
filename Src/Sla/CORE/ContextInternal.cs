@@ -330,7 +330,7 @@ namespace Sla.CORE
 
         protected override void decode(Sla.CORE.Decoder decoder)
         {
-            uint elemId = decoder.openElement(ElementId.ELEM_CONTEXT_POINTS);
+            ElementId elemId = decoder.openElement(ElementId.ELEM_CONTEXT_POINTS);
             while(true) {
                 uint subId = decoder.openElement();
                 if (subId == 0) {
@@ -362,7 +362,7 @@ namespace Sla.CORE
 
         protected override void decodeFromSpec(Decoder decoder)
         {
-            uint elemId = decoder.openElement(ElementId.ELEM_CONTEXT_DATA);
+            ElementId elemId = decoder.openElement(ElementId.ELEM_CONTEXT_DATA);
             while(true) {
                 uint subId = decoder.openElement();
                 if (subId == 0) {

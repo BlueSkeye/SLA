@@ -101,7 +101,7 @@ namespace Sla.CORE
         }
 
         /// Encode a SeqNum to a stream
-        internal void encode(ref Encoder encoder)
+        internal void encode(Sla.CORE.Encoder encoder)
         {
             encoder.openElement(ElementId.ELEM_SEQNUM);
             pc.getSpace().encodeAttributes(encoder, pc.getOffset());
@@ -110,13 +110,12 @@ namespace Sla.CORE
         }
 
         /// Decode a SeqNum from a stream
-        internal static SeqNum decode(ref Decoder decoder)
+        internal static SeqNum decode(Sla.CORE.Decoder decoder)
         {
             uint uniq = uint.MaxValue;
-            uint elemId = decoder.openElement(ElementId.ELEM_SEQNUM);
+            ElementId elemId = decoder.openElement(ElementId.ELEM_SEQNUM);
             Address pc = Address.decode(decoder); // Recover address
-            while(true)
-            {
+            while(true) {
                 AttributeId attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == AttributeId.ATTRIB_UNIQ) {

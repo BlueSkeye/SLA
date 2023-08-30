@@ -330,7 +330,8 @@ namespace Sla.DECCORE
                     // We know param is justified contained in newout
                     VarnodeData vardata;
                     // Test whether the new prototype naturally extends its output
-                    OpCode opc = assumedOutputExtension(param.getAddress(), param.getSize(), out vardata);
+                    OpCode opc = assumedOutputExtension(param.getAddress(), param.getSize(), 
+                        out vardata);
                     Address hiaddr = newout.getAddr();
                     if (opc != OpCode.CPUI_COPY) {
                         // If -newout- looks like a natural extension of the true output type, create the extension op
@@ -496,7 +497,8 @@ namespace Sla.DECCORE
             res.paramshift = paramshift;
             // We are skipping activeinput, activeoutput
             res.isbadjumptable = isbadjumptable;
-            res.copy(*this);       // Copy the FuncProto portion
+            // Copy the FuncProto portion
+            res.copy(this);
             return res;
         }
 
@@ -762,8 +764,8 @@ namespace Sla.DECCORE
             InjectPayload payload = data.getArch().pcodeinjectlib.getPayload(id);
 
             // do the insertion right after the callpoint
-            IEnumerator<PcodeOp> iter = op.getBasicIter();
-            ++iter;
+            LinkedListNode<PcodeOp>? iter = op.getBasicIter();
+            iter = iter.Next;
             data.doLiveInject(payload, op.getAddr(), op.getParent(), iter);
         }
 

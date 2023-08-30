@@ -45,7 +45,7 @@ namespace Sla.DECCORE
         {
             name = "";
             size = 0;
-            uint elemId = decoder.openElement();
+            ElementId elemId = decoder.openElement();
             while(true) {
                 AttributeId attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
@@ -109,7 +109,7 @@ namespace Sla.DECCORE
         protected void decodePayloadParams(Sla.CORE.Decoder decoder)
         {
             while(true) {
-                uint subId = decoder.peekElement();
+                ElementId subId = decoder.peekElement();
                 if (subId == ElementId.ELEM_INPUT) {
                     string paramName;
                     uint size;

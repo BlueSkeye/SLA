@@ -1,8 +1,5 @@
 ﻿using Sla.CORE;
 
-using EntryMap = Sla.EXTRA.rangemap<Sla.DECCORE.SymbolEntry>;
-using VarnodeLocSet = System.Collections.Generic.SortedSet<Sla.DECCORE.Varnode>; // VarnodeCompareLocDef : A set of Varnodes sorted by location (then by definition)
-
 namespace Sla.DECCORE
 {
     /// \brief A container for hints about the data-type layout of an address space

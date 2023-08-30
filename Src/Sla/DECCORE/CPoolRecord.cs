@@ -167,7 +167,7 @@ namespace Sla.DECCORE
             tag = ConstantPoolTagTypes.primitive;    // Default tag
             value = 0;
             flags = 0;
-            uint elemId = decoder.openElement(ElementId.ELEM_CPOOLREC);
+            ElementId elemId = decoder.openElement(ElementId.ELEM_CPOOLREC);
             while(true) {
                 AttributeId attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;

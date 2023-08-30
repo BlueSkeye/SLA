@@ -28,7 +28,7 @@ namespace Sla.CORE
         ///< Restore \b this from an XML stream
         public void decode(Sla.CORE.Decoder decoder)
         {
-            uint elemId = decoder.openElement();
+            ElementId elemId = decoder.openElement();
             if ((elemId != ElementId.ELEM_RANGE) && (elemId != ElementId.ELEM_REGISTER)) {
                 throw new DecoderError("Expecting <range> or <register> element");
             }

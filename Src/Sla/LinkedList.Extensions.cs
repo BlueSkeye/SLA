@@ -1,10 +1,23 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-
+﻿
 namespace Sla
 {
     internal static partial class Extensions
     {
+        internal static bool empty<T>(this LinkedList<T> list)
+        {
+            return 0 == list.Count;
+        }
+
+        internal static LinkedListNode<T> GetAt<T>(this LinkedList<T> list, int index)
+        {
+            if (0 > index) throw new ArgumentOutOfRangeException();
+            if (index >= list.Count) throw new ArgumentOutOfRangeException();
+            LinkedListNode<T>? scannedNode = list.First;
+            for (int i = 1; i < index; i++)
+                scannedNode = (scannedNode ?? throw new ApplicationException()).Next;
+            return scannedNode;
+        }
+
         /// <summary></summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="transferTo"></param>

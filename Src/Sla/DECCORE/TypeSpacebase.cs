@@ -26,7 +26,7 @@ namespace Sla.DECCORE
         /// \param typegrp is the factory owning \b this data-type
         internal void decode(Sla.CORE.Decoder decoder, TypeFactory typegrp)
         {
-            //  uint elemId = decoder.openElement();
+            //  ElementId elemId = decoder.openElement();
             decodeBasic(decoder);
             spaceid = decoder.readSpace(AttributeId.ATTRIB_SPACE);
             localframe = Address.decode(decoder);

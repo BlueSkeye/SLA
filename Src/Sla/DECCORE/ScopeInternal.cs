@@ -3,8 +3,6 @@ using Sla.DECCORE;
 using Sla.EXTRA;
 using System.Globalization;
 
-using EntryMap = Sla.EXTRA.rangemap<Sla.DECCORE.SymbolEntry>;
-
 namespace Sla.DECCORE
 {
     /// \brief An in-memory implementation of the Scope interface.
@@ -927,7 +925,7 @@ namespace Sla.DECCORE
 
         public override void decode(Sla.CORE.Decoder decoder)
         {
-            //  uint elemId = decoder.openElement(ElementId.ELEM_SCOPE);
+            //  ElementId elemId = decoder.openElement(ElementId.ELEM_SCOPE);
             //  name = el.getAttributeValue("name");	// Name must already be set in the constructor
             bool rangeequalssymbols = false;
 

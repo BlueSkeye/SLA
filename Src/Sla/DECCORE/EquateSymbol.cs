@@ -81,7 +81,7 @@ namespace Sla.DECCORE
 
         public override void decode(Sla.CORE.Decoder decoder)
         {
-            uint elemId = decoder.openElement(ElementId.ELEM_EQUATESYMBOL);
+            ElementId elemId = decoder.openElement(ElementId.ELEM_EQUATESYMBOL);
             decodeHeader(decoder);
 
             uint subId = decoder.openElement(ElementId.ELEM_VALUE);

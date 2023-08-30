@@ -1,7 +1,5 @@
 ﻿using Sla.CORE;
 
-using VarnodeLocSet = System.Collections.Generic.SortedSet<Sla.DECCORE.Varnode>; // VarnodeCompareLocDef : A set of Varnodes sorted by location (then by definition)
-
 namespace Sla.DECCORE
 {
     /// \brief Find Varnodes with a vectorized lane scheme and attempt to split the lanes

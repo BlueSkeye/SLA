@@ -149,7 +149,7 @@ namespace Sla.DECCORE
 
         public override void decode(Sla.CORE.Decoder decoder)
         {
-            uint elemId = decoder.openElement(ElementId.ELEM_COMMENTDB);
+            ElementId elemId = decoder.openElement(ElementId.ELEM_COMMENTDB);
             while (decoder.peekElement() != 0) {
                 Comment com = new Comment();
                 com.decode(decoder);

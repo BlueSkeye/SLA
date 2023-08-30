@@ -1,12 +1,5 @@
 ﻿using Sla.CORE;
 using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using ScopeMap = System.Collections.Generic.Dictionary<ulong, Sla.DECCORE.Scope>;
 
 namespace Sla.EXTRA
 {

@@ -1,4 +1,5 @@
 ﻿using Sla.CORE;
+using Sla.EXTRA;
 
 namespace Sla.DECCORE
 {
@@ -49,81 +50,8 @@ namespace Sla.DECCORE
             size = -1;
         }
 
-        /// \brief Initialization data for a SymbolEntry to facilitate a rangemap
-        /// This is all the raw pieces of a SymbolEntry for a (non-dynamic) Symbol except
-        /// the offset of the main address and the size, which are provided by the
-        /// (rangemap compatible) SymbolEntry constructor.
-        public class EntryInitData
-        {
-            // friend class SymbolEntry;
-            // The address space of the main SymbolEntry starting address
-            internal AddrSpace space;
-            // The symbol being mapped
-            internal Symbol symbol;
-            // Varnode flags specific to the storage location
-            internal Varnode.varnode_flags extraflags;
-            // Starting offset of the portion of the Symbol being covered
-            internal int offset;
-            // Reference to the range of code addresses for which the storage is valid
-            internal readonly RangeList uselimit = new RangeList();
-
-            public EntryInitData(Symbol sym, Varnode.varnode_flags exfl, AddrSpace spc,
-                int off, RangeList ul)
-            {
-                uselimit = ul;
-                symbol = sym;
-                extraflags = exfl;
-                space = spc;
-                offset = off;
-            }
-        }
-
-        /// \brief Class for sub-sorting different SymbolEntry objects at the same address
-        /// This is built from the SymbolEntry \b uselimit object (see SymbolEntry::getSubsort())
-        /// Relevant portions of an Address object or pulled out for smaller storage and quick comparisons.
-        public class EntrySubsort
-        {
-            // friend class SymbolEntry;
-            // Index of the sub-sorting address space
-            private int useindex;
-            // Offset into the sub-sorting address space
-            private ulong useoffset;
-
-            // Construct given a sub-sorting address
-            public EntrySubsort(Address addr) {
-                useindex = addr.getSpace().getIndex();
-                useoffset = addr.getOffset();
-            }
-
-            // Construct earliest possible sub-sort
-            public EntrySubsort()
-            {
-                useindex = 0;
-                useoffset = 0;
-            }
-
-            /// \brief Given a boolean value, construct the earliest/latest possible sub-sort
-            /// \param val is \b true for the latest and \b false for the earliest possible sub-sort
-            public EntrySubsort(bool val)
-            {
-                if (val) { useindex = 0xffff; } // Greater than any real values
-                else { useindex = 0; useoffset = 0; }   // Less than any real values
-            }
-
-            /// \brief Copy constructor
-            public EntrySubsort(EntrySubsort op2) {
-                useindex = op2.useindex;
-                useoffset = op2.useoffset;
-            }
-
-            /// \brief Compare \b this with another sub-sort
-            public static bool operator <(EntrySubsort op1, EntrySubsort op2)
-            {
-                if (op1.useindex != op2.useindex)
-                    return (op1.useindex < op2.useindex);
-                return (op1.useoffset < op2.useoffset);
-            }
-        }
+        internal static IRangemapSubsortTypeInstantiator<EntrySubsort> SubsortInstantiator
+            => EntrySubsort.Instanciator.Instance;
 
         /// Fully initialize \b this
         /// Establish the boundary offsets and fill in additional data
@@ -192,9 +120,11 @@ namespace Sla.DECCORE
         /// Get the sub-sort object
         /// Get data used to sub-sort entries (in a rangemap) at the same address
         /// \return the sub-sort object
-        public subsorttype getSubsort()
+        public /*subsorttype*/ EntrySubsort getSubsort()
         {
-            subsorttype res;        // Minimal subsort
+            // Minimal subsort
+            /*subsorttype*/
+            EntrySubsort res = new EntrySubsort();
             if ((symbol.getFlags() & Varnode.varnode_flags.addrtied) == 0) {
                 Sla.CORE.Range? range = uselimit.getFirstRange();
                 if (range == null)
@@ -269,10 +199,10 @@ namespace Sla.DECCORE
         /// \param inaddr is the given address
         /// \param sz is the given size (in bytes)
         /// \return the matching data-type or NULL
-        public Datatype getSizedType(Address addr, int sz)
+        public Datatype getSizedType(Address inaddr, int sz)
         {
             int off = (isDynamic()) ? offset : (int)(inaddr.getOffset() - addr.getOffset()) + offset;
-            Datatype cur = symbol.getType();
+            Datatype cur = symbol.getType() ?? throw new ApplicationException();
             return symbol.getScope().getArch().types.getExactPiece(cur, off, sz);
         }
 
@@ -337,6 +267,127 @@ namespace Sla.DECCORE
                 hash = 0;
             }
             uselimit.decode(decoder);
+        }
+
+        /// \brief Initialization data for a SymbolEntry to facilitate a rangemap
+        /// This is all the raw pieces of a SymbolEntry for a (non-dynamic) Symbol except
+        /// the offset of the main address and the size, which are provided by the
+        /// (rangemap compatible) SymbolEntry constructor.
+        public class EntryInitData
+        {
+            // friend class SymbolEntry;
+            // The address space of the main SymbolEntry starting address
+            internal AddrSpace space;
+            // The symbol being mapped
+            internal Symbol symbol;
+            // Varnode flags specific to the storage location
+            internal Varnode.varnode_flags extraflags;
+            // Starting offset of the portion of the Symbol being covered
+            internal int offset;
+            // Reference to the range of code addresses for which the storage is valid
+            internal readonly RangeList uselimit = new RangeList();
+
+            public EntryInitData(Symbol sym, Varnode.varnode_flags exfl, AddrSpace spc,
+                int off, RangeList ul)
+            {
+                uselimit = ul;
+                symbol = sym;
+                extraflags = exfl;
+                space = spc;
+                offset = off;
+            }
+        }
+
+        /// \brief Class for sub-sorting different SymbolEntry objects at the same address
+        /// This is built from the SymbolEntry \b uselimit object (see SymbolEntry::getSubsort())
+        /// Relevant portions of an Address object or pulled out for smaller storage and quick comparisons.
+        public class EntrySubsort : IComparable<EntrySubsort>
+        {
+            // friend class SymbolEntry;
+            // Index of the sub-sorting address space
+            internal int useindex;
+            // Offset into the sub-sorting address space
+            internal ulong useoffset;
+
+            // Construct given a sub-sorting address
+            public EntrySubsort(Address addr) {
+                useindex = addr.getSpace().getIndex();
+                useoffset = addr.getOffset();
+            }
+
+            // Construct earliest possible sub-sort
+            public EntrySubsort()
+            {
+                useindex = 0;
+                useoffset = 0;
+            }
+
+            ///// \brief Given a boolean value, construct the earliest/latest possible sub-sort
+            ///// \param val is \b true for the latest and \b false for the earliest possible sub-sort
+            //public EntrySubsort(bool val)
+            //{
+            //    if (val) { useindex = 0xffff; } // Greater than any real values
+            //    else { useindex = 0; useoffset = 0; }   // Less than any real values
+            //}
+
+            ///// \brief Copy constructor
+            //public EntrySubsort(EntrySubsort op2) {
+            //    useindex = op2.useindex;
+            //    useoffset = op2.useoffset;
+            //}
+
+            ///// \brief Compare \b this with another sub-sort
+            //public static bool operator <(EntrySubsort op1, EntrySubsort op2)
+            //{
+            //    if (op1.useindex != op2.useindex)
+            //        return (op1.useindex < op2.useindex);
+            //    return (op1.useoffset < op2.useoffset);
+            //}
+
+            public int CompareTo(EntrySubsort? x)
+            {
+                if (null == x) throw new ApplicationException();
+                int result = this.useindex.CompareTo(x.useindex);
+                if (0 == result) {
+                    result = this.useoffset.CompareTo(x.useoffset);
+                }
+                return result;
+            }
+
+            internal class Instanciator : IRangemapSubsortTypeInstantiator<EntrySubsort>
+            {
+                internal static Instanciator Instance = new Instanciator();
+
+                private Instanciator()
+                {
+                }
+
+                /// \brief Given a boolean value, construct the earliest/latest possible sub-sort
+                /// \param val is \b true for the latest and \b false for the earliest possible sub-sort
+                public EntrySubsort Create(bool value)
+                {
+                    EntrySubsort result = new EntrySubsort();
+                    if (value) {
+                        // Greater than any real values
+                        result.useindex = 0xffff;
+                    }
+                    else {
+                        // Less than any real values
+                        result.useindex = 0;
+                        result.useoffset = 0;
+                    }
+                    return result;
+                }
+
+                public EntrySubsort Create(EntrySubsort cloned)
+                {
+                    EntrySubsort result = new EntrySubsort() {
+                        useindex = cloned.useindex,
+                        useoffset = cloned.useoffset
+                    };
+                    return result;
+                }
+            }
         }
     }
 }

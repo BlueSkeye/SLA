@@ -1,8 +1,5 @@
 ﻿using Sla.CORE;
 using Sla.DECCORE;
-using static Sla.DECCORE.FlowBlock;
-using static Sla.DECCORE.TokenSplit;
-using static Sla.SLEIGH.ConstTpl;
 
 namespace Sla.EXTRA
 {
@@ -94,8 +91,7 @@ namespace Sla.EXTRA
 
         ~UnifyDatatype()
         {
-            switch (type)
-            {
+            switch (type) {
                 case TypeKind.op_type:
                 case TypeKind.var_type:
                 case TypeKind.block_type:

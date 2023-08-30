@@ -18,7 +18,7 @@ namespace Sla.DECCORE
         /// \param typegrp is the factory owning \b this data-type
         internal void decode(Sla.CORE.Decoder decoder, TypeFactory typegrp)
         {
-            //  uint elemId = decoder.openElement();
+            //  ElementId elemId = decoder.openElement();
             decodeBasic(decoder);
             submeta = (metatype == type_metatype.TYPE_INT) ? SUB_INT_CHAR : SUB_UINT_CHAR;
             //  decoder.closeElement(elemId);

@@ -80,7 +80,7 @@ namespace Sla.DECCORE
             /// \param decoder is the stream decoder
             public void decode(Sla.CORE.Decoder decoder)
             {
-                uint elemId = decoder.openElement(ElementId.ELEM_REF);
+                ElementId elemId = decoder.openElement(ElementId.ELEM_REF);
                 a = decoder.readUnsignedInteger(AttributeId.ATTRIB_A);
                 b = decoder.readUnsignedInteger(AttributeId.ATTRIB_B);
                 decoder.closeElement(elemId);
@@ -127,7 +127,7 @@ namespace Sla.DECCORE
 
         public override void decode(Sla.CORE.Decoder decoder, TypeFactory typegrp)
         {
-            uint elemId = decoder.openElement(ElementId.ELEM_CONSTANTPOOL);
+            ElementId elemId = decoder.openElement(ElementId.ELEM_CONSTANTPOOL);
             while (decoder.peekElement() != 0)
             {
                 CheapSorter sorter;

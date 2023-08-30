@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-
-using EntryMap = Sla.EXTRA.rangemap<Sla.DECCORE.SymbolEntry>;
+﻿
+using System.Collections;
 
 namespace Sla.DECCORE
 {
@@ -14,11 +8,13 @@ namespace Sla.DECCORE
     /// for each address space, iterator over all the SymbolEntry objects
     internal class MapIterator : IEnumerator<SymbolEntry>
     {
-        /// The list of EntryMaps, one per address space
+        private bool _completed;
+        private bool _disposed;
+        // The list of EntryMaps, one per address space
         private List<EntryMap>? map;
-        /// Current EntryMap being iterated
+        // Current EntryMap being iterated
         private IEnumerator<EntryMap> curmap;
-        /// Current SymbolEntry being iterated
+        // Current SymbolEntry being iterated
         private IEnumerator<SymbolEntry> curiter;
 
         /// Construct an uninitialized iterator
@@ -39,7 +35,7 @@ namespace Sla.DECCORE
             curiter = ci;
         }
 
-        /// \brief Copy constructor
+        // Copy constructor
         internal MapIterator(MapIterator op2)
         {
             map = op2.map;
@@ -48,70 +44,86 @@ namespace Sla.DECCORE
         }
 
         /// Return the SymbolEntry being pointed at
-        internal SymbolEntry operator*()
+        public SymbolEntry Current
         {
-            return &(* curiter);
+            get
+            {
+                AssertNotDisposed();
+                return curiter.Current;
+            }
+        }
+
+        object IEnumerator.Current => this.Current;
+
+        private void AssertNotDisposed()
+        {
+            if (_disposed) throw new ObjectDisposedException(GetType().FullName);
+        }
+
+        public void Dispose()
+        {
+            _disposed = true;
         }
 
         /// Pre-increment the iterator
         /// The iterator is advanced by one
         /// \return a reference to the (advanced) iterator
-        internal static MapIterator operator ++()
+        public bool MoveNext()
         {
-            ++curiter;
-            while ((curmap != map.end()) && (curiter == (*curmap).end_list())) {
-                do {
-                    ++curmap;
-                } while ((curmap != map.end()) && ((*curmap) == (EntryMap)null));
-                if (curmap != map.end())
-                    curiter = (*curmap).begin_list();
+            if (curiter.MoveNext()) return true;
+            while (curmap.MoveNext()) {
+                curiter = curmap.Current.begin_list();
+                if (curiter.MoveNext()) return true;
             }
-            return this;
+            _completed = true;
+            return false;
         }
 
-        /// Post-increment the iterator
-        /// The iterator is advanced by one
-        /// \param i is a dummy variable
-        /// \return a copy of the iterator before it was advanced
-        internal static MapIterator operator ++(int i)
+        public void Reset()
         {
-            MapIterator tmp = new MapIterator(*this);
-            ++curiter;
-            while ((curmap != map.end()) && (curiter == (*curmap).end_list()))
-            {
-                do
-                {
-                    ++curmap;
-                } while ((curmap != map.end()) && ((*curmap) == (EntryMap)null));
-                if (curmap != map.end())
-                    curiter = (*curmap).begin_list();
-            }
-            return tmp;
+            AssertNotDisposed();
+            throw new NotImplementedException();
         }
 
-        /// \brief Assignment operator
-        internal MapIterator operator=(MapIterator op2)
+        ///// Post-increment the iterator
+        ///// The iterator is advanced by one
+        ///// \param i is a dummy variable
+        ///// \return a copy of the iterator before it was advanced
+        //internal static MapIterator operator ++(int i)
+        //{
+        //    MapIterator tmp = new MapIterator(this);
+        //    ++curiter;
+        //    while ((curmap != map.end()) && (curiter == (*curmap).end_list())) {
+        //        do {
+        //            ++curmap;
+        //        } while ((curmap != map.end()) && ((*curmap) == (EntryMap)null));
+        //        if (curmap != map.end())
+        //            curiter = (*curmap).begin_list();
+        //    }
+        //    return tmp;
+        //}
+
+        //// Assignment operator
+        //internal MapIterator operator=(MapIterator op2)
+        //{
+        //    map = op2.map;
+        //    curmap = op2.curmap;
+        //    curiter = op2.curiter;
+        //    return this;
+        //}
+
+        // Equality operator
+        public static bool operator ==(MapIterator op1, MapIterator op2)
         {
-            map = op2.map;
-            curmap = op2.curmap;
-            curiter = op2.curiter;
-            return *this;
+            if (op1.curmap != op2.curmap) return false;
+            if (op1._completed) return true;
+            return (op1.curiter.Current == op2.curiter.Current);
         }
 
-        /// \brief Equality operator
-        internal bool operator ==(MapIterator op2)
+        // Inequality operator
+        public static bool operator !=(MapIterator op1, MapIterator op2)
         {
-            if (curmap != op2.curmap) return false;
-            if (curmap == map.end()) return true;
-            return (curiter == op2.curiter);
-        }
-
-        /// \brief Inequality operator
-        internal bool operator !=(MapIterator op2)
-        {
-            if (curmap != op2.curmap) return true;
-            if (curmap == map.end()) return false;
-            return (curiter != op2.curiter);
+            return !(op1 == op2);
         }
     }
 }

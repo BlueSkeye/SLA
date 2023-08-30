@@ -60,14 +60,14 @@ namespace Sla.CORE
 
         /// Constants are always printed as hexidecimal values in
         /// the debugger and console dumps
-        public override void printRaw(StreamWriter s, ulong offset)
+        public override void printRaw(TextWriter s, ulong offset)
         {
             s.Write($"0x{offset:X}");
         }
 
         /// The ConstantSpace should never be explicitly saved as it is
         /// always built automatically
-        public override void saveXml(StreamWriter s)
+        public override void saveXml(TextWriter s)
         {
             throw new LowlevelError("Should never save the constant space as XML");
         }

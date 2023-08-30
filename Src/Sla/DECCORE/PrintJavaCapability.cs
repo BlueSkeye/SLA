@@ -23,15 +23,17 @@ namespace Sla.DECCORE
             isdefault = false;
         }
 
-        /// Not implemented
-        private PrintJavaCapability(PrintJavaCapability op2)
+        ///// Not implemented
+        //private PrintJavaCapability(PrintJavaCapability op2)
+        //{
+        //}
+
+        ///// Not implemented
+        //private static PrintJavaCapability operator=(PrintJavaCapability op);
+
+        public override PrintLanguage buildLanguage(Architecture glb)
         {
             return new PrintJava(glb, name);
         }
-
-        /// Not implemented
-        private static PrintJavaCapability operator=(PrintJavaCapability op);
-
-        public override PrintLanguage buildLanguage(Architecture glb);
     }
 }

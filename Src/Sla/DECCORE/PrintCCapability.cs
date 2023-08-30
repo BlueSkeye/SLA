@@ -23,15 +23,14 @@ namespace Sla.DECCORE
             isdefault = true;
         }
 
-        /// Not implemented
-        private PrintCCapability(PrintCCapability op2)
-        {
-            return new PrintC(glb, name);
-        }
+        ///// Not implemented
+        //private PrintCCapability(PrintCCapability op2)
+        //{
+        //}
 
 
-        // Not implemented
-        private static PrintCCapability operator=(PrintCCapability op);
+        //// Not implemented
+        //private static PrintCCapability operator=(PrintCCapability op);
 
         public override PrintLanguage buildLanguage(Architecture glb)
         {

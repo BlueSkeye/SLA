@@ -471,7 +471,7 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         public virtual void decode(Sla.CORE.Decoder decoder)
         {
-            uint elemId = decoder.openElement(ElementId.ELEM_SYMBOL);
+            ElementId elemId = decoder.openElement(ElementId.ELEM_SYMBOL);
             decodeHeader(decoder);
 
             decodeBody(decoder);

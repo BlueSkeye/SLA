@@ -72,9 +72,8 @@ namespace Sla.DECCORE
             if (!model.hasThisPointer()) return;
             int numInputs = store.getNumInputs();
             if (numInputs == 0) return;
-            ProtoParameter* param = store.getInput(0);
-            if (param.isHiddenReturn())
-            {
+            ProtoParameter param = store.getInput(0);
+            if (param.isHiddenReturn()) {
                 if (numInputs < 2) return;
                 param = store.getInput(1);
             }
@@ -131,9 +130,10 @@ namespace Sla.DECCORE
             if (likelytrash.empty()) return;
             encoder.openElement(ElementId.ELEM_LIKELYTRASH);
             foreach (VarnodeData cur in likelytrash) {
-                if (binary_search(iter1, iter2, cur)) continue; // Already exists in ProtoModel
+                // Already exists in ProtoModel
+                if (model.trashContains(cur)) continue;
                 encoder.openElement(ElementId.ELEM_ADDR);
-                cur.space.encodeAttributes(encoder, cur.offset, cur.size);
+                cur.space.encodeAttributes(encoder, cur.offset, (int)cur.size);
                 encoder.closeElement(ElementId.ELEM_ADDR);
             }
             encoder.closeElement(ElementId.ELEM_LIKELYTRASH);
@@ -150,10 +150,10 @@ namespace Sla.DECCORE
             tmpList.swap(effectlist);
             IEnumerator<EffectRecord> iter = model.effectBegin();
             while (iter.MoveNext()) {
-                effectlist.Add(iter.Current);
+                effectlist.AddLast(iter.Current);
             }
             bool hasNew = false;
-            int listSize = effectlist.size();
+            int listSize = effectlist.Count;
             foreach (EffectRecord curRecord in tmpList) {
                 int off = ProtoModel.lookupRecord(effectlist, listSize, curRecord.getAddress(),
                     curRecord.getSize());
@@ -161,10 +161,10 @@ namespace Sla.DECCORE
                     throw new LowlevelError("Partial overlap of prototype override with existing effects");
                 else if (off >= 0) {
                     // Found matching record, change its type
-                    effectlist[off] = curRecord;
+                    effectlist.GetAt(off).Value = curRecord;
                 }
                 else {
-                    effectlist.Add(curRecord);
+                    effectlist.AddLast(curRecord);
                     hasNew = true;
                 }
             }
@@ -215,7 +215,8 @@ namespace Sla.DECCORE
                 typelist.Add(typefactory.getTypeVoid());
             nmlist.Add("");
 
-            Datatype extra = typefactory.getBase(4, type_metatype.TYPE_UNKNOWN); // The extra parameters have this type
+            // The extra parameters have this type
+            Datatype extra = typefactory.getBase(4, type_metatype.TYPE_UNKNOWN);
             for (int i = 0; i < paramshift; ++i) {
                 nmlist.Add("");
                 typelist.Add(extra);
@@ -230,11 +231,12 @@ namespace Sla.DECCORE
                     typelist.Add(param.getType());
                 }
             }
-            else
+            else {
                 isdotdotdot = true;
+            }
 
             // Reassign the storage locations for this new parameter list
-            List<ParameterPieces> pieces;
+            List<ParameterPieces> pieces = new List<ParameterPieces>();
             model.assignParameterStorage(typelist, pieces, false);
 
             // delete store;
@@ -262,7 +264,9 @@ namespace Sla.DECCORE
         /// \brief Toggle whether a parameter shift has been applied
         protected void setParamshiftApplied(bool val)
         {
-            flags = val ? (flags | FuncFlags.paramshift_applied) : (flags & ~(FuncFlags.paramshift_applied));
+            flags = val
+                ? (flags | FuncFlags.paramshift_applied)
+                : (flags & ~(FuncFlags.paramshift_applied));
         }
     
         public FuncProto()
@@ -390,20 +394,19 @@ namespace Sla.DECCORE
                 if ((model == (ProtoModel)null) || (expop != ProtoModel.extrapop_unknown))
                     extrapop = expop;
                 if (m.hasThisPointer())
-                    flags |= has_thisptr;
+                    flags |= FuncFlags.has_thisptr;
                 if (m.isConstructor())
-                    flags |= is_constructor;
+                    flags |= FuncFlags.is_constructor;
                 model = m;
             }
-            else
-            {
+            else {
                 model = m;
                 extrapop = ProtoModel.extrapop_unknown;
             }
         }
 
         /// Does \b this prototype have a model
-        public bool hasModel() => (model != (ProtoModel *)0);
+        public bool hasModel() => (model != (ProtoModel)null);
 
         /// Does \b this use the given model
         public bool hasMatchingModel(ProtoModel op2) => (model == op2);
@@ -423,9 +426,9 @@ namespace Sla.DECCORE
         /// Are input data-types locked
         public bool isInputLocked()
         {
-            if ((flags & voidinputlock) != 0) return true;
+            if ((flags & FuncFlags.voidinputlock) != 0) return true;
             if (numParams() == 0) return false;
-            ProtoParameter* param = getParam(0);
+            ProtoParameter param = getParam(0);
             if (param.isTypeLocked()) return true;
             return false;
         }
@@ -434,10 +437,10 @@ namespace Sla.DECCORE
         public bool isOutputLocked() => store.getOutput().isTypeLocked();
 
         /// Is the prototype model for \b this locked
-        public bool isModelLocked() => ((flags&modellock)!= 0);
+        public bool isModelLocked() => ((flags & FuncFlags.modellock) != 0);
 
         /// Is \b this a "custom" function prototype
-        public bool hasCustomStorage() => ((flags&custom_storage)!= 0);
+        public bool hasCustomStorage() => ((flags & FuncFlags.custom_storage) != 0);
 
         /// Toggle the data-type lock on input parameters
         /// The lock on the data-type of input parameters is set as specified.
@@ -448,16 +451,16 @@ namespace Sla.DECCORE
         public void setInputLock(bool val)
         {
             if (val)
-                flags |= modellock;     // Locking input locks the model
+                flags |= FuncFlags.modellock;     // Locking input locks the model
             int num = numParams();
-            if (num == 0)
-            {
-                flags = val ? (flags | voidinputlock) : (flags & ~((uint)voidinputlock));
+            if (num == 0) {
+                flags = val
+                    ? (flags | FuncFlags.voidinputlock)
+                    : (flags & ~(FuncFlags.voidinputlock));
                 return;
             }
-            for (int i = 0; i < num; ++i)
-            {
-                ProtoParameter* param = getParam(i);
+            for (int i = 0; i < num; ++i) {
+                ProtoParameter param = getParam(i);
                 param.setTypeLock(val);
             }
         }
@@ -471,7 +474,8 @@ namespace Sla.DECCORE
         public void setOutputLock(bool val)
         {
             if (val)
-                flags |= modellock;     // Locking output locks the model
+                // Locking output locks the model
+                flags |= FuncFlags.modellock;
             store.getOutput().setTypeLock(val);
         }
 
@@ -482,11 +486,13 @@ namespace Sla.DECCORE
         /// \param val is \b true to indicate a lock, \b false for unlocked
         public void setModelLock(bool val)
         {
-            flags = val ? (flags | modellock) : (flags & ~((uint)modellock));
+            flags = val
+                ? (flags | FuncFlags.modellock)
+                : (flags & ~(FuncFlags.modellock));
         }
 
         /// Does this function get \e in-lined during decompilation.
-        public bool isInline() => ((flags & is_inline)!= 0);
+        public bool isInline() => ((flags & FuncFlags.is_inline)!= 0);
 
         /// \brief Toggle the \e in-line setting for functions with \b this prototype
         ///
@@ -494,7 +500,9 @@ namespace Sla.DECCORE
         /// \param val is \b true if in-lining should be performed.
         public void setInline(bool val)
         {
-            flags = val ? (flags | is_inline) : (flags & ~((uint)is_inline));
+            flags = val
+                ? (flags | FuncFlags.is_inline)
+                : (flags & ~(FuncFlags.is_inline));
         }
 
         /// \brief Get the injection id associated with \b this.
@@ -518,8 +526,7 @@ namespace Sla.DECCORE
         {
             if (val == 0)
                 return false;
-            if (returnBytesConsumed == 0 || val < returnBytesConsumed)
-            {
+            if (returnBytesConsumed == 0 || val < returnBytesConsumed) {
                 returnBytesConsumed = val;
                 return true;
             }
@@ -527,53 +534,61 @@ namespace Sla.DECCORE
         }
 
         /// \brief Does a function with \b this prototype never return
-        public bool isNoReturn() => ((flags & no_return)!= 0);
+        public bool isNoReturn() => ((flags & FuncFlags.no_return)!= 0);
 
         /// \brief Toggle the \e no-return setting for functions with \b this prototype
         ///
         /// \param val is \b true to treat the function as never returning
         public void setNoReturn(bool val)
         {
-            flags = val ? (flags | no_return) : (flags & ~((uint)no_return));
+            flags = val
+                ? (flags | FuncFlags.no_return)
+                : (flags & ~(FuncFlags.no_return));
         }
 
         /// \brief Is \b this a prototype for a class method, taking a \e this pointer.
-        public bool hasThisPointer() => ((flags & has_thisptr)!= 0);
+        public bool hasThisPointer() => ((flags & FuncFlags.has_thisptr)!= 0);
 
         /// \brief Is \b this prototype for a class constructor method
-        public bool isConstructor() => ((flags & is_constructor)!= 0);
+        public bool isConstructor() => ((flags & FuncFlags.is_constructor)!= 0);
 
         /// \brief Toggle whether \b this prototype is a \e constructor method
         ///
         /// \param val is \b true if \b this is a constructor, \b false otherwise
         public void setConstructor(bool val)
         {
-            flags = val ? (flags | is_constructor) : (flags & ~((uint)is_constructor));
+            flags = val
+                ? (flags | FuncFlags.is_constructor)
+                : (flags & ~(FuncFlags.is_constructor));
         }
 
         /// \brief Is \b this prototype for a class destructor method
-        public bool isDestructor() => ((flags & is_destructor)!= 0);
+        public bool isDestructor() => ((flags & FuncFlags.is_destructor)!= 0);
 
         /// \brief Toggle whether \b this prototype is a \e destructor method
         ///
         /// \param val is \b true if \b this is a destructor
         public void setDestructor(bool val)
         {
-            flags = val ? (flags | is_destructor) : (flags & ~((uint)is_destructor));
+            flags = val
+                ? (flags | FuncFlags.is_destructor)
+                : (flags & ~(FuncFlags.is_destructor));
         }
 
         /// \brief Has \b this prototype been marked as having an incorrect input parameter descriptions
-        public bool hasInputErrors() => ((flags&error_inputparam)!= 0);
+        public bool hasInputErrors() => ((flags& FuncFlags.error_inputparam)!= 0);
 
         /// \brief Has \b this prototype been marked as having an incorrect return value description
-        public bool hasOutputErrors() => ((flags&error_outputparam)!= 0);
+        public bool hasOutputErrors() => ((flags& FuncFlags.error_outputparam)!= 0);
 
         /// \brief Toggle the input error setting for \b this prototype
         ///
         /// \param val is \b true if input parameters should be marked as in error
         public void setInputErrors(bool val)
         {
-            flags = val ? (flags | error_inputparam) : (flags & ~((uint)error_inputparam));
+            flags = val
+                ? (flags | FuncFlags.error_inputparam)
+                : (flags & ~(FuncFlags.error_inputparam));
         }
 
         /// \brief Toggle the output error setting for \b this prototype
@@ -581,19 +596,25 @@ namespace Sla.DECCORE
         /// \param val is \b true if return value should be marked as in error
         public void setOutputErrors(bool val)
         {
-            flags = val ? (flags | error_outputparam) : (flags & ~((uint)error_outputparam));
+            flags = val
+                ? (flags | FuncFlags.error_outputparam)
+                : (flags & ~(FuncFlags.error_outputparam));
         }
 
-        public int getExtraPop() => extrapop; ///< Get the general \e extrapop setting for \b this prototype
+        ///< Get the general \e extrapop setting for \b this prototype
+        public int getExtraPop() => extrapop;
 
+        ///< Set the general \e extrapop for \b this prototype
         public void setExtraPop(int ep)
         {
             extrapop = ep;
-        }          ///< Set the general \e extrapop for \b this prototype
+        }
 
-        public int getInjectUponEntry() => model.getInjectUponEntry(); ///< Get any \e upon-entry injection id (or -1)
-        
-        public int getInjectUponReturn() => model.getInjectUponReturn(); ///< Get any \e upon-return injection id (or -1)
+        ///< Get any \e upon-entry injection id (or -1)
+        public int getInjectUponEntry() => model.getInjectUponEntry();
+
+        ///< Get any \e upon-return injection id (or -1)
+        public int getInjectUponReturn() => model.getInjectUponReturn();
 
         /// \brief Assuming \b this prototype is locked, calculate the \e extrapop
         ///
@@ -604,16 +625,18 @@ namespace Sla.DECCORE
         {
             if (!isInputLocked()) return;
             int numparams = numParams();
-            if (isDotdotdot())
-            {
-                if (numparams != 0)     // If this is a "standard" varargs, with fixed initial parameters
-                    setExtraPop(4);     // then this must be __cdecl
-                return;         // otherwise we can't resolve the extrapop, as in the FARPROC prototype
+            if (isDotdotdot()) {
+                if (numparams != 0)
+                    // If this is a "standard" varargs, with fixed initial parameters
+                    // then this must be __cdecl
+                    setExtraPop(4);
+                // otherwise we can't resolve the extrapop, as in the FARPROC prototype
+                return;
             }
-            int expop = 4;         // Extrapop is at least 4 for the return address
-            for (int i = 0; i < numparams; ++i)
-            {
-                ProtoParameter* param = getParam(i);
+            // Extrapop is at least 4 for the return address
+            int expop = 4;
+            for (int i = 0; i < numparams; ++i) {
+                ProtoParameter param = getParam(i);
                 Address addr = param.getAddress();
                 if (addr.getSpace().getType() != spacetype.IPTR_SPACEBASE) continue;
                 int cur = (int)addr.getOffset() + param.getSize();
@@ -634,11 +657,9 @@ namespace Sla.DECCORE
         /// Clear the return value if it has not been locked
         public void clearUnlockedOutput()
         {
-            ProtoParameter* outparam = getOutput();
-            if (outparam.isTypeLocked())
-            {
-                if (outparam.isSizeTypeLocked())
-                {
+            ProtoParameter outparam = getOutput();
+            if (outparam.isTypeLocked()) {
+                if (outparam.isSizeTypeLocked()) {
                     if (model != (ProtoModel)null)
                         outparam.resetSizeLockType(getArch().types);
                 }
@@ -652,7 +673,8 @@ namespace Sla.DECCORE
         public void clearInput()
         {
             store.clearAllInputs();
-            flags &= ~((uint)voidinputlock); // If a void was locked in clear it
+            // If a void was locked in clear it
+            flags &= ~(FuncFlags.voidinputlock);
         }
 
         /// Associate a given injection with \b this prototype
@@ -662,10 +684,9 @@ namespace Sla.DECCORE
         {
             if (id < 0)
                 cancelInjectId();
-            else
-            {
+            else {
                 injectid = id;
-                flags |= is_inline;
+                flags |= FuncFlags.is_inline;
             }
         }
 
@@ -673,7 +694,7 @@ namespace Sla.DECCORE
         public void cancelInjectId()
         {
             injectid = -1;
-            flags &= ~((uint)is_inline);
+            flags &= ~(FuncFlags.is_inline);
         }
 
         /// \brief If \b this has a \e merged model, pick the most likely model (from the merged set)
@@ -684,10 +705,10 @@ namespace Sla.DECCORE
         {
             if (model == (ProtoModel)null) return;
             if (!model.isMerged()) return; // Already been resolved
-            ProtoModelMerged* mergemodel = (ProtoModelMerged*)model;
-            ProtoModel* newmodel = mergemodel.selectModel(active);
-            setModel(newmodel);
+            ProtoModelMerged mergemodel = (ProtoModelMerged)model;
+            ProtoModel newmodel = mergemodel.selectModel(active);
             // we don't need to remark the trials, as this is accomplished by the ParamList::fillinMap method
+            setModel(newmodel);
         }
 
         /// \brief Given a list of input \e trials, derive the most likely inputs for \b this prototype
@@ -758,7 +779,7 @@ namespace Sla.DECCORE
                     ParameterPieces pieces = new ParameterPieces();
                     if (vn.isPersist()) {
                         int sz;
-                        pieces.addr = data.findDisjointCover(vn, sz);
+                        pieces.addr = data.findDisjointCover(vn, out sz);
                         if (sz == vn.getSize())
                             pieces.type = vn.getHigh().getType();
                         else
@@ -804,7 +825,7 @@ namespace Sla.DECCORE
                     ParameterPieces pieces = new ParameterPieces();
                     if (vn.isPersist()) {
                         int sz;
-                        pieces.addr = data.findDisjointCover(vn, sz);
+                        pieces.addr = data.findDisjointCover(vn, out sz);
                         pieces.type = factory.getBase(sz, type_metatype.TYPE_UNKNOWN);
                         pieces.flags = 0;
                     }
@@ -897,60 +918,72 @@ namespace Sla.DECCORE
             flags &= ~(FuncFlags.voidinputlock);
             setDotdotdot(dtdtdt);
 
-            List<ParameterPieces> pieces;
+            List<ParameterPieces> pieces = new List<ParameterPieces>();
 
             // Calculate what memory locations hold each type
             try {
                 model.assignParameterStorage(typelist, pieces, false);
                 store.setOutput(pieces[0]);
                 uint j = 1;
-                for (uint i = 1; i < pieces.size(); ++i) {
+                for (int i = 1; i < pieces.size(); ++i) {
                     if ((pieces[i].flags & ParameterPieces.Flags.hiddenretparm) != 0) {
                         store.setInput(i - 1, "rethidden", pieces[i]);
                         continue;       // increment i but not j
                     }
-                    store.setInput(i - 1, namelist[j], pieces[i]);
+                    store.setInput(i - 1, namelist[(int)j], pieces[i]);
                     j = j + 1;
                 }
             }
-            catch (ParamUnassignedError err) {
+            catch (ParamUnassignedError) {
                 flags |= FuncFlags.error_inputparam;
             }
             updateThisPointer();
         }
 
-        public ProtoParameter getParam(int i) => store.getInput(i); ///< Get the i-th input parameter
+        ///< Get the i-th input parameter
+        public ProtoParameter getParam(int i) => store.getInput(i);
 
+        ///< Remove the i-th input parameter
         public void removeParam(int i)
         {
             store.clearInput(i);
-        }        ///< Remove the i-th input parameter
+        }
 
-        public int numParams() => store.getNumInputs(); ///< Get the number of input parameters
+        ///< Get the number of input parameters
+        public int numParams() => store.getNumInputs();
 
-        public ProtoParameter getOutput() => store.getOutput(); ///< Get the return value
+        ///< Get the return value
+        public ProtoParameter getOutput() => store.getOutput();
 
-        public Datatype getOutputType() => store.getOutput().getType(); ///< Get the return value data-type
+        ///< Get the return value data-type
+        public Datatype getOutputType() => store.getOutput().getType();
 
-        public RangeList getLocalRange() => model.getLocalRange(); ///< Get the range of potential local stack variables
+        ///< Get the range of potential local stack variables
+        public RangeList getLocalRange() => model.getLocalRange();
 
-        public RangeList getParamRange() => model.getParamRange(); ///< Get the range of potential stack parameters
+        ///< Get the range of potential stack parameters
+        public RangeList getParamRange() => model.getParamRange();
 
-        public bool isStackGrowsNegative() => model.isStackGrowsNegative(); ///< Return \b true if the stack grows toward smaller addresses
+        ///< Return \b true if the stack grows toward smaller addresses
+        public bool isStackGrowsNegative() => model.isStackGrowsNegative();
 
-        public bool isDotdotdot() => ((flags & FuncFlags.dotdotdot) != 0); ///< Return \b true if \b this takes a variable number of arguments
+        ///< Return \b true if \b this takes a variable number of arguments
+        public bool isDotdotdot() => ((flags & FuncFlags.dotdotdot) != 0);
 
         public void setDotdotdot(bool val)
         {
             flags = val ? (flags | FuncFlags.dotdotdot) : (flags & ~(FuncFlags.dotdotdot));
         }    ///< Toggle whether \b this takes variable arguments
 
-        public bool isOverride() => ((flags & FuncFlags.is_override) != 0); ///< Return \b true if \b this is a call site override
+        ///< Return \b true if \b this is a call site override
+        public bool isOverride() => ((flags & FuncFlags.is_override) != 0);
 
         /// Toggle whether \b this is a call site override
         public void setOverride(bool val)
         {
-            flags = val ? (flags | FuncFlags.is_override) : (flags & ~(FuncFlags.is_override));
+            flags = val
+                ? (flags | FuncFlags.is_override)
+                : (flags & ~(FuncFlags.is_override));
         }
 
         /// \brief Calculate the effect \b this has an a given storage location
@@ -978,7 +1011,7 @@ namespace Sla.DECCORE
 
         /// Get iterator to front of \e likelytrash list
         public IEnumerator<VarnodeData> trashBegin()
-            => (likelytrash.empty()) ? model.trashBegin() : likelytrash.begin();
+            => (likelytrash.empty()) ? model.trashBegin() : likelytrash.GetEnumerator();
 
         ///// Get iterator to end of \e likelytrash list
         ///// \return the iterator to the end of the list
@@ -1044,13 +1077,12 @@ namespace Sla.DECCORE
         /// \param addr is the starting address of the given storage location
         /// \param size is the number of bytes in the storage
         /// \return the characterization code
-        public int characterizeAsOutput(Address addr, int size)
+        public ParamEntry.Containment characterizeAsOutput(Address addr, int size)
         {
-            if (isOutputLocked())
-            {
-                ProtoParameter* outparam = getOutput();
+            if (isOutputLocked()) {
+                ProtoParameter outparam = getOutput();
                 if (outparam.getType().getMetatype() == type_metatype.TYPE_VOID)
-                    return ParamEntryParamEntry.Containment.no_containment;
+                    return ParamEntry.Containment.no_containment;
                 Address iaddr = outparam.getAddress();
                 // If the output is locked, the varnode must be justified in the location relative
                 // to the endianness of the space, irregardless of the forceleft flag
@@ -1061,7 +1093,7 @@ namespace Sla.DECCORE
                     return ParamEntry.Containment.contains_unjustified;
                 if (iaddr.containedBy(outparam.getSize(), addr, size))
                     return ParamEntry.Containment.contained_by;
-                return ParamEntryParamEntry.Containment.no_containment;
+                return ParamEntry.Containment.no_containment;
             }
             return model.characterizeAsOutput(addr, size);
         }
@@ -1078,14 +1110,12 @@ namespace Sla.DECCORE
         {
             if (!isDotdotdot())
             {       // If the proto is varargs, go straight to the model
-                if ((flags & voidinputlock) != 0) return false;
+                if ((flags & FuncFlags.voidinputlock) != 0) return false;
                 int num = numParams();
-                if (num > 0)
-                {
+                if (num > 0) {
                     bool locktest = false;  // Have tested against locked symbol
-                    for (int i = 0; i < num; ++i)
-                    {
-                        ProtoParameter* param = getParam(i);
+                    for (int i = 0; i < num; ++i) {
+                        ProtoParameter param = getParam(i);
                         if (!param.isTypeLocked()) continue;
                         locktest = true;
                         Address iaddr = param.getAddress();
@@ -1110,9 +1140,8 @@ namespace Sla.DECCORE
         /// \return \b false if the location is definitely not the return value
         public bool possibleOutputParam(Address addr, int size)
         {
-            if (isOutputLocked())
-            {
-                ProtoParameter* outparam = getOutput();
+            if (isOutputLocked()) {
+                ProtoParameter outparam = getOutput();
                 if (outparam.getType().getMetatype() == type_metatype.TYPE_VOID)
                     return false;
                 Address iaddr = outparam.getAddress();
@@ -1154,27 +1183,25 @@ namespace Sla.DECCORE
         /// \return \b true if the given storage is unjustified within its parameter container
         public bool unjustifiedInputParam(Address addr, int size, VarnodeData res)
         {
-            if (!isDotdotdot())
-            {       // If the proto is varargs, go straight to the model
-                if ((flags & voidinputlock) != 0) return false;
+            if (!isDotdotdot()) {
+                // If the proto is varargs, go straight to the model
+                if ((flags & FuncFlags.voidinputlock) != 0) return false;
                 int num = numParams();
-                if (num > 0)
-                {
-                    bool locktest = false;  // Have tested against locked symbol
-                    for (int i = 0; i < num; ++i)
-                    {
-                        ProtoParameter* param = getParam(i);
+                if (num > 0) {
+                    // Have tested against locked symbol
+                    bool locktest = false;
+                    for (int i = 0; i < num; ++i) {
+                        ProtoParameter param = getParam(i);
                         if (!param.isTypeLocked()) continue;
                         locktest = true;
                         Address iaddr = param.getAddress();
                         // If the parameter already exists, test if -addr- -size- is improperly contained in param
                         int just = iaddr.justifiedContain(param.getSize(), addr, size, false);
                         if (just == 0) return false; // Contained but not improperly
-                        if (just > 0)
-                        {
+                        if (just > 0) {
                             res.space = iaddr.getSpace();
                             res.offset = iaddr.getOffset();
-                            res.size = param.getSize();
+                            res.size = (uint)param.getSize();
                             return true;
                         }
                     }
@@ -1211,7 +1238,7 @@ namespace Sla.DECCORE
         /// INT_PIECE indicates the extension is determined by the specific prototype.
         public OpCode assumedOutputExtension(Address addr, int size, out VarnodeData res)
         {
-            return model.assumedOutputExtension(addr, size, out  res);
+            return model.assumedOutputExtension(addr, size, out res);
         }
 
         /// \brief Pass-back the biggest potential input parameter contained within the given range
@@ -1221,27 +1248,23 @@ namespace Sla.DECCORE
         /// \return \b true if there is at least one parameter contained in the range
         public bool getBiggestContainedInputParam(Address loc, int size, VarnodeData res)
         {
-            if (!isDotdotdot())
-            {       // If the proto is varargs, go straight to the model
-                if ((flags & voidinputlock) != 0) return false;
+            if (!isDotdotdot()) {
+                // If the proto is varargs, go straight to the model
+                if ((flags & FuncFlags.voidinputlock) != 0) return false;
                 int num = numParams();
-                if (num > 0)
-                {
+                if (num > 0) {
                     bool locktest = false;  // Have tested against locked symbol
                     res.size = 0;
-                    for (int i = 0; i < num; ++i)
-                    {
-                        ProtoParameter* param = getParam(i);
+                    for (int i = 0; i < num; ++i) {
+                        ProtoParameter param = getParam(i);
                         if (!param.isTypeLocked()) continue;
                         locktest = true;
                         Address iaddr = param.getAddress();
-                        if (iaddr.containedBy(param.getSize(), loc, size))
-                        {
-                            if (param.getSize() > res.size)
-                            {
+                        if (iaddr.containedBy(param.getSize(), loc, size)) {
+                            if (param.getSize() > res.size) {
                                 res.space = iaddr.getSpace();
                                 res.offset = iaddr.getOffset();
-                                res.size = param.getSize();
+                                res.size = (uint)param.getSize();
                             }
                         }
                     }
@@ -1267,7 +1290,7 @@ namespace Sla.DECCORE
                 if (iaddr.containedBy(outparam.getSize(), loc, size)) {
                     res.space = iaddr.getSpace();
                     res.offset = iaddr.getOffset();
-                    res.size = outparam.getSize();
+                    res.size = (uint)outparam.getSize();
                     return true;
                 }
                 return false;
@@ -1284,11 +1307,11 @@ namespace Sla.DECCORE
         public Address getThisPointerStorage(Datatype dt)
         {
             if (!model.hasThisPointer())
-                return Address();
+                return new Address();
             List<Datatype> typelist = new List<Datatype>();
             typelist.Add(getOutputType());
             typelist.Add(dt);
-            List<ParameterPieces> res;
+            List<ParameterPieces> res = new List<ParameterPieces>();
             model.assignParameterStorage(typelist, res, true);
             for (int i = 1; i < res.size(); ++i) {
                 if ((res[i].flags & ParameterPieces.Flags.hiddenretparm) != 0) continue;
@@ -1311,11 +1334,10 @@ namespace Sla.DECCORE
                 if (isOutputLocked()) {
                     ProtoParameter out1 = store.getOutput();
                     ProtoParameter out2 = op2.store.getOutput();
-                    if (*out1 != *out2) return false;
+                    if (out1 != out2) return false;
                 }
             }
-            if ((extrapop != ProtoModel.extrapop_unknown)
-                && (extrapop != op2.extrapop))
+            if ((extrapop != ProtoModel.extrapop_unknown) && (extrapop != op2.extrapop))
                 return false;
             if (isDotdotdot() != op2.isDotdotdot()) {
                 // Mismatch in varargs
@@ -1332,9 +1354,15 @@ namespace Sla.DECCORE
             if (injectid != op2.injectid) return false;
             if ((flags & (FuncFlags.is_inline | FuncFlags.no_return)) != (op2.flags & (FuncFlags.is_inline | FuncFlags.no_return)))
                 return false;
-            if (effectlist.size() != op2.effectlist.size()) return false;
-            for (int i = 0; i < effectlist.size(); ++i)
-                if (effectlist[i] != op2.effectlist[i]) return false;
+            if (effectlist.Count != op2.effectlist.Count) return false;
+            LinkedListNode<EffectRecord> record1 = effectlist.First;
+            LinkedListNode<EffectRecord> record2 = op2.effectlist.First;
+            for (int i = 0;
+                i < effectlist.Count;
+                ++i, record1 = record1.Next, record2 = record2.Next)
+            {
+                if (record1 != record2) return false;
+            }
 
             if (likelytrash.size() != op2.likelytrash.size()) return false;
             for (int i = 0; i < likelytrash.size(); ++i)
@@ -1375,7 +1403,7 @@ namespace Sla.DECCORE
         ///
         /// Get properties not including locking, error, and inlining flags.
         /// \return the active set of flags for \b this prototype
-        public uint getComparableFlags()
+        public FuncFlags getComparableFlags()
             => (flags & (FuncFlags.dotdotdot | FuncFlags.is_constructor | FuncFlags.is_destructor | FuncFlags.has_thisptr ));
 
         /// \brief Encode \b this to a stream as a \<prototype> element.
@@ -1420,7 +1448,8 @@ namespace Sla.DECCORE
             if (injectid >= 0) {
                 Architecture glb = model.getArch();
                 encoder.openElement(ElementId.ELEM_INJECT);
-                encoder.writeString(AttributeId.ATTRIB_CONTENT, glb.pcodeinjectlib.getCallFixupName(injectid));
+                encoder.writeString(AttributeId.ATTRIB_CONTENT,
+                    glb.pcodeinjectlib.getCallFixupName(injectid));
                 encoder.closeElement(ElementId.ELEM_INJECT);
             }
             store.encode(encoder);     // Store any internally backed prototyped symbols
@@ -1437,13 +1466,14 @@ namespace Sla.DECCORE
         {
             // Model must be set first
             if (store == (ProtoStore)null)
-                throw new LowlevelError("Prototype storage must be set before restoring FuncProto");
+                throw new LowlevelError(
+                    "Prototype storage must be set before restoring FuncProto");
             ProtoModel? mod = (ProtoModel)null;
             bool seenextrapop = false;
-            int readextrapop;
+            int readextrapop = 0;
             flags = 0;
             injectid = -1;
-            uint elemId = decoder.openElement(ElementId.ELEM_PROTOTYPE);
+            ElementId elemId = decoder.openElement(ElementId.ELEM_PROTOTYPE);
             while(true) {
                 AttributeId attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
@@ -1453,8 +1483,10 @@ namespace Sla.DECCORE
                         mod = glb.defaultfp;   // Use the default model
                     else {
                         mod = glb.getModel(modelname);
-                        if (mod == (ProtoModel)null)  // Model name is unrecognized
-                            mod = glb.createUnknownModel(modelname);   // Create model with placeholder behavior
+                        if (mod == (ProtoModel)null)
+                            // Model name is unrecognized
+                            // Create model with placeholder behavior
+                            mod = glb.createUnknownModel(modelname);
                     }
                 }
                 else if (attribId == AttributeId.ATTRIB_EXTRAPOP) {
@@ -1494,12 +1526,15 @@ namespace Sla.DECCORE
                         flags |= FuncFlags.is_destructor;
                 }
             }
-            if (mod != (ProtoModel)null) // If a model was specified
-                setModel(mod);      // This sets extrapop to model default
-            if (seenextrapop)       // If explicitly set
+            if (mod != (ProtoModel)null)
+                // If a model was specified
+                // This sets extrapop to model default
+                setModel(mod);
+            if (seenextrapop)
+                // If explicitly set
                 extrapop = readextrapop;
 
-            uint subId = decoder.peekElement();
+            ElementId subId = decoder.peekElement();
             if (subId != 0) {
                 ParameterPieces outpieces = new ParameterPieces();
                 bool outputlock = false;
@@ -1545,7 +1580,7 @@ namespace Sla.DECCORE
                     while (decoder.peekElement() != 0) {
                         EffectRecord newRecord = new EffectRecord();
                         newRecord.decode(EffectRecord.EffectType.unaffected, decoder);
-                        effectlist.Add(newRecord);
+                        effectlist.AddLast(newRecord);
                     }
                     decoder.closeElement(subId);
                 }
@@ -1554,7 +1589,7 @@ namespace Sla.DECCORE
                     while (decoder.peekElement() != 0) {
                         EffectRecord newRecord = new EffectRecord();
                         newRecord.decode(EffectRecord.EffectType.killedbycall, decoder);
-                        effectlist.Add(newRecord);
+                        effectlist.AddLast(newRecord);
                     }
                     decoder.closeElement(subId);
                 }
@@ -1563,7 +1598,7 @@ namespace Sla.DECCORE
                     while (decoder.peekElement() != 0) {
                         EffectRecord newRecord = new EffectRecord();
                         newRecord.decode(EffectRecord.EffectType.return_address, decoder);
-                        effectlist.Add(newRecord);
+                        effectlist.AddLast(newRecord);
                     }
                     decoder.closeElement(subId);
                 }
@@ -1596,7 +1631,7 @@ namespace Sla.DECCORE
                 resolveExtraPop();
 
             ProtoParameter outparam = store.getOutput();
-            if ((outparam.getType().getMetatype() != type_metatype.TYPE_VOID)
+            if (   (outparam.getType().getMetatype() != type_metatype.TYPE_VOID)
                 && outparam.getAddress().isInvalid())
             {
                 throw new LowlevelError("<returnsym> tag must include a valid storage address");

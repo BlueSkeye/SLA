@@ -20,7 +20,7 @@ namespace Sla.DECCORE
         /// \param typegrp is the factory owning \b this data-type
         internal virtual void decode(Sla.CORE.Decoder decoder, TypeFactory typegrp)
         {
-            //  uint elemId = decoder.openElement();
+            //  ElementId elemId = decoder.openElement();
             decodeBasic(decoder); ;
             decoder.rewindAttributes();
             while(true) {

@@ -8,7 +8,7 @@ namespace Sla.SLEIGH
         private ContextPattern context;    // Context piece
         private InstructionPattern instr;  // Instruction piece
         
-        protected virtual PatternBlock getBlock(bool cont)
+        protected override PatternBlock? getBlock(bool cont)
             => cont ? context.getBlock() : instr.getBlock();
 
         public CombinePattern()

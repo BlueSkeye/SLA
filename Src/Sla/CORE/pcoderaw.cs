@@ -138,7 +138,7 @@ namespace Sla.CORE
             out VarnodeData? outvar)
         {
             OpCode opcode = (OpCode)decoder.readSignedInteger(AttributeId.ATTRIB_CODE);
-            uint subId = decoder.peekElement();
+            ElementId subId = decoder.peekElement();
             if (subId == ElementId.ELEM_VOID) {
                 decoder.openElement();
                 decoder.closeElement(subId);

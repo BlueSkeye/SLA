@@ -1,7 +1,4 @@
 ﻿using Sla.CORE;
-using Sla.DECCORE;
-
-using ParamEntryResolver = Sla.EXTRA.rangemap<Sla.DECCORE.ParamEntryRange>;
 
 namespace Sla.DECCORE
 {
@@ -46,7 +43,7 @@ namespace Sla.DECCORE
             ParamEntryResolver resolver = resolverMap[index];
             if (resolver == (ParamEntryResolver)null)
                 return (ParamEntry)null;
-            Tuple<ParamEntryResolver.Enumerator, ParamEntryResolver.Enumerator> res;
+            Tuple<ParamEntryResolver.PartIterator, ParamEntryResolver.PartIterator> res;
             res = resolver.find(loc.getOffset());
             while (res.first != res.second) {
                 ParamEntry testEntry = (res.Current.first).getParamEntry();
@@ -482,7 +479,7 @@ namespace Sla.DECCORE
         /// Enter all the ParamEntry objects into an interval map (based on address space)
         protected void populateResolver()
         {
-            IEnumerator<ParamEntry> iter = entry.begin();
+            IEnumerator<ParamEntry> iter = entry.GetEnumerator();
             int position = 0;
             while (iter.MoveNext()) {
                 ParamEntry paramEntry = iter.Current;
@@ -876,7 +873,7 @@ namespace Sla.DECCORE
                 }
             }
             for (; ; ) {
-                uint subId = decoder.peekElement();
+                ElementId subId = decoder.peekElement();
                 if (subId == 0) break;
                 if (subId == ElementId.ELEM_PENTRY) {
                     parsePentry(decoder, effectlist, numgroup, normalstack, autokilledbycall, splitFloat, false);

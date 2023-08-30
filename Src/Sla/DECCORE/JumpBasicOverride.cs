@@ -348,7 +348,7 @@ namespace Sla.DECCORE
 
         public override void decode(Sla.CORE.Decoder decoder)
         {
-            uint elemId = decoder.openElement(ElementId.ELEM_BASICOVERRIDE);
+            ElementId elemId = decoder.openElement(ElementId.ELEM_BASICOVERRIDE);
             while(true) {
                 uint subId = decoder.openElement();
                 if (subId == 0) break;

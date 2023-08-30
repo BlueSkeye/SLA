@@ -358,7 +358,7 @@ namespace Sla.CORE
         /// \param decoder is the stream decoder
         public void decode(Sla.CORE.Decoder decoder)
         {
-            uint elemId = decoder.openElement(ElementId.ELEM_RANGELIST);
+            ElementId elemId = decoder.openElement(ElementId.ELEM_RANGELIST);
             while (0 != decoder.peekElement()) {
                 Range range = new Range();
                 range.decode(decoder);

@@ -1,21 +1,5 @@
 ﻿using Sla.CORE;
-using Sla.DECCORE;
 using Sla.EXTRA;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
-using System.Xml;
-using System.Runtime.Intrinsics;
-
-using ScopeMap = System.Collections.Generic.Dictionary<ulong, Sla.DECCORE.Scope>;
-using static Sla.DECCORE.Varnode;
 
 namespace Sla.DECCORE
 {
@@ -359,8 +343,8 @@ namespace Sla.DECCORE
         /// \param sz is the number of bytes occupied by the Varnode
         /// \param uselim is the given \b usepoint
         /// \return the newly created SymbolEntry
-        protected abstract SymbolEntry addDynamicMapInternal(Symbol sym, varnode_flags exfl, ulong hash,
-            int off, int sz, RangeList uselim);
+        protected abstract SymbolEntry addDynamicMapInternal(Symbol sym,
+            Varnode.varnode_flags exfl, ulong hash, int off, int sz, RangeList uselim);
 
         /// Integrate a SymbolEntry into the range maps
         /// The mapping is given as an unintegrated SymbolEntry object. Memory
@@ -389,8 +373,8 @@ namespace Sla.DECCORE
             SymbolEntry res;
             int consumeSize = entry.symbol.getBytesConsumed();
             if (entry.addr.isInvalid())
-                res = addDynamicMapInternal(entry.symbol, Varnode.varnode_flags.mapped, entry.hash, 0,
-                    consumeSize, entry.uselimit);
+                res = addDynamicMapInternal(entry.symbol, Varnode.varnode_flags.mapped,
+                    entry.hash, 0, consumeSize, entry.uselimit);
             else {
                 if (entry.uselimit.empty()) {
                     entry.symbol.flags |= Varnode.varnode_flags.addrtied;
@@ -610,8 +594,8 @@ namespace Sla.DECCORE
         /// \param index is a reference to an index used to make the name unique, which will be updated
         /// \param flags are boolean properties of the variable we need the name for
         /// \return the new variable name
-        public abstract string buildVariableName(Address addr, Address pc, Datatype? ct, int index,
-            varnode_flags flags);
+        public abstract string buildVariableName(Address addr, Address pc, Datatype? ct,
+            int index, Varnode.varnode_flags flags);
 
         /// \brief Build a formal \b undefined name, used internally when a Symbol is not given a name
         /// \return a special internal name that won't collide with other names in \b this Scope
@@ -757,7 +741,8 @@ namespace Sla.DECCORE
         /// \param usepoint is a point at which the memory range is accessed (may be \e invalid)
         /// \param flags is a reference used to pass back the boolean properties of the memory range
         /// \return the smallest SymbolEntry containing the range, or NULL
-        public SymbolEntry? queryProperties(Address addr, int size, Address usepoint, out varnode_flags flags)
+        public SymbolEntry? queryProperties(Address addr, int size, Address usepoint,
+            out Varnode.varnode_flags flags)
         {
             SymbolEntry? res = (SymbolEntry)null;
             Scope basescope = glb.symboltab.mapScope(this, addr, usepoint);

@@ -93,8 +93,8 @@ namespace Sla.DECCORE
                     }
                     Address addr = outparam.getAddress();
                     data.newVarnodeOut(sz, addr, callop);
-                    VarnodeData vdata;
-                    OpCode res = fc.assumedOutputExtension(addr, sz, out vdata);
+                    VarnodeData vdata = new VarnodeData();
+                    OpCode res = fc.assumedOutputExtension(addr, sz, vdata);
                     if (res == OpCode.CPUI_PIECE) {
                         // Pick an extension based on type
                         if (outtype.getMetatype() == type_metatype.TYPE_INT)
@@ -106,7 +106,7 @@ namespace Sla.DECCORE
                         // We assume the (smallsize) output is extended to a full register
                         // Create the extension operation to eliminate artifact
                         PcodeOp op = data.newOp(1, callop.getAddr());
-                        data.newVarnodeOut(vdata.size, vdata.getAddr(), op);
+                        data.newVarnodeOut((int)vdata.size, vdata.getAddr(), op);
                         Varnode invn = data.newVarnode(sz, addr);
                         data.opSetInput(op, invn, 0);
                         data.opSetOpcode(op, res);

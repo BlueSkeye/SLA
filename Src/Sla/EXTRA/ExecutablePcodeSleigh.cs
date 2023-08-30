@@ -50,7 +50,7 @@ namespace Sla.EXTRA
 
         internal override void decode(Sla.CORE.Decoder decoder)
         {
-            uint elemId = decoder.openElement();
+            ElementId elemId = decoder.openElement();
             if (   elemId != ElementId.ELEM_PCODE
                 && elemId != ElementId.ELEM_CASE_PCODE
                 && elemId != ElementId.ELEM_ADDR_PCODE

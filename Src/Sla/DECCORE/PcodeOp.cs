@@ -142,9 +142,9 @@ namespace Sla.DECCORE
         // internal IEnumerator<PcodeOp> codeiter;
         internal int _codePosition;
         /// The one possible output Varnode of this op
-        private Varnode? output;
+        internal Varnode? output;
         /// The ordered list of input Varnodes for this op
-        private List<Varnode?> inrefs;
+        private List<Varnode?> inrefs = new List<Varnode?>();
 
         internal void AssertIsIndirectBranching()
         {
@@ -549,12 +549,15 @@ namespace Sla.DECCORE
         public uint getCseHash()
         {
             uint hash;
-            if ((getEvalType() & (PcodeOp.Flags.unary | PcodeOp.Flags.binary)) == 0) return ((uint)0);
-            if (code() == OpCode.CPUI_COPY) return ((uint)0); // Let copy propagation deal with this
+            if ((getEvalType() & (Flags.unary | Flags.binary)) == 0)
+                return 0;
+            if (code() == OpCode.CPUI_COPY)
+                // Let copy propagation deal with this
+                return 0;
 
-            hash = (output.getSize() << 8) | (uint)code();
+            hash = (uint)(output.getSize() << 8) | (uint)code();
             for (int i = 0; i < inrefs.size(); ++i) {
-                Varnode vn = getIn(i);
+                Varnode vn = getIn(i) ?? throw new ApplicationException();
                 hash = (hash << 8) | (hash >> (sizeof(uint) * 8 - 8));
                 hash ^= (vn.isConstant()) ? (uint)vn.getOffset() : (uint)vn.getCreateIndex();
                 // Hash in pointer itself as unique id
@@ -902,7 +905,7 @@ namespace Sla.DECCORE
                                 resmask = 0;
                             else if (sa >= 8 * sizeof(ulong)) {
                                 // Full mask shifted over 8*sizeof(ulong)
-                                resmask = Globals.calc_mask(sz1 - sizeof(ulong));
+                                resmask = Globals.calc_mask((uint)(sz1 - sizeof(ulong)));
                                 // Shift over remaining portion of sa
                                 resmask >>= (sa - 8 * sizeof(ulong));
                             }
@@ -957,7 +960,7 @@ namespace Sla.DECCORE
                     resmask &= fullmask;
                     break;
                 case OpCode.CPUI_LZCOUNT:
-                    resmask = Globals.coveringmask(getIn(0).getSize() * 8);
+                    resmask = Globals.coveringmask((ulong)getIn(0).getSize() * 8);
                     resmask &= fullmask;
                     break;
                 case OpCode.CPUI_SUBPIECE:

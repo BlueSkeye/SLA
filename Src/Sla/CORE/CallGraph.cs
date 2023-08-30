@@ -1,14 +1,5 @@
 ﻿using Sla.DECCORE;
 using Sla.EXTRA;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
-
-using ScopeMap = System.Collections.Generic.Dictionary<ulong, Sla.DECCORE.Scope>;
 
 namespace Sla.CORE
 {
@@ -368,10 +359,10 @@ namespace Sla.CORE
 
         public void decoder(Decoder decoder)
         {
-            uint elemId = decoder.openElement(ElementId.ELEM_CALLGRAPH);
+            ElementId elemId = decoder.openElement(ElementId.ELEM_CALLGRAPH);
             while(true)
             {
-                uint subId = decoder.peekElement();
+                ElementId subId = decoder.peekElement();
                 if (subId == 0) break;
                 if (subId == ElementId.ELEM_EDGE)
                     CallGraphEdge.decode(decoder, this);

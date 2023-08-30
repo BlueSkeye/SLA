@@ -19,7 +19,7 @@ namespace Sla.EXTRA
 
         public override void decode(Sla.CORE.Decoder decoder)
         {
-            uint elemId = decoder.openElement(ElementId.ELEM_CALLFIXUP);
+            ElementId elemId = decoder.openElement(ElementId.ELEM_CALLFIXUP);
             name = decoder.readString(AttributeId.ATTRIB_NAME);
             bool pcodeSubtag = false;
 

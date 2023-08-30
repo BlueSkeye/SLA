@@ -104,7 +104,7 @@ namespace Sla.DECCORE
 
         public override void decode(Sla.CORE.Decoder decoder)
         {
-            uint elemId = decoder.openElement(ElementId.ELEM_SEGMENTOP);
+            ElementId elemId = decoder.openElement(ElementId.ELEM_SEGMENTOP);
             spc = (AddrSpace)null;
             injectId = -1;
             baseinsize = 0;
@@ -133,7 +133,7 @@ namespace Sla.DECCORE
                 throw new LowlevelError("Redefining userop " + name);
 
             while(true) {
-                uint subId = decoder.peekElement();
+                ElementId subId = decoder.peekElement();
                 if (subId == 0) break;
                 if (subId == ElementId.ELEM_CONSTRESOLVE) {
                     int sz;

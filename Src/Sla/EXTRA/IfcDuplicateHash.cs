@@ -1,8 +1,6 @@
 ﻿using Sla.CORE;
 using Sla.DECCORE;
 
-using VarnodeLocSet = System.Collections.Generic.SortedSet<Sla.DECCORE.Varnode>; // VarnodeCompareLocDef : A set of Varnodes sorted by location (then by definition)
-
 namespace Sla.EXTRA
 {
     internal class IfcDuplicateHash : IfaceDecompCommand

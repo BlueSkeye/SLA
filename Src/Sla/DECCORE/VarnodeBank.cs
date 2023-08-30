@@ -1,10 +1,5 @@
 ﻿using Sla.CORE;
 
-// VarnodeDefSet : A set of Varnodes sorted by definition (then location)
-using VarnodeDefSet = System.Collections.Generic.SortedSet<Sla.DECCORE.Varnode>;
-// VarnodeCompareLocDef : A set of Varnodes sorted by location (then by definition)
-using VarnodeLocSet = System.Collections.Generic.SortedSet<Sla.DECCORE.Varnode>;
-
 namespace Sla.DECCORE
 {
     /// \brief A container for Varnode objects from a specific function
@@ -30,9 +25,9 @@ namespace Sla.DECCORE
         /// Number of varnodes created
         private uint create_index;
         /// Varnodes sorted by location then def
-        private VarnodeLocSet loc_tree; // TODO : Instanciate with proper comparer
+        private VarnodeLocSet loc_tree = new VarnodeLocSet();
         /// Varnodes sorted by def then location
-        private VarnodeDefSet def_tree; // TODO : Instanciate with proper comparer
+        private VarnodeDefSet def_tree = new VarnodeDefSet();
         /// Template varnode for searching trees
         private /*mutable*/ Varnode searchvn;
 
@@ -47,7 +42,7 @@ namespace Sla.DECCORE
             Varnode othervn;
             Varnode? actualNode;
 
-            check = loc_tree.insert(vn);
+            check = loc_tree.Add(vn);
             if (loc_tree.TryGetValue(vn, out actualNode)) {
                 // Set already contains this varnode
                 othervn = actualNode ?? throw new ApplicationException();
@@ -57,9 +52,10 @@ namespace Sla.DECCORE
             }
             // Otherwise a new insertion
             loc_tree.Add(vn);
-            vn.lociter = check.first;
+            vn.lociter = check.Item1;
             vn.setFlags(Varnode.varnode_flags.insert);
-            vn.defiter = def_tree.Add(vn).first; // Insertion should also be new in def_tree
+            // Insertion should also be new in def_tree
+            vn.defiter = def_tree.Add(vn).first;
             return vn;
         }
 
@@ -109,9 +105,10 @@ namespace Sla.DECCORE
         {
             Varnode vn = new Varnode(s, m, ct) {
                 create_index = create_index++,
-                lociter = loc_tree.insert(vn).first, // Frees can always be inserted without duplication
-                defiter = def_tree.insert(vn).first
             };
+            // Frees can always be inserted without duplication
+            vn.lociter = loc_tree.insert(vn).first;
+            vn.defiter = def_tree.insert(vn).first;
             return vn;
         }
 
@@ -125,9 +122,9 @@ namespace Sla.DECCORE
         public Varnode createDef(int s, Address m, Datatype ct, PcodeOp op)
         {
             Varnode vn = new Varnode(s, m, ct) {
-                create_index = create_index + 1,
-                setDef(op)
+                create_index = create_index + 1
             };
+            vn.setDef(op);
             return xref(vn);
         }
 
@@ -170,8 +167,8 @@ namespace Sla.DECCORE
             if ((vn.getDef() != (PcodeOp)null) || (!vn.hasNoDescend()))
                 throw new LowlevelError("Deleting integrated varnode");
 
-            loc_tree.erase(vn.lociter);
-            def_tree.erase(vn.defiter);
+            loc_tree.Remove(vn);
+            def_tree.Remove(vn);
             // delete vn;
         }
 
@@ -187,8 +184,9 @@ namespace Sla.DECCORE
             if (vn.isConstant())
                 throw new LowlevelError("Making input out of constant varnode");
 
-            loc_tree.erase(vn.lociter);    // Erase the free version of varnode
-            def_tree.erase(vn.defiter);
+            // Erase the free version of varnode
+            loc_tree.Remove(vn);
+            def_tree.Remove(vn);
 
             vn.setInput();     // Set the input flag
             return xref(vn);
@@ -218,8 +216,8 @@ namespace Sla.DECCORE
                 addr.printRaw(s);
                 throw new LowlevelError(s.ToString());
             }
-            loc_tree.erase(vn.lociter);
-            def_tree.erase(vn.defiter);
+            loc_tree.Remove(vn);
+            def_tree.Remove(vn);
             vn.setDef(op);     // Change the varnode to be defined
             return xref(vn);
         }
@@ -231,14 +229,16 @@ namespace Sla.DECCORE
         /// \param vn is the Varnode to modify
         public void makeFree(Varnode vn)
         {
-            loc_tree.erase(vn.lociter);
-            def_tree.erase(vn.defiter);
+            loc_tree.Remove(vn);
+            def_tree.Remove(vn);
 
-            vn.setDef((PcodeOp)null);    // Clear things that make vn non-free
+            // Clear things that make vn non-free
+            vn.setDef((PcodeOp)null);
             vn.clearFlags(Varnode.varnode_flags.insert | Varnode.varnode_flags.input | Varnode.varnode_flags.indirect_creation);
 
-            vn.lociter = loc_tree.insert(vn).first; // Re-insert as free varnode
-            vn.defiter = def_tree.insert(vn).first;
+            // Re-insert as free varnode
+            vn.lociter = loc_tree.Add(vn);
+            vn.defiter = def_tree.Add(vn);
         }
 
         /// Replace every read of one Varnode with another
@@ -247,21 +247,19 @@ namespace Sla.DECCORE
         /// \param newvn is the Varnode to replace it with
         public void replace(Varnode oldvn, Varnode newvn)
         {
-            IEnumerator<PcodeOp> iter, tmpiter;
-            PcodeOp op;
-            int i;
-
-            iter = oldvn.descend.begin();
-            while (iter != oldvn.descend.end())
-            {
-                op = *iter;
-                tmpiter = iter++;
-                if (op.output == newvn) continue; // Cannot be input to your own definition
-                i = op.getSlot(oldvn);
-                oldvn.descend.erase(tmpiter);  // Sever the link fully
-                op.clearInput(i); // Before attempting to build the new link
+            List<PcodeOp> descending = oldvn.descend;
+            for (int index = 0; index < descending.Count; index++) {
+                PcodeOp op = descending[index];
+                // Cannot be input to your own definition
+                if (op.output == newvn) continue;
+                int i = op.getSlot(oldvn);
+                // Sever the link fully
+                descending.Remove(op);
+                // Before attempting to build the new link
+                op.clearInput(i);
                 newvn.addDescend(op);
-                op.setInput(newvn, i); // This must be called AFTER descend is updated
+                // This must be called AFTER descend is updated
+                op.setInput(newvn, i);
             }
             oldvn.setFlags(Varnode.varnode_flags.coverdirty);
             newvn.setFlags(Varnode.varnode_flags.coverdirty);
@@ -274,22 +272,17 @@ namespace Sla.DECCORE
         /// \param pc is the address where it is defined
         /// \param uniq is the sequence number or -1 if not specified
         /// \return the matching Varnode or NULL
-        public Varnode find(int s, Address loc, Address pc, uint uniq = uint.MaxValue)
+        public Varnode? find(int s, Address loc, Address pc, uint uniq = uint.MaxValue)
         {
-            IEnumerator<Varnode> iter;
-            Varnode vn;
-            PcodeOp op;
-
-            iter = beginLoc(s, loc, pc, uniq);
-            while (iter != loc_tree.end()) {
-                vn = *iter;
+            IEnumerator<Varnode> iter = beginLoc(s, loc, pc, uniq);
+            while (iter.MoveNext()) {
+                Varnode vn = iter.Current;
                 if (vn.getSize() != s) break;
                 if (vn.getAddr() != loc) break;
-                op = vn.getDef();
+                PcodeOp? op = vn.getDef();
                 if ((op != (PcodeOp)null) && (op.getAddr() == pc)) {
                     if ((uniq == uint.MaxValue) || (op.getTime() == uniq)) return vn;
                 }
-                ++iter;
             }
             return (Varnode)null;
         }
@@ -319,23 +312,25 @@ namespace Sla.DECCORE
         /// \return the Varnode object or NULL if no Varnode met the conditions
         public Varnode? findCoveredInput(int s, Address loc)
         {
-            IEnumerator<Varnode> iter, enditer;
-            Varnode vn;
+            IEnumerator<Varnode> enditer;
             ulong highest = loc.getSpace().getHighest();
-            ulong end = loc.getOffset() + s - 1;
+            ulong end = loc.getOffset() + (uint)s - 1;
 
-            iter = beginDef(Varnode.varnode_flags.input, loc);
+            IEnumerator<Varnode> iter = beginDef(Varnode.varnode_flags.input, loc);
             if (end == highest) {
                 // Check for wrap around of address
                 Address tmp = new Address(loc.getSpace(), highest);
                 enditer = endDef(Varnode.varnode_flags.input, tmp);
             }
-            else
+            else {
                 enditer = beginDef(Varnode.varnode_flags.input, loc + s);
+            }
 
-            while (iter != enditer) {
-                vn = *iter++;       // we know vn is input with vn.Loc in (loc,loc+s)
-                if (vn.getOffset() + vn.getSize() - 1 <= end) // vn is completely contained
+            while (iter.MoveNext()) {
+                // we know vn is input with vn.Loc in (loc,loc+s)
+                Varnode vn = iter.Current;
+                if (vn.getOffset() + (uint)vn.getSize() - 1 <= end)
+                    // vn is completely contained
                     return vn;
             }
             return (Varnode)null;
@@ -348,18 +343,16 @@ namespace Sla.DECCORE
         /// \param loc is the starting address of the range
         public Varnode? findCoveringInput(int s, Address loc)
         {
-            IEnumerator<Varnode> iter;
-            Varnode vn;
-            iter = beginDef(Varnode.varnode_flags.input, loc);
+            IEnumerator<Varnode> iter = beginDef(Varnode.varnode_flags.input, loc);
             if (iter != def_tree.end()) {
-                vn = iter.Current;
+                Varnode vn = iter.Current;
                 if ((vn.getAddr() != loc) && (iter != def_tree.begin())) {
                     --iter;
-                    vn = *iter;
+                    vn = iter.Current;
                 }
                 if (vn.isInput() && (vn.getSpace() == loc.getSpace()) &&
                 (vn.getOffset() <= loc.getOffset()) &&
-                (vn.getOffset() + vn.getSize() - 1 >= loc.getOffset() + s - 1))
+                (vn.getOffset() + (uint)vn.getSize() - 1 >= loc.getOffset() + (uint)s - 1))
                     return vn;
             }
             return (Varnode)null;
@@ -371,8 +364,16 @@ namespace Sla.DECCORE
         /// Beginning of location list
         public IEnumerator<Varnode> beginLoc() => loc_tree.GetEnumerator();
 
-        /// End of location list
-        public IEnumerator<Varnode> endLoc() => loc_tree.end();
+        public IEnumerator<Varnode> beginLoc(Varnode startsWith)
+            => loc_tree.GetViewBetween(startsWith, null).GetEnumerator();
+
+        public IEnumerator<Varnode> beginReverseLoc() => loc_tree.Reverse().GetEnumerator();
+
+        public IEnumerator<Varnode> beginReverseLoc(Varnode startsWith)
+            => loc_tree.GetViewBetween(startsWith, null).Reverse().GetEnumerator();
+
+        ///// End of location list
+        //public IEnumerator<Varnode> endLoc() => loc_tree.end();
 
         /// \brief Beginning of Varnodes in given address space sorted by location
         ///
@@ -545,9 +546,9 @@ namespace Sla.DECCORE
         /// \param uniq is the sequence number of the PcodeOp or -1 for now sequence number restriction
         /// \return the beginning iterator
         public IEnumerator<Varnode> beginLoc(int s, Address addr, Address pc, uint uniq)
-        {               // Find first varnode of given loc and size
-                        // defined at a particular location
-            IEnumerator<Varnode> iter;
+        {
+            // Find first varnode of given loc and size
+            // defined at a particular location
             searchvn.size = s;
             searchvn.loc = addr;
             searchvn.flags = Varnode.varnode_flags.written;
@@ -556,7 +557,7 @@ namespace Sla.DECCORE
             SeqNum sq = new SeqNum(pc, uniq);
             PcodeOp searchop = new PcodeOp(0,sq);
             searchvn.def = searchop;
-            iter = loc_tree.lower_bound(searchvn);
+            IEnumerator<Varnode> iter = loc_tree.lower_bound(searchvn);
 
             searchvn.size = 0;
             searchvn.flags = Varnode.varnode_flags.input;
@@ -602,7 +603,7 @@ namespace Sla.DECCORE
         public Varnode.varnode_flags overlapLoc(IEnumerator<Varnode> iter,
             List<IEnumerator<Varnode>> bounds)
         {
-            Varnode vn = *iter;
+            Varnode vn = iter.Current;
             AddrSpace spc = vn.getSpace();
             ulong off = vn.getOffset();
             ulong maxOff = off + (uint)(vn.getSize() - 1);
@@ -611,14 +612,14 @@ namespace Sla.DECCORE
             iter = endLoc(vn.getSize(), vn.getAddr(), Varnode.varnode_flags.written);
             bounds.Add(iter);
             while (iter != loc_tree.end()) {
-                vn = *iter;
+                vn = iter.Current;
                 if (vn.getSpace() != spc || vn.getOffset() > maxOff)
                     break;
                 if (vn.isFree()) {
                     iter = endLoc(vn.getSize(), vn.getAddr(), 0);
                     continue;
                 }
-                ulong endOff = vn.getOffset() + (vn.getSize() - 1);
+                ulong endOff = vn.getOffset() + (uint)(vn.getSize() - 1);
                 if (endOff > maxOff)
                     maxOff = endOff;
                 flags |= vn.getFlags();
@@ -633,8 +634,8 @@ namespace Sla.DECCORE
         /// Beginning of Varnodes sorted by definition
         public IEnumerator<Varnode> beginDef() => def_tree.GetEnumerator();
 
-        /// End of Varnodes sorted by definition
-        public IEnumerator<Varnode> endDef() => def_tree.end();
+        //// End of Varnodes sorted by definition
+        //public IEnumerator<Varnode> endDef() => def_tree.end();
 
         /// \brief Beginning of varnodes with set definition property
         ///
@@ -653,7 +654,7 @@ namespace Sla.DECCORE
 
             if (fl == Varnode.varnode_flags.input)
                 // Inputs occur first with def_tree
-                return def_tree.begin();
+                return def_tree.GetEnumerator();
             if (fl == Varnode.varnode_flags.written) {
                 // Lowest possible location
                 searchvn.loc = new Address(Address.mach_extreme.m_minimal);

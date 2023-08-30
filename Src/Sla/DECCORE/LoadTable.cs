@@ -60,7 +60,7 @@ namespace Sla.DECCORE
         /// Decode \b this table from a \<loadtable> element
         public void decode(Sla.CORE.Decoder decoder)
         {
-            uint elemId = decoder.openElement(ElementId.ELEM_LOADTABLE);
+            ElementId elemId = decoder.openElement(ElementId.ELEM_LOADTABLE);
             size = decoder.readSignedInteger(AttributeId.ATTRIB_SIZE);
             num = decoder.readSignedInteger(AttributeId.ATTRIB_NUM);
             addr = Address.decode(decoder);

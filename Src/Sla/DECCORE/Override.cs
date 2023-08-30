@@ -364,7 +364,7 @@ namespace Sla.DECCORE
         /// \param glb is the Architecture
         public void decode(Sla.CORE.Decoder decoder, Architecture glb)
         {
-            uint elemId = decoder.openElement(ElementId.ELEM_OVERRIDE);
+            ElementId elemId = decoder.openElement(ElementId.ELEM_OVERRIDE);
             while(true) {
                 uint subId = decoder.openElement();
                 if (subId == 0) break;

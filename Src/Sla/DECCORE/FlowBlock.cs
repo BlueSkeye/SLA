@@ -736,7 +736,7 @@ namespace Sla.DECCORE
         {
             while(true)
             {
-                uint subId = decoder.peekElement();
+                ElementId subId = decoder.peekElement();
                 if (subId != ElementId.ELEM_EDGE)
                     break;
                 decodeNextInEdge(decoder, resolver);
@@ -763,7 +763,7 @@ namespace Sla.DECCORE
         /// \param resolver acts as a factory and resolves cross-references
         public void decode(Sla.CORE.Decoder decoder, BlockMap resolver)
         {
-            uint elemId = decoder.openElement(ElementId.ELEM_BLOCK);
+            ElementId elemId = decoder.openElement(ElementId.ELEM_BLOCK);
             decodeHeader(decoder);
             decodeBody(decoder);
             decodeEdges(decoder, resolver);
