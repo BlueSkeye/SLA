@@ -18,7 +18,6 @@
 using System.Numerics;
 using System;
 using System.Text;
-using ghidra;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.IO;
 using System.ComponentModel;
@@ -1127,7 +1126,7 @@ namespace Sla.CORE {
         /// \param point is the context address (for recovering full encoding info if necessary)
         /// \param fullEncoding is used to pass back the recovered full encoding of the pointer
         /// \return the formal Address associated with the encoding
-        public Address resolveConstant(AddrSpace spc, ulong val, int sz, ref Address point,
+        public Address resolveConstant(AddrSpace spc, ulong val, int sz, Address point,
             out ulong fullEncoding)
         {
             int ind = spc.getIndex();

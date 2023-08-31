@@ -1,12 +1,4 @@
-﻿using ghidra;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static ghidra.FlowBlock;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -52,7 +44,7 @@ namespace Sla.DECCORE
             return gotoedges[i] ;
         }
   
-        public override block_type getType() => t_multigoto;
+        public override block_type getType() => block_type.t_multigoto;
 
         public override void scopeBreak(int curexit, int curloopexit)
         {
@@ -63,7 +55,7 @@ namespace Sla.DECCORE
         public override void printHeader(TextWriter s)
         {
             s.Write("Multi goto block ");
-            @base.printHeader(s);
+            base.printHeader(s);
         }
         
         public override void printRaw(TextWriter s)
@@ -76,7 +68,7 @@ namespace Sla.DECCORE
             getBlock(0).emit(lng);
         }
 
-        public override FlowBlock getExitLeaf() => getBlock(0).getExitLeaf();
+        public override FlowBlock? getExitLeaf() => getBlock(0).getExitLeaf();
 
         public override PcodeOp lastOp() => getBlock(0).lastOp();
         
@@ -88,10 +80,10 @@ namespace Sla.DECCORE
 
         public override void encodeBody(Encoder encoder)
         {
-            @base.encodeBody(encoder);
+            base.encodeBody(encoder);
             for (int i = 0; i < gotoedges.Count; ++i) {
                 FlowBlock gototarget = gotoedges[i];
-                FlowBlock? leaf = gototarget.getFrontLeaf();
+                FlowBlock leaf = gototarget.getFrontLeaf() ?? throw new ApplicationException();
                 int depth = gototarget.calcDepth(leaf);
                 encoder.openElement(ElementId.ELEM_TARGET);
                 encoder.writeSignedInteger(AttributeId.ATTRIB_INDEX, leaf.getIndex());

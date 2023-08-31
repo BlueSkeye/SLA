@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -35,16 +28,14 @@ namespace Sla.DECCORE
             if (!op.getIn(0).isWritten()) return 0;
             PcodeOp addop = op.getIn(0).getDef();
             if (addop.code() != OpCode.CPUI_INT_ADD) return 0;
-            Varnode shiftvn;
+            Varnode shiftvn = null;
             PcodeOp unshiftop = (PcodeOp)null;
             int i;
-            for (i = 0; i < 2; ++i)
-            {
+            for (i = 0; i < 2; ++i) {
                 shiftvn = addop.getIn(i);
                 if (!shiftvn.isWritten()) continue;
                 unshiftop = shiftvn.getDef();
-                if (unshiftop.code() == OpCode.CPUI_INT_RIGHT)
-                {
+                if (unshiftop.code() == OpCode.CPUI_INT_RIGHT) {
                     if (!unshiftop.getIn(1).isConstant()) continue;
                     break;
                 }
@@ -56,7 +47,7 @@ namespace Sla.DECCORE
             if (n <= 0) return 0;
             n = shiftvn.getSize() * 8 - n;
             if (n <= 0) return 0;
-            ulong mask = Globals.calc_mask(shiftvn.getSize());
+            ulong mask = Globals.calc_mask((uint)shiftvn.getSize());
             mask = (mask << n) & mask;
             if (mask != op.getIn(1).getOffset()) return 0;
             Varnode sgnvn = unshiftop.getIn(0);

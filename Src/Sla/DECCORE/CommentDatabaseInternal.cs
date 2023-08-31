@@ -1,10 +1,4 @@
-﻿using Sla.DECCORE;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -40,8 +34,10 @@ namespace Sla.DECCORE
 
         public virtual void clearType(Address fad, uint tp)
         {
-            Comment testcommbeg = new Comment(0, fad, new Address(Address.m_minimal), 0, "");
-            Comment testcommend = new Comment(0, fad, new Address(Address.m_maximal), 65535, "");
+            Comment testcommbeg = new Comment(0, fad,
+                new Address(Address.mach_extreme.m_minimal), 0, "");
+            Comment testcommend = new Comment(0, fad,
+                new Address(Address.mach_extreme.m_maximal), 65535, "");
 
             CommentSet::iterator iterbegin = commentset.lower_bound(testcommbeg);
             CommentSet::iterator iterend = commentset.lower_bound(testcommend);
@@ -57,7 +53,8 @@ namespace Sla.DECCORE
             }
         }
 
-        public virtual void addComment(uint tp, Address fad, Address ad, string txt)
+        public override void addComment(Comment.comment_type tp, Address fad, Address ad,
+            string txt)
         {
             Comment newcom = new Comment(tp, fad, ad, 65535, txt);
             IEnumerator<Comment> iter = commentset.GetEnumerator();
@@ -88,7 +85,8 @@ namespace Sla.DECCORE
             commentset.Add(newcom);
         }
 
-        public virtual bool addCommentNoDuplicate(uint tp, Address fad, Address ad, string txt)
+        public override bool addCommentNoDuplicate(Comment.comment_type tp, Address fad,
+            Address ad, string txt)
         {
             Comment newcom = new Comment(tp, fad, ad, 65535, txt);
             List<Comment> reverseOrderComments = new List<Comment>();
@@ -126,16 +124,16 @@ namespace Sla.DECCORE
             // delete com;
         }
 
-        public virtual IEnumerator<Comment> beginComment(Address fad)
+        public override IEnumerator<Comment> beginComment(Address fad)
         {
-            Comment testcomm = new Comment(0, fad, new Address(Address.m_minimal), 0, "");
-            return commentset.lower_bound(&testcomm);
+            Comment testcomm = new Comment(0, fad, new Address(Address.mach_extreme.m_minimal), 0, "");
+            return commentset.lower_bound(testcomm);
         }
 
-        public virtual IEnumerator<Comment> endComment(Address fad)
+        public override IEnumerator<Comment> endComment(Address fad)
         {
-            Comment testcomm = new(0, fad, new Address(Address.m_maximal), 65535, "");
-            return commentset.lower_bound(&testcomm);
+            Comment testcomm = new(0, fad, new Address(Address.mach_extreme.m_maximal), 65535, "");
+            return commentset.lower_bound(testcomm);
         }
 
         public override void encode(Sla.CORE.Encoder encoder)

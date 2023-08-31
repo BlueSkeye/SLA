@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -32,7 +25,8 @@ namespace Sla.DECCORE
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
-        {               // Convert [(s)lessequal AND notequal] to (s)less
+        {
+            // Convert [(s)lessequal AND notequal] to (s)less
             Varnode compvn1;
             Varnode compvn2;
             Varnode vnout1;
@@ -47,8 +41,7 @@ namespace Sla.DECCORE
             if (!vnout2.isWritten()) return 0;
             op_less = vnout1.getDef();
             opc = op_less.code();
-            if ((opc != OpCode.CPUI_INT_LESSEQUAL) && (opc != OpCode.CPUI_INT_SLESSEQUAL))
-            {
+            if ((opc != OpCode.CPUI_INT_LESSEQUAL) && (opc != OpCode.CPUI_INT_SLESSEQUAL)) {
                 op_equal = op_less;
                 op_less = vnout2.getDef();
                 opc = op_less.code();
@@ -63,14 +56,15 @@ namespace Sla.DECCORE
             compvn2 = op_less.getIn(1);
             if (!compvn1.isHeritageKnown()) return 0;
             if (!compvn2.isHeritageKnown()) return 0;
-            if (((*compvn1 != *op_equal.getIn(0)) || (*compvn2 != *op_equal.getIn(1))) &&
-                ((*compvn1 != *op_equal.getIn(1)) || (*compvn2 != *op_equal.getIn(0))))
+            if (   ((compvn1 != op_equal.getIn(0)) || (compvn2 != op_equal.getIn(1)))
+                && ((compvn1 != op_equal.getIn(1)) || (compvn2 != op_equal.getIn(0))))
                 return 0;
 
             data.opSetInput(op, compvn1, 0);
             data.opSetInput(op, compvn2, 1);
-            data.opSetOpcode(op, (opc == OpCode.CPUI_INT_SLESSEQUAL) ? OpCode.CPUI_INT_SLESS : OpCode.CPUI_INT_LESS);
-
+            data.opSetOpcode(op, (opc == OpCode.CPUI_INT_SLESSEQUAL)
+                ? OpCode.CPUI_INT_SLESS
+                : OpCode.CPUI_INT_LESS);
             return 1;
         }
     }

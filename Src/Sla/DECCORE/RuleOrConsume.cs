@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -36,14 +29,12 @@ namespace Sla.DECCORE
             int size = outvn.getSize();
             if (size > sizeof(ulong)) return 0; // FIXME: ulong should be arbitrary precision
             ulong consume = outvn.getConsume();
-            if ((consume & op.getIn(0).getNZMask()) == 0)
-            {
+            if ((consume & op.getIn(0).getNZMask()) == 0) {
                 data.opRemoveInput(op, 0);
                 data.opSetOpcode(op, OpCode.CPUI_COPY);
                 return 1;
             }
-            else if ((consume & op.getIn(1).getNZMask()) == 0)
-            {
+            else if ((consume & op.getIn(1).getNZMask()) == 0) {
                 data.opRemoveInput(op, 1);
                 data.opSetOpcode(op, OpCode.CPUI_COPY);
                 return 1;

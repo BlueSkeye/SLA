@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -43,7 +36,7 @@ namespace Sla.DECCORE
             offset2 = op2.getIn(1).getOffset();
 
             data.opSetInput(op, op2.getIn(0), 0);  // Skip middleman
-            data.opSetInput(op, data.newConstant(4, offset1 + offset2), 1);
+            data.opSetInput(op, data.newConstant(4, (ulong)(offset1 + offset2)), 1);
             return 1;
         }
     }

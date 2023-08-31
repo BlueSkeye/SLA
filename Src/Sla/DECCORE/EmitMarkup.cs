@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -26,21 +20,21 @@ namespace Sla.DECCORE
     internal class EmitMarkup : Emit
     {
         /// Stream being emitted to
-        protected TextWriter s;
+        protected TextWriter? s;
         /// How markup is encoded to the output stream
-        protected Encoder encoder;
+        protected Sla.CORE.Encoder? encoder;
         
         public EmitMarkup() 
             : base()
         {
-            s = (ostream*)0;
-            encoder = (Encoder*)0;
+            s = null;
+            encoder = (Sla.CORE.Encoder)null;
         }
 
         ~EmitMarkup()
         {
-            if (encoder != (Encoder*)0)
-                delete encoder;
+            //if (encoder != (Encoder*)0)
+            //    delete encoder;
         }
 
         public override int beginDocument()
@@ -143,11 +137,12 @@ namespace Sla.DECCORE
             encoder.closeElement(ElementId.ELEM_FUNCPROTO);
         }
 
-        public override void tagVariable(string name, syntax_highlight hl, Varnode vn, PcodeOp op)
+        public override void tagVariable(string name, syntax_highlight hl, Varnode vn,
+            PcodeOp op)
         {
             encoder.openElement(ElementId.ELEM_VARIABLE);
-            if (hl != no_color)
-                encoder.writeUnsignedInteger(AttributeId.ATTRIB_COLOR, hl);
+            if (hl != syntax_highlight.no_color)
+                encoder.writeUnsignedInteger(AttributeId.ATTRIB_COLOR, (uint)hl);
             if (vn != (Varnode)null)
                 encoder.writeUnsignedInteger(AttributeId.ATTRIB_VARREF, vn.getCreateIndex());
             if (op != (PcodeOp)null)
@@ -159,19 +154,20 @@ namespace Sla.DECCORE
         public override void tagOp(string name, syntax_highlight hl, PcodeOp op)
         {
             encoder.openElement(ElementId.ELEM_OP);
-            if (hl != no_color)
-                encoder.writeUnsignedInteger(AttributeId.ATTRIB_COLOR, hl);
+            if (hl != syntax_highlight.no_color)
+                encoder.writeUnsignedInteger(AttributeId.ATTRIB_COLOR, (uint)hl);
             if (op != (PcodeOp)null)
                 encoder.writeUnsignedInteger(AttributeId.ATTRIB_OPREF, op.getTime());
             encoder.writeString(AttributeId.ATTRIB_CONTENT, name);
             encoder.closeElement(ElementId.ELEM_OP);
         }
 
-        public override void tagFuncName(string name, syntax_highlight hl, Funcdata fd, PcodeOp op)
+        public override void tagFuncName(string name, syntax_highlight hl, Funcdata fd,
+            PcodeOp op)
         {
             encoder.openElement(ElementId.ELEM_FUNCNAME);
-            if (hl != no_color)
-                encoder.writeUnsignedInteger(AttributeId.ATTRIB_COLOR, hl);
+            if (hl != syntax_highlight.no_color)
+                encoder.writeUnsignedInteger(AttributeId.ATTRIB_COLOR, (uint)hl);
             if (op != (PcodeOp)null)
                 encoder.writeUnsignedInteger(AttributeId.ATTRIB_OPREF, op.getTime());
             encoder.writeString(AttributeId.ATTRIB_CONTENT, name);
@@ -181,8 +177,8 @@ namespace Sla.DECCORE
         public override void tagType(string name, syntax_highlight hl, Datatype ct)
         {
             encoder.openElement(ElementId.ELEM_TYPE);
-            if (hl != no_color)
-                encoder.writeUnsignedInteger(AttributeId.ATTRIB_COLOR, hl);
+            if (hl != syntax_highlight.no_color)
+                encoder.writeUnsignedInteger(AttributeId.ATTRIB_COLOR, (uint)hl);
             if (ct.getId() != 0)
             {
                 encoder.writeUnsignedInteger(AttributeId.ATTRIB_ID, ct.getId());
@@ -191,11 +187,12 @@ namespace Sla.DECCORE
             encoder.closeElement(ElementId.ELEM_TYPE);
         }
 
-        public override void tagField(string name, syntax_highlight hl, Datatype ct, int off, PcodeOp op)
+        public override void tagField(string name, syntax_highlight hl, Datatype ct,
+            int off, PcodeOp op)
         {
             encoder.openElement(ElementId.ELEM_FIELD);
-            if (hl != no_color)
-                encoder.writeUnsignedInteger(AttributeId.ATTRIB_COLOR, hl);
+            if (hl != syntax_highlight.no_color)
+                encoder.writeUnsignedInteger(AttributeId.ATTRIB_COLOR, (uint)hl);
             if (ct != (Datatype)null) {
                 encoder.writeString(AttributeId.ATTRIB_NAME, ct.getName());
                 if (ct.getId() != 0)
@@ -210,33 +207,35 @@ namespace Sla.DECCORE
             encoder.closeElement(ElementId.ELEM_FIELD);
         }
 
-        public override void tagComment(string name, syntax_highlight hl, AddrSpace spc, ulong off)
+        public override void tagComment(string name, syntax_highlight hl, AddrSpace spc,
+            ulong off)
         {
             encoder.openElement(ElementId.ELEM_COMMENT);
-            if (hl != no_color)
-                encoder.writeUnsignedInteger(AttributeId.ATTRIB_COLOR, hl);
+            if (hl != syntax_highlight.no_color)
+                encoder.writeUnsignedInteger(AttributeId.ATTRIB_COLOR, (uint)hl);
             encoder.writeSpace(AttributeId.ATTRIB_SPACE, spc);
             encoder.writeUnsignedInteger(AttributeId.ATTRIB_OFF, off);
             encoder.writeString(AttributeId.ATTRIB_CONTENT, name);
             encoder.closeElement(ElementId.ELEM_COMMENT);
         }
 
-        public override void tagLabel(string name, syntax_highlight hl, AddrSpace spc, ulong off)
+        public override void tagLabel(string name, syntax_highlight hl, AddrSpace spc,
+            ulong off)
         {
             encoder.openElement(ElementId.ELEM_LABEL);
-            if (hl != no_color)
-                encoder.writeUnsignedInteger(AttributeId.ATTRIB_COLOR, hl);
+            if (hl != syntax_highlight.no_color)
+                encoder.writeUnsignedInteger(AttributeId.ATTRIB_COLOR, (uint)hl);
             encoder.writeSpace(AttributeId.ATTRIB_SPACE, spc);
             encoder.writeUnsignedInteger(AttributeId.ATTRIB_OFF, off);
             encoder.writeString(AttributeId.ATTRIB_CONTENT, name);
             encoder.closeElement(ElementId.ELEM_LABEL);
         }
 
-        public override void print(string data, syntax_highlight hl = no_color)
+        public override void print(string data, syntax_highlight hl = syntax_highlight.no_color)
         {
             encoder.openElement(ElementId.ELEM_SYNTAX);
-            if (hl != no_color)
-                encoder.writeUnsignedInteger(AttributeId.ATTRIB_COLOR, hl);
+            if (hl != syntax_highlight.no_color)
+                encoder.writeUnsignedInteger(AttributeId.ATTRIB_COLOR, (uint)hl);
             encoder.writeString(AttributeId.ATTRIB_CONTENT, data);
             encoder.closeElement(ElementId.ELEM_SYNTAX);
         }
@@ -262,13 +261,13 @@ namespace Sla.DECCORE
 
         public override void setOutputStream(TextWriter t)
         {
-            if (encoder != (Encoder*)0)
-                delete encoder;
+            //if (encoder != (Encoder)null)
+            //    delete encoder;
             s = t;
-            encoder = new PackedEncode(*s);
+            encoder = new PackedEncode(s);
         }
 
-        public override TexWriter getOutputStream() => s;
+        public override TextWriter getOutputStream() => s ?? throw new ApplicationException();
 
         public override bool emitsMarkup() => true;
     }

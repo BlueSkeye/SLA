@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -31,13 +24,17 @@ namespace Sla.DECCORE
 
         public override int applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode vn2 = op.getIn(1);
+            Varnode vn2 = op.getIn(1) ?? throw new ApplicationException();
             if (!vn2.isWritten()) return 0;
-            PcodeOp shiftop = vn2.getDef();
+            PcodeOp shiftop = vn2.getDef() ?? throw new ApplicationException();
             if (shiftop.code() != OpCode.CPUI_INT_LEFT) return 0;
-            if (!shiftop.getIn(1).isConstant()) return 0; // Must be a constant shift
+            if (!shiftop.getIn(1).isConstant())
+                // Must be a constant shift
+                return 0;
             int sa = shiftop.getIn(1).getOffset();
-            if ((sa & 7) != 0) return 0;    // Not a multiple of 8
+            if ((sa & 7) != 0)
+                // Not a multiple of 8
+                return 0;
             Varnode tmpvn = shiftop.getIn(0);
             if (!tmpvn.isWritten()) return 0;
             PcodeOp zextop = tmpvn.getDef();

@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -45,8 +38,7 @@ namespace Sla.DECCORE
             int sa;
             bool leftshift;
 
-            switch (op.code())
-            {
+            switch (op.code()) {
                 case OpCode.CPUI_INT_LEFT:
                     sa = (int)constvn.getOffset();
                     leftshift = true;
@@ -69,9 +61,8 @@ namespace Sla.DECCORE
                     return 0;           // Never reaches here
             }
 
-            PcodeOp bitop = vn.getDef();
-            switch (bitop.code())
-            {
+            PcodeOp bitop = vn.getDef() ?? throw new ApplicationException();
+            switch (bitop.code()) {
                 case OpCode.CPUI_INT_AND:
                 case OpCode.CPUI_INT_OR:
                 case OpCode.CPUI_INT_XOR:
@@ -88,7 +79,7 @@ namespace Sla.DECCORE
             for (i = 0; i < bitop.numInput(); ++i)
             {
                 ulong nzm = bitop.getIn(i).getNZMask();
-                ulong mask = Globals.calc_mask(op.getOut().getSize());
+                ulong mask = Globals.calc_mask((uint)op.getOut().getSize());
                 if (leftshift)
                     nzm = Globals.pcode_left(nzm, sa);
                 else
@@ -96,8 +87,7 @@ namespace Sla.DECCORE
                 if ((nzm & mask) == (ulong)0) break;
             }
             if (i == bitop.numInput()) return 0;
-            switch (bitop.code())
-            {
+            switch (bitop.code()) {
                 case OpCode.CPUI_INT_MULT:
                 case OpCode.CPUI_INT_AND:
                     vn = data.newConstant(vn.getSize(), 0);

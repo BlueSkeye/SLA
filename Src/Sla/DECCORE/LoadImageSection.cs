@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -31,6 +27,6 @@ namespace Sla.DECCORE
         /// Number of bytes in section
         internal ulong size;
         /// Properties of the section
-        internal LoadImageSection.Properties flags;
+        internal Properties flags;
     }
 }

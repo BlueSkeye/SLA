@@ -330,8 +330,8 @@ namespace Sla.DECCORE
         /// \param sz is the number of bytes in the range
         /// \param uselim is the given \b usepoint (which may be \e invalid)
         /// \return the newly created SymbolEntry
-        protected abstract SymbolEntry addMapInternal(Symbol sym, varnode_flags exfl, Address addr,
-            int off, int sz, RangeList uselim);
+        protected abstract SymbolEntry addMapInternal(Symbol sym, Varnode.varnode_flags exfl,
+            Address addr, int off, int sz, RangeList uselim);
 
         /// \brief Create a new SymbolEntry for a Symbol given a dynamic hash
         /// The SymbolEntry is specified in terms of a \b hash and \b usepoint, which describe how
@@ -382,12 +382,12 @@ namespace Sla.DECCORE
                     // can only happen if use is not limited
                     entry.symbol.flags |= glb.symboltab.getProperty(entry.addr);
                 }
-                res = addMapInternal(entry.symbol, varnode_flags.mapped, entry.addr, 0, consumeSize,
-                    entry.uselimit);
+                res = addMapInternal(entry.symbol, Varnode.varnode_flags.mapped, entry.addr,
+                    0, consumeSize, entry.uselimit);
                 if (entry.addr.isJoin()) {
                     // The address is a join,  we add extra SymbolEntry maps for each of the pieces
                     JoinRecord rec = glb.findJoin(entry.addr.getOffset());
-                    varnode_flags exfl;
+                    Varnode.varnode_flags exfl;
                     int num = rec.numPieces();
                     ulong off = 0;
                     bool bigendian = entry.addr.isBigEndian();
@@ -395,9 +395,9 @@ namespace Sla.DECCORE
                         int i = bigendian ? j : (num - 1 - j); // Take pieces in endian order
                         VarnodeData vdat = rec.getPiece((uint)i);
                         if (i == 0)     // i==0 is most signif
-                            exfl = varnode_flags.precishi;
+                            exfl = Varnode.varnode_flags.precishi;
                         else if (i == num - 1)
-                            exfl = varnode_flags.precislo;
+                            exfl = Varnode.varnode_flags.precislo;
                         else
                             // Middle pieces have both flags set
                             exfl = Varnode.varnode_flags.precislo | Varnode.varnode_flags.precishi;
@@ -1158,7 +1158,8 @@ namespace Sla.DECCORE
             RangeList rnglist = new RangeList();
             if (!caddr.isInvalid())
                 rnglist.insertRange(caddr.getSpace(), caddr.getOffset(), caddr.getOffset());
-            addDynamicMapInternal(sym, varnode_flags.mapped, hash, 0, ct.getSize(), rnglist);
+            addDynamicMapInternal(sym, Varnode.varnode_flags.mapped, hash, 0, ct.getSize(),
+                rnglist);
             return sym;
         }
 
@@ -1170,8 +1171,8 @@ namespace Sla.DECCORE
         /// \param addr is the address of the p-code op reading the constant
         /// \param hash is the dynamic hash identifying the constant
         /// \return the new EquateSymbol
-        public Symbol addEquateSymbol(string nm, Symbol.DisplayFlags format, ulong value, Address addr,
-            ulong hash)
+        public Symbol addEquateSymbol(string nm, Symbol.DisplayFlags format, ulong value,
+            Address addr, ulong hash)
         {
             Symbol sym = new EquateSymbol(owner, nm, format, value);
             addSymbolInternal(sym);
@@ -1234,7 +1235,9 @@ namespace Sla.DECCORE
                 SymbolEntry entry = sym.getMapEntry(0);
                 Address addr = entry.getAddr();
                 Address usepoint = entry.getFirstUseAddress();
-                varnode_flags flags = usepoint.isInvalid() ? Varnode.varnode_flags.addrtied : 0;
+                Varnode.varnode_flags flags = usepoint.isInvalid()
+                    ? Varnode.varnode_flags.addrtied
+                    : 0;
                 if (sym.getCategory() == Symbol.SymbolCategory.function_parameter) {
                     flags |= Varnode.varnode_flags.input;
                     int index = sym.getCategoryIndex() + 1;
@@ -1256,9 +1259,9 @@ namespace Sla.DECCORE
         /// \return \b true if the memory is marked as \e read-only
         public bool isReadOnly(Address addr, int size, Address usepoint)
         {
-            varnode_flags flags;
+            Varnode.varnode_flags flags;
             queryProperties(addr, size, usepoint, out flags);
-            return ((flags & varnode_flags.@readonly)!= 0);
+            return ((flags & Varnode.varnode_flags.@readonly)!= 0);
         }
 
         /// Print a description of \b this Scope's \e owned memory ranges

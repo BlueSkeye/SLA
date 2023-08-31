@@ -1,11 +1,4 @@
-﻿using ghidra;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Sla.DECCORE
 {
     /// \brief Information about how a HighVariable fits into a larger group or Symbol
@@ -39,10 +32,7 @@ namespace Sla.DECCORE
             high = h;
             groupOffset = offset;
             size = h.getInstance(0).getSize();
-            if (grp != (HighVariable)null)
-                group = grp.piece.getGroup();
-            else
-                group = new VariableGroup();
+            group = (grp != (HighVariable)null) ? grp.piece.getGroup() : new VariableGroup();
             group.addPiece(this);
         }
 
@@ -89,7 +79,8 @@ namespace Sla.DECCORE
         public void markExtendCoverDirty()
         {
             if ((high.highflags & HighVariable.DirtinessFlags.intersectdirty) != 0)
-                return; // intersection list itself is dirty, extended covers will be recomputed anyway
+                // intersection list itself is dirty, extended covers will be recomputed anyway
+                return;
             for (int i = 0; i < intersection.size(); ++i) {
                 intersection[i].high.highflags |= HighVariable.DirtinessFlags.extendcoverdirty;
             }
@@ -157,7 +148,8 @@ namespace Sla.DECCORE
         /// \param mergePairs passes back the collection of HighVariable pairs that must be merged
         public void mergeGroups(VariablePiece op2, List<HighVariable> mergePairs)
         {
-            int diff = groupOffset - op2.groupOffset; // Add to op2, or subtract from this
+            // Add to op2, or subtract from this
+            int diff = groupOffset - op2.groupOffset;
             if (diff > 0)
                 op2.group.adjustOffsets(diff);
             else if (diff < 0)
@@ -167,7 +159,8 @@ namespace Sla.DECCORE
                 if (group.pieceSet.TryGetValue(piece, out variablePiece)) {
                     mergePairs.Add(variablePiece.high);
                     mergePairs.Add(piece.high);
-                    piece.high.piece = (VariablePiece)null; // Detach HighVariable from its original VariablePiece
+                    // Detach HighVariable from its original VariablePiece
+                    piece.high.piece = (VariablePiece)null;
                     // delete piece;
                 }
                 else

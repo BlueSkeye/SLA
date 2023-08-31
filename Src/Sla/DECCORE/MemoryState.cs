@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -18,7 +12,7 @@ namespace Sla.DECCORE
         /// Architecture information about memory spaces
         protected Translate trans;
         /// Memory banks associated with each address space
-        protected List<MemoryBank> memspace;
+        protected List<MemoryBank> memspace = new List<MemoryBank>();
 
         /// A constructor for MemoryState
         /// The MemoryState needs a Translate object in order to be able to convert register names
@@ -62,9 +56,7 @@ namespace Sla.DECCORE
         public MemoryBank getMemoryBank(AddrSpace spc)
         {
             int index = spc.getIndex();
-            if (index >= memspace.size())
-                return (MemoryBank)null;
-            return memspace[index];
+            return (index >= memspace.Count) ? (MemoryBank)null : memspace[index];
         }
 
         /// Set a value on the memory state
@@ -77,10 +69,11 @@ namespace Sla.DECCORE
         /// \param cval is the value to be written
         public void setValue(AddrSpace spc, ulong off, int size, ulong cval)
         {
-            MemoryBank* mspace = getMemoryBank(spc);
+            MemoryBank? mspace = getMemoryBank(spc);
             if (mspace == (MemoryBank)null)
-                throw new LowlevelError("Setting value for unmapped memory space: " + spc.getName());
-            mspace.setValue(off, size, cval);
+                throw new LowlevelError(
+                    $"Setting value for unmapped memory space: {spc.getName()}");
+            mspace.setValue(off, (uint)size, cval);
         }
 
         /// Retrieve a memory value from the memory state
@@ -94,9 +87,10 @@ namespace Sla.DECCORE
         public ulong getValue(AddrSpace spc, ulong off, int size)
         {
             if (spc.getType() == spacetype.IPTR_CONSTANT) return off;
-            MemoryBank* mspace = getMemoryBank(spc);
+            MemoryBank? mspace = getMemoryBank(spc);
             if (mspace == (MemoryBank)null)
-                throw new LowlevelError("Getting value from unmapped memory space: " + spc.getName());
+                throw new LowlevelError(
+                    $"Getting value from unmapped memory space: {spc.getName()}");
             return mspace.getValue(off, size);
         }
 
@@ -111,7 +105,7 @@ namespace Sla.DECCORE
         {
             // Set a "register" value
             VarnodeData vdata = trans.getRegister(nm);
-            setValue(vdata.space, vdata.offset, vdata.size, cval);
+            setValue(vdata.space, vdata.offset, (int)vdata.size, cval);
         }
 
         /// Retrieve a value from a named register in the memory state
@@ -125,7 +119,7 @@ namespace Sla.DECCORE
         {
             // Get a "register" value
             VarnodeData vdata = trans.getRegister(nm);
-            return getValue(vdata.space, vdata.offset, vdata.size);
+            return getValue(vdata.space, vdata.offset, (int)vdata.size);
         }
 
         /// Set value on a given \b varnode
@@ -135,7 +129,7 @@ namespace Sla.DECCORE
         /// \param cval is the value to write into the varnode
         public void setValue(VarnodeData vn, ulong cval)
         {
-            setValue(vn.space, vn.offset, vn.size, cval);
+            setValue(vn.space, vn.offset, (int)vn.size, cval);
         }
 
         /// Get a value from a \b varnode
@@ -143,7 +137,7 @@ namespace Sla.DECCORE
         /// than querying for the offset and space
         /// \param vn is a pointer to the varnode to be read
         /// \return the value read from the varnode
-        public ulong getValue(VarnodeData vn) => getValue(vn.space, vn.offset, vn.size);
+        public ulong getValue(VarnodeData vn) => getValue(vn.space, vn.offset, (int)vn.size);
 
         /// Get a chunk of data from memory state
         /// This is the main interface for reading a range of bytes from the MemorySate.
@@ -156,9 +150,10 @@ namespace Sla.DECCORE
         /// \param size is the number of bytes being queried
         public void getChunk(byte[] res, AddrSpace spc, ulong off, int size)
         {
-            MemoryBank* mspace = getMemoryBank(spc);
+            MemoryBank? mspace = getMemoryBank(spc);
             if (mspace == (MemoryBank)null)
-                throw new LowlevelError("Getting chunk from unmapped memory space: " + spc.getName());
+                throw new LowlevelError(
+                    $"Getting chunk from unmapped memory space: {spc.getName()}");
             mspace.getChunk(off, size, res);
         }
 
@@ -173,9 +168,10 @@ namespace Sla.DECCORE
         /// \param size is the number of bytes to write
         public void setChunk(byte[] val, AddrSpace spc,ulong off, int size)
         {
-            MemoryBank* mspace = getMemoryBank(spc);
+            MemoryBank? mspace = getMemoryBank(spc);
             if (mspace == (MemoryBank)null)
-                throw new LowlevelError("Setting chunk of unmapped memory space: " + spc.getName());
+                throw new LowlevelError(
+                    $"Setting chunk of unmapped memory space: {spc.getName()}");
             mspace.setChunk(off, size, val);
         }
     }

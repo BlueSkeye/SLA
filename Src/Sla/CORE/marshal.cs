@@ -21,7 +21,6 @@ using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics;
-using ghidra;
 using System.IO;
 using System.Xml.Linq;
 using System.Collections.Generic;

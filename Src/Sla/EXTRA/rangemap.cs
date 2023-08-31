@@ -115,21 +115,20 @@ namespace Sla.EXTRA
         public class PartIterator : IEnumerator<AddrRange>
         {
             /// The underlying multiset iterator
-            private /*typename*/ IEnumerator<AddrRange> iter;
+            private /*typename*/ IEnumerator<_recordtype> iter;
 
             public PartIterator()
             {
             }
 
             /// Construct given iterator
-            public PartIterator(/*typename*/ IEnumerator<AddrRange> i)
+            public PartIterator(/*typename*/ IEnumerator<_recordtype> i)
             {
                 iter = i;
             }
 
             /// Dereference to the \b recordtype object
-            public rangemap<_recordtype, linetype, subsorttype, inittype>.AddrRange Current
-                => iter.Current;
+            public _recordtype Current => iter.Current;
 
             object IEnumerator.Current => this.Current;
 
@@ -169,12 +168,13 @@ namespace Sla.EXTRA
                 //return orig;
             }
 
-            /// Assign to the iterator
-            public static PartIterator operator=(PartIterator op1, PartIterator op2)
-            {
-                op1.iter = op2.iter;
-                return op1;
-            }
+            // Assign to the iterator
+            // TODO : Find assignment use and duplicate in a specific method.
+            //public static PartIterator operator=(PartIterator op1, PartIterator op2)
+            //{
+            //    op1.iter = op2.iter;
+            //    return op1;
+            //}
 
             /// Test equality of iterators
             public static bool operator ==(PartIterator op1, PartIterator op2)
@@ -188,8 +188,8 @@ namespace Sla.EXTRA
                 return (op1.iter != op2.iter);
             }
 
-            /// Get the \b recordtype iterator
-            public /*typename*/ IEnumerator<_recordtype> getValueIter()  => (iter).getValue();
+            // Get the \b recordtype iterator
+            public /*typename*/ IEnumerator<_recordtype> getValueIter()  => iter;
 
             public void Reset()
             {
@@ -202,7 +202,8 @@ namespace Sla.EXTRA
             }
         }
 
-        // typedef PartIterator const_iterator;		///< The main sub-range iterator data-type
+        // The main sub-range iterator data-type
+        // typedef PartIterator const_iterator;
 
         // The underlying multiset of sub-ranges
         private std::multiset<AddrRange> tree;

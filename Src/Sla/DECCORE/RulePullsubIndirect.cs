@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -42,15 +35,15 @@ namespace Sla.DECCORE
             PcodeOp targ_op = PcodeOp.getOpFromConst(indir.getIn(1).getAddr());
             if (targ_op.isDead()) return 0;
             if (vn.isAddrForce()) return 0;
-            RulePullsubMulti::minMaxUse(vn, maxByte, minByte);
+            RulePullsubMulti.minMaxUse(vn, out maxByte, out minByte);
             newSize = maxByte - minByte + 1;
             if (maxByte < minByte || (newSize >= vn.getSize()))
                 return 0;
-            if (!RulePullsubMulti::acceptableSize(newSize)) return 0;
+            if (!RulePullsubMulti.acceptableSize(newSize)) return 0;
             Varnode outvn = op.getOut();
             if (outvn.isPrecisLo() || outvn.isPrecisHi()) return 0; // Don't pull apart double precision object
 
-            ulong consume = Globals.calc_mask(newSize) << 8 * minByte;
+            ulong consume = Globals.calc_mask((uint)newSize) << 8 * minByte;
             consume = ~consume;
             if ((consume & indir.getIn(0).getConsume()) != 0) return 0;
 
@@ -72,9 +65,9 @@ namespace Sla.DECCORE
             else
             {
                 Varnode basevn = indir.getIn(0);
-                Varnode small1 = RulePullsubMulti::findSubpiece(basevn, newSize, op.getIn(1).getOffset());
+                Varnode small1 = RulePullsubMulti.findSubpiece(basevn, newSize, op.getIn(1).getOffset());
                 if (small1 == (Varnode)null)
-                    small1 = RulePullsubMulti::buildSubpiece(basevn, newSize, op.getIn(1).getOffset(), data);
+                    small1 = RulePullsubMulti.buildSubpiece(basevn, newSize, op.getIn(1).getOffset(), data);
                 // Create new indirect near original indirect
                 new_ind = data.newOp(2, indir.getAddr());
                 data.opSetOpcode(new_ind, OpCode.CPUI_INDIRECT);
@@ -84,7 +77,7 @@ namespace Sla.DECCORE
                 data.opInsertBefore(new_ind, indir);
             }
 
-            RulePullsubMulti::replaceDescendants(vn, small2, maxByte, minByte, data);
+            RulePullsubMulti.replaceDescendants(vn, small2, maxByte, minByte, data);
             return 1;
         }
     }

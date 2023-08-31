@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -33,9 +26,10 @@ namespace Sla.DECCORE
         {
             Varnode vn = op.getOut();
             Varnode invn = op.getIn(0);
-            ulong mask = Globals.calc_mask(invn.getSize());
+            ulong mask = Globals.calc_mask((uint)invn.getSize());
 
-            SubvariableFlow subflow = new SubvariableFlow(&data,vn,mask,invn.isPtrFlow(),false,false);
+            SubvariableFlow subflow = new SubvariableFlow(data, vn,
+                mask, invn.isPtrFlow(), false, false);
             if (!subflow.doTrace()) return 0;
             subflow.doReplacement();
             return 1;

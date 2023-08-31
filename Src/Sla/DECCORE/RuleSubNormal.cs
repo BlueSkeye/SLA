@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -54,11 +47,9 @@ namespace Sla.DECCORE
             if ((n + 8 * c + 8 * outsize < 8 * insize) && (n != k * 8)) return 0;
 
             // If totalcut + remain > original input
-            if (k + c + outsize > insize)
-            {
+            if (k + c + outsize > insize) {
                 int truncSize = insize - c - k;
-                if (n == k * 8 && truncSize > 0 && Globals.popcount(truncSize) == 1)
-                {
+                if (n == k * 8 && truncSize > 0 && Globals.popcount(truncSize) == 1) {
                     // We need an additional extension
                     c += k;
                     PcodeOp newop = data.newOp(2, op.getAddr());
@@ -81,14 +72,13 @@ namespace Sla.DECCORE
             // if n == k*8, then a shift is unnecessary
             c += k;
             n -= k * 8;
-            if (n == 0)
-            {           // Extra shift is unnecessary
+            if (n == 0) {
+                // Extra shift is unnecessary
                 data.opSetInput(op, a, 0);
                 data.opSetInput(op, data.newConstant(4, c), 1);
                 return 1;
             }
-            else if (n >= outsize * 8)
-            {
+            else if (n >= outsize * 8) {
                 n = outsize * 8;        // Can only shift so far
                 if (opc == OpCode.CPUI_INT_SRIGHT)
                     n -= 1;

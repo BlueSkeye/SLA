@@ -41,7 +41,8 @@ namespace Sla.DECCORE
         /// \param fad is the address of the function to which the comment belongs
         /// \param ad is the address to which the comment is attached
         /// \param txt is the body of the comment
-        public abstract void addComment(uint tp, Address fad, Address ad, string txt);
+        public abstract void addComment(Comment.comment_type tp, Address fad, Address ad,
+            string txt);
 
         /// \brief Add a new comment to the container, making sure there is no duplicate
         /// If there is already a comment at the same address with the same body, no

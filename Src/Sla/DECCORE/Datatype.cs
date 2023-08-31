@@ -131,8 +131,7 @@ namespace Sla.DECCORE
                 saveId = hashSize(id, size);
             else
                 saveId = id;
-            if (saveId != 0)
-            {
+            if (saveId != 0) {
                 encoder.writeUnsignedInteger(AttributeId.ATTRIB_ID, saveId);
             }
             encoder.writeSignedInteger(AttributeId.ATTRIB_SIZE, size);
@@ -180,7 +179,8 @@ namespace Sla.DECCORE
         /// \param format is the given format
         internal void setDisplayFormat(uint format)
         {
-            flags &= ~Properties.force_format;  // Clear preexisting
+            // Clear preexisting
+            flags &= ~Properties.force_format;
             flags |= (Properties)(format << 12);
         }
 
@@ -199,11 +199,13 @@ namespace Sla.DECCORE
                 res = (res << 8) | (res >> 56);
                 res += (ulong)nm[i];
                 if ((res & 1) == 0)
-                    res ^= 0xfeabfeab;  // Some kind of feedback
+                    // Some kind of feedback
+                    res ^= 0xfeabfeab;
             }
             ulong tmp = 1;
             tmp <<= 63;
-            res |= tmp; // Make sure the hash is negative (to distinguish it from database id's)
+            // Make sure the hash is negative (to distinguish it from database id's)
+            res |= tmp;
             return res;
         }
 

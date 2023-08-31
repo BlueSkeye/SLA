@@ -1,12 +1,4 @@
-﻿using ghidra;
-using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -32,12 +24,14 @@ namespace Sla.DECCORE
         {
         }
 
-        public void foldIn(ParamListStandard op2);				///< Add another model to the union
+        // Add another model to the union
+        public void foldIn(ParamListStandard op2);
 
+        // Fold-ins are finished, finalize \b this
         public void finalize()
         {
             populateResolver();
-        }               ///< Fold-ins are finished, finalize \b this
+        }
 
         public override uint getType() => p_merged;
 

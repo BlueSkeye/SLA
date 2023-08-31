@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -47,12 +40,11 @@ namespace Sla.DECCORE
             // Its likely collapsing the divisions will interfere with the modulo rules
             if (vn.loneDescend() == (PcodeOp)null) return 0;
             ulong val1;
-            if (opc1 == opc2)
-            {
+            if (opc1 == opc2) {
                 val1 = constVn1.getOffset();
             }
-            else
-            {   // Unsigned case with INT_RIGHT
+            else {
+                // Unsigned case with INT_RIGHT
                 int sa = constVn1.getOffset();
                 val1 = 1;
                 val1 <<= sa;
@@ -63,9 +55,9 @@ namespace Sla.DECCORE
             ulong val2 = constVn2.getOffset();
             ulong resval = (val1 * val2) & Globals.calc_mask(sz);
             if (resval == 0) return 0;
-            if (signbit_negative(val1, sz))
-                val1 = (~val1 + 1) & Globals.calc_mask(sz);
-            if (signbit_negative(val2, sz))
+            if (Globals.signbit_negative(val1, sz))
+                val1 = (~val1 + 1) & Globals.calc_mask((uint)sz);
+            if (Globals.signbit_negative(val2, sz))
                 val2 = (~val2 + 1) & Globals.calc_mask(sz);
             int bitcount = Globals.mostsigbit_set(val1) + Globals.mostsigbit_set(val2) + 2;
             if (opc2 == OpCode.CPUI_INT_DIV && bitcount > sz * 8) return 0;    // Unsigned overflow

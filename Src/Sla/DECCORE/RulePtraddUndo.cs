@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -36,17 +29,19 @@ namespace Sla.DECCORE
         public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode basevn;
-            TypePointer* tp;
+            TypePointer tp;
 
             if (!data.hasTypeRecoveryStarted()) return 0;
             int size = (int)op.getIn(2).getOffset(); // Size the PTRADD thinks we are pointing
             basevn = op.getIn(0);
             tp = (TypePointer)basevn.getTypeReadFacing(op);
-            if (tp.getMetatype() == type_metatype.TYPE_PTR)                              // Make sure we are still a pointer
-                if (tp.getPtrTo().getSize() == AddrSpace.addressToByteInt(size, tp.getWordSize()))
-                {   // of the correct size
+            if (tp.getMetatype() == type_metatype.TYPE_PTR)
+                // Make sure we are still a pointer
+                if (tp.getPtrTo().getSize() == AddrSpace.addressToByteInt(size, tp.getWordSize())) {
+                    // of the correct size
                     Varnode indVn = op.getIn(1);
-                    if ((!indVn.isConstant()) || (indVn.getOffset() != 0))                    // and that index isn't zero
+                    if ((!indVn.isConstant()) || (indVn.getOffset() != 0))
+                        // and that index isn't zero
                         return 0;
                 }
 

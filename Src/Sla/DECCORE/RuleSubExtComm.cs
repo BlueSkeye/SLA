@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -40,7 +33,7 @@ namespace Sla.DECCORE
 
         public override int applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode * base = op.getIn(0);
+            Varnode @base = op.getIn(0) ?? throw new ApplicationException();
             if (!@base.isWritten()) return 0;
             PcodeOp extop = @base.getDef();
             if ((extop.code() != OpCode.CPUI_INT_ZEXT) && (extop.code() != OpCode.CPUI_INT_SEXT))
@@ -48,12 +41,10 @@ namespace Sla.DECCORE
             Varnode invn = extop.getIn(0);
             if (invn.isFree()) return 0;
             int subcut = (int)op.getIn(1).getOffset();
-            if (op.getOut().getSize() + subcut <= invn.getSize())
-            {
+            if (op.getOut().getSize() + subcut <= invn.getSize()) {
                 // SUBPIECE doesn't hit the extended bits at all
                 data.opSetInput(op, invn, 0);
-                if (invn.getSize() == op.getOut().getSize())
-                {
+                if (invn.getSize() == op.getOut().getSize()) {
                     data.opRemoveInput(op, 1);
                     data.opSetOpcode(op, OpCode.CPUI_COPY);
                 }
@@ -63,8 +54,7 @@ namespace Sla.DECCORE
             if (subcut >= invn.getSize()) return 0;
 
             Varnode newvn;
-            if (subcut != 0)
-            {
+            if (subcut != 0) {
                 PcodeOp newop = data.newOp(2, op.getAddr());
                 data.opSetOpcode(newop, OpCode.CPUI_SUBPIECE);
                 newvn = data.newUniqueOut(invn.getSize() - subcut, newop);

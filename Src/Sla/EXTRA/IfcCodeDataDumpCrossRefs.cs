@@ -1,17 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Sla.EXTRA
 {
     internal class IfcCodeDataDumpCrossRefs : IfaceCodeDataCommand
     {
-        public override void execute(istream s)
+        public override void execute(TextReader s)
         {
-            codedata.dumpCrossRefs(*status.fileoptr);
+            codedata.dumpCrossRefs(status.fileoptr);
         }
     }
 }

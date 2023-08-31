@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -50,12 +43,12 @@ namespace Sla.DECCORE
             PcodeOp multOp = multOut.getDef();
             if (multOp.code() != OpCode.CPUI_INT_MULT) return 0;
             int slot;
-            PcodeOp sextOp;
-            for (slot = 0; slot < 2; ++slot)
-            {           // Search for the INT_SEXT
+            PcodeOp sextOp = null;
+            for (slot = 0; slot < 2; ++slot) {
+                // Search for the INT_SEXT
                 Varnode vn = multOp.getIn(slot);
                 if (!vn.isWritten()) continue;
-                sextOp = vn.getDef();
+                sextOp = vn.getDef() ?? throw new ApplicationException();
                 if (sextOp.code() == OpCode.CPUI_INT_SEXT) break;
             }
             if (slot > 1) return 0;
@@ -63,13 +56,11 @@ namespace Sla.DECCORE
             if (a.isFree() || a.getSize() != sizeout) return 0;
             Varnode otherVn = multOp.getIn(1 - slot);
             // otherVn must be a positive integer and small enough so the INT_MULT can't overflow into the sign-bit
-            if (otherVn.isConstant())
-            {
-                if (otherVn.getOffset() > Globals.calc_mask(sizeout)) return 0;
+            if (otherVn.isConstant()) {
+                if (otherVn.getOffset() > Globals.calc_mask((uint)sizeout)) return 0;
                 if (2 * sizeout > multSize) return 0;
             }
-            else if (otherVn.isWritten())
-            {
+            else if (otherVn.isWritten()) {
                 PcodeOp zextOp = otherVn.getDef();
                 if (zextOp.code() != OpCode.CPUI_INT_ZEXT) return 0;
                 if (zextOp.getIn(0).getSize() + sizeout > multSize) return 0;

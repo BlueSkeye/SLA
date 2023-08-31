@@ -1,14 +1,4 @@
 ﻿using Sla.CORE;
-using System.Collections;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Sla.DECCORE
 {
@@ -36,62 +26,63 @@ namespace Sla.DECCORE
         {
             int maxByte, minByte, newSize;
 
-            Varnode vn = op.getIn(0);
+            Varnode vn = op.getIn(0) ?? throw new ApplicationException();
             if (!vn.isWritten()) return 0;
-            PcodeOp mult = vn.getDef();
+            PcodeOp mult = vn.getDef() ?? throw new ApplicationException();
             if (mult.code() != OpCode.CPUI_MULTIEQUAL) return 0;
             // We only pull up, do not pull "down" to bottom of loop
             if (mult.getParent().hasLoopIn()) return 0;
-            minMaxUse(vn, maxByte, minByte);        // Figure out what part of -vn- is used
+            // Figure out what part of -vn- is used
+            minMaxUse(vn, out maxByte, out minByte);
             newSize = maxByte - minByte + 1;
             if (maxByte < minByte || (newSize >= vn.getSize()))
-                return 0;   // If all or none is getting used, nothing to do
+                // If all or none is getting used, nothing to do
+                return 0;
             if (!acceptableSize(newSize)) return 0;
-            Varnode outvn = op.getOut();
-            if (outvn.isPrecisLo() || outvn.isPrecisHi()) return 0; // Don't pull apart a double precision object
+            Varnode outvn = op.getOut() ?? throw new ApplicationException();
+            if (outvn.isPrecisLo() || outvn.isPrecisHi())
+                // Don't pull apart a double precision object
+                return 0;
 
-            // Make sure we don't new add SUBPIECE ops that aren't going to cancel in some way
+            // Make sure we don't new add SUBPIECE ops that aren't going to cancel in
+            // some way
             int branches = mult.numInput();
-            ulong consume = Globals.calc_mask(newSize) << 8 * minByte;
-            consume = ~consume;         // Check for use of bits outside of what gets truncated later
-            for (int i = 0; i < branches; ++i)
-            {
-                Varnode inVn = mult.getIn(i);
-                if ((consume & inVn.getConsume()) != 0)
-                {   // Check if bits not truncated are still used
+            ulong consume = Globals.calc_mask((uint)newSize) << 8 * minByte;
+            // Check for use of bits outside of what gets truncated later
+            consume = ~consume;
+            for (int i = 0; i < branches; ++i) {
+                Varnode inVn = mult.getIn(i) ?? throw new ApplicationException();
+                if ((consume & inVn.getConsume()) != 0) {
+                    // Check if bits not truncated are still used
                     // Check if there's an extension that matches the truncation
-                    if (minByte == 0 && inVn.isWritten())
-                    {
-                        PcodeOp defOp = inVn.getDef();
+                    if (minByte == 0 && inVn.isWritten()) {
+                        PcodeOp defOp = inVn.getDef() ?? throw new ApplicationException();
                         OpCode opc = defOp.code();
-                        if (opc == OpCode.CPUI_INT_ZEXT || opc == OpCode.CPUI_INT_SEXT)
-                        {
+                        if (opc == OpCode.CPUI_INT_ZEXT || opc == OpCode.CPUI_INT_SEXT) {
                             if (newSize == defOp.getIn(0).getSize())
-                                continue;       // We have matching extension, so new SUBPIECE will cancel anyway
+                                // We have matching extension, so new SUBPIECE will
+                                // cancel anyway
+                                continue;
                         }
                     }
                     return 0;
                 }
             }
 
-            Address smalladdr2;
-            if (!vn.getSpace().isBigEndian())
-                smalladdr2 = vn.getAddr() + minByte;
-            else
-                smalladdr2 = vn.getAddr() + (vn.getSize() - maxByte - 1);
-
-            List < Varnode *> @params;
-
-            for (int i = 0; i < branches; ++i)
-            {
+            Address smalladdr2 = vn.getSpace().isBigEndian()
+                ? vn.getAddr() + (vn.getSize() - maxByte - 1)
+                :  vn.getAddr() + minByte;
+            List<Varnode> @params = new List<Varnode>();
+            for (int i = 0; i < branches; ++i) {
                 Varnode vn_piece = mult.getIn(i);
                 // We have to be wary of exponential splittings here, do not pull the SUBPIECE
                 // up the MULTIEQUAL if another related SUBPIECE has already been pulled
                 // Search for a previous SUBPIECE
-                Varnode vn_sub = findSubpiece(vn_piece, newSize, minByte);
-                if (vn_sub == (Varnode)null) // Couldn't find previous subpieceing
-                    vn_sub = buildSubpiece(vn_piece, newSize, minByte, data);
-                    @params.Add(vn_sub);
+                Varnode? vn_sub = findSubpiece(vn_piece, (uint)newSize, (uint)minByte);
+                if (vn_sub == (Varnode)null)
+                    // Couldn't find previous subpieceing
+                    vn_sub = buildSubpiece(vn_piece, (uint)newSize, (uint)minByte, data);
+                @params.Add(vn_sub);
             }
             // Build new multiequal near original multiequal
             PcodeOp new_multi = data.newOp (@params.size(), mult.getAddr());
@@ -112,7 +103,7 @@ namespace Sla.DECCORE
         /// \param vn is the given Varnode
         /// \param maxByte will hold the index of the maximum byte
         /// \param minByte will hold the index of the minimum byte
-        public static void minMaxUse(Varnode vn, int maxByte, int minByte)
+        public static void minMaxUse(Varnode vn, out int maxByte, out int minByte)
         {
             int inSize = vn.getSize();
             maxByte = -1;
@@ -200,66 +191,58 @@ namespace Sla.DECCORE
         /// \param shift is the number of least significant bytes to truncate
         /// \param data is the function being analyzed
         /// \return the output Varnode of the new SUBPIECE
-        public static Varnode buildSubpiece(Varnode basevn, uint outsize, uint shift, Funcdata data)
+        public static Varnode buildSubpiece(Varnode basevn, uint outsize, uint shift,
+            Funcdata data)
         {
             Address newaddr;
             PcodeOp new_op;
             Varnode outvn;
 
-            if (basevn.isInput())
-            {
+            if (basevn.isInput()) {
                 BlockBasic bb = (BlockBasic)data.getBasicBlocks().getBlock(0);
                 newaddr = bb.getStart();
             }
-            else
-            {
+            else {
                 if (!basevn.isWritten()) throw new LowlevelError("Undefined pullsub");
                 newaddr = basevn.getDef().getAddr();
             }
-            Address smalladdr1;
+            Address smalladdr1 = new Address();
             bool usetmp = false;
-            if (basevn.getAddr().isJoin())
-            {
+            if (basevn.getAddr().isJoin()) {
                 usetmp = true;
-                JoinRecord* joinrec = data.getArch().findJoin(basevn.getOffset());
-                if (joinrec.numPieces() > 1)
-                { // If only 1 piece (float extension) automatically use unique
+                JoinRecord joinrec = data.getArch().findJoin(basevn.getOffset());
+                if (joinrec.numPieces() > 1) {
+                    // If only 1 piece (float extension) automatically use unique
                     uint skipleft = shift;
-                    for (int i = joinrec.numPieces() - 1; i >= 0; --i)
-                    { // Move from least significant to most
-                        VarnodeData vdata = joinrec.getPiece(i);
-                        if (skipleft >= vdata.size)
-                        {
+                    for (int i = joinrec.numPieces() - 1; i >= 0; --i) {
+                        // Move from least significant to most
+                        VarnodeData vdata = joinrec.getPiece((uint)i);
+                        if (skipleft >= vdata.size) {
                             skipleft -= vdata.size;
                         }
-                        else
-                        {
+                        else {
                             if (skipleft + outsize > vdata.size)
                                 break;
-                            if (vdata.space.isBigEndian())
-                                smalladdr1 = vdata.getAddr() + (vdata.size - (outsize + skipleft));
-                            else
-                                smalladdr1 = vdata.getAddr() + skipleft;
+                            smalladdr1 = vdata.space.isBigEndian()
+                                ? vdata.getAddr() + (vdata.size - (outsize + skipleft))
+                                : vdata.getAddr() + skipleft;
                             usetmp = false;
                             break;
                         }
                     }
                 }
             }
-            else
-            {
-                if (!basevn.getSpace().isBigEndian())
-                    smalladdr1 = basevn.getAddr() + shift;
-                else
-                    smalladdr1 = basevn.getAddr() + (basevn.getSize() - (shift + outsize));
+            else {
+                smalladdr1 = basevn.getSpace().isBigEndian()
+                    ? basevn.getAddr() + (basevn.getSize() - (shift + outsize))
+                    : basevn.getAddr() + shift;
             }
             // Build new subpiece near definition of basevn
             new_op = data.newOp(2, newaddr);
             data.opSetOpcode(new_op, OpCode.CPUI_SUBPIECE);
             if (usetmp)
                 outvn = data.newUniqueOut(outsize, new_op);
-            else
-            {
+            else {
                 smalladdr1.renormalize(outsize);
                 outvn = data.newVarnodeOut(outsize, smalladdr1, new_op);
             }
@@ -281,22 +264,23 @@ namespace Sla.DECCORE
         /// \param outsize is the desired truncation size
         /// \param shift if the desired truncation shift
         /// \return the truncated Varnode or NULL
-        public static Varnode findSubpiece(Varnode basevn, uint outsize, uint shift)
+        public static Varnode? findSubpiece(Varnode basevn, uint outsize, uint shift)
         {
             IEnumerator<PcodeOp> iter = basevn.beginDescend();
-            PcodeOp prevop;
 
             while (iter.MoveNext()) {
-                prevop = iter.Current;
-                if (prevop.code() != OpCode.CPUI_SUBPIECE) continue; // Find previous SUBPIECE
-                                                               // Make sure output is defined in same block as vn_piece
+                PcodeOp prevop = iter.Current;
+                if (prevop.code() != OpCode.CPUI_SUBPIECE)
+                    // Find previous SUBPIECE
+                    continue;
+                // Make sure output is defined in same block as vn_piece
                 if (basevn.isInput() && (prevop.getParent().getIndex() != 0)) continue;
                 if (!basevn.isWritten()) continue;
                 if (basevn.getDef().getParent() != prevop.getParent()) continue;
                 // Make sure subpiece matches form
-                if ((prevop.getIn(0) == basevn) &&
-                    (prevop.getOut().getSize() == outsize) &&
-                    (prevop.getIn(1).getOffset() == shift))
+                if (   (prevop.getIn(0) == basevn)
+                    && (prevop.getOut().getSize() == outsize)
+                    && (prevop.getIn(1).getOffset() == shift))
                 {
                     return prevop.getOut();
                 }

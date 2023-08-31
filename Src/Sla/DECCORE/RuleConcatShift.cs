@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -50,14 +43,13 @@ namespace Sla.DECCORE
             if (mainin.isFree()) return 0;
             sa -= leastsize;
             OpCode extcode = (op.code() == OpCode.CPUI_INT_RIGHT) ? OpCode.CPUI_INT_ZEXT : OpCode.CPUI_INT_SEXT;
-            if (sa == 0)
-            {       // Exact cancelation
+            if (sa == 0) {
+                // Exact cancelation
                 data.opRemoveInput(op, 1);  // Remove thrown away least
                 data.opSetOpcode(op, extcode); // Change to extension
                 data.opSetInput(op, mainin, 0);
             }
-            else
-            {
+            else {
                 // Create a new extension op
                 PcodeOp extop = data.newOp(1, op.getAddr());
                 data.opSetOpcode(extop, extcode);

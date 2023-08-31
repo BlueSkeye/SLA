@@ -7,7 +7,6 @@ using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.Arm;
 using System.Text;
 using System.Threading.Tasks;
-using static ghidra.ParamMeasure;
 
 namespace Sla.DECCORE
 {
@@ -161,7 +160,7 @@ namespace Sla.DECCORE
         /// Sort the alias starting offsets
         public void sortAlias()
         {
-            sort(alias.begin(), alias.end());
+            alias.Sort();
         }
 
         /// Get the collection of pointer Varnodes

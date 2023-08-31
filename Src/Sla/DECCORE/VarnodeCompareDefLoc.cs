@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Sla.DECCORE
 {
-    /// \brief Compare two Varnode pointers by definition then location
-    internal class VarnodeCompareDefLoc : IComparer<Varnode>
+    // Compare two Varnode pointers by definition then location
+    internal class VarnodeCompareDefLoc // : IComparer<Varnode>
     {
         internal static readonly VarnodeCompareDefLoc Instance = new VarnodeCompareDefLoc();
 

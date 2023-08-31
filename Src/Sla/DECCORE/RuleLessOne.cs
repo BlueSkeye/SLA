@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -33,7 +26,6 @@ namespace Sla.DECCORE
         public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode constvn = op.getIn(1);
-
             if (!constvn.isConstant()) return 0;
             ulong val = constvn.getOffset();
             if ((op.code() == OpCode.CPUI_INT_LESS) && (val != 1)) return 0;

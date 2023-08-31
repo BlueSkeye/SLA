@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -44,11 +37,10 @@ namespace Sla.DECCORE
             ulong val = cvn1.getOffset();
             int size = cvn1.getSize();
             // Check that cvn1 is of the form    11110000
-            if (((val - 1) | val) != Globals.calc_mask(size)) return 0;
+            if (((val - 1) | val) != Globals.calc_mask((uint)size)) return 0;
 
             Varnode cvn2 = addop.getIn(1);
-            if (cvn2.isConstant())
-            {
+            if (cvn2.isConstant()) {
                 xalign = addop.getIn(0);
                 if (xalign.isFree()) return 0;
                 ulong mask1 = xalign.getNZMask();
@@ -61,11 +53,9 @@ namespace Sla.DECCORE
                 data.opSetInput(op, data.newConstant(size, val), 1);
                 return 1;
             }
-            else
-            {
+            else {
                 if (addop.getOut().loneDescend() != op) return 0;
-                for (int i = 0; i < 2; ++i)
-                {
+                for (int i = 0; i < 2; ++i) {
                     Varnode zerovn = addop.getIn(i);
                     ulong mask2 = zerovn.getNZMask();
                     if ((mask2 & val) != mask2) continue; // zerovn must be unaffected by the AND operation

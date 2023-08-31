@@ -1,12 +1,4 @@
-﻿using Sla.DECCORE;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -38,18 +30,17 @@ namespace Sla.DECCORE
             indop = PcodeOp.getOpFromConst(op.getIn(1).getAddr());
 
             // Is the indirect effect gone?
-            if (!indop.isDead())
-            {
-                if (indop.code() == OpCode.CPUI_COPY)
-                { // STORE resolved to a COPY
+            if (!indop.isDead()) {
+                if (indop.code() == OpCode.CPUI_COPY) {
+                    // STORE resolved to a COPY
                     Varnode vn1 = indop.getOut();
                     Varnode vn2 = op.getOut();
                     int res = vn1.characterizeOverlap(*vn2);
-                    if (res > 0)
-                    { // Copy has an effect of some sort
-                        if (res == 2)
-                        { // vn1 and vn2 are the same storage
-                          // Convert INDIRECT to COPY
+                    if (res > 0) {
+                        // Copy has an effect of some sort
+                        if (res == 2) {
+                            // vn1 and vn2 are the same storage
+                            // Convert INDIRECT to COPY
                             data.opUninsert(op);
                             data.opSetInput(op, vn1, 0);
                             data.opRemoveInput(op, 1);
@@ -57,8 +48,8 @@ namespace Sla.DECCORE
                             data.opInsertAfter(op, indop);
                             return 1;
                         }
-                        if (vn1.contains(*vn2) == 0)
-                        {   // INDIRECT output is properly contained in COPY output
+                        if (vn1.contains(vn2) == 0) {
+                            // INDIRECT output is properly contained in COPY output
                             // Convert INDIRECT to a SUBPIECE
                             ulong trunc;
                             if (vn1.getSpace().isBigEndian())
@@ -76,25 +67,21 @@ namespace Sla.DECCORE
                         return 0;       // Partial overlap, not sure what to do
                     }
                 }
-                else if (indop.isCall())
-                {
+                else if (indop.isCall()) {
                     if (op.isIndirectCreation() || op.noIndirectCollapse())
                         return 0;
                     // If there are no aliases to a local variable, collapse
                     if (!op.getOut().hasNoLocalAlias())
                         return 0;
                 }
-                else if (indop.usesSpacebasePtr())
-                {
-                    if (indop.code() == OpCode.CPUI_STORE)
-                    {
-                        LoadGuard* guard = data.getStoreGuard(indop);
+                else if (indop.usesSpacebasePtr()) {
+                    if (indop.code() == OpCode.CPUI_STORE) {
+                        LoadGuard guard = data.getStoreGuard(indop);
                         if (guard != (LoadGuard)null) {
                             if (guard.isGuarded(op.getOut().getAddr()))
                                 return 0;
                         }
-                        else
-                        {
+                        else {
                             // A marked STORE that is not guarded should eventually get converted to a COPY
                             // so we keep the INDIRECT until that happens
                             return 0;

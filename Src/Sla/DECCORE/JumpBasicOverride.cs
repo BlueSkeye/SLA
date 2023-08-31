@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Numerics;
 using System.Runtime.Intrinsics;
 using System.Text;
@@ -18,11 +19,11 @@ namespace Sla.DECCORE
     internal class JumpBasicOverride : JumpBasic
     {
         /// Absolute address table (manually specified)
-        private set<Address> adset;
+        private HashSet<Address> adset = new HashSet<Address>();
         /// Normalized switch variable values associated with addresses
-        private List<ulong> values;
+        private List<ulong> values = new List<ulong>();
         /// Address associated with each value
-        private List<Address> addrtable;
+        private List<Address> addrtable = new List<Address>();
         /// Possible start for guessing values that match addresses
         private ulong startingvalue;
         /// Dynamic info for recovering normalized switch variable
@@ -33,7 +34,6 @@ namespace Sla.DECCORE
         private bool istrivial;
 
         /// \brief Return the PcodeOp (within the PathMeld set) that takes the given Varnode as input
-        ///
         /// If there no PcodeOp in the set reading the Varnode, null is returned
         /// \param vn is the given Varnode
         /// \return the PcodeOp or null
@@ -73,7 +73,8 @@ namespace Sla.DECCORE
             if (opi < 0) return -1;
             PcodeOp startop = pathMeld.getOp(opi);
 
-            if (!values.empty())        // Have we already worked out the values and addresses
+            if (!values.empty())
+                // Have we already worked out the values and addresses
                 return opi;
 
             EmulateFunction emul = new EmulateFunction(fd);
@@ -86,17 +87,19 @@ namespace Sla.DECCORE
             uint total = 0;
             uint miss = 0;
             HashSet<Address> alreadyseen = new HashSet<Address>();
-            while (total < adset.size()) {
+            while (total < adset.Count) {
                 try {
                     addr = emul.emulatePath(val, pathMeld, startop, trialvn);
                 }
-                catch (LowlevelError ) { // Something went wrong with emulation
+                catch (LowlevelError ) {
+                    // Something went wrong with emulation
                     addr = 0;
-                    miss = tolerance;       // Terminate early
+                    // Terminate early
+                    miss = tolerance;
                 }
                 addr = AddrSpace.addressToByte(addr, spc.getWordSize());
                 Address newaddr = new Address(spc, addr);
-                if (adset.find(newaddr) != adset.end()) {
+                if (adset.Contains(newaddr)) {
                     if (!alreadyseen.Contains(newaddr)) {
                         alreadyseen.Add(newaddr);
                         // If this is the first time we've seen this address
@@ -106,7 +109,7 @@ namespace Sla.DECCORE
                     addrtable.Add(newaddr);
                     // We may be seeing the same (valid) address over and over, without seeing others in -adset-
                     // Terminate if things get too large
-                    if (values.size() > adset.size() + 100) break;
+                    if (values.size() > adset.Count + 100) break;
                     miss = 0;
                 }
                 else {
@@ -118,7 +121,7 @@ namespace Sla.DECCORE
 
             //  if ((loadpoint != (List<LoadTable> *)0)&&(total == adset.size()))
             //    emul.collectLoadPoints(*loadpoints);
-            if (total == adset.size())
+            if (total == adset.Count)
                 return opi;
             values.Clear();
             addrtable.Clear();
@@ -169,19 +172,17 @@ namespace Sla.DECCORE
             while (i < pathMeld.numOps())
             { // Look for preceding ADD
                 op = pathMeld.getOp(i);
-                if (op.code() == OpCode.CPUI_INT_ADD)
-                {
+                if (op.code() == OpCode.CPUI_INT_ADD) {
                     res = pathMeld.getOpParent(i);
                     break;
                 }
                 ++i;
             }
             i += 1;
-            while (i < pathMeld.numOps())
-            { // Look for preceding MULT
+            while (i < pathMeld.numOps()) {
+                // Look for preceding MULT
                 op = pathMeld.getOp(i);
-                if (op.code() == OpCode.CPUI_INT_MULT)
-                {
+                if (op.code() == OpCode.CPUI_INT_MULT) {
                     res = pathMeld.getOpParent(i);
                     break;
                 }
@@ -213,19 +214,21 @@ namespace Sla.DECCORE
         public void setAddresses(List<Address> adtable)
         {
             for (int i = 0; i < adtable.size(); ++i)
-                adset.insert(adtable[i]);
+                adset.Add(adtable[i]);
         }
 
+        // Set the normalized switch variable
         public void setNorm(Address addr, ulong h)
         {
             normaddress = addr;
             hash = h;
-        }   ///< Set the normalized switch variable
+        }
 
+        // Set the starting value for the normalized range
         public void setStartingValue(ulong val)
         {
             startingvalue = val;
-        }       ///< Set the starting value for the normalized range
+        }
 
         public override bool isOverride() => true;
 
@@ -240,7 +243,7 @@ namespace Sla.DECCORE
                 // If we haven't previously decided to use trivial model
                 Varnode? trialvn = (Varnode)null;
                 if (hash != 0) {
-                    DynamicHash dyn;
+                    DynamicHash dyn = new DynamicHash();
                     trialvn = dyn.findVarnode(fd, normaddress, hash);
                 }
                 // If there was never a specified norm, or the specified norm was never recovered
@@ -260,10 +263,11 @@ namespace Sla.DECCORE
             return true;
         }
 
-        public override void buildAddresses(Funcdata fd, PcodeOp indop, List<Address> addresstable,
-            List<LoadTable> loadpoints)
+        public override void buildAddresses(Funcdata fd, PcodeOp indop,
+            List<Address> addresstable, List<LoadTable> loadpoints)
         {
-            addresstable = addrtable;   // Addresses are already calculated, just copy them out
+            // Addresses are already calculated, just copy them out
+            addresstable = addrtable;
         }
 
         // findUnnormalized inherited from JumpBasic
@@ -272,21 +276,21 @@ namespace Sla.DECCORE
         {
             ulong addr;
 
-            for (uint i = 0; i < values.size(); ++i)
-            {
-                try
-                {
+            for (uint i = 0; i < values.size(); ++i) {
+                try {
                     addr = backup2Switch(fd, values[i], normalvn, switchvn);
                 }
-                catch (EvaluationError err) {
+                catch (EvaluationError) {
                     addr = 0xBAD1ABE1;
                 }
                 label.Add(addr);
-                if (label.size() >= addresstable.size()) break; // This should never happen
+                // This should never happen
+                if (label.size() >= addresstable.size()) break;
             }
 
             while (label.size() < addresstable.size()) {
-                fd.warning("Bad switch case", addresstable[label.size()]); // This should never happen
+                // This should never happen
+                fd.warning("Bad switch case", addresstable[label.size()]);
                 label.Add(0xBAD1ABE1);
             }
         }
@@ -350,12 +354,11 @@ namespace Sla.DECCORE
         {
             ElementId elemId = decoder.openElement(ElementId.ELEM_BASICOVERRIDE);
             while(true) {
-                uint subId = decoder.openElement();
+                ElementId subId = decoder.openElement();
                 if (subId == 0) break;
                 if (subId == ElementId.ELEM_DEST) {
-                    VarnodeData vData = new VarnodeData();
-                    vData.decodeFromAttributes(decoder);
-                    adset.insert(vData.getAddr());
+                    VarnodeData vData = VarnodeData.decodeFromAttributes(decoder);
+                    adset.Add(vData.getAddr());
                 }
                 else if (subId == ElementId.ELEM_NORMADDR) {
                     VarnodeData vData = VarnodeData.decodeFromAttributes(decoder);
@@ -370,7 +373,7 @@ namespace Sla.DECCORE
                 decoder.closeElement(subId);
             }
             decoder.closeElement(elemId);
-            if (adset.empty())
+            if (0 == adset.Count)
                 throw new LowlevelError("Empty jumptable override");
         }
     }

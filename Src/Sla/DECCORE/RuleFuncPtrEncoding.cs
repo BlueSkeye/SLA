@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -44,7 +37,7 @@ namespace Sla.DECCORE
             Varnode maskvn = andop.getIn(1);
             if (!maskvn.isConstant()) return 0;
             ulong val = maskvn.getOffset();
-            ulong testmask = Globals.calc_mask(maskvn.getSize());
+            ulong testmask = Globals.calc_mask((uint)maskvn.getSize());
             ulong slide = ulong.MaxValue;
             slide <<= align;
             if ((testmask & slide) == val)

@@ -43,7 +43,7 @@ namespace Sla.EXTRA
             {
                 s1 << dcp.testCollection.getCommand(i) << endl;
             }
-            istringstream* s2 = new istringstream(s1.str());
+            istringstream* s2 = new istringstream(s1.ToString());
             status.pushScript(s2, "test> ");
         }
     }

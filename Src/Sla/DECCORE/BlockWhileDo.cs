@@ -1,13 +1,4 @@
-﻿using ghidra;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static ghidra.FlowBlock;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -50,12 +41,12 @@ namespace Sla.DECCORE
         private void findLoopVariable(PcodeOp cbranch, BlockBasic head, BlockBasic tail,
             PcodeOp lastOp)
         {
-            Varnode vn = cbranch.getIn(1);
+            Varnode vn = cbranch.getIn(1) ?? throw new ApplicationException();
             if (!vn.isWritten()) {
                 // No loop variable found
                 return;
             }
-            PcodeOp op = vn.getDef();
+            PcodeOp op = vn.getDef() ?? throw new ApplicationException();
             int slot = tail.getOutRevIndex(0);
 
             PcodeOpNode[] path = new PcodeOpNode[4];
@@ -72,20 +63,20 @@ namespace Sla.DECCORE
                     count -= 1;
                     continue;
                 }
-                Varnode nextVn = curOp.getIn(ind);
+                Varnode nextVn = curOp.getIn(ind) ?? throw new ApplicationException();
                 if (!nextVn.isWritten()) {
                     continue;
                 }
-                PcodeOp defOp = nextVn.getDef();
+                PcodeOp defOp = nextVn.getDef() ?? throw new ApplicationException();
                 if (defOp.code() == OpCode.CPUI_MULTIEQUAL) {
                     if (defOp.getParent() != head) {
                         continue;
                     }
-                    Varnode itvn = defOp.getIn(slot);
+                    Varnode itvn = defOp.getIn(slot) ?? throw new ApplicationException();
                     if (!itvn.isWritten()) {
                         continue;
                     }
-                    PcodeOp possibleIterate = itvn.getDef();
+                    PcodeOp possibleIterate = itvn.getDef() ?? throw new ApplicationException();
                     if (possibleIterate.getParent() == tail) {
                         // Found proper head/tail configuration
                         if (possibleIterate.isMarker()) {
@@ -133,11 +124,11 @@ namespace Sla.DECCORE
                 return null;
             }
             slot = 1 - slot;
-            Varnode initVn = loopDef.getIn(slot);
+            Varnode initVn = loopDef.getIn(slot) ?? throw new ApplicationException();
             if (!initVn.isWritten()) {
                 return null;
             }
-            PcodeOp res = initVn.getDef();
+            PcodeOp res = initVn.getDef() ?? throw new ApplicationException();
             if (res.isMarker()) {
                 return null;
             }
@@ -177,19 +168,19 @@ namespace Sla.DECCORE
         /// \return an explicit statement or null
         private PcodeOp? testTerminal(Funcdata data, int slot)
         {
-            Varnode vn = loopDef.getIn(slot);
+            Varnode vn = loopDef.getIn(slot) ?? throw new ApplicationException();
             if (!vn.isWritten()) {
                 return null;
             }
-            PcodeOp finalOp = vn.getDef();
+            PcodeOp finalOp = vn.getDef() ?? throw new ApplicationException();
             BlockBasic parentBlock = (BlockBasic)loopDef.getParent().getIn(slot);
             PcodeOp resOp = finalOp;
             if (finalOp.code() == OpCode.CPUI_COPY && finalOp.notPrinted()) {
-                vn = finalOp.getIn(0);
+                vn = finalOp.getIn(0) ?? throw new ApplicationException();
                 if (!vn.isWritten()) {
                     return null;
                 }
-                resOp = vn.getDef();
+                resOp = vn.getDef() ?? throw new ApplicationException();
                 if (resOp.getParent() != parentBlock) {
                     return null;
                 }
@@ -204,9 +195,9 @@ namespace Sla.DECCORE
             }
 
             // finalOp MUST be the last op in the basic block (except for the branch)
-            PcodeOp lastOp = finalOp.getParent().lastOp();
+            PcodeOp lastOp = finalOp.getParent().lastOp() ?? throw new ApplicationException();
             if (lastOp.isBranch()) {
-                lastOp = lastOp.previousOp();
+                lastOp = lastOp.previousOp() ?? throw new ApplicationException();
             }
             if (!data.moveRespectingCover(finalOp, lastOp)) {
                 return null;
@@ -219,11 +210,11 @@ namespace Sla.DECCORE
         /// \return \b true if the loop variable is an input to the iterator statement
         private bool testIterateForm()
         {
-            Varnode targetVn = loopDef.getOut();
+            Varnode targetVn = loopDef.getOut() ?? throw new ApplicationException();
             HighVariable high = targetVn.getHigh();
 
             List<PcodeOpNode> path = new List<PcodeOpNode>();
-            PcodeOp op = iterateOp;
+            PcodeOp op = iterateOp ?? throw new ApplicationException();
             path.Add(new PcodeOpNode(op, 0));
             while (0 != path.Count) {
                 PcodeOpNode node = path[path.Count - 1];
@@ -231,7 +222,7 @@ namespace Sla.DECCORE
                     path.RemoveAt(path.Count - 1);
                     continue;
                 }
-                Varnode vn = node.op.getIn(node.slot);
+                Varnode vn = node.op.getIn(node.slot) ?? throw new ApplicationException();
                 node.slot += 1;
                 if (vn.isAnnotation()) {
                     continue;
@@ -246,7 +237,7 @@ namespace Sla.DECCORE
                 if (!vn.isWritten()) {
                     continue;
                 }
-                op = vn.getDef();
+                op = vn.getDef() ?? throw new ApplicationException();
                 path.Add(new PcodeOpNode(vn.getDef(), 0));
             }
             return false;
@@ -269,23 +260,23 @@ namespace Sla.DECCORE
         /// Does \b this require overflow syntax
         public bool hasOverflowSyntax()
         {
-            return ((getFlags() &f_whiledo_overflow)!= 0);
+            return ((getFlags() & block_flags.f_whiledo_overflow)!= 0);
         }
 
         /// Set that \b this requires overflow syntax
         public void setOverflowSyntax()
         {
-            setFlag(f_whiledo_overflow);
+            setFlag(block_flags.f_whiledo_overflow);
         }
 
-        public override block_type getType() => t_whiledo;
+        public override block_type getType() => block_type.t_whiledo;
 
         public override void markLabelBumpUp(bool bump)
         {
             // whiledos steal lower blocks labels
-            @base.markLabelBumpUp(true);
+            base.markLabelBumpUp(true);
             if (!bump) {
-                clearFlag(f_label_bumpup);
+                clearFlag(block_flags.f_label_bumpup);
             }
         }
 
@@ -332,7 +323,7 @@ namespace Sla.DECCORE
         /// \param data is the function containing \b this loop
         public override void finalTransform(Funcdata data)
         {
-            @base.finalTransform(data);
+            base.finalTransform(data);
             if (!data.getArch().analyze_for_loops) {
                 return;
             }
@@ -344,7 +335,7 @@ namespace Sla.DECCORE
                 return;
             }
             BlockBasic head = (BlockBasic)copyBl.subBlock(0);
-            if (head.getType() != t_basic) {
+            if (head.getType() != block_type.t_basic) {
                 return;
             }
             // There must be a last op in body, for there to be an iterator statement
@@ -404,7 +395,7 @@ namespace Sla.DECCORE
         public override void finalizePrinting(Funcdata data)
         {
             // Continue recursing
-            @base.finalizePrinting(data);
+            base.finalizePrinting(data);
             if (iterateOp == null) {
                 // For-loop printing not enabled
                 return;

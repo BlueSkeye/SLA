@@ -1,5 +1,4 @@
-﻿using ghidra;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -293,7 +292,7 @@ namespace Sla.CORE
         /// \param mem is the specified storage region
         /// \param point is the code address
         /// \return the tracked value or zero
-        internal ulong getTrackedValue(ref VarnodeData mem, ref Address point)
+        internal ulong getTrackedValue(VarnodeData mem, Address point)
         {
             TrackedSet tset = getTrackedSet(point);
             ulong endoff = mem.offset + mem.size - 1;

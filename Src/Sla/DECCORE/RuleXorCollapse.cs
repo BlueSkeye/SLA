@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -45,8 +38,7 @@ namespace Sla.DECCORE
             coeff1 = op.getIn(1).getOffset();
             Varnode xorvn = xorop.getIn(1);
             if (xorop.getIn(0).isFree()) return 0; // This will be propagated
-            if (!xorvn.isConstant())
-            {
+            if (!xorvn.isConstant()) {
                 if (coeff1 != 0) return 0;
                 if (xorvn.isFree()) return 0;
                 data.opSetInput(op, xorvn, 1); // Move term to other side

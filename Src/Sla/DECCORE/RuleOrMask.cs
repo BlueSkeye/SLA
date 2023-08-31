@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -36,10 +29,10 @@ namespace Sla.DECCORE
             if (size > sizeof(ulong)) return 0; // FIXME: ulong should be arbitrary precision
             Varnode constvn;
 
-            constvn = op.getIn(1);
+            constvn = op.getIn(1) ?? throw new ApplicationException();
             if (!constvn.isConstant()) return 0;
             ulong val = constvn.getOffset();
-            ulong mask = Globals.calc_mask(size);
+            ulong mask = Globals.calc_mask((uint)size);
             if ((val & mask) != mask) return 0;
             data.opSetOpcode(op, OpCode.CPUI_COPY);
             data.opSetInput(op, constvn, 0);

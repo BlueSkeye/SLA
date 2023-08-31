@@ -1,10 +1,4 @@
-﻿using ghidra;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Sla.DECCORE
 {
     /// \brief An operation that writes to volatile memory
@@ -18,7 +12,7 @@ namespace Sla.DECCORE
         public VolatileWriteOp(Architecture g, string nm,int ind,bool functional)
             : base(g, nm, ind)
         {
-            flags = functional ? 0 : annotation_assignment;
+            flags = functional ? 0 : userop_flags.annotation_assignment;
         }
 
         public override string getOperatorName(PcodeOp op)
@@ -29,7 +23,8 @@ namespace Sla.DECCORE
 
         public override int extractAnnotationSize(Varnode vn, PcodeOp op)
         {
-            return op.getIn(2).getSize(); // Get size from the 3rd parameter of write function
+            // Get size from the 3rd parameter of write function
+            return op.getIn(2).getSize();
         }
     }
 }

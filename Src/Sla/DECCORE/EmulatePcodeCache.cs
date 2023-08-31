@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -63,13 +57,12 @@ namespace Sla.DECCORE
         /// Set-up currentOp and currentBehave
         private void establishOp()
         {
-            if (current_op < opcache.size())
-            {
+            if (current_op < opcache.size()) {
                 currentOp = opcache[current_op];
                 currentBehave = currentOp.getBehavior();
                 return;
             }
-            currentOp = (PcodeOpRaw*)0;
+            currentOp = (PcodeOpRaw)null;
             currentBehave = (OpBehavior)null;
         }
 
@@ -80,8 +73,7 @@ namespace Sla.DECCORE
         {
             instruction_start = false;
             current_op += 1;
-            if (current_op >= opcache.size())
-            {
+            if (current_op >= opcache.size()) {
                 current_address = current_address + instruction_length;
                 createInstruction(current_address);
             }
@@ -93,9 +85,8 @@ namespace Sla.DECCORE
         protected override void executeBranch()
         {
             Address destaddr = currentOp.getInput(0).getAddr();
-            if (destaddr.isConstant())
-            {
-                uint id = destaddr.getOffset();
+            if (destaddr.isConstant()) {
+                uint id = (uint)destaddr.getOffset();
                 id = id + (uint)current_op;
                 current_op = id;
                 if (current_op == opcache.size())
@@ -125,7 +116,7 @@ namespace Sla.DECCORE
             : base(s)
         {
             trans = t;
-            OpBehavior::registerInstructions(inst, t);
+            OpBehavior.registerInstructions(inst, t);
             breaktable = b;
             breaktable.setEmulate(this);
         }
@@ -133,11 +124,10 @@ namespace Sla.DECCORE
         ~EmulatePcodeCache()
         {
             clearCache();
-            for (int i = 0; i < inst.size(); ++i)
-            {
-                OpBehavior* t_op = inst[i];
-                if (t_op != (OpBehavior)null)
-                    delete t_op;
+            for (int i = 0; i < inst.size(); ++i) {
+                OpBehavior? t_op = inst[i];
+                //if (t_op != (OpBehavior)null)
+                //    delete t_op;
             }
         }
 

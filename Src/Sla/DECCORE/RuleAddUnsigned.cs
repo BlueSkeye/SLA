@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -32,25 +24,31 @@ namespace Sla.DECCORE
 
         public override int applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode constvn = op.getIn(1);
+            Varnode constvn = op.getIn(1) ?? throw new ApplicationException();
 
             if (!constvn.isConstant()) return 0;
-            Datatype* dt = constvn.getTypeReadFacing(op);
-            if (dt.getMetatype() != type_metatype.TYPE_UINT) return 0;
-            if (dt.isCharPrint()) return 0;    // Only change integer forms
-            if (dt.isEnumType()) return 0;
+            Datatype dt = constvn.getTypeReadFacing(op);
+            if (dt.getMetatype() != type_metatype.TYPE_UINT)
+                return 0;
+            if (dt.isCharPrint())
+                // Only change integer forms
+                return 0;
+            if (dt.isEnumType())
+                return 0;
             ulong val = constvn.getOffset();
-            ulong mask = Globals.calc_mask(constvn.getSize());
-            int sa = constvn.getSize() * 6;   // 1/4 less than full bitsize
+            ulong mask = Globals.calc_mask((uint)constvn.getSize());
+            // 1/4 less than full bitsize
+            int sa = constvn.getSize() * 6;
             ulong quarter = (mask >> sa) << sa;
-            if ((val & quarter) != quarter) return 0;   // The first quarter of bits must all be 1's
-            if (constvn.getSymbolEntry() != (SymbolEntry)null)
-            {
-                EquateSymbol* sym = dynamic_cast<EquateSymbol*>(constvn.getSymbolEntry().getSymbol());
-                if (sym != (EquateSymbol)null)
-                {
+            if ((val & quarter) != quarter)
+                // The first quarter of bits must all be 1's
+                return 0;
+            if (constvn.getSymbolEntry() != (SymbolEntry)null) {
+                EquateSymbol? sym = (constvn.getSymbolEntry().getSymbol()) as EquateSymbol;
+                if (sym != (EquateSymbol)null) {
                     if (sym.isNameLocked())
-                        return 0;       // Dont transform a named equate
+                        // Dont transform a named equate
+                        return 0;
                 }
             }
             data.opSetOpcode(op, OpCode.CPUI_INT_SUB);

@@ -157,7 +157,7 @@ namespace Sla.DECCORE
                 catch (DataUnavailError err) {
                     ostringstream msg;
                     msg << "Could not emulate address calculation at " << curop.getAddr();
-                    throw new LowlevelError(msg.str());
+                    throw new LowlevelError(msg.ToString());
                 }
             }
             Varnode invn = pathMeld.getOp(0).getIn(0);

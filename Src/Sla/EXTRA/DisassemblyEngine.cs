@@ -13,8 +13,8 @@ namespace Sla.EXTRA
     internal class DisassemblyEngine : PcodeEmit
     {
         private Translate trans;
-        private List<Address> jumpaddr;
-        private set<ulong> targetoffsets;
+        private List<Address> jumpaddr = new List<Address>();
+        private HashSet<ulong> targetoffsets = new HashSet<ulong>();
         private OpCode lastop;
         private bool hascall;
         private bool hitsaddress;
@@ -24,11 +24,11 @@ namespace Sla.EXTRA
         {
             trans = t;
             jumpaddr.Clear();
-            targetoffsets.clear();
+            targetoffsets.Clear();
         }
 
-        public override void dump(Address addr,OpCode opc, VarnodeData? outvar,VarnodeData[] vars,
-            int isize)
+        public override void dump(Address addr,OpCode opc, VarnodeData? outvar,
+            VarnodeData[] vars, int isize)
         {
             lastop = opc;
             switch (opc) {
@@ -43,13 +43,13 @@ namespace Sla.EXTRA
                 case OpCode.CPUI_COPY:
                 case OpCode.CPUI_BRANCHIND:
                 case OpCode.CPUI_CALLIND:
-                    if (targetoffsets.end() != targetoffsets.find(vars[0].offset)) {
+                    if (targetoffsets.Contains(vars[0].offset)) {
                         hitsaddress = true;
                         targethit = vars[0].offset;
                     }
                     break;
                 case OpCode.CPUI_LOAD:
-                    if (targetoffsets.end() != targetoffsets.find(vars[1].offset)) {
+                    if (targetoffsets.Contains(vars[1].offset)) {
                         hitsaddress = true;
                         targethit = vars[1].offset;
                     }
@@ -92,7 +92,8 @@ namespace Sla.EXTRA
                 case OpCode.CPUI_BRANCH:
                 case OpCode.CPUI_BRANCHIND:
                     if (hitsaddress)
-                        res.flags |= CodeUnit.Flags.thunkhit; // Hits target via indirect jump
+                        // Hits target via indirect jump
+                        res.flags |= CodeUnit.Flags.thunkhit;
                     break;
                 case OpCode.CPUI_RETURN:
                     break;
@@ -112,7 +113,7 @@ namespace Sla.EXTRA
 
         public void addTarget(Address addr)
         {
-            targetoffsets.insert(addr.getOffset() );
+            targetoffsets.Add(addr.getOffset());
         }
     }
 }

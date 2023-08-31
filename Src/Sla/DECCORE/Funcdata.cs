@@ -5529,7 +5529,7 @@ namespace Sla.DECCORE
             ostringstream before;
             op.printDebug(before);
             modify_list.Add(op);
-            modify_before.Add( before.str() );
+            modify_before.Add( before.ToString() );
         }
 
         /// Abandon printing debug for current action

@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -52,8 +45,7 @@ namespace Sla.DECCORE
             int sa;
             if ((opc == OpCode.CPUI_INT_RIGHT) || (opc == OpCode.CPUI_INT_LEFT))
                 sa = (int)cvn.getOffset();
-            else
-            {
+            else {
                 sa = Globals.leastsigbit_set(cvn.getOffset()); // Make sure the multiply is really a shift
                 if (sa <= 0) return 0;
                 ulong testval = 1;
@@ -62,14 +54,12 @@ namespace Sla.DECCORE
                 opc = OpCode.CPUI_INT_LEFT;    // Treat OpCode.CPUI_INT_MULT as OpCode.CPUI_INT_LEFT
             }
             ulong nzm = invn.getNZMask();
-            ulong fullmask = Globals.calc_mask(invn.getSize());
-            if (opc == OpCode.CPUI_INT_RIGHT)
-            {
+            ulong fullmask = Globals.calc_mask((uint)invn.getSize());
+            if (opc == OpCode.CPUI_INT_RIGHT) {
                 nzm >>= sa;
                 mask >>= sa;
             }
-            else
-            {
+            else {
                 nzm <<= sa;
                 mask <<= sa;
                 nzm &= fullmask;

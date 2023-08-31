@@ -299,16 +299,17 @@ namespace Sla.SLEIGH
             // delete pattern;
         }
 
-        public TokenPattern operator=(TokenPattern tokpat)
-        {
-            // delete pattern;
+        // TODO : Find assignment use and duplicate in a specific method.
+        //public TokenPattern operator=(TokenPattern tokpat)
+        //{
+        //    // delete pattern;
 
-            pattern = tokpat.pattern.simplifyClone();
-            toklist = tokpat.toklist;
-            leftellipsis = tokpat.leftellipsis;
-            rightellipsis = tokpat.rightellipsis;
-            return this;
-        }
+        //    pattern = tokpat.pattern.simplifyClone();
+        //    toklist = tokpat.toklist;
+        //    leftellipsis = tokpat.leftellipsis;
+        //    rightellipsis = tokpat.rightellipsis;
+        //    return this;
+        //}
 
         public void setLeftEllipsis(bool val)
         {

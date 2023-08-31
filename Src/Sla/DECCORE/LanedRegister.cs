@@ -90,13 +90,14 @@ namespace Sla.DECCORE
                 throw new NotSupportedException();
             }
 
-            ///< Assignment
-            public static LanedIterator operator=(LanedIterator op1, LanedIterator op2)
-            {
-                op1.size = op2.size;
-                op1.mask = op2.mask;
-                return op1;
-            }
+            // Assignment
+            // TODO : Find assignment use and duplicate in a specific method.
+            //public static LanedIterator operator=(LanedIterator op1, LanedIterator op2)
+            //{
+            //    op1.size = op2.size;
+            //    op1.mask = op2.mask;
+            //    return op1;
+            //}
 
             // Equal operator
             public static bool operator ==(LanedIterator op1, LanedIterator op2)

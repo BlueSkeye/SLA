@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -35,7 +28,9 @@ namespace Sla.DECCORE
             int size = op.getOut().getSize();
             Varnode vn;
 
-            if (size > sizeof(ulong)) return 0; // FIXME: ulong should be arbitrary precision
+            if (size > sizeof(ulong))
+                // FIXME: ulong should be arbitrary precision
+                return 0;
             mask1 = op.getIn(0).getNZMask();
             if (mask1 == 0)
                 andmask = 0;
@@ -45,14 +40,15 @@ namespace Sla.DECCORE
                 andmask = mask1 & mask2;
             }
 
-            if (andmask == 0)       // Result of AND is always zero
+            if (andmask == 0)
+                // Result of AND is always zero
                 vn = data.newConstant(size, 0);
             else if ((andmask & op.getOut().getConsume()) == 0)
                 vn = data.newConstant(size, 0);
-            else if (andmask == mask1)
-            {
+            else if (andmask == mask1) {
                 if (!op.getIn(1).isConstant()) return 0;
-                vn = op.getIn(0);      // Result of AND is equal to input(0)
+                // Result of AND is equal to input(0)
+                vn = op.getIn(0);
             }
             else
                 return 0;

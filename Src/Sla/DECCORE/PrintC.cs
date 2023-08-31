@@ -474,8 +474,7 @@ namespace Sla.DECCORE
                     return;
                 }
             }
-            if ((ct.getSize() == 1) && (val >= 0x80))
-            {
+            if ((ct.getSize() == 1) && (val >= 0x80)) {
                 // For byte characters, the encoding is assumed to be ASCII, UTF-8, or some other
                 // code-page that extends ASCII. At 0x80 and above, we cannot treat the value as a
                 // unicode code-point. Its either part of a multi-byte UTF-8 encoding or an unknown
@@ -486,7 +485,8 @@ namespace Sla.DECCORE
                     push_integer(val, 1, isSigned, vn, op);
                     return;
                 }
-                displayFormat = Symbol.DisplayFlags.force_hex;  // Fallthru but force a hex representation
+                // Fallthru but force a hex representation
+                displayFormat = Symbol.DisplayFlags.force_hex;
             }
             StringWriter t = new StringWriter();
             // From here we assume, the constant value is a direct unicode code-point.
@@ -501,7 +501,7 @@ namespace Sla.DECCORE
             else
                 printUnicode(t, (int)val);
             t.Write("'");
-            pushAtom(new Atom(t.str(), tagtype.vartoken, EmitMarkup.syntax_highlight.const_color, op, vn));
+            pushAtom(new Atom(t.ToString(), tagtype.vartoken, EmitMarkup.syntax_highlight.const_color, op, vn));
         }
 
         protected override void pushConstant(ulong val, Datatype ct, Varnode vn, PcodeOp op)
@@ -619,11 +619,8 @@ namespace Sla.DECCORE
             if (val == 0) return false;
             AddrSpace spc = glb.getDefaultDataSpace();
             ulong fullEncoding;
-            Address point;
-            if (op != (PcodeOp)null)
-                point = op.getAddr();
-            Address stringaddr = glb.resolveConstant(spc, val, ct.getSize(), ref point,
-                out fullEncoding);
+            Address point = (op == (PcodeOp)null) ? new Address() : op.getAddr();
+            Address stringaddr = glb.resolveConstant(spc, val, ct.getSize(), point, out fullEncoding);
             if (stringaddr.isInvalid()) return false;
             if (!glb.symboltab.getGlobalScope().isReadOnly(stringaddr, 1, new Address()))
                 return false;        // Check that string location is readonly
@@ -1037,7 +1034,7 @@ namespace Sla.DECCORE
                 lb.Write("code_");
             lb.Write(addr.getShortcut());
             addr.printRaw(lb);
-            emit.tagLabel(lb.str(), EmitMarkup.syntax_highlight.no_color, spc, off);
+            emit.tagLabel(lb.ToString(), EmitMarkup.syntax_highlight.no_color, spc, off);
         }
 
         /// Emit any required label statement for a given basic block
@@ -1350,66 +1347,6 @@ namespace Sla.DECCORE
             setCStyleComments();
         }
 
-        /// \brief Push a single character constant to the RPN stack
-        ///
-        /// For C, a character constant is usually emitted as the character in single quotes.
-        /// Handle unicode, wide characters, etc. Characters come in with the compiler's raw encoding.
-        /// \param val is the constant value
-        /// \param ct is data-type attached to the value
-        /// \param vn is the Varnode holding the value
-        /// \param op is the PcodeOp using the value
-        protected override void pushCharConstant(ulong val, Datatype ct, Varnode vn, PcodeOp op)
-        {
-            Symbol.DisplayFlags displayFormat = 0;
-            bool isSigned = (ct.getMetatype() == type_metatype.TYPE_INT);
-            if ((vn != (Varnode)null)&& (!vn.isAnnotation())) {
-                HighVariable high = vn.getHigh();
-                Symbol sym = high.getSymbol();
-                if (sym != (Symbol)null) {
-                    if (sym.isNameLocked() && (sym.getCategory() == Symbol.SymbolCategory.equate)) {
-                        if (pushEquate(val, vn.getSize(), (EquateSymbol)sym, vn, op))
-                            return;
-                    }
-                    displayFormat = sym.getDisplayFormat();
-                }
-                if (displayFormat == 0)
-                    displayFormat = high.getType().getDisplayFormat();
-            }
-            if (displayFormat != 0 && displayFormat != Symbol.SymbolCategory.force_char) {
-                if (!castStrategy.caresAboutCharRepresentation(vn, op)) {
-                    push_integer(val, ct.getSize(), isSigned, vn, op);
-                    return;
-                }
-            }
-            if ((ct.getSize() == 1) && (val >= 0x80)) {
-                // For byte characters, the encoding is assumed to be ASCII, UTF-8, or some other
-                // code-page that extends ASCII. At 0x80 and above, we cannot treat the value as a
-                // unicode code-point. Its either part of a multi-byte UTF-8 encoding or an unknown
-                // code-page value. In either case, we print as an integer or an escape sequence.
-                if (displayFormat != Symbol.DisplayFlags.force_hex
-                    && displayFormat != Symbol.DisplayFlags.force_char)
-                {
-                    push_integer(val, 1, isSigned, vn, op);
-                    return;
-                }
-                displayFormat = Symbol.DisplayFlags.force_hex;  // Fallthru but force a hex representation
-            }
-            StringWriter t = new StringWriter();
-            // From here we assume, the constant value is a direct unicode code-point.
-            // The value could be an illegal code-point (surrogates or beyond the max code-point),
-            // but this will just be emitted as an escape sequence.
-            if (doEmitWideCharPrefix() && ct.getSize() > 1)
-                t.Write('L');       // Print symbol indicating wide character
-            t.Write("'");          // char is surrounded with single quotes
-            if (displayFormat == Symbol.DisplayFlags.force_hex) {
-                printCharHexEscape(t, (int)val);
-            }
-            else
-                printUnicode(t, (int)val);
-            t.Write("'");
-            pushAtom(new Atom(t.ToString(), tagtype.vartoken, EmitMarkup.syntax_highlight.const_color, op, vn));
-        }
-
         protected override bool pushEquate(ulong val, int sz, EquateSymbol sym, Varnode vn, PcodeOp op)
         {
             ulong mask = Globals.calc_mask((uint)sz);
@@ -1573,7 +1510,7 @@ namespace Sla.DECCORE
                 }
                 else if (ct.getMetatype() == type_metatype.TYPE_ARRAY) {
                     int el;
-                    Datatype? arrayof = ((TypeArray)ct).getSubEntry(off, sz, off, el);
+                    Datatype? arrayof = ((TypeArray)ct).getSubEntry(off, sz, out off, out el);
                     if (arrayof != (Datatype)null) {
                         StringWriter s = new StringWriter();
                         s.Write(el);
@@ -1595,9 +1532,9 @@ namespace Sla.DECCORE
                             token = object_member,
                             field = field,
                             parent = ct,
-                            fieldname = entry.field.name,
                             hilite = EmitMarkup.syntax_highlight.no_color
                         };
+                        entry.fieldname = entry.field.name;
                         stack.Add(entry);
                         ct = field.type;
                         succeeded = true;
@@ -1670,7 +1607,7 @@ namespace Sla.DECCORE
         {
             bool proceed = false;
             Datatype parent = vn.getHigh().getType() ?? throw new ApplicationException();
-            TypeField field;
+            TypeField field = new TypeField();
             if (parent.needsResolution() && parent.getMetatype() != type_metatype.TYPE_PTR) {
                 Funcdata fd = op.getParent().getFuncdata();
                 int slot = op.getSlot(vn);
@@ -1687,7 +1624,7 @@ namespace Sla.DECCORE
                 }
             }
 
-            PcodeOp defOp = vn.getDef();
+            PcodeOp defOp = vn.getDef() ?? throw new ApplicationException();
             if (!proceed) {
                 // Just push original op
                 defOp.getOpcode().push(this, defOp, op);

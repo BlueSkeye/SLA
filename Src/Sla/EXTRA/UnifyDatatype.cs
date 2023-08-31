@@ -61,33 +61,35 @@ namespace Sla.EXTRA
             }
         }
 
-        public UnifyDatatype operator=(UnifyDatatype op2)
-        {
-            switch (type) {
-                case TypeKind.op_type:
-                case TypeKind.var_type:
-                case TypeKind.block_type:
-                    break;
-                case TypeKind.const_type:
-                    // delete storespot.cn;
-                    break;
-                default:
-                    throw new LowlevelError("Bad unify datatype");
-            }
-            type = op2.type;
-            switch (type) {
-                case TypeKind.op_type:
-                case TypeKind.var_type:
-                case TypeKind.block_type:
-                    break;
-                case TypeKind.const_type:
-                    storespot.cn = 0; // Copy needs its own memory
-                    break;
-                default:
-                    throw new LowlevelError("Bad unify datatype");
-            }
-            return this;
-        }
+        // TODO : Find assignment use and duplicate in a specific method.
+        //public UnifyDatatype operator=(UnifyDatatype op2)
+        //{
+        //    switch (type) {
+        //        case TypeKind.op_type:
+        //        case TypeKind.var_type:
+        //        case TypeKind.block_type:
+        //            break;
+        //        case TypeKind.const_type:
+        //            // delete storespot.cn;
+        //            break;
+        //        default:
+        //            throw new LowlevelError("Bad unify datatype");
+        //    }
+        //    type = op2.type;
+        //    switch (type) {
+        //        case TypeKind.op_type:
+        //        case TypeKind.var_type:
+        //        case TypeKind.block_type:
+        //            break;
+        //        case TypeKind.const_type:
+        //            // Copy needs its own memory
+        //            storespot.cn = 0;
+        //            break;
+        //        default:
+        //            throw new LowlevelError("Bad unify datatype");
+        //    }
+        //    return this;
+        //}
 
         ~UnifyDatatype()
         {

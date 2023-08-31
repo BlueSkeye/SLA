@@ -1,18 +1,11 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
     internal class RuleSubvarSext : Rule
     {
         /// Is it guaranteed the root is a sub-variable needing to be trimmed
-        private int isaggressive;
+        private bool isaggressive;
         
         public RuleSubvarSext(string g)
             : base(g, 0, "subvar_sext")
@@ -37,9 +30,10 @@ namespace Sla.DECCORE
         {
             Varnode vn = op.getOut();
             Varnode invn = op.getIn(0);
-            ulong mask = Globals.calc_mask(invn.getSize());
+            ulong mask = Globals.calc_mask((uint)invn.getSize());
 
-            SubvariableFlow subflow = new SubvariableFlow(&data,vn,mask,isaggressive,true,false);
+            SubvariableFlow subflow = new SubvariableFlow(data, vn,
+                mask, isaggressive, true, false);
             if (!subflow.doTrace()) return 0;
             subflow.doReplacement();
             return 1;

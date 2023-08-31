@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -37,8 +30,8 @@ namespace Sla.DECCORE
         {
             Varnode vn = op.getIn(0);
             int sz = vn.getSize();
-            if (signbit_negative(vn.getNZMask(), sz)) return 0;
-            if (signbit_negative(op.getIn(1).getNZMask(), sz)) return 0;
+            if (Globals.signbit_negative(vn.getNZMask(), sz)) return 0;
+            if (Globals.signbit_negative(op.getIn(1).getNZMask(), sz)) return 0;
 
             if (op.code() == OpCode.CPUI_INT_SLESS)
                 data.opSetOpcode(op, OpCode.CPUI_INT_LESS);

@@ -34,6 +34,6 @@ namespace Sla.DECCORE
             displayName = n;
         }
         
-        public override Datatype clone() => new TypeBase(this);
+        internal override Datatype clone() => new TypeBase(this);
     }
 }

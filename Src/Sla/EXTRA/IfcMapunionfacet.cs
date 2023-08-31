@@ -39,7 +39,7 @@ namespace Sla.EXTRA
             s >> hex >> hash;       // Parse the hash value
             ostringstream s2;
             s2 << "unionfacet" << dec << (fieldNum + 1) << '_' << hex << addr.getOffset();
-            Symbol* sym = dcp.fd.getScopeLocal().addUnionFacetSymbol(s2.str(), ct, fieldNum, addr, hash);
+            Symbol* sym = dcp.fd.getScopeLocal().addUnionFacetSymbol(s2.ToString(), ct, fieldNum, addr, hash);
             dcp.fd.getScopeLocal().setAttribute(sym, Varnode.varnode_flags.typelock | Varnode.varnode_flags.namelock);
         }
     }

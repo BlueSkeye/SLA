@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -32,16 +24,15 @@ namespace Sla.DECCORE
 
         public override int applyOp(PcodeOp op, Funcdata data)
         {
-            SegmentOp* segdef = data.getArch().userops.getSegmentOp(op.getIn(0).getSpaceFromConst().getIndex());
+            SegmentOp segdef = data.getArch().userops.getSegmentOp(op.getIn(0).getSpaceFromConst().getIndex());
             if (segdef == (SegmentOp)null)
                 throw new LowlevelError("Segment operand missing definition");
 
             Varnode vn1 = op.getIn(1);
             Varnode vn2 = op.getIn(2);
 
-            if (vn1.isConstant() && vn2.isConstant())
-            {
-                List<ulong> bindlist;
+            if (vn1.isConstant() && vn2.isConstant()) {
+                List<ulong> bindlist = new List<ulong>();
                 bindlist.Add(vn1.getOffset());
                 bindlist.Add(vn2.getOffset());
                 ulong val = segdef.execute(bindlist);
@@ -51,10 +42,9 @@ namespace Sla.DECCORE
                 data.opSetOpcode(op, OpCode.CPUI_COPY);
                 return 1;
             }
-            else if (segdef.hasFarPointerSupport())
-            {
+            else if (segdef.hasFarPointerSupport()) {
                 // If the hi and lo pieces come from a contigouous source
-                if (!contiguous_test(vn1, vn2)) return 0;
+                if (!Globals.contiguous_test(vn1, vn2)) return 0;
                 Varnode whole = Globals.findContiguousWhole(data, vn1, vn2);
                 if (whole == (Varnode)null) return 0;
                 if (whole.isFree()) return 0;

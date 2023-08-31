@@ -1,11 +1,4 @@
-﻿using ghidra;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -28,7 +21,7 @@ namespace Sla.DECCORE
 
         public override bool isOverride() => false;
 
-        public override int getTableSize() => size;
+        public override int getTableSize() => (int)size;
 
         public override bool recoverModel(Funcdata fd, PcodeOp indop, uint matchsize,
             uint maxtablesize)
@@ -40,10 +33,9 @@ namespace Sla.DECCORE
         public override void buildAddresses(Funcdata fd, PcodeOp indop, List<Address> addresstable,
             List<LoadTable> loadpoints)
         {
-            addresstable.clear();
+            addresstable.Clear();
             BlockBasic bl = indop.getParent();
-            for (int i = 0; i < bl.sizeOut(); ++i)
-            {
+            for (int i = 0; i < bl.sizeOut(); ++i) {
                 BlockBasic outbl = (BlockBasic)bl.getOut(i);
                 addresstable.Add(outbl.getStart());
             }
@@ -57,10 +49,11 @@ namespace Sla.DECCORE
             List<ulong> label, JumpModel orig)
         {
             for (int i = 0; i < addresstable.size(); ++i)
-                label.Add(addresstable[i].getOffset()); // Address itself is the label
+                // Address itself is the label
+                label.Add(addresstable[i].getOffset());
         }
 
-        public override Varnode foldInNormalization(Funcdata fd, PcodeOp indop) => null;
+        public override Varnode? foldInNormalization(Funcdata fd, PcodeOp indop) => null;
 
         public override bool foldInGuards(Funcdata fd, JumpTable jump) => false;
 

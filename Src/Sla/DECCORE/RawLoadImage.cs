@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -17,7 +12,7 @@ namespace Sla.DECCORE
         /// Address of first byte in the file
         private ulong vma;
         /// Main file stream for image
-        private ifstream thefile;
+        private FileStream? thefile;
         /// Total number of bytes in the loadimage/file
         private ulong filesize;
         /// Address space that the file bytes are mapped to
@@ -27,7 +22,7 @@ namespace Sla.DECCORE
         public RawLoadImage(string f)
         {
             vma = 0;
-            thefile = (ifstream*)0;
+            thefile = null;
             spaceid = (AddrSpace)null;
             filesize = 0;
         }
@@ -42,64 +37,63 @@ namespace Sla.DECCORE
         /// The file is opened and its size immediately recovered.
         public void open()
         {
-            if (thefile != (ifstream*)0) throw new LowlevelError("loadimage is already open");
-            thefile = new ifstream(filename.c_str());
-            if (!(*thefile))
-            {
-                string errmsg = "Unable to open raw image file: " + filename;
-                throw new LowlevelError(errmsg);
+            if (thefile != null)
+                throw new LowlevelError("loadimage is already open");
+            try { thefile = File.OpenRead(filename); }
+            catch {
+                throw new LowlevelError($"Unable to open raw image file: {filename}");
             }
-            thefile.seekg(0, ios::end);
-            filesize = thefile.tellg();
+            thefile.Seek(0, SeekOrigin.End);
+            filesize = (ulong)thefile.Length;
         }
 
         /// RawLoadImage destructor
         ~RawLoadImage()
         {
-            if (thefile != (ifstream*)0)
-            {
-                thefile.close();
-                delete thefile;
+            if (thefile != null) {
+                thefile.Close();
+                // delete thefile;
             }
         }
 
-        public override void loadFill(byte ptr, int size, Address addr)
+        public override void loadFill(byte[] ptr, int size, Address addr)
         {
             ulong curaddr = addr.getOffset();
             ulong offset = 0;
             ulong readsize;
 
-            curaddr -= vma;     // Get relative offset of first byte
-            while (size > 0)
-            {
-                if (curaddr >= filesize)
-                {
-                    if (offset == 0)        // Initial address not within file
+            // Get relative offset of first byte
+            curaddr -= vma;
+            while (size > 0) {
+                if (curaddr >= filesize) {
+                    if (offset == 0)
+                        // Initial address not within file
                         break;
-                    memset(ptr + offset, 0, size); // Fill out the rest of the buffer with 0
+                    // Fill out the rest of the buffer with 0
+                    Array.Fill(ptr, (byte)0, (int)offset, size);
                     return;
                 }
-                readsize = size;
-                if (curaddr + readsize > filesize) // Adjust to biggest possible read
+                readsize = (ulong)size;
+                if (curaddr + readsize > filesize)
+                    // Adjust to biggest possible read
                     readsize = filesize - curaddr;
-                thefile.seekg(curaddr);
-                thefile.read((char*)(ptr + offset), readsize);
+                thefile.Seek((long)curaddr, SeekOrigin.Begin);
+                thefile.Read(ptr, (int)offset, (int)readsize);
                 offset += readsize;
-                size -= readsize;
+                size -= (int)readsize;
                 curaddr += readsize;
             }
-            if (size > 0)
-            {
-                ostringstream errmsg;
-                errmsg << "Unable to load " << dec << size << " bytes at " << addr.getShortcut();
+            if (size > 0) {
+                TextWriter errmsg = new StringWriter();
+                errmsg.Write($"Unable to load {size} bytes at {addr.getShortcut()}");
                 addr.printRaw(errmsg);
-                throw new DataUnavailError(errmsg.str());
+                throw new DataUnavailError(errmsg.ToString());
             }
         }
 
         public override string getArchType() => "unknown";
 
-        public override void adjustVma(long adjust)
+        public override void adjustVma(ulong adjust)
         {
             adjust = AddrSpace.addressToByte(adjust, spaceid.getWordSize());
             vma += adjust;

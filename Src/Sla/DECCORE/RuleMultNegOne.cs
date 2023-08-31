@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -30,8 +23,9 @@ namespace Sla.DECCORE
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
-        {               // a * -1 . -a
-            Varnode constvn = op.getIn(1);
+        {
+            // a * -1 . -a
+            Varnode constvn = op.getIn(1) ?? throw new ApplicationException();
 
             if (!constvn.isConstant()) return 0;
             if (constvn.getOffset() != Globals.calc_mask(constvn.getSize())) return 0;

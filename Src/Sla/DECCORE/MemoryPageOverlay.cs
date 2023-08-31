@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -29,11 +25,11 @@ namespace Sla.DECCORE
         protected override void insert(ulong addr, ulong val)
         {
             ulong pageaddr = addr & ~((ulong)(getPageSize() - 1));
-            IEnumerator<KeyValuePair<ulong, byte[]>> iter;
             byte[] pageptr;
 
-            if (page.TryGetValue(pageaddr, out pageptr))
+            if (page.TryGetValue(pageaddr, out pageptr)) {
                 pageptr = pageptr;
+            }
             else {
                 pageptr = new byte[getPageSize()];
                 page[pageaddr] = pageptr;
@@ -46,7 +42,8 @@ namespace Sla.DECCORE
             }
 
             ulong pageoffset = addr & ((ulong)(getPageSize() - 1));
-            deconstructValue(pageptr + pageoffset, val, getWordSize(), getSpace().isBigEndian());
+            deconstructValue(pageptr + pageoffset, val, getWordSize(),
+                getSpace().isBigEndian());
         }
 
         /// Overridden aligned word find
@@ -66,7 +63,8 @@ namespace Sla.DECCORE
                 return underlie.find(addr);
             }
             ulong pageoffset = addr & ((ulong)(getPageSize() - 1));
-            return constructValue(pageptr + pageoffset, getWordSize(), getSpace().isBigEndian());
+            return constructValue(pageptr + pageoffset, getWordSize(),
+                getSpace().isBigEndian());
         }
 
         /// Overridden getPage

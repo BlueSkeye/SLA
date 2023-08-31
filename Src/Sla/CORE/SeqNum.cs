@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sla.EXTRA;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,7 +19,7 @@ namespace Sla.CORE
     ///     for the execution order of the PcodeOp within its basic
     ///     block.  The \e order field also provides uniqueness but
     ///     may change over time if the syntax tree is manipulated.
-    public class SeqNum
+    public class SeqNum : IComparable<SeqNum>
     {
         /// Program counter at start of instruction
         internal Address pc;
@@ -75,6 +76,12 @@ namespace Sla.CORE
         internal void setOrder(uint ord)
         {
             order = ord;
+        }
+
+        public int CompareTo(SeqNum? other)
+        {
+            if (this == (other ?? throw new ArgumentNullException())) return 0;
+            return (this < other) ? -1 : 1;
         }
 
         /// Compare two sequence numbers for equality

@@ -77,13 +77,17 @@ namespace Sla.DECCORE
         /// \param newoff is a pointer to the renormalized offset to pass back
         /// \param el is a pointer to the array index to pass back
         /// \return the element data-type or NULL if the piece overlaps more than one
-        public Datatype getSubEntry(int off, int sz, int newoff, int el)
+        public Datatype getSubEntry(int off, int sz, out int newoff, out int el)
         {
             if (null == arrayof) throw new BugException();
             int noff = off % arrayof.getSize();
             int nel = off / arrayof.getSize();
-            if (noff + sz > arrayof.getSize()) // Requesting parts of more then one element
+            if (noff + sz > arrayof.getSize()) {
+                // Requesting parts of more then one element
+                newoff = 0;
+                el = 0;
                 return (Datatype)null;
+            }
             newoff = noff;
             el = nel;
             return arrayof;

@@ -29,9 +29,9 @@ namespace Sla.DECCORE
         /// \param pass is the pass number when the range was heritaged
         /// \param intersect is a reference for passing back the intersect code
         /// \return the iterator to the map element containing the added range
-        public IEnumerator add(Address addr, int size, int pass, out int intersect)
+        public SizePass add(Address addr, int size, int pass, out int intersect)
         {
-            iterator iter = themap.lower_bound(addr);
+            IEnumerator iter = themap.lower_bound(addr);
             if (iter != themap.begin())
                 --iter;
             if ((iter != themap.end()) && (-1 == addr.overlap(0, iter.Current.Key, (*iter).second.size)))
@@ -61,9 +61,11 @@ namespace Sla.DECCORE
                 }
                 themap.erase(iter++);
             }
-            iter = themap.insert(pair<Address, SizePass>(addr, SizePass())).first;
-            (*iter).second.size = size;
-            (*iter).second.pass = pass;
+            SizePass newPass = new SizePass() {
+                size = size,
+                pass = pass
+            };
+            themap.Add(addr, newPass);
             return iter;
         }
 
@@ -72,9 +74,10 @@ namespace Sla.DECCORE
         /// describing the associated range and when it was heritaged.
         /// \param addr is the given address
         /// \return the iterator to the SizeMap entry or the end iterator is the address is unheritaged
-        public iterator find(Address addr)
+        public IEnumerator find(Address addr)
         {
-            iterator iter = themap.upper_bound(addr); // First range after address
+            // First range after address
+            IEnumerator iter = themap.upper_bound(addr);
             if (iter == themap.begin()) return themap.end();
             --iter;         // First range before or equal to address
             if (-1 != addr.overlap(0, iter.Current.Key, (*iter).second.size))

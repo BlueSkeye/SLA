@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -46,30 +39,26 @@ namespace Sla.DECCORE
 
             if (vn2.isFree()) return 0;    // Don't propagate free
 
-            if ((opc2 == OpCode.CPUI_FLOAT_FLOAT2FLOAT) && (opc1 == OpCode.CPUI_FLOAT_FLOAT2FLOAT))
-            {
-                if (insize1 > outsize)
-                {   // op is superfluous
+            if ((opc2 == OpCode.CPUI_FLOAT_FLOAT2FLOAT) && (opc1 == OpCode.CPUI_FLOAT_FLOAT2FLOAT)) {
+                if (insize1 > outsize) {   // op is superfluous
                     data.opSetInput(op, vn2, 0);
                     if (outsize == insize2)
                         data.opSetOpcode(op, OpCode.CPUI_COPY);    // We really have the identity
                     return 1;
                 }
-                else if (insize2 < insize1)
-                { // Convert two increases . one combined increase
+                else if (insize2 < insize1) {
+                    // Convert two increases . one combined increase
                     data.opSetInput(op, vn2, 0);
                     return 1;
                 }
             }
-            else if ((opc2 == OpCode.CPUI_FLOAT_INT2FLOAT) && (opc1 == OpCode.CPUI_FLOAT_FLOAT2FLOAT))
-            {
+            else if ((opc2 == OpCode.CPUI_FLOAT_INT2FLOAT) && (opc1 == OpCode.CPUI_FLOAT_FLOAT2FLOAT)) {
                 // Convert integer straight into final float size
                 data.opSetInput(op, vn2, 0);
                 data.opSetOpcode(op, OpCode.CPUI_FLOAT_INT2FLOAT);
                 return 1;
             }
-            else if ((opc2 == OpCode.CPUI_FLOAT_FLOAT2FLOAT) && (opc1 == OpCode.CPUI_FLOAT_TRUNC))
-            {
+            else if ((opc2 == OpCode.CPUI_FLOAT_FLOAT2FLOAT) && (opc1 == OpCode.CPUI_FLOAT_TRUNC)) {
                 // Convert float straight into final integer
                 data.opSetInput(op, vn2, 0);
                 return 1;

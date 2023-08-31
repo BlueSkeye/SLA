@@ -86,7 +86,7 @@ namespace Sla.DECCORE
         /// \param fd is the function containing the switch
         /// \param indop is the given switch as a OpCode.CPUI_BRANCHIND
         /// \return the Varnode holding the final unnormalized switch variable
-        public abstract Varnode foldInNormalization(Funcdata fd, PcodeOp indop);
+        public abstract Varnode? foldInNormalization(Funcdata fd, PcodeOp indop);
 
         /// \brief Eliminate any \e guard code involved in computing the switch destination
         /// We now think of the BRANCHIND as encompassing any guard function.

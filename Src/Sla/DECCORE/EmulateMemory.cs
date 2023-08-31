@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
     /// \brief An abstract Emulate class using a MemoryState object as the backing machine state
-    ///
     /// Most p-code operations are implemented using the MemoryState to fetch and store
     /// values.  Control-flow is implemented partially in that setExecuteAddress() is called
     /// to indicate which instruction is being executed. The derived class must provide
@@ -44,7 +39,7 @@ namespace Sla.DECCORE
         protected override void executeLoad()
         {
             ulong off = memstate.getValue(currentOp.getInput(1));
-            AddrSpace* spc = currentOp.getInput(0).getSpaceFromConst();
+            AddrSpace spc = currentOp.getInput(0).getSpaceFromConst();
 
             off = AddrSpace.addressToByte(off, spc.getWordSize());
             ulong res = memstate.getValue(spc, off, currentOp.getOutput().size);
@@ -53,9 +48,12 @@ namespace Sla.DECCORE
 
         protected override void executeStore()
         {
-            ulong val = memstate.getValue(currentOp.getInput(2)); // Value being stored
-            ulong off = memstate.getValue(currentOp.getInput(1)); // Offset to store at
-            AddrSpace* spc = currentOp.getInput(0).getSpaceFromConst(); // Space to store in
+            // Value being stored
+            ulong val = memstate.getValue(currentOp.getInput(2));
+            // Offset to store at
+            ulong off = memstate.getValue(currentOp.getInput(1));
+            // Space to store in
+            AddrSpace spc = currentOp.getInput(0).getSpaceFromConst();
 
             off = AddrSpace.addressToByte(off, spc.getWordSize());
             memstate.setValue(spc, off, currentOp.getInput(2).size, val);

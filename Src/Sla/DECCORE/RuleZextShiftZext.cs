@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -31,14 +24,15 @@ namespace Sla.DECCORE
 
         public override int applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode invn = op.getIn(0);
+            Varnode invn = op.getIn(0) ?? throw new ApplicationException();
             if (!invn.isWritten()) return 0;
-            PcodeOp shiftop = invn.getDef();
-            if (shiftop.code() == OpCode.CPUI_INT_ZEXT)
-            {   // Check for ZEXT( ZEXT( a ) )
-                Varnode vn = shiftop.getIn(0);
+            PcodeOp shiftop = invn.getDef() ?? throw new ApplicationException();
+            if (shiftop.code() == OpCode.CPUI_INT_ZEXT) {
+                // Check for ZEXT( ZEXT( a ) )
+                Varnode vn = shiftop.getIn(0) ?? throw new ApplicationException();
                 if (vn.isFree()) return 0;
-                if (invn.loneDescend() != op)      // Only propagate if -op- is only use of -invn-
+                if (invn.loneDescend() != op)
+                    // Only propagate if -op- is only use of -invn-
                     return 0;
                 data.opSetInput(op, vn, 0);
                 return 1;
@@ -46,12 +40,12 @@ namespace Sla.DECCORE
             if (shiftop.code() != OpCode.CPUI_INT_LEFT) return 0;
             if (!shiftop.getIn(1).isConstant()) return 0;
             if (!shiftop.getIn(0).isWritten()) return 0;
-            PcodeOp zext2op = shiftop.getIn(0).getDef();
+            PcodeOp zext2op = shiftop.getIn(0).getDef() ?? throw new ApplicationException();
             if (zext2op.code() != OpCode.CPUI_INT_ZEXT) return 0;
-            Varnode rootvn = zext2op.getIn(0);
+            Varnode rootvn = zext2op.getIn(0) ?? throw new ApplicationException();
             if (rootvn.isFree()) return 0;
 
-            ulong sa = shiftop.getIn(1).getOffset();
+            ulong sa = shiftop.getIn(1).getOffset() ?? throw new ApplicationException();
             if (sa > 8 * (ulong)(zext2op.getOut().getSize() - rootvn.getSize()))
                 return 0; // Shift might lose bits off the top
             PcodeOp newop = data.newOp(1, op.getAddr());

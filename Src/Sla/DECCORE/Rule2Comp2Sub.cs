@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -31,7 +24,7 @@ namespace Sla.DECCORE
 
         public override int applyOp(PcodeOp op, Funcdata data)
         {
-            PcodeOp addop = op.getOut().loneDescend();
+            PcodeOp? addop = op.getOut().loneDescend();
             if (addop == (PcodeOp)null) return 0;
             if (addop.code() != OpCode.CPUI_INT_ADD) return 0;
             if (addop.getIn(0) == op.getOut())

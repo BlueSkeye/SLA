@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -31,13 +24,13 @@ namespace Sla.DECCORE
 
         public override int applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode zextvn = op.getIn(0);
+            Varnode zextvn = op.getIn(0) ?? throw new ApplicationException();
             if (!zextvn.isWritten()) return 0;
-            PcodeOp zextop = zextvn.getDef();
+            PcodeOp zextop = zextvn.getDef() ?? throw new ApplicationException();
             if (zextop.code() != OpCode.CPUI_INT_ZEXT) return 0;
-            Varnode zextin = zextop.getIn(0);
+            Varnode zextin = zextop.getIn(0) ?? throw new ApplicationException();
             if (zextin.isFree()) return 0;
-            Varnode savn = op.getIn(1);
+            Varnode savn = op.getIn(1) ?? throw new ApplicationException();
             if ((!savn.isConstant()) && (savn.isFree()))
                 return 0;
 
