@@ -11,12 +11,14 @@ namespace Sla.EXTRA
     {
         /// \class IfcQuit
         /// \brief Quit command to terminate processing from the given interface
-        public override void execute(TextWriter s)
-        {               // Generic quit call back
-            if (!s.eof())
+        public override void execute(TextReader s)
+        {
+            // Generic quit call back
+            if (-1 != s.Read()) {
                 throw new IfaceParseError("Too many parameters to quit");
-
-            status.done = true;        // Set flag to drop out of mainloop
+            }
+            // Set flag to drop out of mainloop
+            status.done = true;
         }
     }
 }

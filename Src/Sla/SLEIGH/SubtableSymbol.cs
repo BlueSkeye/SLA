@@ -123,7 +123,7 @@ namespace Sla.SLEIGH
             throw new SleighError("Cannot use subtable in expression");
         }
 
-        public override void getFixedHandle(out FixedHandle hand, ParserWalker walker)
+        public override void getFixedHandle(FixedHandle hand, ParserWalker walker)
         {
             throw new SleighError("Cannot use subtable in expression");
         }

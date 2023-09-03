@@ -434,12 +434,12 @@ namespace Sla.DECCORE
         /// \return \b true if \b op2 (as input to \b this) should be parenthesized
         protected bool parentheses(OpToken op2)
         {
-            ReversePolish top = revpol.back();
+            ReversePolish top = revpol.Last();
             OpToken topToken = top.tok;
             int stage = top.visited;
             switch (topToken.type) {
-                case OpToken::space:
-                case OpToken::binary:
+                case OpToken.tokentype.space:
+                case OpToken.tokentype.binary:
                     if (topToken.precedence > op2.precedence) return true;
                     if (topToken.precedence < op2.precedence) return false;
                     if (topToken.associative && (topToken == op2)) return false;
@@ -447,37 +447,40 @@ namespace Sla.DECCORE
                     // operator printed first must be evaluated first
                     // In this case op2 must be evaluated first, so we
                     // check if it is printed first (in first stage of binary)
-                    if ((op2.type == OpToken::postsurround) && (stage == 0)) return false;
+                    if ((op2.type == OpToken.tokentype.postsurround) && (stage == 0)) return false;
                     return true;
-                case OpToken::unary_prefix:
+                case OpToken.tokentype.unary_prefix:
                     if (topToken.precedence > op2.precedence) return true;
                     if (topToken.precedence < op2.precedence) return false;
                     //    if (associative && (this == &op2)) return false;
-                    if ((op2.type == OpToken::unary_prefix) || (op2.type == OpToken::presurround)) return false;
-                    return true;
-                case OpToken::postsurround:
+                    return (op2.type != OpToken.tokentype.unary_prefix)
+                        && (op2.type != OpToken.tokentype.presurround);
+                case OpToken.tokentype.postsurround:
                     if (stage == 1) return false;   // Inside the surround
                     if (topToken.precedence > op2.precedence) return true;
                     if (topToken.precedence < op2.precedence) return false;
                     // If the precedences are equal, we know this postsurround
                     // comes after, so op2 being first doesn't need parens
-                    if ((op2.type == OpToken::postsurround) || (op2.type == OpToken::binary)) return false;
+                    return (op2.type != OpToken.tokentype.postsurround)
+                        && (op2.type != OpToken.tokentype.binary);
                     //    if (associative && (this == &op2)) return false;
-                    return true;
-                case OpToken::presurround:
+                case OpToken.tokentype.presurround:
                     if (stage == 0) return false;   // Inside the surround
                     if (topToken.precedence > op2.precedence) return true;
                     if (topToken.precedence < op2.precedence) return false;
                     //    if (associative && (this == &op2)) return false;
-                    if ((op2.type == OpToken::unary_prefix) || (op2.type == OpToken::presurround)) return false;
-                    return true;
-                case OpToken::hiddenfunction:
+                    return (op2.type != OpToken.tokentype.unary_prefix)
+                        && (op2.type != OpToken.tokentype.presurround);
+                case OpToken.tokentype.hiddenfunction:
                     if ((stage == 0) && (revpol.size() > 1)) {
                         // If there is an unresolved previous token
                         // New token is printed next to the previous token.
                         OpToken prevToken = revpol[revpol.size() - 2].tok;
-                        if (prevToken.type != OpToken::binary && prevToken.type != OpToken::unary_prefix)
+                        if (   (prevToken.type != OpToken.tokentype.binary)
+                            && (prevToken.type != OpToken.tokentype.unary_prefix))
+                        {
                             return false;
+                        }
                         if (prevToken.precedence < op2.precedence) return false;
                         // If precedence is equal, make sure we don't treat two tokens as associative,
                         // i.e. we should have parentheses
@@ -495,18 +498,21 @@ namespace Sla.DECCORE
         protected void emitOp(ReversePolish entry)
         {
             switch (entry.tok.type) {
-                case OpToken::binary:
+                case OpToken.tokentype.binary:
                     if (entry.visited != 1) return;
-                    emit.spaces(entry.tok.spacing, entry.tok.bump); // Spacing around operator
-                    emit.tagOp(entry.tok.print1, EmitMarkup::no_color, entry.op);
+                    // Spacing around operator
+                    emit.spaces(entry.tok.spacing, entry.tok.bump);
+                    emit.tagOp(entry.tok.print1, EmitMarkup.syntax_highlight.no_color,
+                        entry.op);
                     emit.spaces(entry.tok.spacing, entry.tok.bump);
                     break;
-                case OpToken::unary_prefix:
+                case OpToken.tokentype.unary_prefix:
                     if (entry.visited != 0) return;
-                    emit.tagOp(entry.tok.print1, EmitMarkup::no_color, entry.op);
+                    emit.tagOp(entry.tok.print1, EmitMarkup.syntax_highlight.no_color,
+                        entry.op);
                     emit.spaces(entry.tok.spacing, entry.tok.bump);
                     break;
-                case OpToken::postsurround:
+                case OpToken.tokentype.postsurround:
                     if (entry.visited == 0) return;
                     if (entry.visited == 1) {
                         // Front surround token 
@@ -519,7 +525,7 @@ namespace Sla.DECCORE
                         emit.closeParen(entry.tok.print2, entry.id2);
                     }
                     break;
-                case OpToken::presurround:
+                case OpToken.tokentype.presurround:
                     if (entry.visited == 2) return;
                     if (entry.visited == 0) {
                         // Front surround token 
@@ -531,12 +537,14 @@ namespace Sla.DECCORE
                         emit.spaces(entry.tok.spacing, entry.tok.bump);
                     }
                     break;
-                case OpToken::space:           // Like binary but just a space between
+                case OpToken.tokentype.space:
+                    // Like binary but just a space between
                     if (entry.visited != 1) return;
                     emit.spaces(entry.tok.spacing, entry.tok.bump);
                     break;
-                case OpToken::hiddenfunction:
-                    return;         // Never directly prints anything
+                case OpToken.tokentype.hiddenfunction:
+                    // Never directly prints anything
+                    return;
             }
         }
 
@@ -585,7 +593,7 @@ namespace Sla.DECCORE
             if (codepoint < 0x7F) {
                 // Printable ASCII
                 switch (codepoint) {
-                    case 92:            // back-slash
+                    case 92: // back-slash
                     case '"':
                     case '\'':
                         return true;
@@ -597,7 +605,8 @@ namespace Sla.DECCORE
                     // Printable codepoints  A1-FF
                     return false;
                 }
-                return true;        // Delete + C1 Control characters
+                // Delete + C1 Control characters
+                return true;
             }
             if (codepoint >= 0x2fa20) {
                 // Up to last currently defined language
@@ -667,13 +676,14 @@ namespace Sla.DECCORE
         /// \param charsize is 1 for UTF8, 2 for UTF16, or 4 for UTF32
         /// \param bigend is \b true for a big endian encoding of UTF elements
         /// \return \b true if we reach a terminator character
-        protected bool escapeCharacterData(TextWriter s, byte[] buf, int count, int charsize, bool bigend)
+        protected bool escapeCharacterData(TextWriter s, byte[] buf, int count, int charsize,
+            bool bigend)
         {
             int i = 0;
             int skip = charsize;
             int codepoint = 0;
             while (i < count) {
-                codepoint = StringManager.getCodepoint(buf + i, charsize, bigend, skip);
+                codepoint = StringManager.getCodepoint(buf, i, charsize, bigend, skip);
                 if (codepoint == 0 || codepoint == -1) break;
                 printUnicode(s, codepoint);
                 i += skip;
@@ -700,7 +710,7 @@ namespace Sla.DECCORE
                         pushImpliedField(vn, op);
                     }
                     else {
-                        PcodeOp defOp = vn.getDef();
+                        PcodeOp defOp = vn.getDef() ?? throw new ApplicationException();
                         defOp.getOpcode().push(this, defOp, op);
                     }
                 }
@@ -716,7 +726,7 @@ namespace Sla.DECCORE
         /// Both of its input expressions are also pushed.
         /// \param tok is the operator token to push
         /// \param op is the associated PcodeOp
-        protected void opBinary(OpToken tok, PcodeOp op)
+        protected void opBinary(OpToken? tok, PcodeOp op)
         {
             if (isSet(modifiers.negatetoken)) {
                 tok = tok.negate;
@@ -724,9 +734,10 @@ namespace Sla.DECCORE
                 if (tok == (OpToken)null)
                     throw new LowlevelError("Could not find fliptoken");
             }
-            pushOp(tok, op);        // Push on reverse polish notation
-                                    // implied vn's pushed on in reverse order for efficiency
-                                    // see PrintLanguage::pushVnImplied
+            // Push on reverse polish notation
+            // implied vn's pushed on in reverse order for efficiency
+            // see PrintLanguage::pushVnImplied
+            pushOp(tok, op);
             pushVn(op.getIn(1), op, mods);
             pushVn(op.getIn(0), op, mods);
         }
@@ -751,10 +762,10 @@ namespace Sla.DECCORE
         protected void resetDefaultsInternal()
         {
             mods = 0;
-            head_comment_type = Comment::header | Comment.comment_type.warningheader;
+            head_comment_type = Comment.comment_type.header | Comment.comment_type.warningheader;
             line_commentindent = 20;
-            namespc_strategy = MINIMAL_NAMESPACES;
-            instr_comment_type = Comment::user2 | Comment.comment_type.warning;
+            namespc_strategy = namespace_strategy.MINIMAL_NAMESPACES;
+            instr_comment_type = Comment.comment_type.user2 | Comment.comment_type.warning;
         }
 
         /// \brief Print a single unicode character as a \e character \e constant for the high-level language
@@ -855,19 +866,19 @@ namespace Sla.DECCORE
             AddrSpace spc = comm.getAddr().getSpace();
             ulong off = comm.getAddr().getOffset();
             if (indent < 0)
-                indent = line_commentindent; // User specified default indent
+                // User specified default indent
+                indent = line_commentindent;
             emit.tagLine(indent);
             int id = emit.startComment();
             // The comment delimeters should not be printed as
             // comment tags, so that they won't get filled
-            emit.tagComment(commentstart, EmitMarkup::comment_color,
-                      spc, off);
+            emit.tagComment(commentstart, EmitMarkup.syntax_highlight.comment_color, spc, off);
             int pos = 0;
-            while (pos < text.size()) {
+            while (pos < text.Length) {
                 char tok = text[pos++];
                 if ((tok == ' ') || (tok == '\t')) {
                     int count = 1;
-                    while (pos < text.size()) {
+                    while (pos < text.Length) {
                         tok = text[pos];
                         if ((tok != ' ') && (tok != '\t')) break;
                         count += 1;
@@ -890,7 +901,7 @@ namespace Sla.DECCORE
                     }
                     // Treat annotation as one token
                     string annote = text.Substring(pos - count, count);
-                    emit.tagComment(annote, EmitMarkup::comment_color, spc, off);
+                    emit.tagComment(annote, EmitMarkup.syntax_highlight.comment_color, spc, off);
                 }
                 else
                 {
@@ -906,7 +917,7 @@ namespace Sla.DECCORE
                 }
             }
             if (commentend.Length != 0)
-                emit.tagComment(commentend, EmitMarkup::comment_color, spc, off);
+                emit.tagComment(commentend, EmitMarkup.syntax_highlight.comment_color, spc, off);
             emit.stopComment(id);
             comm.setEmitted(true);
         }
@@ -1094,7 +1105,7 @@ namespace Sla.DECCORE
         {
             emit.clear();
             if (!modstack.empty()) {
-                mods = modstack.front();
+                mods = modstack.First();
                 modstack.Clear();
             }
             scopestack.Clear();
@@ -1121,8 +1132,10 @@ namespace Sla.DECCORE
                 mod = 0;
             else
                 throw new LowlevelError("Unknown integer format option: " + nm);
-            mods &= ~(modifiers.force_hex | modifiers.force_dec); // Turn off any pre-existing force
-            mods |= mod;            // Set any new force
+            // Turn off any pre-existing force
+            mods &= ~(modifiers.force_hex | modifiers.force_dec);
+            // Set any new force
+            mods |= mod;
         }
 
         /// \brief Set the way comments are displayed in decompiler output

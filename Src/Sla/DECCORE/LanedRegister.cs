@@ -139,7 +139,7 @@ namespace Sla.DECCORE
         /// \return \b true if the XML description provides lane sizes
         public bool decode(Sla.CORE.Decoder decoder)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_REGISTER);
+            uint elemId = decoder.openElement(ElementId.ELEM_REGISTER);
             string laneSizes = string.Empty;
             while(true) {
                 AttributeId attribId = decoder.getNextAttributeId();

@@ -27,11 +27,18 @@ namespace Sla.DECCORE
             /// Compare by position then by index
             /// \param op2 is the other IndexPair to compare with \b this
             /// \return \b true if \b this is ordered before the other IndexPair
-            internal static bool operator <(IndexPair op1, IndexPair op2)
+            public static bool operator <(IndexPair op1, IndexPair op2)
             {
                 return (op1.blockPosition != op2.blockPosition) 
                     ? (op1.blockPosition < op2.blockPosition)
                     : (op1.addressIndex < op2.addressIndex);
+            }
+
+            public static bool operator >(IndexPair op1, IndexPair op2)
+            {
+                return (op1.blockPosition != op2.blockPosition)
+                    ? (op1.blockPosition > op2.blockPosition)
+                    : (op1.addressIndex > op2.addressIndex);
             }
 
             /// Compare just by position
@@ -346,7 +353,7 @@ namespace Sla.DECCORE
         {
             IndexPair val = new IndexPair(block2Position(bl),0);
             Tuple<IEnumerator<IndexPair>, IEnumerator<IndexPair>> range;
-            range = equal_range(block2addr.begin(), block2addr.end(), val, IndexPair.compareByPosition);
+            range = Globals.equal_range(block2addr.begin(), block2addr.end(), val, IndexPair.compareByPosition);
             return range.second - range.first;
         }
 
@@ -473,10 +480,10 @@ namespace Sla.DECCORE
                 // If possible, mark up the switch variable as not fully consumed so that
                 // subvariable flow can truncate it.
                 switchVarConsume = Globals.minimalmask(switchvn.getNZMask());
-                if (switchVarConsume >= Globals.calc_mask(switchvn.getSize()))
-                {   // If mask covers everything
+                if (switchVarConsume >= Globals.calc_mask((uint)switchvn.getSize())) {
+                    // If mask covers everything
                     if (switchvn.isWritten()) {
-                        PcodeOp op = switchvn.getDef();
+                        PcodeOp op = switchvn.getDef() ?? throw new ApplicationException();
                         if (op.code() == OpCode.CPUI_INT_SEXT) {
                             // Check for a signed extension
                             // Assume the extension is not consumed
@@ -703,11 +710,11 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         internal void decode(Sla.CORE.Decoder decoder)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_JUMPTABLE);
+            uint elemId = decoder.openElement(ElementId.ELEM_JUMPTABLE);
             opaddress = Address.decode(decoder);
             bool missedlabel = false;
             while(true) {
-                ElementId subId = decoder.peekElement();
+                uint subId = decoder.peekElement();
                 if (subId == 0) break;
                 if (subId == ElementId.ELEM_DEST) {
                     decoder.openElement();

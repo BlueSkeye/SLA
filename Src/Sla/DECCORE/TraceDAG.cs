@@ -196,16 +196,17 @@ namespace Sla.DECCORE
             internal FlowBlock exitproto;
             // The active BlockTrace being considered
             internal BlockTrace trace;
-            // Minimum distance crossed by \b this and any other BlockTrace sharing same exit block
+            // Minimum distance crossed by \b this and any other BlockTrace sharing
+            // same exit block
             internal int distance;
             // 1 if BlockTrace destination has no exit, 0 otherwise
             internal int terminal;
             // Number of active BlockTraces with same BranchPoint and exit as \b this
             internal int siblingedge;
 
-            /// Compare BadEdgeScore for unstructured suitability
-            /// \param op2 is the other BadEdgeScore to compare with \b this
-            /// \return true if \b this is LESS likely to be the bad edge than \b op2
+            // Compare BadEdgeScore for unstructured suitability
+            // \param op2 is the other BadEdgeScore to compare with \b this
+            // \return true if \b this is LESS likely to be the bad edge than \b op2
             internal bool compareFinal(BadEdgeScore op2)
             {
                 if (siblingedge != op2.siblingedge)
@@ -217,29 +218,55 @@ namespace Sla.DECCORE
                 if (terminal != op2.terminal)
                     return (terminal < op2.terminal);
                 if (distance != op2.distance)
-                    return (distance < op2.distance); // Less distance between branchpoints means less likely to be bad
-                return (trace.top.depth < op2.trace.top.depth); // Less depth means less likely to be bad
+                    // Less distance between branchpoints means less likely to be bad
+                    return (distance < op2.distance);
+                // Less depth means less likely to be bad
+                return (trace.top.depth < op2.trace.top.depth);
             }
 
-            /// Compare for grouping
-            /// Comparator for grouping BlockTraces with the same exit block and parent BranchPoint
-            /// \param op2 is the other BadEdgeScore to compare to
-            /// \return \b true is \b this should be ordered before \b op2
-            internal static bool operator <(BadEdgeScore op1, BadEdgeScore op2)
+            // Compare for grouping
+            // Comparator for grouping BlockTraces with the same exit block and
+            // parent BranchPoint
+            // \param op2 is the other BadEdgeScore to compare to
+            // \return \b true is \b this should be ordered before \b op2
+            public static bool operator <(BadEdgeScore op1, BadEdgeScore op2)
             {
                 int thisind = op1.exitproto.getIndex();
                 int op2ind = op2.exitproto.getIndex();
-                if (thisind != op2ind)  // Sort on exit block being traced to
+                if (thisind != op2ind)
+                    // Sort on exit block being traced to
                     return (thisind < op2ind);
                 FlowBlock? tmpbl = op1.trace.top.top;
                 thisind = (tmpbl != (FlowBlock)null) ? tmpbl.getIndex() : -1;
                 tmpbl = op2.trace.top.top;
                 op2ind = (tmpbl != (FlowBlock)null) ? tmpbl.getIndex() : -1;
-                if (thisind != op2ind)  // Then sort on branch point being traced from
+                if (thisind != op2ind)
+                    // Then sort on branch point being traced from
                     return (thisind < op2ind);
                 thisind = op1.trace.pathout;
-                op2ind = op2.trace.pathout;    // Then on the branch being taken
+                // Then on the branch being taken
+                op2ind = op2.trace.pathout;
                 return (thisind < op2ind);
+            }
+
+            public static bool operator >(BadEdgeScore op1, BadEdgeScore op2)
+            {
+                int thisind = op1.exitproto.getIndex();
+                int op2ind = op2.exitproto.getIndex();
+                if (thisind != op2ind)
+                    // Sort on exit block being traced to
+                    return (thisind > op2ind);
+                FlowBlock? tmpbl = op1.trace.top.top;
+                thisind = (tmpbl != (FlowBlock)null) ? tmpbl.getIndex() : -1;
+                tmpbl = op2.trace.top.top;
+                op2ind = (tmpbl != (FlowBlock)null) ? tmpbl.getIndex() : -1;
+                if (thisind != op2ind)
+                    // Then sort on branch point being traced from
+                    return (thisind > op2ind);
+                thisind = op1.trace.pathout;
+                // Then on the branch being taken
+                op2ind = op2.trace.pathout;
+                return (thisind > op2ind);
             }
         }
 
@@ -304,30 +331,30 @@ namespace Sla.DECCORE
         /// \param end is the end of the list of conflicting BlockTraces
         private void processExitConflict(IEnumerator<BadEdgeScore> start, IEnumerator<BadEdgeScore> end)
         {
-            IEnumerator<BadEdgeScore> iter;
             BranchPoint startbp;
 
             while (start != end) {
-                iter = start;
-                ++iter;
+                BadEdgeScore startScore = start.Current;
+                IEnumerator<BadEdgeScore> iter = start;
                 startbp = start.Current.trace.top;
-                if (iter != end) {
-                    startbp.markPath();    // Mark path to root, so we can find common ancestors easily
+                if (iter.MoveNext()) {
+                    // Mark path to root, so we can find common ancestors easily
+                    startbp.markPath();
                     do {
+                        BadEdgeScore thisScore = iter.Current;
                         if (startbp == iter.Current.trace.top) {
                             // Edge coming from same BranchPoint
-                            start.Current.siblingedge += 1;
-                            iter.Current.siblingedge += 1;
+                            startScore.siblingedge += 1;
+                            thisScore.siblingedge += 1;
                         }
-                        int dist = startbp.distance(iter.Current.trace.top);
+                        int dist = startbp.distance(thisScore.trace.top);
                         // Distance is symmetric with respect to the pair of traces,
                         // Update minimum for both traces
-                        if ((start.Current.distance == -1) || (start.Current.distance > dist))
-                            start.Current.distance = dist;
-                        if ((start.Current.distance == -1) || (start.Current.distance > dist))
-                            start.Current.distance = dist;
-                        ++iter;
-                    } while (iter != end);
+                        if ((startScore.distance == -1) || (startScore.distance > dist))
+                            startScore.distance = dist;
+                        if ((startScore.distance == -1) || (startScore.distance > dist))
+                            startScore.distance = dist;
+                    } while (iter.MoveNext());
                     startbp.markPath();    // Unmark the path
                 }
                 if (!start.MoveNext()) break;
@@ -535,13 +562,13 @@ namespace Sla.DECCORE
             if (bp.depth == 0)
                 // If this is the root block
                 // This is all there is to do
-                return activetrace.First();
+                return activetrace.First;
 
             if (bp.parent != (BranchPoint)null) {
                 BlockTrace parenttrace = bp.parent.paths[bp.pathout];
                 parenttrace.derivedbp = (BranchPoint)null; // Derived branchpoint is gone
-                if (edgeout_bl == (FlowBlock)null)
-                {       // If all traces were terminal
+                if (edgeout_bl == (FlowBlock)null) {
+                    // If all traces were terminal
                     parenttrace.flags |= BlockTrace.Flags.f_terminal;
                     parenttrace.bottom = (FlowBlock)null;
                     parenttrace.destnode = (FlowBlock)null;
@@ -552,10 +579,11 @@ namespace Sla.DECCORE
                     parenttrace.destnode = exitblock;
                     parenttrace.edgelump = edgelump_sum;
                 }
-                insertActive(parenttrace); // Parent trace gets re-activated
+                // Parent trace gets re-activated
+                insertActive(parenttrace);
                 return parenttrace.activeiter;
             }
-            return activetrace.First();
+            return activetrace.First;
         }
 
         /// Clear the \b visitcount field of any FlowBlock we have modified

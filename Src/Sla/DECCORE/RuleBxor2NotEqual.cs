@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -16,14 +9,15 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule? clone(ActionGroupList grouplist) {
+        public override Rule? clone(ActionGroupList grouplist)
+        {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleBxor2NotEqual(getGroup());
         }
 
         /// \class RuleBxor2NotEqual
         /// \brief Eliminate BOOL_XOR:  `V ^^ W  =>  V != W`
-        public override getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(OpCode.CPUI_BOOL_XOR);
         }

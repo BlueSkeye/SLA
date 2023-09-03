@@ -45,20 +45,18 @@ namespace Sla.DECCORE
         /// \return the name of the image
         public string getFileName() => filename;
 
-        /// Get data from the LoadImage
-        /// \fn void LoadImage::loadFill(byte *ptr,int size, Address addr)
-        /// This is the \e core routine of a LoadImage.  Given a particular
-        /// address range, this routine retrieves the exact byte values
-        /// that are stored at that address when the executable is loaded
-        /// into RAM.  The caller must supply a pre-allocated array
-        /// of bytes where the returned bytes should be stored.  If the
-        /// requested address range does not exist in the image, or
-        /// otherwise can't be retrieved, this method throws an
-        /// DataUnavailError exception.
-        /// \param ptr points to where the resulting bytes will be stored
-        /// \param size is the number of bytes to retrieve from the image
-        /// \param addr is the starting address of the bytes to retrieve
-        public abstract void loadFill(byte[] ptr, int size, Address addr);
+        // Get data from the LoadImage
+        // This is the \e core routine of a LoadImage. Given a particular address range,
+        // this routine retrieves the exact byte values that are stored at that address
+        // when the executable is loaded into RAM. The caller must supply a pre-allocated
+        // array of bytes where the returned bytes should be stored. If the requested
+        // address range does not exist in the image, or otherwise can't be retrieved,
+        // this method throws an DataUnavailError exception.
+        // \param ptr points to where the resulting bytes will be stored
+        // \param index (ADDED)
+        // \param size is the number of bytes to retrieve from the image
+        // \param addr is the starting address of the bytes to retrieve
+        public abstract void loadFill(byte[] ptr, int index, int size, Address addr);
 
         /// Prepare to read symbols
         /// This routine should read in and parse any symbol information
@@ -172,9 +170,7 @@ namespace Sla.DECCORE
         public virtual byte[] load(int size, Address addr)
         {
             byte[] buf = new byte[size];
-            if (buf == (byte*)0)
-                throw new LowlevelError("Out of memory");
-            loadFill(buf, size, addr);
+            loadFill(buf, 0, size, addr);
             return buf;
         }
     }

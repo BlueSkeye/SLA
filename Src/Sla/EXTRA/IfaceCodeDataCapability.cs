@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
-
+﻿
 namespace Sla.EXTRA
 {
     internal class IfaceCodeDataCapability : IfaceCapability
@@ -22,10 +16,12 @@ namespace Sla.EXTRA
 
         // private IfaceCodeDataCapability operator=(IfaceCodeDataCapability op2);	// Not implemented
 
-        public virtual void registerCommands(IfaceStatus status)
+        public override void registerCommands(IfaceStatus status)
         {
             status.registerCom(new IfcCodeDataInit(), "codedata", "init");
+#if BFD_SUPPORTED
             status.registerCom(new IfcCodeDataTarget(), "codedata", "target");
+#endif
             status.registerCom(new IfcCodeDataRun(), "codedata", "run");
             status.registerCom(new IfcCodeDataDumpModelHits(), "codedata", "dump", "hits");
             status.registerCom(new IfcCodeDataDumpCrossRefs(), "codedata", "dump", "crossrefs");

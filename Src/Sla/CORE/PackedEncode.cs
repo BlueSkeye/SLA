@@ -104,7 +104,7 @@ namespace Sla.CORE
         }
 
         ///< Construct from a stream
-        public PackedEncode(StreamWriter s)
+        public PackedEncode(TextWriter s)
         {
             outStream = s;
         }

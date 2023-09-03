@@ -46,7 +46,7 @@ namespace Sla.DECCORE
 
         public override void decode(Sla.CORE.Decoder decoder)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_LABELSYM);
+            uint elemId = decoder.openElement(ElementId.ELEM_LABELSYM);
             decodeHeader(decoder);
             decoder.closeElement(elemId);
         }

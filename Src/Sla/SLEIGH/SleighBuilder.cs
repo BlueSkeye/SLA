@@ -11,23 +11,24 @@ namespace Sla.SLEIGH
     /// additional instructions.
     internal class SleighBuilder : PcodeBuilder
     {
-        private override void dump(OpTpl op)
+        protected override void dump(OpTpl op)
         {
             // Dump on op through low-level dump interface
             // filling in dynamic loads and stores if necessary
             PcodeData thisop;
-            VarnodeData invars;
-            VarnodeData loadvars;
-            VarnodeData storevars;
+            VarnodeData[] invars;
+            VarnodeData[] loadvars;
+            VarnodeData[] storevars;
             VarnodeTpl vn;
-            VarnodeTpl outvn;
+            VarnodeTpl? outvn;
             int isize = op.numInput();
             // First build all the inputs
-            invars = cache.allocateVarnodes(isize);
+            invars = cache.allocateVarnodes((uint)isize);
             for (int i = 0; i < isize; ++i) {
                 vn = op.getIn(i);
                 if (vn.isDynamic(walker)) {
-                    generateLocation(vn, invars[i]); // Input of -op- is really temporary storage
+                    // Input of -op- is really temporary storage
+                    generateLocation(vn, invars[i]);
                     PcodeData load_op = cache.allocateInstruction();
                     load_op.opc = OpCode.CPUI_LOAD;
                     load_op.outvar = invars + i;
@@ -35,9 +36,9 @@ namespace Sla.SLEIGH
                     loadvars = load_op.invar = cache.allocateVarnodes(2);
                     AddrSpace spc = generatePointer(vn, loadvars[1]);
                     loadvars[0].space = const_space;
-                    loadvars[0].offset = (ulong)(ulong)spc;
+                    loadvars[0].offset = (ulong)spc;
                     loadvars[0].size = sizeof(spc);
-                    if (vn.getOffset().getSelect() == ConstTpl::v_offset_plus)
+                    if (vn.getOffset().getSelect() == ConstTpl.v_field.v_offset_plus)
                         generatePointerAdd(load_op, vn);
                 }
                 else
@@ -55,8 +56,9 @@ namespace Sla.SLEIGH
             if (outvn != (VarnodeTpl)null) {
                 if (outvn.isDynamic(walker)) {
                     storevars = cache.allocateVarnodes(3);
-                    generateLocation(outvn, storevars[2]); // Output of -op- is really temporary storage
-                    thisop.outvar = storevars + 2;
+                    // Output of -op- is really temporary storage
+                    generateLocation(outvn, storevars[2]);
+                    thisop.outvar = storevars[2];
                     PcodeData store_op = cache.allocateInstruction();
                     store_op.opc = OpCode.CPUI_STORE;
                     store_op.isize = 3;
@@ -64,9 +66,10 @@ namespace Sla.SLEIGH
                     store_op.invar = storevars;
                     AddrSpace spc = generatePointer(outvn, storevars[1]); // pointer
                     storevars[0].space = const_space;
-                    storevars[0].offset = (ulong)(ulong)spc; // space in which to store
+                    // space in which to store
+                    storevars[0].offset = (ulong)spc;
                     storevars[0].size = sizeof(spc);
-                    if (outvn.getOffset().getSelect() == ConstTpl::v_offset_plus)
+                    if (outvn.getOffset().getSelect() == ConstTpl.v_field.v_offset_plus)
                         generatePointerAdd(store_op, outvn);
                 }
                 else {
@@ -76,12 +79,18 @@ namespace Sla.SLEIGH
             }
         }
 
-        private AddrSpace const_space;     ///< The constant address space
-        private AddrSpace uniq_space;      ///< The unique address space
-        private ulong uniquemask;           ///< Mask of address bits to use to uniquify temporary registers
-        private ulong uniqueoffset;         ///< Uniquifier bits for \b this instruction
-        private DisassemblyCache discache;     ///< Cache of disassembled instructions
-        private PcodeCacher cache;         ///< Cache accumulating p-code data for the instruction
+        // The constant address space
+        private AddrSpace const_space;
+        // The unique address space
+        private AddrSpace uniq_space;
+        // Mask of address bits to use to uniquify temporary registers
+        private ulong uniquemask;
+        // Uniquifier bits for \b this instruction
+        private ulong uniqueoffset;
+        // Cache of disassembled instructions
+        private DisassemblyCache discache;
+        // Cache accumulating p-code data for the instruction
+        private PcodeCacher cache;
 
         /// \brief Build a named p-code section of a constructor that contains only implied BUILD directives
         ///
@@ -96,12 +105,12 @@ namespace Sla.SLEIGH
             int numops = ct.getNumOperands();
 
             for (int i = 0; i < numops; ++i) {
-                SubtableSymbol sym = (SubtableSymbol)ct.getOperand(i).getDefiningSymbol();
+                SubtableSymbol? sym = (SubtableSymbol)ct.getOperand(i).getDefiningSymbol();
                 if (sym == (SubtableSymbol)null) continue;
                 if (sym.getType() !=  SleighSymbol.symbol_type.subtable_symbol) continue;
 
                 walker.pushOperand(i);
-                ConstructTpl construct = walker.getConstructor().getNamedTempl(secnum);
+                ConstructTpl? construct = walker.getConstructor().getNamedTempl(secnum);
                 if (construct == (ConstructTpl)null)
                     buildEmpty(walker.getConstructor(), secnum);
                 else
@@ -169,8 +178,10 @@ namespace Sla.SLEIGH
             newparams[1].space = const_space;   // Add in V_OFFSET_PLUS
             newparams[1].offset = offsetPlus;
             newparams[1].size = newparams[0].size;
-            op.outvar = nextop.invar + 1; // Output of ADD is input to original op
-            op.outvar.space = uniq_space;     // Result of INT_ADD in special runtime temp
+            // Output of ADD is input to original op
+            op.outvar = nextop.invar[1];
+            // Result of INT_ADD in special runtime temp
+            op.outvar.space = uniq_space;
             op.outvar.offset = uniq_space.getTrans().getUniqueStart(Translate.UniqueLayout.RUNTIME_BITRANGE_EA);
         }
 
@@ -203,45 +214,47 @@ namespace Sla.SLEIGH
             uniqueoffset = (walker.getAddr().getOffset() & uniquemask) << 4;
         }
 
-        private override void appendBuild(OpTpl bld, int secnum)
+        public override void appendBuild(OpTpl bld, int secnum)
         {
             // Append p-code for a particular build statement
-            int index = bld.getIn(0).getOffset().getReal(); // Recover operand index from build statement
-                                                               // Check if operand is a subtable
-            SubtableSymbol* sym = (SubtableSymbol*)walker.getConstructor().getOperand(index).getDefiningSymbol();
-            if ((sym == (SubtableSymbol)null) || (sym.getType() !=  SleighSymbol.symbol_type.subtable_symbol)) return;
+            // Recover operand index from build statement
+            int index = (int)bld.getIn(0).getOffset().getReal();
+            // Check if operand is a subtable
+            SubtableSymbol? sym = (SubtableSymbol)walker.getConstructor().getOperand(index).getDefiningSymbol();
+            if (   (sym == (SubtableSymbol)null)
+                || (sym.getType() != SleighSymbol.symbol_type.subtable_symbol))
+            {
+                return;
+            }
 
             walker.pushOperand(index);
-            Constructor* ct = walker.getConstructor();
-            if (secnum >= 0)
-            {
-                ConstructTpl* construct = ct.getNamedTempl(secnum);
+            Constructor ct = walker.getConstructor();
+            if (secnum >= 0) {
+                ConstructTpl? construct = ct.getNamedTempl(secnum);
                 if (construct == (ConstructTpl)null)
                     buildEmpty(ct, secnum);
                 else
                     build(construct, secnum);
             }
-            else
-            {
-                ConstructTpl* construct = ct.getTempl();
+            else {
+                ConstructTpl construct = ct.getTempl();
                 build(construct, -1);
             }
             walker.popOperand();
         }
 
-        private override void delaySlot(OpTpl op)
+        public override void delaySlot(OpTpl op)
         {
             // Append pcode for an entire instruction (delay slot)
             // in the middle of the current instruction
-            ParserWalker* tmp = walker;
+            ParserWalker tmp = walker;
             ulong olduniqueoffset = uniqueoffset;
 
             Address baseaddr = tmp.getAddr();
             int fallOffset = tmp.getLength();
             int delaySlotByteCnt = tmp.getParserContext().getDelaySlot();
             int bytecount = 0;
-            do
-            {
+            do {
                 Address newaddr = baseaddr + fallOffset;
                 setUniqueOffset(newaddr);
                 ParserContext pos = discache.getParserContext(newaddr);
@@ -252,20 +265,22 @@ namespace Sla.SLEIGH
                 ParserWalker newwalker = new ParserWalker(pos);
                 walker = newwalker;
                 walker.baseState();
-                build(walker.getConstructor().getTempl(), -1); // Build the whole delay slot
+                // Build the whole delay slot
+                build(walker.getConstructor().getTempl(), -1);
                 fallOffset += len;
                 bytecount += len;
             } while (bytecount < delaySlotByteCnt);
-            walker = tmp;           // Restore original context
+            // Restore original context
+            walker = tmp;
             uniqueoffset = olduniqueoffset;
         }
 
-        private override void setLabel(OpTpl op)
+        public override void setLabel(OpTpl op)
         {
             cache.addLabel(op.getIn(0).getOffset().getReal() + getLabelBase());
         }
 
-        private override void appendCrossBuild(OpTpl bld, int secnum)
+        public override void appendCrossBuild(OpTpl bld, int secnum)
         {
             // Weave in the p-code section from an instruction at another address
             // bld-param(0) contains the address of the instruction
@@ -273,11 +288,11 @@ namespace Sla.SLEIGH
             if (secnum >= 0)
                 throw new LowlevelError("CROSSBUILD directive within a named section");
             secnum = bld.getIn(1).getOffset().getReal();
-            VarnodeTpl* vn = bld.getIn(0);
-            AddrSpace* spc = vn.getSpace().fixSpace(*walker);
-            ulong addr = spc.wrapOffset(vn.getOffset().fix(*walker));
+            VarnodeTpl vn = bld.getIn(0);
+            AddrSpace spc = vn.getSpace().fixSpace(walker);
+            ulong addr = spc.wrapOffset(vn.getOffset().fix(walker));
 
-            ParserWalker* tmp = walker;
+            ParserWalker tmp = walker;
             ulong olduniqueoffset = uniqueoffset;
 
             Address newaddr = new Address(spc, addr);

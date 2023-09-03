@@ -112,7 +112,7 @@ namespace Sla.CORE
         /// \param decoder is the stream decoder
         public static VarnodeData decode(Sla.CORE.Decoder decoder)
         {
-            ElementId elemId = decoder.openElement();
+            uint elemId = decoder.openElement();
             VarnodeData result = VarnodeData.decodeFromAttributes(decoder);
             decoder.closeElement(elemId);
             return result;

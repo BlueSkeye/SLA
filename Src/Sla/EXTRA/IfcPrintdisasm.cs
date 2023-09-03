@@ -27,7 +27,7 @@ namespace Sla.EXTRA
             if (s.eof()) {
                 if (dcp.fd == (Funcdata)null)
                     throw new IfaceExecutionError("No function selected");
-                *status.fileoptr << "Assembly listing for " << dcp.fd.getName() << endl;
+                status.fileoptr << "Assembly listing for " << dcp.fd.getName() << endl;
                 addr = dcp.fd.getAddress();
                 size = dcp.fd.getSize();
                 glb = dcp.fd.getArch();

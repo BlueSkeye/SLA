@@ -115,13 +115,14 @@ namespace Sla.SLEIGH
 
         public ConstTpl(AddrSpace sid)
         {
-            type = spaceid;
+            type = const_type.spaceid;
             value.spaceid = sid;
         }
 
         public ConstTpl(const_type tp, int ht, v_field vf)
-        {               // Constructor for handle constant
-            type = handle;
+        {
+            // Constructor for handle constant
+            type = const_type.handle;
             value.handle_index = ht;
             select = vf;
             value_real = 0;
@@ -129,7 +130,7 @@ namespace Sla.SLEIGH
 
         public ConstTpl(const_type tp, int ht, v_field vf, ulong plus)
         {
-            type = handle;
+            type = const_type.handle;
             value.handle_index = ht;
             select = vf;
             value_real = plus;
@@ -149,20 +150,27 @@ namespace Sla.SLEIGH
             return false;
         }
 
+        public static bool operator !=(ConstTpl op1, ConstTpl op2)
+        {
+            return !(op1 == op2);
+        }
+
         public static bool operator ==(ConstTpl op1, ConstTpl op2)
         {
             if (op1.type != op2.type) return false;
-            switch (op1.type)
-            {
+            switch (op1.type) {
                 case const_type.real:
                     return (op1.value_real == op2.value_real);
                 case const_type.handle:
-                    if (op1.value.handle_index != op2.value.handle_index) return false;
-                    if (op1.select != op2.select) return false;
+                    if (op1.value.handle_index != op2.value.handle_index)
+                        return false;
+                    if (op1.select != op2.select)
+                        return false;
                     break;
                 case const_type.spaceid:
                     return (op1.value.spaceid == op2.value.spaceid);
-                default:            // Nothing additional to compare
+                default:
+                    // Nothing additional to compare
                     break;
             }
             return true;
@@ -183,6 +191,26 @@ namespace Sla.SLEIGH
                 case const_type.spaceid:
                     return (op1.value.spaceid < op2.value.spaceid);
                 default:            // Nothing additional to compare
+                    break;
+            }
+            return false;
+        }
+
+        public static bool operator >(ConstTpl op1, ConstTpl op2)
+        {
+            if (op1.type != op2.type) return (op1.type > op2.type);
+            switch (op1.type) {
+                case const_type.real:
+                    return (op1.value_real > op2.value_real);
+                case const_type.handle:
+                    if (op1.value.handle_index != op2.value.handle_index)
+                        return (op1.value.handle_index > op2.value.handle_index);
+                    if (op1.select != op2.select) return (op1.select > op2.select);
+                    break;
+                case const_type.spaceid:
+                    return (op1.value.spaceid > op2.value.spaceid);
+                default:
+                    // Nothing additional to compare
                     break;
             }
             return false;
@@ -213,11 +241,11 @@ namespace Sla.SLEIGH
                 case const_type.j_flowref:
                     return walker.getRefAddr().getOffset();
                 case const_type.j_flowref_size:
-                    return walker.getRefAddr().getAddrSize();
+                    return (ulong)walker.getRefAddr().getAddrSize();
                 case const_type.j_flowdest:
                     return walker.getDestAddr().getOffset();
                 case const_type.j_flowdest_size:
-                    return walker.getDestAddr().getAddrSize();
+                    return (ulong)walker.getDestAddr().getAddrSize();
                 case const_type.j_curspace_size:
                     return walker.getCurSpace().getAddrSize();
                 case const_type.j_curspace:
@@ -251,7 +279,7 @@ namespace Sla.SLEIGH
                                         val = hand.offset_offset;
                                     else
                                         val = hand.temp_offset;
-                                    val >>= 8 * (value_real >> 16);
+                                    val >>= 8UL * (value_real >> (int)16);
                                     return val;
                                 }
                         }
@@ -299,7 +327,7 @@ namespace Sla.SLEIGH
         public void transfer(List<HandleTpl> @params)
         {
             // Replace old handles with new handles
-            if (type != handle) return;
+            if (type != const_type.handle) return;
             HandleTpl newhandle = @params[value.handle_index] ;
 
             switch (select) {
@@ -332,7 +360,7 @@ namespace Sla.SLEIGH
             }
         }
 
-        public bool isZero() => ((type==real)&& (value_real == 0));
+        public bool isZero() => ((type == const_type.real) && (value_real == 0));
 
         public void changeHandleIndex(List<int> handmap)
         {

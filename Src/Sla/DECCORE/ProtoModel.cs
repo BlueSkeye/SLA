@@ -593,7 +593,7 @@ namespace Sla.DECCORE
             injectUponEntry = -1;
             injectUponReturn = -1;
             likelytrash.Clear();
-            ElementId elemId = decoder.openElement(ElementId.ELEM_PROTOTYPE);
+            uint elemId = decoder.openElement(ElementId.ELEM_PROTOTYPE);
             while(true) {
                 AttributeId attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;

@@ -295,7 +295,7 @@ namespace Sla.DECCORE
             if (hasOverflowSyntax()) {
                 s.Write("(overflow) ");
             }
-            @base.printHeader(s);
+            base.printHeader(s);
         }
 
         public override void emit(PrintLanguage lng)

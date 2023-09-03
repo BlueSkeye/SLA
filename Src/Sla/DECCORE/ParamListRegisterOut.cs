@@ -40,7 +40,7 @@ namespace Sla.DECCORE
                 newPieces.addr = assignAddress(proto[0], status);
                 if (newPieces.addr.isInvalid())
                     throw new ParamUnassignedError(
-                        $"Cannot assign parameter address for {proto[0].getName()}";
+                        $"Cannot assign parameter address for {proto[0].getName()}");
             }
             newPieces.type = proto[0];
             newPieces.flags = 0;

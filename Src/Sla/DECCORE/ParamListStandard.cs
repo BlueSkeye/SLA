@@ -471,7 +471,7 @@ namespace Sla.DECCORE
                 resolver = new ParamEntryResolver();
                 resolverMap[spc.getIndex()] = resolver;
             }
-            ParamEntryResolver::inittype initData = ParamEntryResolver::inittype(position, paramEntry);
+            ParamEntryResolver.inittype initData = ParamEntryResolver.inittype(position, paramEntry);
             resolver.insert(initData, first, last);
         }
 
@@ -557,7 +557,7 @@ namespace Sla.DECCORE
             int basegroup = numgroup;
             ParamEntry? previous1 = (ParamEntry)null;
             ParamEntry? previous2 = (ParamEntry)null;
-            ElementId elemId = decoder.openElement(ElementId.ELEM_GROUP);
+            uint elemId = decoder.openElement(ElementId.ELEM_GROUP);
             while (decoder.peekElement() != 0) {
                 parsePentry(decoder, effectlist, basegroup, normalstack, autokill, splitFloat, true);
                 ParamEntry pentry = entry.Last();
@@ -719,7 +719,7 @@ namespace Sla.DECCORE
             ParamEntryResolver? resolver = resolverMap[index];
             if (resolver == (ParamEntryResolver)null)
                 return ParamEntry.Containment.no_containment;
-            Tuple<ParamEntryResolver::const_iterator, ParamEntryResolver::const_iterator> iterpair;
+            Tuple<ParamEntryResolver.PartIterator, ParamEntryResolver.PartIterator> iterpair;
             iterpair = resolver.find(loc.getOffset());
             bool resContains = false;
             bool resContainedBy = false;
@@ -782,8 +782,8 @@ namespace Sla.DECCORE
             if (endLoc.getOffset() < loc.getOffset())
                 return false;   // Assume there is no parameter if we see wrapping
             ParamEntry maxEntry = (ParamEntry)null;
-            ParamEntryResolver::const_iterator iter = resolver.find_begin(loc.getOffset());
-            ParamEntryResolver::const_iterator enditer = resolver.find_end(endLoc.getOffset());
+            ParamEntryResolver.PartIterator iter = resolver.find_begin(loc.getOffset());
+            ParamEntryResolver.PartIterator enditer = resolver.find_end(endLoc.getOffset());
             while (iter != enditer) {
                 ParamEntry testEntry = (*iter).getParamEntry();
                 ++iter;
@@ -819,7 +819,7 @@ namespace Sla.DECCORE
             return false;
         }
 
-        public override OpCode assumedExtension(Address addr, int size, VarnodeData res)
+        public override OpCode assumedExtension(Address addr, int size, out VarnodeData res)
         {
             IEnumerator<ParamEntry> iter = entry.GetEnumerator();
             while (iter.MoveNext()) {
@@ -846,7 +846,8 @@ namespace Sla.DECCORE
 
         public override int getMaxDelay() => maxdelay;
 
-        public override void decode(Sla.CORE.Decoder decoder, List<EffectRecord> effectlist, bool normalstack)
+        public override void decode(Sla.CORE.Decoder decoder, LinkedList<EffectRecord> effectlist,
+            bool normalstack)
         {
             numgroup = 0;
             spacebase = (AddrSpace)null;
@@ -855,7 +856,7 @@ namespace Sla.DECCORE
             // True if we should split FLOAT entries into their own resource section
             bool splitFloat = true;
             bool autokilledbycall = false;
-            ElementId elemId = decoder.openElement();
+            uint elemId = decoder.openElement();
             for (; ; ) {
                 AttributeId attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;

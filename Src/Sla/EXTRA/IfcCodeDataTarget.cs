@@ -1,6 +1,7 @@
 ﻿
 namespace Sla.EXTRA
 {
+#if BFD_SUPPORTED
     internal class IfcCodeDataTarget : IfaceCodeDataCommand
     {
         public override void execute(TextReader s)
@@ -24,4 +25,5 @@ namespace Sla.EXTRA
             }
         }
     }
+#endif
 }

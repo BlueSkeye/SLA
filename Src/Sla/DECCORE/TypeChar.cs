@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -18,33 +14,34 @@ namespace Sla.DECCORE
         /// \param typegrp is the factory owning \b this data-type
         internal void decode(Sla.CORE.Decoder decoder, TypeFactory typegrp)
         {
-            //  ElementId elemId = decoder.openElement();
+            //  uint elemId = decoder.openElement();
             decodeBasic(decoder);
-            submeta = (metatype == type_metatype.TYPE_INT) ? SUB_INT_CHAR : SUB_UINT_CHAR;
+            submeta = (metatype == type_metatype.TYPE_INT)
+                ? sub_metatype.SUB_INT_CHAR
+                : sub_metatype.SUB_UINT_CHAR;
             //  decoder.closeElement(elemId);
         }
 
         /// Construct TypeChar copying properties from another data-type
         public TypeChar(TypeChar op)
-                  : base(op)
+            : base(op)
         {
-            flags |= Datatype::chartype;
+            flags |= Datatype.Properties.chartype;
         }
         
         /// Construct a char (always 1-byte) given a name
         public TypeChar(string n)
             : base(1, type_metatype.TYPE_INT, n)
         {
-            flags |= Datatype::chartype;
-            submeta = SUB_INT_CHAR;
+            flags |= Datatype.Properties.chartype;
+            submeta = sub_metatype.SUB_INT_CHAR;
         }
 
-        public override Datatype clone() => new TypeChar(this);
+        internal override Datatype clone() => new TypeChar(this);
 
         public override void encode(Sla.CORE.Encoder encoder)
         {
-            if (typedefImm != (Datatype)null)
-            {
+            if (typedefImm != (Datatype)null) {
                 encodeTypedef(encoder);
                 return;
             }

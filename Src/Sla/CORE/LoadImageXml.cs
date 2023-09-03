@@ -102,7 +102,7 @@ namespace Sla.CORE
 
             // Read parsed xml file
             XmlDecode decoder = new XmlDecode(m, rootel);
-            ElementId elemId = decoder.openElement(ElementId.ELEM_BINARYIMAGE);
+            uint elemId = decoder.openElement(ElementId.ELEM_BINARYIMAGE);
             while (true) {
                 uint subId = decoder.openElement();
                 if (subId == 0) break;

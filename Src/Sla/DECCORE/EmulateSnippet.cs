@@ -43,10 +43,10 @@ namespace Sla.DECCORE
         /// \return indicated bytes arranged as a constant value
         private ulong getLoadImageValue(AddrSpace spc, ulong offset, int sz)
         {
-            LoadImage loadimage = glb.loader;
-            ulong res;
-
-            loadimage.loadFill((byte*)&res, sizeof(ulong), new Address(spc, off));
+            LoadImage loadimage = glb.loader ?? throw new ApplicationException();
+            byte[] buffer = new byte[sizeof(ulong)];
+            loadimage.loadFill(buffer, 0, sizeof(ulong), new Address(spc, offset));
+            ulong res = Globals.GetUInt64(buffer);
 
             if ((Globals.HOST_ENDIAN == 1) != spc.isBigEndian())
                 res = Globals.byte_swap(res, sizeof(ulong));
@@ -60,8 +60,8 @@ namespace Sla.DECCORE
         protected override void executeUnary()
         {
             ulong in1 = getVarnodeValue(currentOp.getInput(0));
-            ulong @out = currentBehave.evaluateUnary(currentOp.getOutput().size,
-                currentOp.getInput(0).size, in1);
+            ulong @out = currentBehave.evaluateUnary((int)currentOp.getOutput().size,
+                (int)currentOp.getInput(0).size, in1);
             setVarnodeValue(currentOp.getOutput().offset, @out);
         }
 
@@ -69,8 +69,8 @@ namespace Sla.DECCORE
         {
             ulong in1 = getVarnodeValue(currentOp.getInput(0));
             ulong in2 = getVarnodeValue(currentOp.getInput(1));
-            ulong @out = currentBehave.evaluateBinary(currentOp.getOutput().size,
-                currentOp.getInput(0).size, in1, in2);
+            ulong @out = currentBehave.evaluateBinary((int)currentOp.getOutput().size,
+                (int)currentOp.getInput(0).size, in1, in2);
             setVarnodeValue(currentOp.getOutput().offset, @out);
         }
 
@@ -80,7 +80,7 @@ namespace Sla.DECCORE
             ulong off = getVarnodeValue(currentOp.getInput(1));
             AddrSpace spc = currentOp.getInput(0).getSpaceFromConst();
             off = AddrSpace.addressToByte(off, spc.getWordSize());
-            int sz = currentOp.getOutput().size;
+            int sz = (int)currentOp.getOutput().size;
             ulong res = getLoadImageValue(spc, off, sz);
             setVarnodeValue(currentOp.getOutput().offset, res);
         }

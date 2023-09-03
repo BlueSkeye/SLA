@@ -16,7 +16,7 @@ namespace Sla.DECCORE
             flags = fl;
         }
         
-        public override uint getType() => pointer_mod;
+        public override TypeModifier.Modifier getType() => pointer_mod;
 
         public override bool isValid() => true;
 

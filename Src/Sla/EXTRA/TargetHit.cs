@@ -23,6 +23,11 @@ namespace Sla.EXTRA
 
             mask = m;
         }
-        public static bool operator <(TargetHit op1, TargetHit op2) => (op1.funcstart<op2.funcstart);
+
+        public static bool operator <(TargetHit op1, TargetHit op2)
+            => (op1.funcstart<op2.funcstart);
+
+        public static bool operator >(TargetHit op1, TargetHit op2)
+            => (op1.funcstart > op2.funcstart);
     }
 }

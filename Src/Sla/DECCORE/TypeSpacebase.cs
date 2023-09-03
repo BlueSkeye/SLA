@@ -1,8 +1,4 @@
 ﻿using Sla.CORE;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.DECCORE
 {
@@ -26,7 +22,7 @@ namespace Sla.DECCORE
         /// \param typegrp is the factory owning \b this data-type
         internal void decode(Sla.CORE.Decoder decoder, TypeFactory typegrp)
         {
-            //  ElementId elemId = decoder.openElement();
+            //  uint elemId = decoder.openElement();
             decodeBasic(decoder);
             spaceid = decoder.readSpace(AttributeId.ATTRIB_SPACE);
             localframe = Address.decode(decoder);
@@ -54,10 +50,10 @@ namespace Sla.DECCORE
         /// \return the symbol table Scope
         public Scope getMap()
         {
-            Scope* res = glb.symboltab.getGlobalScope();
-            if (!localframe.isInvalid())
-            { // If this spacebase is for a localframe
-                Funcdata* fd = res.queryFunction(localframe);
+            Scope res = glb.symboltab.getGlobalScope() ?? throw new ApplicationException();
+            if (!localframe.isInvalid()) {
+                // If this spacebase is for a localframe
+                Funcdata? fd = res.queryFunction(localframe);
                 if (fd != (Funcdata)null)
                     res = fd.getScopeLocal();
             }
@@ -77,103 +73,114 @@ namespace Sla.DECCORE
             // Currently a constant off of a global spacebase must be a full pointer encoding
             if (localframe.isInvalid())
                 sz = -1;    // Set size to -1 to guarantee that full encoding recovery isn't launched
-            return glb.resolveConstant(spaceid, off, sz, point, fullEncoding);
+            return glb.resolveConstant(spaceid, off, sz, point, out fullEncoding);
         }
 
-        public override Datatype getSubType(ulong off, ulong newoff)
+        public override Datatype? getSubType(ulong off, out ulong newoff)
         {
-            Scope* scope = getMap();
-            off = AddrSpace.byteToAddress(off, spaceid.getWordSize());    // Convert from byte offset to address unit
-                                                                            // It should always be the case that the given offset represents a full encoding of the
-                                                                            // pointer, so the point of context is unused and the size is given as -1
-            Address nullPoint;
+            Scope scope = getMap();
+            // Convert from byte offset to address unit
+            off = AddrSpace.byteToAddress(off, spaceid.getWordSize());
+            // It should always be the case that the given offset represents a full
+            // encoding of the pointer, so the point of context is unused and the size
+            // is given as -1
+            Address nullPoint = new Address();
             ulong fullEncoding;
-            Address addr = glb.resolveConstant(spaceid, off, -1, nullPoint, fullEncoding);
-            SymbolEntry* smallest;
+            Address addr = glb.resolveConstant(spaceid, off, -1, nullPoint, out fullEncoding);
 
             // Assume symbol being referenced is address tied so we use a null point of context
             // FIXME: A valid point of context may be necessary in the future
-            smallest = scope.queryContainer(addr, 1, nullPoint);
+            SymbolEntry? smallest = scope.queryContainer(addr, 1, nullPoint);
 
-            if (smallest == (SymbolEntry)null)
-            {
-                *newoff = 0;
+            if (smallest == (SymbolEntry)null) {
+                newoff = 0;
                 return glb.types.getBase(1, type_metatype.TYPE_UNKNOWN);
             }
-            *newoff = (addr.getOffset() - smallest.getAddr().getOffset()) + smallest.getOffset();
+            newoff = (addr.getOffset() - smallest.getAddr().getOffset())
+                + (uint)smallest.getOffset();
             return smallest.getSymbol().getType();
         }
 
-        public override Datatype nearestArrayedComponentForward(ulong off, ulong newoff, int elSize)
+        public override Datatype? nearestArrayedComponentForward(ulong off, out ulong newoff,
+            out int elSize)
         {
-            Scope* scope = getMap();
-            off = AddrSpace.byteToAddress(off, spaceid.getWordSize());    // Convert from byte offset to address unit
-                                                                            // It should always be the case that the given offset represents a full encoding of the
-                                                                            // pointer, so the point of context is unused and the size is given as -1
-            Address nullPoint;
+            Scope scope = getMap();
+            // Convert from byte offset to address unit
+            off = AddrSpace.byteToAddress(off, spaceid.getWordSize());
+            // It should always be the case that the given offset represents a full encoding of the
+            // pointer, so the point of context is unused and the size is given as -1
+            Address nullPoint = new Address();
             ulong fullEncoding;
-            Address addr = glb.resolveConstant(spaceid, off, -1, nullPoint, fullEncoding);
-            SymbolEntry* smallest = scope.queryContainer(addr, 1, nullPoint);
+            Address addr = glb.resolveConstant(spaceid, off, -1, nullPoint, out fullEncoding);
+            SymbolEntry? smallest = scope.queryContainer(addr, 1, nullPoint);
             Address nextAddr;
-            Datatype* symbolType;
+            Datatype symbolType;
             if (smallest == (SymbolEntry)null || smallest.getOffset() != 0)
                 nextAddr = addr + 32;
-            else
-            {
-                symbolType = smallest.getSymbol().getType();
-                if (symbolType.getMetatype() == type_metatype.TYPE_STRUCT)
-                {
+            else {
+                symbolType = smallest.getSymbol().getType() ?? throw new ApplicationException();
+                if (symbolType.getMetatype() == type_metatype.TYPE_STRUCT) {
                     ulong structOff = addr.getOffset() - smallest.getAddr().getOffset();
                     ulong dummyOff;
-                    Datatype* res = symbolType.nearestArrayedComponentForward(structOff, &dummyOff, elSize);
-                    if (res != (Datatype)null)
-                    {
-                        *newoff = structOff;
+                    Datatype? res = symbolType.nearestArrayedComponentForward(structOff,
+                        out dummyOff, out elSize);
+                    if (res != (Datatype)null) {
+                        newoff = structOff;
                         return symbolType;
                     }
                 }
-                int sz = AddrSpace::byteToAddressInt(smallest.getSize(), spaceid.getWordSize());
+                int sz = AddrSpace.byteToAddressInt(smallest.getSize(), spaceid.getWordSize());
                 nextAddr = smallest.getAddr() + sz;
             }
-            if (nextAddr < addr)
-                return (Datatype)null;        // Don't let the address wrap
-            smallest = scope.queryContainer(nextAddr, 1, nullPoint);
-            if (smallest == (SymbolEntry)null || smallest.getOffset() != 0)
+            if (nextAddr < addr) {
+                // Don't let the address wrap
+                newoff = 0;
+                elSize = 0;
                 return (Datatype)null;
+            }
+            smallest = scope.queryContainer(nextAddr, 1, nullPoint);
+            if (smallest == (SymbolEntry)null || smallest.getOffset() != 0) {
+                newoff = 0;
+                elSize = 0;
+                return (Datatype)null;
+            }
             symbolType = smallest.getSymbol().getType();
-            *newoff = addr.getOffset() - smallest.getAddr().getOffset();
-            if (symbolType.getMetatype() == type_metatype.TYPE_ARRAY)
-            {
-                *elSize = ((TypeArray*)symbolType).getBase().getSize();
+            newoff = addr.getOffset() - smallest.getAddr().getOffset();
+            if (symbolType.getMetatype() == type_metatype.TYPE_ARRAY) {
+                elSize = ((TypeArray)symbolType).getBase().getSize();
                 return symbolType;
             }
-            if (symbolType.getMetatype() == type_metatype.TYPE_STRUCT)
-            {
+            if (symbolType.getMetatype() == type_metatype.TYPE_STRUCT) {
                 ulong dummyOff;
-                Datatype* res = symbolType.nearestArrayedComponentForward(0, &dummyOff, elSize);
+                Datatype? res = symbolType.nearestArrayedComponentForward(0, out dummyOff,
+                    out elSize);
                 if (res != (Datatype)null)
                     return symbolType;
             }
+            elSize = 0;
             return (Datatype)null;
         }
 
-        public override Datatype nearestArrayedComponentBackward(ulong off, ulong newoff, int elSize)
+        public override Datatype? nearestArrayedComponentBackward(ulong off, out ulong newoff,
+            out int elSize)
         {
-            Datatype* subType = getSubType(off, newoff);
-            if (subType == (Datatype)null)
+            Datatype? subType = getSubType(off, out newoff);
+            if (subType == (Datatype)null) {
+                elSize = 0;
                 return (Datatype)null;
-            if (subType.getMetatype() == type_metatype.TYPE_ARRAY)
-            {
-                *elSize = ((TypeArray*)subType).getBase().getSize();
+            }
+            if (subType.getMetatype() == type_metatype.TYPE_ARRAY) {
+                elSize = ((TypeArray)subType).getBase().getSize();
                 return subType;
             }
-            if (subType.getMetatype() == type_metatype.TYPE_STRUCT)
-            {
+            if (subType.getMetatype() == type_metatype.TYPE_STRUCT) {
                 ulong dummyOff;
-                Datatype* res = subType.nearestArrayedComponentBackward(*newoff, &dummyOff, elSize);
+                Datatype? res = subType.nearestArrayedComponentBackward(newoff, out dummyOff,
+                    out elSize);
                 if (res != (Datatype)null)
                     return subType;
             }
+            elSize = 0;
             return (Datatype)null;
         }
 
@@ -182,21 +189,20 @@ namespace Sla.DECCORE
         // For tree structure
         public override int compareDependency(Datatype op)
         {
-            int res = Datatype::compareDependency(op);
+            int res = base.compareDependency(op);
             if (res != 0) return res;
-            TypeSpacebase* tsb = (TypeSpacebase)&op;
+            TypeSpacebase tsb = (TypeSpacebase)op;
             if (spaceid != tsb.spaceid) return (spaceid < tsb.spaceid) ? -1 : 1;
             if (localframe.isInvalid()) return 0; // Global space base
             if (localframe != tsb.localframe) return (localframe < tsb.localframe) ? -1 : 1;
             return 0;
         }
 
-        public override Datatype clone() => new TypeSpacebase(this);
+        internal override Datatype clone() => new TypeSpacebase(this);
 
         public override void encode(Sla.CORE.Encoder encoder)
         {
-            if (typedefImm != (Datatype)null)
-            {
+            if (typedefImm != (Datatype)null) {
                 encodeTypedef(encoder);
                 return;
             }

@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Sla.EXTRA
 {
-    internal class IfaceCodeDataCommand : IfaceCommand
+    internal abstract class IfaceCodeDataCommand : IfaceCommand
     {
         protected IfaceStatus status;
         protected IfaceDecompData dcp;

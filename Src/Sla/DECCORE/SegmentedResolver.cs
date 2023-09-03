@@ -42,7 +42,8 @@ namespace Sla.DECCORE
                 // (as with near pointers)
                 if (null != segop.getResolve().space) {
                     ulong @base = glb.context.getTrackedValue(segop.getResolve(), point);
-                    fullEncoding = (@base << 8 * innersz) + (val & Globals.calc_mask(innersz));
+                    fullEncoding = (@base << 8 * innersz)
+                        + (val & Globals.calc_mask((uint)innersz));
                     List<ulong> seginput = new List<ulong>();
                     seginput.Add(@base);
                     seginput.Add(val);
@@ -54,8 +55,8 @@ namespace Sla.DECCORE
                 // For anything else, consider it a "far" pointer
                 fullEncoding = val;
                 int outersz = segop.getBaseSize();
-                ulong @base = (val >> 8 * innersz) & Globals.calc_mask(outersz);
-                val = val & Globals.calc_mask(innersz);
+                ulong @base = (val >> 8 * innersz) & Globals.calc_mask((uint)outersz);
+                val = val & Globals.calc_mask((uint)innersz);
                 List<ulong> seginput = new List<ulong>();
                 seginput.Add(@base);
                 seginput.Add(val);

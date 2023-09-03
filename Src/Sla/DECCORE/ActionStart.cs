@@ -10,7 +10,7 @@ namespace Sla.DECCORE
     /// \brief Gather raw p-code for a function.
     internal class ActionStart : Action
     {
-        ///< Constructor
+        // Constructor
         public ActionStart(string g)
             : base(0,"start", g)
         {
@@ -21,7 +21,7 @@ namespace Sla.DECCORE
             return (!grouplist.contains(getGroup())) ? null : new ActionStart(getGroup());
         }
 
-        public override virtual  apply(Funcdata data)
+        public override int apply(Funcdata data)
         {
             data.startProcessing();
             return 0;

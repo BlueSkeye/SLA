@@ -33,7 +33,7 @@ namespace Sla.CORE
         /// \param decoder is the stream decoder
         internal void decode(Sla.CORE.Decoder decoder)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_SET);
+            uint elemId = decoder.openElement(ElementId.ELEM_SET);
             this.loc = VarnodeData.decodeFromAttributes(decoder);
             val = decoder.readUnsignedInteger(AttributeId.ATTRIB_VAL);
             decoder.closeElement(elemId);

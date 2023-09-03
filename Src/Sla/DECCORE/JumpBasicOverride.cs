@@ -278,7 +278,7 @@ namespace Sla.DECCORE
 
             for (uint i = 0; i < values.size(); ++i) {
                 try {
-                    addr = backup2Switch(fd, values[i], normalvn, switchvn);
+                    addr = backup2Switch(fd, values[(int)i], normalvn, switchvn);
                 }
                 catch (EvaluationError) {
                     addr = 0xBAD1ABE1;
@@ -352,9 +352,9 @@ namespace Sla.DECCORE
 
         public override void decode(Sla.CORE.Decoder decoder)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_BASICOVERRIDE);
+            uint elemId = decoder.openElement(ElementId.ELEM_BASICOVERRIDE);
             while(true) {
-                ElementId subId = decoder.openElement();
+                uint subId = decoder.openElement();
                 if (subId == 0) break;
                 if (subId == ElementId.ELEM_DEST) {
                     VarnodeData vData = VarnodeData.decodeFromAttributes(decoder);

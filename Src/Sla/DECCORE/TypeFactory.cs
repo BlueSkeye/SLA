@@ -1,37 +1,36 @@
 ﻿using Sla.CORE;
-using Sla.DECCORE;
-
-/// A set of data-types sorted by function
-using DatatypeSet = System.Collections.Generic.HashSet<Sla.DECCORE.Datatype>; // sorted by DatatypeCompare
-// A set of data-types sorted by name
-using DatatypeNameSet = System.Collections.Generic.HashSet<Sla.DECCORE.Datatype>; // sorted by DatatypeNameCompare
 
 namespace Sla.DECCORE
 {
-    /// \brief Container class for all Datatype objects in an Architecture
+    // \brief Container class for all Datatype objects in an Architecture
     internal class TypeFactory
     {
-        /// Size of the core "int" datatype
+        // ADDED : Some special "sizes" for use by getBase method.
+        internal const int AddressSpaceSize = int.MaxValue;
+        internal const int PcodeOpSize = AddressSpaceSize - 1;
+        internal const int FuncCallSpecsSize = PcodeOpSize - 1;
+
+        // Size of the core "int" datatype
         private int sizeOfInt;
-        /// Size of the core "long" datatype
+        // Size of the core "long" datatype
         private int sizeOfLong;
-        /// Alignment of structures
+        // Alignment of structures
         private int align;
-        /// Size of an enumerated type
+        // Size of an enumerated type
         private int enumsize;
-        /// Default enumeration meta-type (when parsing C)
+        // Default enumeration meta-type (when parsing C)
         private type_metatype enumtype;
-        /// Datatypes within this factory (sorted by function)
+        // Datatypes within this factory (sorted by function)
         private DatatypeSet tree;
-        /// Cross-reference by name
+        // Cross-reference by name
         private DatatypeNameSet nametree;
-        /// Matrix of the most common atomic data-types
+        // Matrix of the most common atomic data-types
         private Datatype[][] typecache = InitializeCache();
-        /// Specially cached 10-byte float type
-        private Datatype? typecache10;
-        /// Specially cached 16-byte float type
-        private Datatype? typecache16;
-        /// Same dimensions as char but acts and displays as an INT
+        // Specially cached 10-byte float type
+        internal Datatype? typecache10;
+        // Specially cached 16-byte float type
+        internal Datatype? typecache16;
+        // Same dimensions as char but acts and displays as an INT
         private Datatype? type_nochar;
 
         private static Datatype[][] InitializeCache()
@@ -134,7 +133,7 @@ namespace Sla.DECCORE
             ulong id = 0;
             string nm = string.Empty;
             uint format = 0;       // No forced display format by default
-                                    //  ElementId elemId = decoder.openElement();
+                                    //  uint elemId = decoder.openElement();
             while (true) {
                 AttributeId attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
@@ -191,7 +190,7 @@ namespace Sla.DECCORE
         private Datatype decodeStruct(Decoder decoder, bool forcecore)
         {
             TypeStruct ts = new TypeStruct();
-            //  ElementId elemId = decoder.openElement();
+            //  uint elemId = decoder.openElement();
             ts.decodeBasic(decoder);
             if (forcecore)
                 ts.flags |= Datatype.Properties.coretype;
@@ -224,7 +223,7 @@ namespace Sla.DECCORE
         private Datatype decodeUnion(Decoder decoder, bool forcecore)
         {
             TypeUnion tu = new TypeUnion();
-            //  ElementId elemId = decoder.openElement();
+            //  uint elemId = decoder.openElement();
             tu.decodeBasic(decoder);
             if (forcecore)
                 tu.flags |= Datatype.Properties.coretype;
@@ -259,7 +258,7 @@ namespace Sla.DECCORE
         private Datatype decodeCode(Decoder decoder, bool isConstructor, bool isDestructor, bool forcecore)
         {
             TypeCode tc = new TypeCode();
-            //  ElementId elemId = decoder.openElement();
+            //  uint elemId = decoder.openElement();
             tc.decodeStub(decoder);
             if (tc.getMetatype() != type_metatype.TYPE_CODE) {
                 throw new LowlevelError("Expecting metatype=\"code\"");
@@ -297,7 +296,7 @@ namespace Sla.DECCORE
             string metastring;
             Datatype ct;
 
-            ElementId elemId = decoder.openElement();
+            uint elemId = decoder.openElement();
             if (elemId == ElementId.ELEM_VOID) {
                 ct = getTypeVoid(); // Automatically a coretype
                 decoder.closeElement(elemId);
@@ -519,11 +518,12 @@ namespace Sla.DECCORE
         /// \param id is the type id of the data-type
         /// \param sz is the given distinguishing size if non-zero
         /// \return the matching Datatype object
-        protected override Datatype findById(string n,ulong id, int sz)
+        protected virtual Datatype? findById(string n,ulong id, int sz)
         {
-            if (sz > 0)
-            {               // If the id is for a "variable length" base data-type
-                id = Datatype.hashSize(id, sz);    // Construct the id for the "sized" variant
+            if (sz > 0) {
+                // If the id is for a "variable length" base data-type
+                // Construct the id for the "sized" variant
+                id = Datatype.hashSize(id, sz);
             }
             return findByIdLocal(n, id);
         }
@@ -546,9 +546,9 @@ namespace Sla.DECCORE
         /// Set up default values for size of "int", structure alignment, and enums
         public void setupSizes()
         {
-            if (sizeOfInt == 0)
-            {
-                sizeOfInt = 1;          // Default if we can't find a better value
+            if (sizeOfInt == 0) {
+                // Default if we can't find a better value
+                sizeOfInt = 1;
                 AddrSpace? spc = glb.getStackSpace();
                 if (spc != (AddrSpace)null) {
                     VarnodeData spdata = spc.getSpacebase(0);        // Use stack pointer as likely indicator of "int" size
@@ -627,7 +627,7 @@ namespace Sla.DECCORE
         /// Find type with given name. If there are more than, return first.
         /// \param n is the name to search for
         /// \return a Datatype object with the name or NULL
-        public Datatype findByName(string n)
+        public Datatype? findByName(string n)
         {
             return findById(n, 0, 0);
         }
@@ -640,15 +640,19 @@ namespace Sla.DECCORE
         public Datatype setName(Datatype ct, string n)
         {
             if (ct.id != 0)
-                nametree.erase(ct); // Erase any name reference
-            tree.erase(ct);     // Remove new type completely from trees
-            ct.name = n;           // Change the name
+                // Erase any name reference
+                nametree.Remove(ct);
+            // Remove new type completely from trees
+            tree.Remove(ct);
+            // Change the name
+            ct.name = n;
             ct.displayName = n;
             if (ct.id == 0)
                 ct.id = Datatype.hashName(n);
             // Insert type with new name
-            tree.insert(ct);
-            nametree.insert(ct);    // Re-insert name reference
+            tree.Add(ct);
+            // Re-insert name reference
+            nametree.Add(ct);
             return ct;
         }
 
@@ -696,18 +700,22 @@ namespace Sla.DECCORE
 
             // We could check field overlapping here
 
-            tree.erase(ot);
+            tree.Remove(ot);
             ot.setFields(fd);
             ot.flags &= ~Datatype.Properties.type_incomplete;
             ot.flags |= (flags & (Datatype.Properties.opaque_string | Datatype.Properties.variable_length | Datatype.Properties.type_incomplete));
-            if (fixedsize > 0)
-            {       // If the caller is trying to force a size
-                if (fixedsize > ot.size)   // If the forced size is bigger than the size required for fields
-                    ot.size = fixedsize;   //     Force the bigger size
-                else if (fixedsize < ot.size) // If the forced size is smaller, this is an error
-                    throw new LowlevelError("Trying to force too small a size on " + ot.getName());
+            if (fixedsize > 0) {
+                // If the caller is trying to force a size
+                if (fixedsize > ot.size)
+                    // If the forced size is bigger than the size required for fields
+                    // Force the bigger size
+                    ot.size = fixedsize;
+                else if (fixedsize < ot.size)
+                    // If the forced size is smaller, this is an error
+                    throw new LowlevelError(
+                        $"Trying to force too small a size on {ot.getName()}");
             }
-            tree.insert(ot);
+            tree.Add(ot);
             recalcPointerSubmeta(ot, sub_metatype.SUB_PTR);
             recalcPointerSubmeta(ot, sub_metatype.SUB_PTR_STRUCT);
             return true;
@@ -721,11 +729,12 @@ namespace Sla.DECCORE
         /// \param fixedsize is 0 or the forced size of the union
         /// \param flags are other flags to set on the union
         /// \return true if modification was successful
-        public bool setFields(List<TypeField> fd, TypeUnion ot, int fixedsize, Datatype.Properties flags)
+        public bool setFields(List<TypeField> fd, TypeUnion ot, int fixedsize,
+            Datatype.Properties flags)
         {
-            if (!ot.isIncomplete())
+            if (!ot.isIncomplete()) {
                 throw new LowlevelError("Can only set fields on an incomplete union");
-
+            }
             foreach (TypeField thisField in fd) {
                 Datatype ct = thisField.type;
                 // Do some sanity checks on the field
@@ -734,18 +743,21 @@ namespace Sla.DECCORE
                 if (thisField.name.Length == 0) return false;
             }
 
-            tree.erase(ot);
+            tree.Remove(ot);
             ot.setFields(fd);
             ot.flags &= ~Datatype.Properties.type_incomplete;
             ot.flags |= (flags & (Datatype.Properties.variable_length | Datatype.Properties.type_incomplete));
-            if (fixedsize > 0)
-            {       // If the caller is trying to force a size
-                if (fixedsize > ot.size)   // If the forced size is bigger than the size required for fields
-                    ot.size = fixedsize;   //     Force the bigger size
-                else if (fixedsize < ot.size) // If the forced size is smaller, this is an error
+            if (fixedsize > 0) {
+                // If the caller is trying to force a size
+                if (fixedsize > ot.size)
+                    // If the forced size is bigger than the size required for fields
+                    // Force the bigger size
+                    ot.size = fixedsize;
+                else if (fixedsize < ot.size)
+                    // If the forced size is smaller, this is an error
                     throw new LowlevelError("Trying to force too small a size on " + ot.getName());
             }
-            tree.insert(ot);
+            tree.Add(ot);
             return true;
         }
 
@@ -759,11 +771,11 @@ namespace Sla.DECCORE
         {
             if (!newCode.isIncomplete())
                 throw new LowlevelError("Can only set prototype on incomplete data-type");
-            tree.erase(newCode);
+            tree.Remove(newCode);
             newCode.setPrototype(this, fp);
             newCode.flags &= ~Datatype.Properties.type_incomplete;
             newCode.flags |= (flags & (Datatype.Properties.variable_length | Datatype.Properties.type_incomplete));
-            tree.insert(newCode);
+            tree.Add(newCode);
         }
 
         /// Set named values for an enumeration
@@ -775,8 +787,8 @@ namespace Sla.DECCORE
         /// \param assignlist is true if the corresponding name in namelist has an assigned value
         /// \param te is the enumeration object to modify
         /// \return true if the modification is successful (no duplicate names)
-        public bool setEnumValues(List<string> namelist, List<ulong> vallist, List<bool> assignlist,
-            TypeEnum te)
+        public bool setEnumValues(List<string> namelist, List<ulong> vallist,
+            List<bool> assignlist, TypeEnum te)
         {
             Dictionary<ulong, string> nmap = new Dictionary<ulong, string>();
 
@@ -790,7 +802,9 @@ namespace Sla.DECCORE
                     if (val > maxval)
                         maxval = val;
                     val &= mask;
-                    if (nmap.ContainsKey(val)) return false; // Duplicate value
+                    if (nmap.ContainsKey(val))
+                        // Duplicate value
+                        return false;
                     nmap[val] = namelist[i];
                 }
             }
@@ -804,9 +818,9 @@ namespace Sla.DECCORE
                     nmap[val] = namelist[i];
                 }
             }
-            tree.erase(te);
+            tree.Remove(te);
             te.setNameMap(nmap);
-            tree.insert(te);
+            tree.Add(te);
             return true;
         }
 
@@ -816,8 +830,8 @@ namespace Sla.DECCORE
         /// \return the decoded Datatype object
         public Datatype decodeType(Decoder decoder)
         {
-            Datatype ct;
-            ElementId elemId = decoder.peekElement();
+            Datatype? ct;
+            uint elemId = decoder.peekElement();
             if (ElementId.ELEM_TYPEREF == elemId) {
                 elemId = decoder.openElement();
                 ulong newid = 0;
@@ -834,7 +848,8 @@ namespace Sla.DECCORE
                     }
                 }
                 string newname = decoder.readString(AttributeId.ATTRIB_NAME);
-                if (newid == 0)     // If there was no id, use the name hash
+                if (newid == 0)
+                    // If there was no id, use the name hash
                     newid = Datatype.hashName(newname);
                 ct = findById(newname, newid, size);
                 if (ct == (Datatype)null)
@@ -852,10 +867,11 @@ namespace Sla.DECCORE
         /// \param isConstructor toggles "constructor" property on "function" datatypes
         /// \param isDestructor toggles "destructor" property on "function" datatypes
         /// \return the decoded Datatype object
-        public Datatype decodeTypeWithCodeFlags(Decoder decoder, bool isConstructor, bool isDestructor)
+        public Datatype decodeTypeWithCodeFlags(Decoder decoder, bool isConstructor,
+            bool isDestructor)
         {
             TypePointer tp = new TypePointer();
-            ElementId elemId = decoder.openElement();
+            uint elemId = decoder.openElement();
             tp.decodeBasic(decoder);
             if (tp.getMetatype() != type_metatype.TYPE_PTR)
                 throw new LowlevelError("Special type decode does not see pointer");
@@ -876,15 +892,16 @@ namespace Sla.DECCORE
         /// \return the "void" data-type
         public TypeVoid getTypeVoid()
         {
-            TypeVoid ct = (TypeVoid)typecache[0][type_metatype.TYPE_VOID - type_metatype.TYPE_FLOAT];
+            TypeVoid? ct = (TypeVoid)typecache[0][type_metatype.TYPE_VOID - type_metatype.TYPE_FLOAT];
             if (ct != (TypeVoid)null)
                 return ct;
             TypeVoid tv = new TypeVoid();
             tv.id = Datatype.hashName(tv.name);
             ct = (TypeVoid)tv.clone();
-            tree.insert(ct);
-            nametree.insert(ct);
-            typecache[0][type_metatype.TYPE_VOID - type_metatype.TYPE_FLOAT] = ct; // Cache this particular type ourselves
+            tree.Add(ct);
+            nametree.Add(ct);
+            // Cache this particular type ourselves
+            typecache[0][type_metatype.TYPE_VOID - type_metatype.TYPE_FLOAT] = ct;
             return ct;
         }
 
@@ -896,19 +913,23 @@ namespace Sla.DECCORE
         /// \return the Datatype object
         public Datatype getBaseNoChar(int s, type_metatype m)
         {
-            if ((s == 1) && (m == type_metatype.TYPE_INT) && (type_nochar != (Datatype)null)) // Jump in and return
-                return type_nochar;     // the non character based type (as the main getBase would return char)
-            return getBase(s, m);       // otherwise do the main getBase
+            if ((s == 1) && (m == type_metatype.TYPE_INT) && (type_nochar != (Datatype)null))
+                // Jump in and return
+                // the non character based type (as the main getBase would return char)
+                return type_nochar;
+            // otherwise do the main getBase
+            return getBase(s, m);
         }
 
-        /// Get atomic type
-        /// Get one of the "base" datatypes. This routine is called a lot, so we go through a cache first.
-        /// \param s is the desired size
-        /// \param m is the desired meta-type
-        /// \return the Datatype object
+        // Get atomic type
+        // Get one of the "base" datatypes. This routine is called a lot, so we go through
+        // a cache first.
+        // \param s is the desired size
+        // \param m is the desired meta-type
+        // \return the Datatype object
         public Datatype getBase(int s, type_metatype m)
         {
-            Datatype ct;
+            Datatype? ct;
             if (s < 9) {
                 if (m >= type_metatype.TYPE_FLOAT) {
                     ct = typecache[s][m - type_metatype.TYPE_FLOAT];
@@ -974,9 +995,10 @@ namespace Sla.DECCORE
         public TypePointer getTypePointerStripArray(int s, Datatype pt, uint ws)
         {
             if (pt.hasStripped())
-                pt = pt.getStripped();
+                pt = pt.getStripped() ?? throw new ApplicationException();
             if (pt.getMetatype() == type_metatype.TYPE_ARRAY)
-                pt = ((TypeArray)pt).getBase();       // Strip the first ARRAY type
+                // Strip the first ARRAY type
+                pt = ((TypeArray)pt).getBase() ?? throw new ApplicationException();
             TypePointer tmp = new TypePointer(s, pt, ws);
             return (TypePointer)findAdd(tmp);
         }
@@ -990,7 +1012,7 @@ namespace Sla.DECCORE
         public TypePointer getTypePointer(int s, Datatype pt, uint ws)
         {
             if (pt.hasStripped())
-                pt = pt.getStripped();
+                pt = pt.getStripped() ?? throw new ApplicationException();
             TypePointer tmp = new TypePointer(s, pt, ws);
             return (TypePointer)findAdd(tmp);
         }
@@ -1006,7 +1028,7 @@ namespace Sla.DECCORE
         public TypePointer getTypePointer(int s, Datatype pt, uint ws, string n)
         {
             if (pt.hasStripped())
-                pt = pt.getStripped();
+                pt = pt.getStripped() ?? throw new ApplicationException();
             TypePointer tmp = new TypePointer(s, pt, ws);
             tmp.name = n;
             tmp.displayName = n;
@@ -1048,7 +1070,7 @@ namespace Sla.DECCORE
         public TypeArray getTypeArray(int @as, Datatype ao)
         {
             if (ao.hasStripped())
-                ao = ao.getStripped();
+                ao = ao.getStripped() ?? throw new ApplicationException();
             TypeArray tmp = new TypeArray(@as, ao);
             return (TypeArray)findAdd(tmp);
         }
@@ -1130,7 +1152,8 @@ namespace Sla.DECCORE
         public TypeCode getTypeCode(ProtoModel model, Datatype outtype, List<Datatype> intypes,
           bool dotdotdot)
         {
-            TypeCode tc = new TypeCode();        // getFuncdata type with no name
+            // getFuncdata type with no name
+            TypeCode tc = new TypeCode();
             tc.setPrototype(this, model, outtype, intypes, dotdotdot, getTypeVoid());
             tc.markComplete();
             return (TypeCode)findAdd(tc);
@@ -1154,11 +1177,15 @@ namespace Sla.DECCORE
                     throw new LowlevelError("Trying to create typedef of existing type: " + name);
                 return res;
             }
-            res = ct.clone();      // Clone everything
-            res.name = name;       // But a new name
+            // Clone everything
+            res = ct.clone();
+            // But a new name
+            res.name = name;
             res.displayName = name;
-            res.id = id;           // and new id
-            res.flags &= ~(Datatype.Properties.coretype); // Not a core type
+            // and new id
+            res.id = id;
+            // Not a core type
+            res.flags &= ~(Datatype.Properties.coretype);
             res.typedefImm = ct;
             res.setDisplayFormat(format);
             insert(res);
@@ -1172,16 +1199,17 @@ namespace Sla.DECCORE
         /// \param ptrTo is the data-type being pointed directly to
         /// \param off is the offset of the pointed-to data-type relative to the \e container
         /// \return the new/matching pointer
-        public TypePointerRel getTypePointerRel(TypePointer parentPtr, Datatype ptrTo, int off)
+        public TypePointerRel getTypePointerRel(TypePointer parentPtr, Datatype ptrTo,
+            int off)
         {
             TypePointerRel tp = new TypePointerRel(parentPtr.size, ptrTo, parentPtr.wordsize, parentPtr.ptrto, off);
-            tp.markEphemeral(this);        // Mark as ephemeral
+            // Mark as ephemeral
+            tp.markEphemeral(this);
             TypePointerRel res = (TypePointerRel)findAdd(tp);
             return res;
         }
 
         /// \brief Build a named pointer offset into a larger container
-        ///
         /// The resulting data-type is named and not ephemeral and will display as a formal data-type
         /// in decompiler output.
         /// \param sz is the size in bytes of the pointer
@@ -1191,8 +1219,8 @@ namespace Sla.DECCORE
         /// \param off is the offset of the pointed-to data-type relative to the \e container
         /// \param nm is the name to associate with the pointer
         /// \return the new/matching pointer
-        public TypePointerRel getTypePointerRel(int sz, Datatype parent, Datatype ptrTo, int ws, int off,
-            string nm)
+        public TypePointerRel getTypePointerRel(int sz, Datatype parent, Datatype ptrTo,
+            int ws, int off, string nm)
         {
             TypePointerRel tp = new TypePointerRel(sz, ptrTo, (uint)ws, parent, off);
             tp.name = nm;
@@ -1230,7 +1258,7 @@ namespace Sla.DECCORE
         /// \param offset is the starting byte offset for the piece
         /// \param size is the number of bytes in the piece
         /// \return the data-type of the piece or null
-        public Datatype getExactPiece(Datatype ct, int offset, int size)
+        public Datatype? getExactPiece(Datatype ct, int offset, int size)
         {
             if (offset + size > ct.getSize())
                 return (Datatype)null;
@@ -1240,11 +1268,12 @@ namespace Sla.DECCORE
             do {
                 if (ct.getSize() <= size) {
                     if (ct.getSize() == size)
-                        return ct;          // Perfect size match
+                        // Perfect size match
+                        return ct;
                     break;
                 }
                 else if (ct.getMetatype() == type_metatype.TYPE_UNION) {
-                    return getTypePartialUnion((TypeUnion)ct, curOff, size);
+                    return getTypePartialUnion((TypeUnion)ct, (int)curOff, size);
                 }
                 lastType = ct;
                 lastOff = curOff;
@@ -1252,7 +1281,7 @@ namespace Sla.DECCORE
             } while (ct != (Datatype)null);
             // If we reach here, lastType is bigger than size
             if (lastType.getMetatype() == type_metatype.TYPE_STRUCT || lastType.getMetatype() == type_metatype.TYPE_ARRAY)
-                return getTypePartialStruct(lastType, lastOff, size);
+                return getTypePartialStruct(lastType, (int)lastOff, size);
             return (Datatype)null;
         }
 
@@ -1264,8 +1293,8 @@ namespace Sla.DECCORE
         {
             if (ct.isCoreType())
                 throw new LowlevelError("Cannot destroy core type");
-            nametree.erase(ct);
-            tree.erase(ct);
+            nametree.Remove(ct);
+            tree.Remove(ct);
             // delete ct;
         }
 
@@ -1279,8 +1308,7 @@ namespace Sla.DECCORE
         public Datatype concretize(Datatype ct)
         {
             type_metatype metatype = ct.getMetatype();
-            if (metatype == type_metatype.TYPE_CODE)
-            {
+            if (metatype == type_metatype.TYPE_CODE) {
                 if (ct.getSize() != 1)
                     throw new LowlevelError("Primitive code data-type that is not size 1");
                 ct = getBase(1, type_metatype.TYPE_UNKNOWN);
@@ -1297,7 +1325,6 @@ namespace Sla.DECCORE
         {
             DatatypeSet mark = new DatatypeSet();
             IEnumerator<Datatype> iter = tree.GetEnumerator();
-
             while (iter.MoveNext())
                 orderRecurse(deporder, mark, iter.Current);
         }
@@ -1318,13 +1345,20 @@ namespace Sla.DECCORE
             encoder.writeSignedInteger(AttributeId.ATTRIB_ENUMSIZE, enumsize);
             encoder.writeBool(AttributeId.ATTRIB_ENUMSIGNED, (enumtype == type_metatype.TYPE_INT));
             foreach (Datatype scannedType in deporder) {
-                if (scannedType.getName().Length == 0) continue;   // Don't save anonymous types
-                if (scannedType.isCoreType())
-                { // If this would be saved as a coretype
+                if (scannedType.getName().Length == 0)
+                    // Don't save anonymous types
+                    continue;
+                if (scannedType.isCoreType()) {
+                    // If this would be saved as a coretype
                     type_metatype meta = scannedType.getMetatype();
-                    if ((meta != type_metatype.TYPE_PTR) && (meta != type_metatype.TYPE_ARRAY) &&
-                    (meta != type_metatype.TYPE_STRUCT) && (meta != type_metatype.TYPE_UNION))
-                        continue;       // Don't save it here
+                    if (   (meta != type_metatype.TYPE_PTR)
+                        && (meta != type_metatype.TYPE_ARRAY)
+                        && (meta != type_metatype.TYPE_STRUCT)
+                        && (meta != type_metatype.TYPE_UNION))
+                    {
+                        // Don't save it here
+                        continue;
+                    }
                 }
                 scannedType.encode(encoder);
             }
@@ -1338,16 +1372,19 @@ namespace Sla.DECCORE
         public void encodeCoreTypes(Encoder encoder)
         {
             IEnumerator<Datatype> iter = tree.GetEnumerator();
-            Datatype ct;
 
             encoder.openElement(ElementId.ELEM_CORETYPES);
             while (iter.MoveNext()) {
-                ct = iter.Current   ;
+                Datatype ct = iter.Current;
                 if (!ct.isCoreType()) continue;
                 type_metatype meta = ct.getMetatype();
-                if ((meta == type_metatype.TYPE_PTR) || (meta == type_metatype.TYPE_ARRAY) ||
-                    (meta == type_metatype.TYPE_STRUCT) || (meta == type_metatype.TYPE_UNION))
+                if (   (meta == type_metatype.TYPE_PTR)
+                    || (meta == type_metatype.TYPE_ARRAY)
+                    || (meta == type_metatype.TYPE_STRUCT)
+                    || (meta == type_metatype.TYPE_UNION))
+                {
                     continue;
+                }
                 ct.encode(encoder);
             }
             encoder.closeElement(ElementId.ELEM_CORETYPES);
@@ -1359,7 +1396,7 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         public void decode(Sla.CORE.Decoder decoder)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_TYPEGRP);
+            uint elemId = decoder.openElement(ElementId.ELEM_TYPEGRP);
 
             sizeOfInt = (int)decoder.readSignedInteger(AttributeId.ATTRIB_INTSIZE);
             sizeOfLong = (int)decoder.readSignedInteger(AttributeId.ATTRIB_LONGSIZE);
@@ -1381,9 +1418,9 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         public void decodeCoreTypes(Decoder decoder)
         {
-            clear();            // Make sure this routine flushes
-
-            ElementId elemId = decoder.openElement(ElementId.ELEM_CORETYPES);
+            // Make sure this routine flushes
+            clear();
+            uint elemId = decoder.openElement(ElementId.ELEM_CORETYPES);
             while (decoder.peekElement() != 0)
                 decodeTypeNoRef(decoder, true);
             decoder.closeElement(elemId);
@@ -1399,9 +1436,9 @@ namespace Sla.DECCORE
         {
             uint defaultSize = glb.getDefaultSize();
             align = 0;
-            ElementId elemId = decoder.openElement(ElementId.ELEM_DATA_ORGANIZATION);
+            uint elemId = decoder.openElement(ElementId.ELEM_DATA_ORGANIZATION);
             while(true) {
-                ElementId subId = decoder.openElement();
+                uint subId = decoder.openElement();
                 if (subId == 0) break;
                 if (subId == ElementId.ELEM_INTEGER_SIZE) {
                     sizeOfInt = (int)decoder.readSignedInteger(AttributeId.ATTRIB_VALUE);
@@ -1411,7 +1448,7 @@ namespace Sla.DECCORE
                 }
                 else if (subId == ElementId.ELEM_SIZE_ALIGNMENT_MAP) {
                     while(true) {
-                        ElementId mapId = decoder.openElement();
+                        uint mapId = decoder.openElement();
                         if (mapId != ElementId.ELEM_ENTRY) break;
                         int sz = (int)decoder.readSignedInteger(AttributeId.ATTRIB_SIZE);
                         int val = (int)decoder.readSignedInteger(AttributeId.ATTRIB_ALIGNMENT);
@@ -1436,7 +1473,7 @@ namespace Sla.DECCORE
         /// param el is the XML element
         public void parseEnumConfig(Decoder decoder)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_ENUM);
+            uint elemId = decoder.openElement(ElementId.ELEM_ENUM);
             enumsize = (int)decoder.readSignedInteger(AttributeId.ATTRIB_SIZE);
             if (decoder.readBool(AttributeId.ATTRIB_SIGNED))
                 enumtype = type_metatype.TYPE_INT;

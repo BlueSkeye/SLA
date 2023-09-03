@@ -35,9 +35,9 @@ namespace Sla.EXTRA
             if (scope == (Scope)null)
                 throw new IfaceExecutionError("No map named: " + name);
 
-            *status.fileoptr << scope.getFullName() << endl;
-            scope.printBounds(*status.fileoptr);
-            scope.printEntries(*status.fileoptr);
+            status.fileoptr << scope.getFullName() << endl;
+            scope.printBounds(status.fileoptr);
+            scope.printEntries(status.fileoptr);
         }
     }
 }

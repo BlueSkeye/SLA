@@ -10,7 +10,7 @@ namespace Sla.SLEIGH
     /// This class represents what's in common across the SLEIGH infrastructure between:
     ///   - Reading the various SLEIGH specification files
     ///   - Building and writing out SLEIGH specification files
-    internal class SleighBase : Translate
+    internal abstract class SleighBase : Translate
     {
         /// Maximum size of a varnode in the unique space (should match value in SleighBase.java)
         public const uint MAX_UNIQUE_SIZE = 128;
@@ -165,22 +165,22 @@ namespace Sla.SLEIGH
             sym.size = (uint)size;
             // First point greater than offset
             IEnumerator<KeyValuePair<VarnodeData, string>> iter = varnode_xref.upper_bound(sym);
-            if (iter == varnode_xref.begin()) return "";
+            if (iter == varnode_xref.begin()) return string.Empty;
             iter--;
             VarnodeData point = iter.Current.Key;
-            if (point.space != @base) return "";
+            if (point.space != @base) return string.Empty;
             ulong offbase = point.offset;
-            if (point.offset + point.size >= off + size)
+            if (point.offset + point.size >= off + (uint)size)
                 return iter.Current.Value;
 
             while (iter != varnode_xref.begin()) {
                 --iter;
-                VarnodeData point = iter.Current.Key;
+                point = iter.Current.Key;
                 if ((point.space != @base) || (point.offset != offbase)) return "";
-                if (point.offset + point.size >= off + size)
-                    return (*iter).second;
+                if (point.offset + point.size >= off + (uint)size)
+                    return iter.Current.Value;
             }
-            return "";
+            return string.Empty;
         }
 
         public override void getAllRegisters(Dictionary<VarnodeData, string> reglist)

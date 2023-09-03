@@ -17,7 +17,7 @@ namespace Sla.EXTRA
 
             while (s.get(c))
                 status.fileoptr.put(c);
-            *status.fileoptr << endl;
+            status.fileoptr << endl;
         }
     }
 }

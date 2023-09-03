@@ -408,7 +408,7 @@ namespace Sla.DECCORE
                 else if (ct.getMetatype() == type_metatype.TYPE_ARRAY) {
                     TypeArray ctarray = (TypeArray)ct;
                     ct = ctarray.getBase();
-                    push_integer(ctarray.numElements(), 4, false, (Varnode)null, (PcodeOp)null);
+                    push_integer((ulong)ctarray.numElements(), 4, false, (Varnode)null, (PcodeOp)null);
                 }
                 else if (ct.getMetatype() == type_metatype.TYPE_CODE) {
                     TypeCode ctcode = (TypeCode)ct;
@@ -1016,7 +1016,7 @@ namespace Sla.DECCORE
             AddrSpace spc = addr.getSpace();
             ulong off = addr.getOffset();
             if (!bb.hasSpecialLabel()) {
-                if (bb.getType() == FlowBlock::t_basic) {
+                if (bb.getType() == FlowBlock.block_type.t_basic) {
                     Scope symScope = ((BlockBasic)bb).getFuncdata().getScopeLocal();
                     Symbol sym = symScope.queryCodeLabel(addr);
                     if (sym != (Symbol)null) {
@@ -1101,7 +1101,7 @@ namespace Sla.DECCORE
                 btype = bl.getType();
             }
             if (btype == FlowBlock.block_type.t_plain) return;
-            if (bl.getType() != FlowBlock.block_flags.t_basic) {
+            if (bl.getType() != FlowBlock.block_type.t_basic) {
                 BlockGraph rootbl = (BlockGraph)bl;
                 int size = rootbl.getSize();
                 for (int i = 0; i < size; ++i) {
@@ -1295,7 +1295,7 @@ namespace Sla.DECCORE
 
             // Retrieve UTF8 version of string
             bool isTrunc = false;
-            List<byte> buffer = manager.getStringData(addr, charType, isTrunc);
+            List<byte> buffer = manager.getStringData(addr, charType, out isTrunc);
             if (buffer.empty())
                 return false;
             if (doEmitWideCharPrefix() && charType.getSize() > 1 && !charType.isOpaqueString())
@@ -1368,7 +1368,7 @@ namespace Sla.DECCORE
                 pushSymbol(sym, vn, op);
                 return true;
             }
-            modval = (-baseval) & mask;
+            modval = ((ulong)(-((long)baseval)) & mask);
             if (modval == val) {
                 // twos complement
                 pushOp(unary_minus, (PcodeOp)null);
@@ -1691,7 +1691,7 @@ namespace Sla.DECCORE
             else if ((mods & modifiers.force_hex) != 0) {
                 displayFormat = Symbol.DisplayFlags.force_hex;
             }
-            else if ((val <= 10) || ((mods & modifiers.force_dec))) {
+            else if ((val <= 10) || (0 != (mods & modifiers.force_dec))) {
                 displayFormat = Symbol.DisplayFlags.force_dec;
             }
             else {
@@ -1709,7 +1709,7 @@ namespace Sla.DECCORE
             else if (displayFormat == Symbol.DisplayFlags.force_dec)
                 t.Write(val);
             else if (displayFormat == Symbol.DisplayFlags.force_oct)
-                t << oct << '0' << val;
+                t.Write($"0{Convert.ToString((long)val, 8)}");
             else if (displayFormat == Symbol.DisplayFlags.force_char) {
                 if (doEmitWideCharPrefix() && sz > 1)
                     t.Write('L');           // Print symbol indicating wide character
@@ -1869,10 +1869,9 @@ namespace Sla.DECCORE
         }
 
         /// \brief Generate a generic name for an unnamed data-type
-        ///
         /// \param ct is the given data-type
         /// \return the generated name
-        protected override string genericTypeName(Datatype ct)
+        protected virtual string genericTypeName(Datatype ct)
         {
             StringWriter s = new StringWriter();
             switch (ct.getMetatype()) {
@@ -3438,7 +3437,7 @@ namespace Sla.DECCORE
                     // type_metatype.TYPE_STRUCT
                     TypeField? fld = ct.findTruncation((int)suboff, 0, op, 0, out newoff);
                     if (fld == (TypeField)null) {
-                        if (ct.getSize() <= suboff) {
+                        if ((uint)ct.getSize() <= suboff) {
                             clear();
                             throw new CORE.LowlevelError("PTRSUB out of bounds into struct");
                         }

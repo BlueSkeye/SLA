@@ -139,7 +139,8 @@ namespace Sla.DECCORE
         ///// End of fields
         //public IEnumerator<TypeField> endField() => field.end();
 
-        public override TypeField? findTruncation(int off, int sz, PcodeOp op, int slot, int newoff)
+        public override TypeField? findTruncation(int off, int sz, PcodeOp op, int slot,
+            out int newoff)
         {
             int i = getFieldIter(off);
             if (i < 0) return (TypeField)null;

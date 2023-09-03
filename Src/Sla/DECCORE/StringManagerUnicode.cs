@@ -1,4 +1,5 @@
 ﻿using Sla.CORE;
+using System.Text;
 
 namespace Sla.DECCORE
 {
@@ -29,7 +30,7 @@ namespace Sla.DECCORE
             int count = 0;
             int skip = charsize;
             while (i < size) {
-                int codepoint = getCodepoint(buf + i, charsize, bigend, skip);
+                int codepoint = getCodepoint(buf, i, charsize, bigend, skip);
                 if (codepoint < 0) return -1;
                 if (codepoint == 0) break;
                 count += 1;
@@ -60,12 +61,15 @@ namespace Sla.DECCORE
                 return data.byteData;
             }
 
-            StringData stringData = stringMap[addr];       // Allocate (initially empty) byte List
+            // Allocate (initially empty) byte List
+            StringData stringData = stringMap[addr];
             stringData.isTruncated = false;
             isTrunc = false;
 
-            if (charType.isOpaqueString())     // Cannot currently test for an opaque encoding
-                return stringData.byteData;         // Return the empty buffer
+            if (charType.isOpaqueString())
+                // Cannot currently test for an opaque encoding
+                // Return the empty buffer
+                return stringData.byteData;
 
             int curBufferSize = 0;
             int charsize = charType.getSize();
@@ -73,42 +77,50 @@ namespace Sla.DECCORE
 
             try {
                 do {
-                    int amount = 32;   // Grab 32 bytes of image at a time
-                    uint newBufferSize = curBufferSize + amount;
+                    // Grab 32 bytes of image at a time
+                    int amount = 32;
+                    uint newBufferSize = (uint)(curBufferSize + amount);
                     if (newBufferSize > maximumChars) {
-                        newBufferSize = maximumChars;
-                        amount = newBufferSize - curBufferSize;
+                        newBufferSize = (uint)maximumChars;
+                        amount = (int)(newBufferSize - curBufferSize);
                         if (amount == 0) {
-                            return stringData.byteData;     // Could not find terminator
+                            // Could not find terminator
+                            return stringData.byteData;
                         }
                     }
-                    glb.loader.loadFill(testBuffer + curBufferSize, amount, addr + curBufferSize);
-                    foundTerminator = hasCharTerminator(testBuffer + curBufferSize, amount, charsize);
-                    curBufferSize = newBufferSize;
+                    glb.loader.loadFill(testBuffer, curBufferSize, amount,
+                        addr + curBufferSize);
+                    foundTerminator = hasCharTerminator(testBuffer, curBufferSize,
+                        amount, charsize);
+                    curBufferSize = (int)newBufferSize;
                 } while (!foundTerminator);
             }
             catch (DataUnavailError) {
-                return stringData.byteData;         // Return the empty buffer
+                // Return the empty buffer
+                return stringData.byteData;
             }
 
             int numChars = checkCharacters(testBuffer, curBufferSize, charsize);
             if (numChars < 0)
-                return stringData.byteData;     // Return the empty buffer (invalid encoding)
+                // Return the empty buffer (invalid encoding)
+                return stringData.byteData;
             if (charsize == 1 && numChars < maximumChars) {
-                stringData.byteData.reserve(curBufferSize);
-                stringData.byteData.assign(testBuffer, testBuffer + curBufferSize);
+                stringData.byteData.Capacity = curBufferSize;
+                stringData.byteData.assign(testBuffer, curBufferSize);
             }
             else {
                 // We need to translate to UTF8 and/or truncate
                 TextWriter s = new StringWriter();
                 if (!writeUnicode(s, testBuffer, curBufferSize, charsize))
-                    return stringData.byteData;     // Return the empty buffer
-                string resString = s.ToString();
+                    // Return the empty buffer
+                    return stringData.byteData;
+                string resString = s.ToString() ?? throw new ApplicationException();
                 int newSize = resString.Length;
-                stringData.byteData.reserve(newSize + 1);
-                byte* ptr = (byte*)resString.c_str();
-                stringData.byteData.assign(ptr, ptr + newSize);
-                stringData.byteData[newSize] = 0;       // Make sure there is a null terminator
+                stringData.byteData.Capacity = newSize + 1;
+                byte[] ptr = Encoding.UTF8.GetBytes(resString);
+                stringData.byteData.assign(ptr, newSize);
+                // Make sure there is a null terminator
+                stringData.byteData[newSize] = 0;
             }
             stringData.isTruncated = (numChars >= maximumChars);
             isTrunc = stringData.isTruncated;
@@ -130,7 +142,7 @@ namespace Sla.DECCORE
             int count = 0;
             int skip = charsize;
             while (i < size) {
-                int codepoint = getCodepoint(buffer + i, charsize, bigend, skip);
+                int codepoint = getCodepoint(buffer, i, charsize, bigend, skip);
                 if (codepoint < 0) return false;
                 if (codepoint == 0) break;      // Terminator
                 writeUtf8(s, codepoint);

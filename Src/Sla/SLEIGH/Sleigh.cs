@@ -406,19 +406,25 @@ namespace Sla.SLEIGH
         /// \param pos is the parse object that will hold the resulting tree
         private void resolve(ParserContext pos)
         {
-            loader.loadFill(pos.getBuffer(), 16, pos.getAddr());
+            loader.loadFill(pos.getBuffer(), 0, 16, pos.getAddr());
             ParserWalkerChange walker = new ParserWalkerChange(pos);
-            pos.deallocateState(walker);    // Clear the previous resolve and initialize the walker
+            // Clear the previous resolve and initialize the walker
+            pos.deallocateState(walker);
             Constructor ct;
             Constructor? subct;
             uint off;
-            int oper, numoper;
+            int oper;
+            int numoper;
 
             pos.setDelaySlot(0);
-            walker.setOffset(0);        // Initial offset
-            pos.clearCommits();     // Clear any old context commits
-            pos.loadContext();      // Get context for current address
-            ct = root.resolve(walker); // Base constructor
+            // Initial offset
+            walker.setOffset(0);
+            // Clear any old context commits
+            pos.clearCommits();
+            // Get context for current address
+            pos.loadContext();
+            // Base constructor
+            ct = root.resolve(walker);
             walker.setConstructor(ct);
             ct.applyContext(walker);
             while (walker.isState()) {
@@ -428,7 +434,8 @@ namespace Sla.SLEIGH
                 while (oper < numoper) {
                     OperandSymbol sym = ct.getOperand(oper);
                     off = walker.getOffset(sym.getOffsetBase()) + sym.getRelativeOffset();
-                    pos.allocateOperand(oper, walker); // Descend into new operand and reserve space
+                    // Descend into new operand and reserve space
+                    pos.allocateOperand(oper, walker);
                     walker.setOffset(off);
                     TripleSymbol? tsym = sym.getDefiningSymbol();
                     if (tsym != (TripleSymbol)null) {
@@ -453,7 +460,8 @@ namespace Sla.SLEIGH
                         pos.setDelaySlot((int)templ.delaySlot());
                 }
             }
-            pos.setNaddr(pos.getAddr() + pos.getLength());  // Update Naddr to pointer after instruction
+            // Update Naddr to pointer after instruction
+            pos.setNaddr(pos.getAddr() + pos.getLength());
             pos.setParserState(ParserContext.State.disassembly);
         }
 
@@ -482,7 +490,7 @@ namespace Sla.SLEIGH
                             break;
                         else
                             // Some other kind of symbol as an operand
-                            triple.getFixedHandle(out walker.getParentHandle(), walker);
+                            triple.getFixedHandle(walker.getParentHandle(), walker);
                     }
                     else {
                         // Must be an expression

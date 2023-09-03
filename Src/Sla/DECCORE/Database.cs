@@ -90,7 +90,7 @@ namespace Sla.DECCORE
         /// \return the matching scope
         private Scope parseParentTag(Decoder decoder)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_PARENT);
+            uint elemId = decoder.openElement(ElementId.ELEM_PARENT);
             ulong id = decoder.readUnsignedInteger(AttributeId.ATTRIB_ID);
             Scope? res = resolveScope(id);
             if (res == (Scope)null)
@@ -488,7 +488,7 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         public void decode(Sla.CORE.Decoder decoder)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_DB);
+            uint elemId = decoder.openElement(ElementId.ELEM_DB);
             idByNameHash = false;       // Default
             while(true) {
                 AttributeId attribId = decoder.getNextAttributeId();
@@ -509,7 +509,7 @@ namespace Sla.DECCORE
             }
 
             while(true) {
-                ElementId subId = decoder.openElement();
+                uint subId = decoder.openElement();
                 if (subId != ElementId.ELEM_SCOPE) break;
                 string name = string.Empty;
                 string displayName = string.Empty;
@@ -553,7 +553,7 @@ namespace Sla.DECCORE
         /// \param newScope is the empty Scope
         public void decodeScope(Decoder decoder, Scope newScope)
         {
-            ElementId elemId = decoder.openElement();
+            uint elemId = decoder.openElement();
             if (elemId == ElementId.ELEM_SCOPE) {
                 Scope parentScope = parseParentTag(decoder);
                 attachScope(newScope, parentScope);
@@ -561,7 +561,7 @@ namespace Sla.DECCORE
             }
             else {
                 newScope.decodeWrappingAttributes(decoder);
-                ElementId subId = decoder.openElement(ElementId.ELEM_SCOPE);
+                uint subId = decoder.openElement(ElementId.ELEM_SCOPE);
                 Scope parentScope = parseParentTag(decoder);
                 attachScope(newScope, parentScope);
                 newScope.decode(decoder);
@@ -577,8 +577,8 @@ namespace Sla.DECCORE
         public Scope decodeScopePath(Decoder decoder)
         {
             Scope curscope = getGlobalScope();
-            ElementId elemId = decoder.openElement(ElementId.ELEM_PARENT);
-            ElementId subId = decoder.openElement();
+            uint elemId = decoder.openElement(ElementId.ELEM_PARENT);
+            uint subId = decoder.openElement();
             decoder.closeElementSkipping(subId);        // Skip element describing the root scope
             while(true) {
                 subId = decoder.openElement();

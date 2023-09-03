@@ -45,7 +45,7 @@ namespace Sla.DECCORE
         {
             name = "";
             size = 0;
-            ElementId elemId = decoder.openElement();
+            uint elemId = decoder.openElement();
             while(true) {
                 AttributeId attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;

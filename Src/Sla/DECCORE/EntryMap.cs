@@ -6,7 +6,8 @@ namespace Sla.DECCORE
         rangemap<SymbolEntry, System.UInt64, SymbolEntry.EntrySubsort, SymbolEntry.EntryInitData>
     {
         internal EntryMap()
-            : base(SymbolEntry.EntrySubsort.Instanciator.Instance)
+            : base(SymbolEntry.EntrySubsort.Instanciator.Instance,
+                  Sla.UInt64LinetypeComparer.Instance)
         {
         }
     }

@@ -33,7 +33,7 @@ namespace Sla.DECCORE
         {
         }
         
-        public override uint getType() => p_standard_out;
+        public override Model getType() => Model.p_standard_out;
 
         public override void assignMap(List<Datatype> proto, TypeFactory typefactory,
             List<ParameterPieces> res)
@@ -76,7 +76,7 @@ namespace Sla.DECCORE
             }
         }
 
-        public override void decode(Sla.CORE.Decoder decoder, List<EffectRecord> effectlist,
+        public override void decode(Sla.CORE.Decoder decoder, LinkedList<EffectRecord> effectlist,
             bool normalstack)
         {
             base.decode(decoder, effectlist, normalstack);

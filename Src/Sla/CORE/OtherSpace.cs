@@ -35,12 +35,12 @@ namespace Sla.CORE
             setFlags(Properties.is_otherspace);
         }
 
-        public override void printRaw(StreamWriter s, ulong offset)
+        public override void printRaw(TextWriter s, ulong offset)
         {
             s.Write("0x{0:X}", offset);
         }
 
-        public override void saveXml(StreamWriter s)
+        public override void saveXml(TextWriter s)
         {
             s.Write("<space_other");
             saveBasicAttributes(s);

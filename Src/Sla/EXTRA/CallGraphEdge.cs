@@ -41,7 +41,7 @@ namespace Sla.EXTRA
 
         public static void decode(Sla.CORE.Decoder decoder, CallGraph graph)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_EDGE);
+            uint elemId = decoder.openElement(ElementId.ELEM_EDGE);
 
             Address fromaddr = Address.decode(decoder);
             Address toaddr = Address.decode(decoder);

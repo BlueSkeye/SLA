@@ -31,7 +31,7 @@ namespace Sla.DECCORE
         /// \param typegrp is the factory owning \b this data-type
         internal void decode(Sla.CORE.Decoder decoder, TypeFactory typegrp)
         {
-            //  ElementId elemId = decoder.openElement();
+            //  uint elemId = decoder.openElement();
             decodeBasic(decoder);
             // Get endianness flag from architecture, rather than specific type encoding
             setflags();
@@ -63,7 +63,7 @@ namespace Sla.DECCORE
                 : sub_metatype.SUB_UINT_UNICODE;
         }
 
-        public override Datatype clone() => new TypeUnicode(this);
+        internal override Datatype clone() => new TypeUnicode(this);
     
         public override void encode(Sla.CORE.Encoder encoder)
         {

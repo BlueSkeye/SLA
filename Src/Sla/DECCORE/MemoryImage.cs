@@ -23,19 +23,20 @@ namespace Sla.DECCORE
         /// LoadImage.  If this fails, the value is returned as 0.
         /// \param addr is the address of the word to fetch
         /// \return the fetched value
-        protected override ulong find(ulong addr)
+        internal override ulong find(ulong addr)
         {
             // Assume that -addr- is word aligned
-            ulong res = 0;      // Make sure all bytes start as 0, as load may not fill all bytes
+            // Make sure all bytes start as 0, as load may not fill all bytes
+            ulong res = 0;
             AddrSpace spc = getSpace();
-            try
-            {
-                byte* ptr = (byte*)&res;
-                ptr += (Globals.HOST_ENDIAN == 1) ? (sizeof(ulong) - getWordSize()) : 0;
-                loader.loadFill(ptr, getWordSize(), new Address(spc, addr));
+            try {
+                byte[] ptr = new byte[sizeof(ulong)];
+                int index = (Globals.HOST_ENDIAN == 1)
+                    ? (int)(sizeof(ulong) - getWordSize())
+                    : 0;
+                loader.loadFill(ptr, index, (int)getWordSize(), new Address(spc, addr));
             }
-            catch (DataUnavailError err)
-            {
+            catch (DataUnavailError) {
                 // Pages not mapped in the load image, are assumed to be zero
                 res = 0;
             }
@@ -48,15 +49,15 @@ namespace Sla.DECCORE
         /// Retrieve an aligned page from the bank.  First an attempt is made to retrieve the
         /// page from the LoadImage, which may do its own zero filling.  If the attempt fails, the
         /// page is entirely filled in with zeros.
-        protected override void getPage(ulong addr, byte res, int skip, int size)
-        {  // Assume that -addr- is page aligned
-            AddrSpace* spc = getSpace();
+        internal override void getPage(ulong addr, byte[] res, uint skip, uint size)
+        {
+            // Assume that -addr- is page aligned
+            AddrSpace spc = getSpace();
 
-            try
-            {
-                loader.loadFill(res, size, Address(spc, addr + skip));
+            try {
+                loader.loadFill(res, 0, (int)size, new Address(spc, addr + skip));
             }
-            catch (DataUnavailError err) {
+            catch (DataUnavailError) {
                 // Pages not mapped in the load image, are assumed to be zero
                 for (int i = 0; i < size; ++i)
                     res[i] = 0;
@@ -71,7 +72,7 @@ namespace Sla.DECCORE
         /// \param ps is the number of bytes in a page (must be power of 2)
         /// \param ld is the underlying LoadImage
         public MemoryImage(AddrSpace spc, int ws, int ps, LoadImage ld)
-            : base(spc, ws, ps)
+            : base(spc, (uint)ws, (uint)ps)
         {
             loader = ld;
         }

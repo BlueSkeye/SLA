@@ -31,24 +31,29 @@ namespace Sla.DECCORE
         {
             if (op.doesSpecialPrinting())
                 return 0;
-            if (op.getIn(0).getTypeReadFacing(op).isPieceStructured())
-            {
-                data.opMarkSpecialPrint(op);    // Print this as a field extraction
+            if (op.getIn(0).getTypeReadFacing(op).isPieceStructured()) {
+                // Print this as a field extraction
+                data.opMarkSpecialPrint(op);
                 return 0;
             }
 
-            int c = op.getIn(1).getOffset();
-            if (c == 0) return 0;       // SUBPIECE is not least sig
-            Varnode a = op.getIn(0);
-            Varnode outvn = op.getOut();
+            int c = (int)op.getIn(1).getOffset();
+            if (c == 0)
+                // SUBPIECE is not least sig
+                return 0;
+            Varnode a = op.getIn(0) ?? throw new ApplicationException();
+            Varnode outvn = op.getOut() ?? throw new ApplicationException();
             if (outvn.isAddrTied() && a.isAddrTied()) {
-                if (outvn.overlap(*a) == c)
+                if (outvn.overlap(a) == c)
                     // This SUBPIECE should get converted to a marker by ActionCopyMarker
-                    return 0;           // So don't convert it
+                    // So don't convert it
+                    return 0;
             }
-            OpCode opc = OpCode.CPUI_INT_RIGHT; // Default shift type
-            int d = c * 8;         // Convert to bit shift
-                                    // Search for lone right shift descendant
+            // Default shift type
+            OpCode opc = OpCode.CPUI_INT_RIGHT;
+            // Convert to bit shift
+            int d = c * 8;
+            // Search for lone right shift descendant
             PcodeOp? lone = outvn.loneDescend();
             if (lone != (PcodeOp)null) {
                 OpCode opc2 = lone.code();
@@ -57,11 +62,13 @@ namespace Sla.DECCORE
                         // Shift by constant
                         if (outvn.getSize() + c == a.getSize()) {
                             // If SUB is "hi" lump the SUB and shift together
-                            d += lone.getIn(1).getOffset();
+                            d += (int)lone.getIn(1).getOffset();
                             if (d >= a.getSize() * 8) {
                                 if (opc2 == OpCode.CPUI_INT_RIGHT)
-                                    return 0;       // Result should have been 0
-                                d = a.getSize() * 8 - 1;   // sign extraction
+                                    // Result should have been 0
+                                    return 0;
+                                // sign extraction
+                                d = a.getSize() * 8 - 1;
                             }
                             data.opUnlink(op);
                             op = lone;
@@ -79,7 +86,7 @@ namespace Sla.DECCORE
             Varnode newout = data.newUnique(a.getSize(), ct);
             data.opSetOutput(shiftop, newout);
             data.opSetInput(shiftop, a, 0);
-            data.opSetInput(shiftop, data.newConstant(4, d), 1);
+            data.opSetInput(shiftop, data.newConstant(4, (ulong)d), 1);
             data.opInsertBefore(shiftop, op);
 
             // Change SUBPIECE into a least sig SUBPIECE

@@ -1,14 +1,8 @@
 ﻿using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Intrinsics.Arm;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.EXTRA
 {
-    internal class IfcPrintRaw
+    internal class IfcPrintRaw : IfaceDecompCommand
     {
         /// \class IfcPrintRaw
         /// \brief Print the raw p-code for the \e current function: `print raw`
@@ -19,8 +13,7 @@ namespace Sla.EXTRA
         {
             if (dcp.fd == (Funcdata)null)
                 throw new IfaceExecutionError("No function selected");
-
-            dcp.fd.printRaw(*status.fileoptr);
+            dcp.fd.printRaw(status.fileoptr);
         }
     }
 }

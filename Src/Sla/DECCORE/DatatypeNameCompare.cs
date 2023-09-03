@@ -1,14 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Sla.DECCORE
 {
     /// Compare two Datatype pointers: first by name, then by id
     internal class DatatypeNameCompare : IComparer<Datatype>
     {
+        internal static readonly DatatypeNameCompare Instance = new DatatypeNameCompare();
+
+        private DatatypeNameCompare()
+        {
+        }
+
         public int Compare(Datatype? a, Datatype? b)
         {
             if (null == a) throw new BugException();

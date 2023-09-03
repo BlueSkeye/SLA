@@ -38,7 +38,7 @@ namespace Sla.SLEIGH
             throw new SleighError("Cannot use symbol in pattern");
         }
 
-        public override void getFixedHandle(ref FixedHandle hand, ParserWalker walker)
+        public override void getFixedHandle(FixedHandle hand, ParserWalker walker)
         {
             Address refAddr = walker.getDestAddr();
             hand.space = const_space;

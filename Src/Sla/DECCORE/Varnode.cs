@@ -176,6 +176,19 @@ namespace Sla.DECCORE
         //friend class Merge;
         //friend class Funcdata;
 
+        /// \brief Check if the two given Varnodes are matching constants
+        ///
+        /// \param vn1 is the first given Varnode
+        /// \param vn2 is the second given Varnode
+        /// \return \b true if the Varnodes are both constants with the same value
+        internal static bool matching_constants(Varnode vn1, Varnode vn2)
+
+        {
+            if (!vn1.isConstant()) return false;
+            if (!vn2.isConstant()) return false;
+            return (vn1.getOffset() == vn2.getOffset());
+        }
+
         /// Internal function for update coverage information
         /// Rebuild variable cover based on where the Varnode
         /// is defined and read. This is \e only called by the
@@ -727,6 +740,19 @@ namespace Sla.DECCORE
             if (f1 == Varnode.varnode_flags.written)
                 if (op1.def.getSeqNum() != op2.def.getSeqNum())
                     return (op1.def.getSeqNum() < op2.def.getSeqNum());
+            return false;
+        }
+
+        public static bool operator >(Varnode op1, Varnode op2)
+        {
+            if (op1.loc != op2.loc) return (op1.loc > op2.loc);
+            if (op1.size != op2.size) return (op1.size > op2.size);
+            varnode_flags f1 = op1.flags & (varnode_flags.input | varnode_flags.written);
+            varnode_flags f2 = op2.flags & (varnode_flags.input | varnode_flags.written);
+            if (f1 != f2) return ((f1 - 1) > (f2 - 1)); // -1 forces free varnodes to come last
+            if (f1 == Varnode.varnode_flags.written)
+                if (op1.def.getSeqNum() != op2.def.getSeqNum())
+                    return (op1.def.getSeqNum() > op2.def.getSeqNum());
             return false;
         }
 

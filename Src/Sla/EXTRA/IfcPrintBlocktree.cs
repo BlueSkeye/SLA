@@ -20,7 +20,7 @@ namespace Sla.EXTRA
             if (dcp.fd == (Funcdata)null)
                 throw new IfaceExecutionError("No function selected");
 
-            dcp.fd.printBlockTree(*status.fileoptr);
+            dcp.fd.printBlockTree(status.fileoptr);
         }
     }
 }

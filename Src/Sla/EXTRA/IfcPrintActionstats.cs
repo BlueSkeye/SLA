@@ -22,7 +22,7 @@ namespace Sla.EXTRA
             if (dcp.conf.allacts.getCurrent() == (Action*)0)
                 throw new IfaceExecutionError("No action set");
 
-            dcp.conf.allacts.getCurrent().printStatistics(*status.fileoptr);
+            dcp.conf.allacts.getCurrent().printStatistics(status.fileoptr);
         }
     }
 }

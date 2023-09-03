@@ -43,7 +43,7 @@ namespace Sla.DECCORE
             if (sa > max)
                 sa = max;           // Shift amount has saturated
             data.opSetInput(op, inVn, 0);
-            data.opSetInput(op, data.newConstant(4, sa), 1);
+            data.opSetInput(op, data.newConstant(4, (ulong)sa), 1);
             return 1;
         }
     }

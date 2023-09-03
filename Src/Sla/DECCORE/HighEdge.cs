@@ -23,7 +23,13 @@ namespace Sla.DECCORE
         {
             if (op1.a == op2.a) return (op1.b < op2.b); return (op1.a < op2.a);
         }
-    
+
+        public static bool operator >(HighEdge op1, HighEdge op2)
+        {
+            if (op1.a == op2.a) return (op1.b > op2.b);
+            return (op1.a > op2.a);
+        }
+
         public HighEdge(HighVariable c, HighVariable d)
         {
             a = c;

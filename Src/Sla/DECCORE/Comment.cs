@@ -128,7 +128,7 @@ namespace Sla.DECCORE
         {
             emitted = false;
             type = 0;
-            ElementId elemId = decoder.openElement(ElementId.ELEM_COMMENT);
+            uint elemId = decoder.openElement(ElementId.ELEM_COMMENT);
             type = Comment.encodeCommentType(decoder.readString(AttributeId.ATTRIB_TYPE));
             funcaddr = Address.decode(decoder);
             addr = Address.decode(decoder);

@@ -99,6 +99,14 @@ namespace Sla.SLEIGH
             return false;
         }
 
+        public static bool operator >(VarnodeTpl op1, VarnodeTpl op2)
+        {
+            if (!(op1.space == op2.space)) return (op1.space > op2.space);
+            if (!(op1.offset == op2.offset)) return (op1.offset > op2.offset);
+            if (!(op1.size == op2.size)) return (op1.size > op2.size);
+            return false;
+        }
+
         public void setOffset(ulong constVal)
         {
             offset = new ConstTpl(ConstTpl.const_type.real, constVal);

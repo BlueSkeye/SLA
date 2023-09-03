@@ -1473,7 +1473,7 @@ namespace Sla.DECCORE
             int readextrapop = 0;
             flags = 0;
             injectid = -1;
-            ElementId elemId = decoder.openElement(ElementId.ELEM_PROTOTYPE);
+            uint elemId = decoder.openElement(ElementId.ELEM_PROTOTYPE);
             while(true) {
                 AttributeId attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;

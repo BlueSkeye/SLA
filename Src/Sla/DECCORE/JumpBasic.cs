@@ -78,33 +78,31 @@ namespace Sla.DECCORE
         {
             Varnode curvn = outvn;
             PcodeOp op;
-            TypeOp* top;
+            TypeOp top;
             int slot;
 
-            while (curvn != invn)
-            {
+            while (curvn != invn) {
                 op = curvn.getDef();
                 top = op.getOpcode();
-                for (slot = 0; slot < op.numInput(); ++slot) // Find first non-constant input
+                for (slot = 0; slot < op.numInput(); ++slot)
+                    // Find first non-constant input
                     if (!op.getIn(slot).isConstant()) break;
-                if (op.getEvalType() == PcodeOp.Flags.binary)
-                {
+                if (op.getEvalType() == PcodeOp.Flags.binary) {
                     Address addr = op.getIn(1 - slot).getAddr();
                     ulong otherval;
-                    if (!addr.isConstant())
-                    {
+                    if (!addr.isConstant()) {
                         MemoryImage mem = new MemoryImage(addr.getSpace(),4,1024,fd.getArch().loader);
                         otherval = mem.getValue(addr.getOffset(), op.getIn(1 - slot).getSize());
                     }
                     else
                         otherval = addr.getOffset();
                     output = top.recoverInputBinary(slot, op.getOut().getSize(), output,
-                                     op.getIn(slot).getSize(), otherval);
+                        op.getIn(slot).getSize(), otherval);
                     curvn = op.getIn(slot);
                 }
-                else if (op.getEvalType() == PcodeOp.Flags.unary)
-                {
-                    output = top.recoverInputUnary(op.getOut().getSize(), output, op.getIn(slot).getSize());
+                else if (op.getEvalType() == PcodeOp.Flags.unary) {
+                    output = top.recoverInputUnary(op.getOut().getSize(), output,
+                        op.getIn(slot).getSize());
                     curvn = op.getIn(slot);
                 }
                 else
@@ -130,7 +128,7 @@ namespace Sla.DECCORE
                 if (constvn.isConstant())
                 {
                     maxValue = Globals.coveringmask(constvn.getOffset());
-                    maxValue = (maxValue + 1) & Globals.calc_mask(vn.getSize());
+                    maxValue = (maxValue + 1) & Globals.calc_mask((uint)vn.getSize());
                 }
             }
             else if (op.code() == OpCode.CPUI_MULTIEQUAL)
@@ -150,7 +148,7 @@ namespace Sla.DECCORE
                 if (i == op.numInput())
                 {
                     maxValue = Globals.coveringmask(maxValue);
-                    maxValue = (maxValue + 1) & Globals.calc_mask(vn.getSize());
+                    maxValue = (maxValue + 1) & Globals.calc_mask((uint)vn.getSize());
                 }
                 else
                     maxValue = 0;
@@ -166,43 +164,47 @@ namespace Sla.DECCORE
         /// \param slot is input slot to the PcodeOp all paths must terminate at
         protected void findDeterminingVarnodes(PcodeOp op, int slot)
         {
-            List<PcodeOpNode> path;
-            bool firstpoint = false;    // Have not seen likely switch variable yet
+            List<PcodeOpNode> path = new List<PcodeOpNode>();
+            // Have not seen likely switch variable yet
+            bool firstpoint = false;
 
-            path.Add(PcodeOpNode(op, slot));
+            path.Add(new PcodeOpNode(op, slot));
 
-            do
-            {   // Traverse through tree of inputs to final address
-                PcodeOpNode & node(path.GetLastItem());
+            do {
+                // Traverse through tree of inputs to final address
+                PcodeOpNode node = path.GetLastItem();
                 Varnode curvn = node.op.getIn(node.slot);
-                if (isprune(curvn))
-                {   // Here is a node of the tree
-                    if (ispoint(curvn))
-                    {   // Is it a possible switch variable
-                        if (!firstpoint)
-                        {   // If it is the first possible
-                            pathMeld.set(path); // Take the current path as the result
+                if (isprune(curvn)) {
+                    // Here is a node of the tree
+                    if (ispoint(curvn)) {
+                        // Is it a possible switch variable
+                        if (!firstpoint) {
+                            // If it is the first possible
+                            // Take the current path as the result
+                            pathMeld.set(path);
                             firstpoint = true;
                         }
-                        else            // If we have already seen at least one possible
+                        else
+                            // If we have already seen at least one possible
                             pathMeld.meld(path);
                     }
 
-                    path.GetLastItem().slot += 1;
-                    while (path.GetLastItem().slot >= path.GetLastItem().op.numInput())
-                    {
+                    PcodeOpNode lastNode = path.GetLastItem();
+                    lastNode.slot += 1;
+                    while (path.GetLastItem().slot >= path.GetLastItem().op.numInput()) {
                         path.RemoveLastItem();
                         if (path.empty()) break;
-                        path.GetLastItem().slot += 1;
+                        lastNode = path.GetLastItem();
+                        lastNode.slot += 1;
                     }
                 }
-                else
-                {           // This varnode is not pruned
-                    path.Add(PcodeOpNode(curvn.getDef(), 0));
+                else {
+                    // This varnode is not pruned
+                    path.Add(new PcodeOpNode(curvn.getDef(), 0));
                 }
             } while (path.size() > 1);
-            if (pathMeld.empty())
-            {   // Never found a likely point, which means that
+            if (pathMeld.empty()) {
+                // Never found a likely point, which means that
                 // it looks like the address is uniquely determined
                 // but the constants/readonlys haven't been collapsed
                 pathMeld.set(op, op.getIn(slot));
@@ -225,28 +227,26 @@ namespace Sla.DECCORE
         protected void analyzeGuards(BlockBasic bl, int pathout)
         {
             int i, j, indpath;
-            int maxbranch = 2;     // Maximum number of CBRANCHs to consider
+            // Maximum number of CBRANCHs to consider
+            int maxbranch = 2;
             int maxpullback = 2;
             bool usenzmask = (jumptable.getStage() == 0);
 
-            selectguards.clear();
+            selectguards.Clear();
             BlockBasic prevbl;
-            Varnode vn;
+            Varnode? vn;
 
-            for (i = 0; i < maxbranch; ++i)
-            {
-                if ((pathout >= 0) && (bl.sizeOut() == 2))
-                {
+            for (i = 0; i < maxbranch; ++i) {
+                if ((pathout >= 0) && (bl.sizeOut() == 2)) {
                     prevbl = bl;
                     bl = (BlockBasic)prevbl.getOut(pathout);
                     indpath = pathout;
                     pathout = -1;
                 }
-                else
-                {
-                    pathout = -1;       // Make sure not to use pathout next time around
-                    while(true)
-                    {
+                else {
+                    // Make sure not to use pathout next time around
+                    pathout = -1;
+                    while(true) {
                         if (bl.sizeIn() != 1)
                         {
                             if (bl.sizeIn() > 1)
@@ -255,21 +255,22 @@ namespace Sla.DECCORE
                         }
                         // Only 1 flow path to the switch
                         prevbl = (BlockBasic)bl.getIn(0);
-                        if (prevbl.sizeOut() != 1) break; // Is it possible to deviate from switch path in this block
-                        bl = prevbl;        // If not, back up to next block
+                        if (prevbl.sizeOut() != 1)
+                            // Is it possible to deviate from switch path in this block
+                            break;
+                        // If not, back up to next block
+                        bl = prevbl;
                     }
                     indpath = bl.getInRevIndex(0);
                 }
                 PcodeOp cbranch = prevbl.lastOp();
                 if ((cbranch == (PcodeOp)null) || (cbranch.code() != OpCode.CPUI_CBRANCH))
                     break;
-                if (i != 0)
-                {
+                if (i != 0) {
                     // Check that this CBRANCH isn't protecting some other switch
                     BlockBasic otherbl = (BlockBasic)prevbl.getOut(1 - indpath);
                     PcodeOp otherop = otherbl.lastOp();
-                    if (otherop != (PcodeOp)null && otherop.code() == OpCode.CPUI_BRANCHIND)
-                    {
+                    if (otherop != (PcodeOp)null && otherop.code() == OpCode.CPUI_BRANCHIND) {
                         if (otherop != jumptable.getIndirectOp())
                             break;
                     }
@@ -285,10 +286,11 @@ namespace Sla.DECCORE
                 int indpathstore = prevbl.getFlipPath() ? 1 - indpath : indpath;
                 selectguards.Add(new GuardRecord(cbranch, cbranch, indpathstore, rng, vn));
                 for (j = 0; j < maxpullback; ++j) {
-                    Varnode markup;        // Throw away markup information
+                    // Throw away markup information
+                    Varnode? markup;
                     if (!vn.isWritten()) break;
                     PcodeOp readOp = vn.getDef();
-                    vn = rng.pullBack(readOp, &markup, usenzmask);
+                    vn = rng.pullBack(readOp, out markup, usenzmask);
                     if (vn == (Varnode)null) break;
                     if (rng.isEmpty()) break;
                     selectguards.Add(new GuardRecord(cbranch, readOp, indpathstore, rng, vn));
@@ -302,7 +304,7 @@ namespace Sla.DECCORE
         /// can be restricted. Multiple guards may provide different restrictions.
         /// \param vn is the given Varnode
         /// \param rng will hold resulting range of values the Varnode can hold at the switch
-        protected void calcRange(Varnode vn, CircleRange rng)
+        protected void calcRange(Varnode vn, out CircleRange rng)
         {
             // Get an initial range, based on the size/type of -vn-
             int stride = 1;
@@ -310,8 +312,8 @@ namespace Sla.DECCORE
                 rng = new CircleRange(vn.getOffset(), vn.getSize());
             else if (vn.isWritten() && vn.getDef().isBoolOutput())
                 rng = new CircleRange(0, 2, 1, 1);  // Only 0 or 1 possible
-            else
-            {           // Should we go ahead and use nzmask in all cases?
+            else {
+                // Should we go ahead and use nzmask in all cases?
                 ulong maxValue = getMaxValue(vn);
                 stride = getStride(vn);
                 rng = new CircleRange(0, maxValue, vn.getSize(), stride);
@@ -319,7 +321,7 @@ namespace Sla.DECCORE
 
             // Intersect any guard ranges which apply to -vn-
             int bitsPreserved;
-            Varnode baseVn = GuardRecord.quasiCopy(vn, bitsPreserved);
+            Varnode baseVn = GuardRecord.quasiCopy(vn, out bitsPreserved);
             foreach (GuardRecord guard in selectguards) {
                 int matchval = guard.valueMatch(vn, baseVn, bitsPreserved);
                 // if (matchval == 2)   TODO: we need to check for aliases
@@ -351,15 +353,16 @@ namespace Sla.DECCORE
             ulong sz, maxsize;
 
             varnodeIndex = 0;
-            calcRange(pathMeld.getVarnode(0), rng);
+            calcRange(pathMeld.getVarnode(0), out rng);
             jrange.setRange(rng);
             jrange.setStartVn(pathMeld.getVarnode(0));
             jrange.setStartOp(pathMeld.getOp(0));
             maxsize = rng.getSize();
             for (int i = 1; i < pathMeld.numCommonVarnode(); ++i) {
-                if (maxsize == matchsize)   // Found variable that gives (already recovered) size
+                if (maxsize == matchsize)
+                    // Found variable that gives (already recovered) size
                     return;
-                calcRange(pathMeld.getVarnode(i), rng);
+                calcRange(pathMeld.getVarnode(i), out rng);
                 sz = rng.getSize();
                 if (sz < maxsize) {
                     // Don't let a 1-byte switch variable get thru without a guard
@@ -423,11 +426,12 @@ namespace Sla.DECCORE
         {
             Varnode vn = pathMeld.getVarnode(varnodeIndex);
             int bitsPreserved;
-            Varnode baseVn = GuardRecord.quasiCopy(vn, bitsPreserved);
+            Varnode baseVn = GuardRecord.quasiCopy(vn, out bitsPreserved);
             for (int i = 0; i < selectguards.size(); ++i) {
                 GuardRecord guardRecord = selectguards[i];
                 if (guardRecord.valueMatch(vn, baseVn, bitsPreserved) == 0 || guardRecord.isUnrolled()) {
-                    guardRecord.clear();        // Indicate this guard was not used or should not be folded
+                    // Indicate this guard was not used or should not be folded
+                    guardRecord.clear();
                 }
             }
         }
@@ -512,7 +516,8 @@ namespace Sla.DECCORE
                 return;
             int indpath = bl.getInRevIndex(0);
             bool toswitchval = (indpath == 1);
-            PcodeOp cbranch = ((BlockBasic)bl.getIn(0)).lastOp();
+            PcodeOp cbranch = ((BlockBasic)bl.getIn(0)).lastOp()
+                ?? throw new ApplicationException();
             if (cbranch.isBooleanFlip())
                 toswitchval = !toswitchval;
             CircleRange rng = new CircleRange(toswitchval);
@@ -523,11 +528,12 @@ namespace Sla.DECCORE
                 if (multiOp != (PcodeOp)null) {
                     selectguards.Add(new GuardRecord(cbranch, readOp, indpathstore, rng, multiOp.getOut(), true));
                 }
-                Varnode markup;        // Throw away markup information
-                Varnode vn = varArray[0];
+                // Throw away markup information
+                Varnode? vn = varArray[0] ?? throw new ApplicationException();
                 if (!vn.isWritten()) break;
-                PcodeOp readOp = vn.getDef() ?? throw new BugException();
-                vn = rng.pullBack(readOp, markup, usenzmask);
+                readOp = vn.getDef() ?? throw new BugException();
+                Varnode? markup;
+                vn = rng.pullBack(readOp, out markup, usenzmask);
                 if (vn == (Varnode)null) break;
                 if (rng.isEmpty()) break;
                 if (!BlockBasic.liftVerifyUnroll(varArray, readOp.getSlot(vn))) break;
@@ -779,11 +785,11 @@ namespace Sla.DECCORE
                         (addresstable[i].getOffset() - addr.getOffset()) :
                         (addr.getOffset() - addresstable[i].getOffset());
                     if (diff > 0xffff) {
-                        byte[] buffer = new byte[8];
+                        byte[] buffer = new byte[4];
                         LoadImage loadimage = fd.getArch().loader ?? throw new BugException();
                         bool dataavail = true;
                         try {
-                            loadimage.loadFill(buffer, 4, addresstable[i]);
+                            loadimage.loadFill(buffer, 0, 4, addresstable[i]);
                         }
                         catch (DataUnavailError) {
                             dataavail = false;

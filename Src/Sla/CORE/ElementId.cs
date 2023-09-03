@@ -16,7 +16,7 @@ namespace Sla.CORE
     public class ElementId
     {
         ///< A map of ElementId names to their associated id
-        private static Dictionary<string, uint> lookupElementId;
+        private static Dictionary<string, uint> lookupElementId = new Dictionary<string, uint>();
 
         internal static readonly ElementId ELEM_DATA = new ElementId("data", 1);
         internal static readonly ElementId ELEM_INPUT = new ElementId("input", 2);
@@ -288,7 +288,7 @@ namespace Sla.CORE
             return ref name;
         }
 
-        /// Get the element's id
+        // Get the element's id
         public uint getId() => id;
 
         /// Test equality with another ElementId

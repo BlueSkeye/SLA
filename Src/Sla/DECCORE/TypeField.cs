@@ -25,26 +25,23 @@ namespace Sla.DECCORE
         /// \param typegrp is the TypeFactory for parsing data-type info
         public TypeField(Sla.CORE.Decoder decoder, TypeFactory typegrp)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_FIELD);
+            uint elemId = decoder.openElement(ElementId.ELEM_FIELD);
             ident = -1;
             offset = -1;
-            while(true)
-            {
-                uint attrib = decoder.getNextAttributeId();
+            while(true) {
+                AttributeId attrib = decoder.getNextAttributeId();
                 if (attrib == 0) break;
                 if (attrib == AttributeId.ATTRIB_NAME)
                     name = decoder.readString();
-                else if (attrib == ATTRIB_OFFSET)
-                {
-                    offset = decoder.readSignedInteger();
+                else if (attrib == AttributeId.ATTRIB_OFFSET) {
+                    offset = (int)decoder.readSignedInteger();
                 }
-                else if (attrib == ATTRIB_ID)
-                {
-                    ident = decoder.readSignedInteger();
+                else if (attrib == AttributeId.ATTRIB_ID) {
+                    ident = (int)decoder.readSignedInteger();
                 }
             }
             type = typegrp.decodeType(decoder);
-            if (name.size() == 0)
+            if (string.IsNullOrEmpty(name))
                 throw new LowlevelError("name attribute must not be empty in <field> tag");
             if (offset < 0)
                 throw new LowlevelError("offset attribute invalid for <field> tag");
@@ -66,6 +63,11 @@ namespace Sla.DECCORE
         public static bool operator <(TypeField op1, TypeField op2)
         {
             return (op1.offset<op2.offset);
+        }
+
+        public static bool operator >(TypeField op1, TypeField op2)
+        {
+            return (op1.offset > op2.offset);
         }
 
         /// Encode \b this field to a stream

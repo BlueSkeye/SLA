@@ -54,7 +54,7 @@ namespace Sla.DECCORE
                 if (div2.isConstant())
                 {
                     if (!div.isConstant()) continue;
-                    ulong mask = Globals.calc_mask(div2.getSize());
+                    ulong mask = Globals.calc_mask((uint)div2.getSize());
                     if ((((div2.getOffset() ^ mask) + 1) & mask) != div.getOffset())
                         continue;
                 }

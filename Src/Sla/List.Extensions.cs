@@ -4,9 +4,46 @@ namespace Sla
 {
     internal static partial class Extensions
     {
+        internal delegate T ResizeInstantiatorDelegate<T>();
+
+        internal static void assign<T>(this List<T> into, IEnumerable<T> from, int count)
+        {
+            int index = 0;
+            foreach(T item in from) {
+                into[index++] = item;
+                if (index >= count) return;
+            }
+            throw new ApplicationException();
+        }
+
         internal static bool empty<T>(this List<T> from) => from.Count == 0;
 
-        internal delegate T ResizeInstantiatorDelegate<T>();
+        internal static IBiDirEnumerator<T> GetBiDirectionalEnumerator<T>(this List<T> from,
+            bool reverseOrder = false)
+            => new BiDirEnumerator<T>(from, reverseOrder);
+        
+        internal static T GetLastItem<T>(this List<T> from)
+        {
+            int lastItemIndex = from.Count - 1;
+
+            if (lastItemIndex < 0) {
+                throw new BugException();
+            }
+            return from[lastItemIndex];
+        }
+
+        internal static IEnumerator<T> GetReverseEnumerator<T>(this List<T> from)
+            => new ReverseEnumerator<T>(from);
+
+        internal static void RemoveLastItem<T>(this List<T> from)
+        {
+            int lastItemIndex = from.Count - 1;
+
+            if (0 > lastItemIndex) {
+                throw new InvalidOperationException();
+            }
+            from.RemoveAt(lastItemIndex);
+        }
 
         internal static void resize<T>(this List<T> list, int newSize,
             ResizeInstantiatorDelegate<T>? instantiator = null)
@@ -23,22 +60,6 @@ namespace Sla
             }
         }
 
-        internal static int size<T>(this List<T> from) => from.Count;
-
-        internal static IBiDirEnumerator<T> GetBiDirectionalEnumerator<T>(this List<T> from,
-            bool reverseOrder = false)
-            => new BiDirEnumerator<T>(from, reverseOrder);
-        
-        internal static T GetLastItem<T>(this List<T> from)
-        {
-            int lastItemIndex = from.Count - 1;
-
-            if (lastItemIndex < 0) {
-                throw new BugException();
-            }
-            return from[lastItemIndex];
-        }
-
         internal static void SetLastItem<T>(this List<T> from, T newValue)
         {
             int lastItemIndex = from.Count - 1;
@@ -50,18 +71,7 @@ namespace Sla
             return;
         }
 
-        internal static IEnumerator<T> GetReverseEnumerator<T>(this List<T> from)
-            => new ReverseEnumerator<T>(from);
- 
-        internal static void RemoveLastItem<T>(this List<T> from)
-        {
-            int lastItemIndex = from.Count - 1;
-
-            if (0 > lastItemIndex) {
-                throw new InvalidOperationException();
-            }
-            from.RemoveAt(lastItemIndex);
-        }
+        internal static int size<T>(this List<T> from) => from.Count;
 
         internal static void stable_sort<T>(this List<T> container)
         {

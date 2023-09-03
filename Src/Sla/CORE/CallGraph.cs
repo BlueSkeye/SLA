@@ -359,9 +359,8 @@ namespace Sla.CORE
 
         public void decoder(Decoder decoder)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_CALLGRAPH);
-            while(true)
-            {
+            uint elemId = decoder.openElement(ElementId.ELEM_CALLGRAPH);
+            while(true) {
                 ElementId subId = decoder.peekElement();
                 if (subId == 0) break;
                 if (subId == ElementId.ELEM_EDGE)

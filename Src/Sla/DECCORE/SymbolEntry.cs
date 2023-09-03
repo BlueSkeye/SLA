@@ -126,9 +126,8 @@ namespace Sla.DECCORE
             /*subsorttype*/
             EntrySubsort res = new EntrySubsort();
             if ((symbol.getFlags() & Varnode.varnode_flags.addrtied) == 0) {
-                Sla.CORE.Range? range = uselimit.getFirstRange();
-                if (range == null)
-                    throw new LowlevelError("Map entry with empty uselimit");
+                Sla.CORE.Range range = uselimit.getFirstRange()
+                    ?? throw new LowlevelError("Map entry with empty uselimit");
                 res.useindex = range.getSpace().getIndex();
                 res.useoffset = range.getFirst();
             }
@@ -147,10 +146,11 @@ namespace Sla.DECCORE
         /// Get the number of bytes consumed by \b this storage
         public int getSize() => size;
 
-        /// Is \b this storage valid for the given code address
-        /// This storage location may only hold the Symbol value for a limited portion of the code.
-        /// \param usepoint is the given code address to test
-        /// \return \b true if \b this storage is valid at the given address
+        // Is \b this storage valid for the given code address
+        // This storage location may only hold the Symbol value for a limited portion
+        // of the code.
+        // \param usepoint is the given code address to test
+        // \return \b true if \b this storage is valid at the given address
         public bool inUse(Address usepoint)
         {
             if (isAddrTied()) return true; // Valid throughout scope
@@ -175,7 +175,8 @@ namespace Sla.DECCORE
         }
 
         ///< Is \b this storage address tied
-        public bool isAddrTied() => ((symbol.getFlags() & Varnode.varnode_flags.addrtied) != 0);
+        public bool isAddrTied()
+            => ((symbol.getFlags() & Varnode.varnode_flags.addrtied) != 0);
 
         /// Update a Varnode data-type from \b this
         /// If the Symbol associated with \b this is type-locked, change the given
@@ -201,14 +202,17 @@ namespace Sla.DECCORE
         /// \return the matching data-type or NULL
         public Datatype getSizedType(Address inaddr, int sz)
         {
-            int off = (isDynamic()) ? offset : (int)(inaddr.getOffset() - addr.getOffset()) + offset;
+            int off = isDynamic()
+                ? offset
+                : (int)(inaddr.getOffset() - addr.getOffset()) + offset;
             Datatype cur = symbol.getType() ?? throw new ApplicationException();
             return symbol.getScope().getArch().types.getExactPiece(cur, off, sz);
         }
 
-        /// Dump a description of \b this to a stream
-        /// Give a contained one-line description of \b this storage, suitable for a debug console
-        /// \param s is the output stream
+        // Dump a description of \b this to a stream
+        // Give a contained one-line description of \b this storage, suitable for
+        // a debug console
+        // \param s is the output stream
         public void printEntry(TextWriter s)
         {
             s.Write($"{symbol.getName()} : ");
@@ -218,8 +222,7 @@ namespace Sla.DECCORE
                 s.Write(addr.getShortcut());
                 addr.printRaw(s);
             }
-            s.Write($":{(uint)symbol.getType().getSize()}");
-            s.Write(' ');
+            s.Write($":{(uint)symbol.getType().getSize()} ");
             symbol.getType().printRaw(s);
             s.Write(" : ");
             uselimit.printBounds(s);
@@ -255,7 +258,7 @@ namespace Sla.DECCORE
         /// \return the advanced iterator
         public void decode(Sla.CORE.Decoder decoder)
         {
-            ElementId elemId = decoder.peekElement();
+            uint elemId = decoder.peekElement();
             if (elemId == ElementId.ELEM_HASH) {
                 decoder.openElement();
                 hash = decoder.readUnsignedInteger(AttributeId.ATTRIB_VAL);

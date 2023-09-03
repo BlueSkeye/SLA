@@ -109,7 +109,7 @@ namespace Sla.DECCORE
             string p2 = string.Empty;
             string p3 = string.Empty;
 
-            ElementId elemId = decoder.openElement();
+            uint elemId = decoder.openElement();
             uint subId = decoder.openElement();
             if (subId == ElementId.ELEM_PARAM1) {
                 p1 = decoder.readString(AttributeId.ATTRIB_CONTENT);
@@ -136,7 +136,7 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         public void decode(Sla.CORE.Decoder decoder)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_OPTIONSLIST);
+            uint elemId = decoder.openElement(ElementId.ELEM_OPTIONSLIST);
 
             while (decoder.peekElement() != 0)
                 decodeOne(decoder);

@@ -79,13 +79,13 @@ namespace Sla.CORE
         /// \param decoder is the stream decoder
         /// \param size is a reference to be filled in as the size encoded by the tag
         /// \return the offset of the final address encoded by the tag
-        public override ulong decodeAttributes(Decoder decoder, ref uint size)
+        public override ulong decodeAttributes(Decoder decoder, out uint size)
         {
             List<VarnodeData> pieces = new List<VarnodeData>();
             uint sizesum = 0;
             uint logicalsize = 0;
             while(true) {
-                AttributeId attribId = decoder.getNextAttributeId();
+                uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == AttributeId.ATTRIB_LOGICALSIZE) {
                     logicalsize = (uint)decoder.readUnsignedInteger();
@@ -110,7 +110,7 @@ namespace Sla.CORE
                 int offpos = attrVal.IndexOf(':');
                 if (-1 == offpos) {
                     Translate tr = getTrans();
-                    ref VarnodeData point = ref tr.getRegister(attrVal);
+                    VarnodeData point = tr.getRegister(attrVal);
                     vdat = point;
                 }
                 else {
@@ -187,7 +187,7 @@ namespace Sla.CORE
             return -1;
         }
 
-        public override void printRaw(StreamWriter s, ulong offset)
+        public override void printRaw(TextWriter s, ulong offset)
         {
             JoinRecord rec = getManager().findJoin(offset);
             int szsum = 0;
@@ -249,7 +249,7 @@ namespace Sla.CORE
             return rec.getUnified().offset;
         }
 
-        public override void saveXml(StreamWriter s)
+        public override void saveXml(TextWriter s)
         {
             throw new LowlevelError("Should never save join space to XML");
         }

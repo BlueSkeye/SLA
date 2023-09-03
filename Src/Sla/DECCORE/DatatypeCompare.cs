@@ -1,14 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Sla.DECCORE
 {
     /// Compare two Datatype pointers for equivalence of their description
     internal class DatatypeCompare : IComparer<Datatype>
     {
+        internal static readonly DatatypeCompare Instance = new DatatypeCompare();
+
+        private DatatypeCompare()
+        {
+        }
+
         /// Comparison operator
         public int Compare(Datatype? a, Datatype? b)
         {

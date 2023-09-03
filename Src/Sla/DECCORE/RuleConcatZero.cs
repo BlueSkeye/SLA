@@ -34,7 +34,7 @@ namespace Sla.DECCORE
             data.opSetOpcode(newop, OpCode.CPUI_INT_ZEXT);
             data.opSetOpcode(op, OpCode.CPUI_INT_LEFT);
             data.opSetInput(op, outvn, 0);
-            data.opSetInput(op, data.newConstant(4, sa), 1);
+            data.opSetInput(op, data.newConstant(4, (ulong)sa), 1);
             data.opSetInput(newop, highvn, 0);
             data.opInsertBefore(newop, op);
             return 1;

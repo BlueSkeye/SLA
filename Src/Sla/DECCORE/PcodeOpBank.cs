@@ -362,16 +362,16 @@ namespace Sla.DECCORE
         public IEnumerator<KeyValuePair<SeqNum, PcodeOp>> beginAll() => optree.GetEnumerator();
 
         /// \brief End of all PcodeOps in sequence number order
-        public PcodeOpTree.Enumerator endAll() => optree.end();
+        public IEnumerator<KeyValuePair<SeqNum, PcodeOp>> endAll() => optree.end();
 
         /// \brief Start of all PcodeOps at one Address
-        public PcodeOpTree.Enumerator begin(Address addr)
+        public IEnumerator<PcodeOp> begin(Address addr)
         {
             return optree.lower_bound(new SeqNum(addr, 0));
         }
 
         /// \brief End of all PcodeOps at one Address
-        public PcodeOpTree.Enumerator end(Address addr)
+        public IEnumerator<PcodeOp> end(Address addr)
         {
             return optree.upper_bound(new SeqNum(addr, uint.MaxValue));
         }

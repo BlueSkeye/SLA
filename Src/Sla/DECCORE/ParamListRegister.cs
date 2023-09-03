@@ -1,4 +1,6 @@
 ﻿
+using System;
+
 namespace Sla.DECCORE
 {
     /// \brief An unstructured model for passing input parameters to a function.
@@ -22,10 +24,33 @@ namespace Sla.DECCORE
         {
         }
         
-        public override uint getType() => p_register;
+        public override Model getType() => Model.p_register;
 
-        public override void fillinMap(ParamActive active);
+        public override void fillinMap(ParamActive active)
+        {
+            if (active.getNumTrials() == 0) return; // No trials to check
 
-        public override ParamList clone();
-}
+            // Mark anything active as used
+            for (int i = 0; i < active.getNumTrials(); ++i) {
+                ParamTrial paramtrial = active.getTrial(i);
+                ParamEntry? entrySlot = findEntry(paramtrial.getAddress(),
+                    paramtrial.getSize());
+                if (entrySlot == (ParamEntry)null)
+                    // There may be no matching entry (if the model was recovered late)
+                    paramtrial.markNoUse();
+                else {
+                    // Keep track of entry recovered for this trial
+                    paramtrial.setEntry(entrySlot, 0);
+                    if (paramtrial.isActive())
+                        paramtrial.markUsed();
+                }
+            }
+            active.sortTrials();
+        }
+
+        public override ParamList clone()
+        {
+            return new ParamListRegister(this);
+        }
+    }
 }

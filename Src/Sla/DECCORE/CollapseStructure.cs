@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -267,7 +261,7 @@ namespace Sla.DECCORE
             }
             while (loopbodyiter != loopbody.end()) {
                 // Last innermost loop
-                loopbottom = loopbodyiter.Current.getCurrentBounds(looptop, graph);
+                loopbottom = loopbodyiter.Current.getCurrentBounds(out looptop, graph);
                 if (loopbottom != null) {
                     if ((!likelylistfull) || (likelyiter != likelygoto.end())) {
                         // Reaching here means, we removed edges but loop still didn't collapse
@@ -325,7 +319,7 @@ namespace Sla.DECCORE
             while (updateLoopBody()) {
                 while (likelyiter != likelygoto.end()) {
                     int outedge;
-                    FlowBlock startbl = likelyiter.Current.getCurrentEdge(outedge, graph);
+                    FlowBlock startbl = likelyiter.Current.getCurrentEdge(out outedge, graph);
                     ++likelyiter;
                     if (startbl != null) {
                         // Mark the selected branch as goto

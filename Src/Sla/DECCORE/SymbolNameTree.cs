@@ -8,6 +8,8 @@ namespace Sla.DECCORE
         {
         }
 
+        internal bool empty() => (0 == base.Count);
+
         private class _Comparer : IComparer<Symbol>
         {
             internal static readonly _Comparer Singleton = new _Comparer();

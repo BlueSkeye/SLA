@@ -1,10 +1,4 @@
 ﻿using Sla.CORE;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.DECCORE
 {
@@ -17,7 +11,7 @@ namespace Sla.DECCORE
     /// The class contains, as a field, a stripped down emulator to run the script and
     /// a convenience method evaluate() to feed in concrete values to the input parameters
     /// and return a value from a single output parameter.
-    internal class ExecutablePcode : InjectPayload
+    internal abstract class ExecutablePcode : InjectPayload
     {
         /// The Architecture owning \b this snippet
         private Architecture glb;
@@ -89,10 +83,10 @@ namespace Sla.DECCORE
 
         ~ExecutablePcode()
         {
-            if (emitter != (PcodeEmit)null) delete emitter;
+            // if (emitter != (PcodeEmit)null) delete emitter;
         }
     
-        public override string getSource() => source;
+        internal override string getSource() => source;
 
         /// Evaluate the snippet on the given inputs
         /// The caller provides a list of concrete values that are assigned to the

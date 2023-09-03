@@ -43,7 +43,7 @@ namespace Sla.SLEIGH
 
         public override PatternExpression getPatternExpression() => patexp;
 
-        public override void getFixedHandle(ref FixedHandle hand, ParserWalker walker)
+        public override void getFixedHandle(FixedHandle hand, ParserWalker walker)
         {
             hand.space = walker.getCurSpace();
             hand.offset_space = (AddrSpace)null;

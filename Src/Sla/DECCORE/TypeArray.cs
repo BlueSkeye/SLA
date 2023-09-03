@@ -17,7 +17,7 @@ namespace Sla.DECCORE
         /// \param typegrp is the factory owning \b this data-type
         internal void decode(Sla.CORE.Decoder decoder, TypeFactory typegrp)
         {
-            //  ElementId elemId = decoder.openElement();
+            //  uint elemId = decoder.openElement();
             decodeBasic(decoder);
             arraysize = -1;
             decoder.rewindAttributes();
@@ -104,7 +104,7 @@ namespace Sla.DECCORE
         {
             if (null == arrayof) throw new BugException();
             // Go down exactly one level, to type of element
-            newoff = off % arrayof.getSize();
+            newoff = off % (uint)arrayof.getSize();
             return arrayof;
         }
 

@@ -167,11 +167,11 @@ namespace Sla.DECCORE
 
         public override void decode(Sla.CORE.Decoder decoder)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_RESOLVEPROTOTYPE);
+            uint elemId = decoder.openElement(ElementId.ELEM_RESOLVEPROTOTYPE);
             name = decoder.readString(AttributeId.ATTRIB_NAME);
             while(true) {
                 // A tag for each merged prototype
-                ElementId subId = decoder.openElement();
+                uint subId = decoder.openElement();
                 if (subId != ElementId.ELEM_MODEL) break;
                 string modelName = decoder.readString(AttributeId.ATTRIB_NAME);
                 ProtoModel mymodel = glb.getModel(modelName);

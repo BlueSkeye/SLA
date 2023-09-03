@@ -7,7 +7,7 @@ namespace Sla.DECCORE
     ///
     /// All binary op-codes have a single data-type for input values
     /// and a data-type for the output value
-    internal class TypeOpBinary : TypeOp
+    internal abstract class TypeOpBinary : TypeOp
     {
         private type_metatype metaout;  ///< The metatype of the output
         private type_metatype metain;       ///< The metatype of the inputs

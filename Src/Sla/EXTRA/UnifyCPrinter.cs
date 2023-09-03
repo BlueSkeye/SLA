@@ -39,7 +39,7 @@ namespace Sla.EXTRA
         private void printGetOpList(TextWriter s)
         {
             // Print the getOpList method of the new rule
-            s.WriteLine($"void {classname}::getOpList(List<uint> &oplist) const");
+            s.WriteLine($"void {classname}::getOpList(List<OpCode> &oplist) const");
             s.WriteLine();
             s.WriteLine('{');
             for (int i = 0; i < opcodelist.size(); ++i) {

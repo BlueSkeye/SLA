@@ -18,7 +18,7 @@ namespace Sla.DECCORE
             arraysize = @as;
         }
         
-        public override uint getType() => array_mod;
+        public override TypeModifier.Modifier getType() => array_mod;
     
         public override bool isValid() => (arraysize>0);
 

@@ -722,7 +722,7 @@ namespace Sla.CORE
         ///< Save the format to an XML stream
         /// Write the format out to a \<floatformat> XML tag.
         /// \param s is the output stream
-        public void saveXml(StreamWriter s)
+        public void saveXml(TextWriter s)
         {
             s.Write("<floatformat");
             Xml.a_v_i(s,"size", size);

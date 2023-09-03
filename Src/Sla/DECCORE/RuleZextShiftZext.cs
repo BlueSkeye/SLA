@@ -45,7 +45,7 @@ namespace Sla.DECCORE
             Varnode rootvn = zext2op.getIn(0) ?? throw new ApplicationException();
             if (rootvn.isFree()) return 0;
 
-            ulong sa = shiftop.getIn(1).getOffset() ?? throw new ApplicationException();
+            ulong sa = (ulong)shiftop.getIn(1).getOffset();
             if (sa > 8 * (ulong)(zext2op.getOut().getSize() - rootvn.getSize()))
                 return 0; // Shift might lose bits off the top
             PcodeOp newop = data.newOp(1, op.getAddr());

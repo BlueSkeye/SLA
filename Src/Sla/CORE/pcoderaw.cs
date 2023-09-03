@@ -65,7 +65,7 @@ namespace Sla.CORE
         /// particular operation within the entire translation of the machine instruction
         /// \param a is the instruction address
         /// \param b is the order number
-        public void setSeqNum(ref Address a, uint b)
+        public void setSeqNum(Address a, uint b)
         {
             seq = new SeqNum(a, b);
         }

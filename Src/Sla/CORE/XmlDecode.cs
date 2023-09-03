@@ -1,25 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Sla.CORE
 {
     /// \brief An XML based decoder
     /// The underlying transfer encoding is an XML document.  The decoder can either be initialized with an
     /// existing Element as the root of the data to transfer, or the ingestStream() method can be invoked
     /// to read the XML document from an input stream, in which case the decoder manages the Document object.
-    public class XmlDecode : Decoder
+    public class XmlDecode : Sla.CORE.Decoder
     {
         /// An ingested XML document, owned by \b this decoder
         private Document? document;
         /// The root XML element to be decoded
         private Element? rootElement;
         /// Stack of currently \e open elements
-        private Stack<Element> elStack;
+        private Stack<Element> elStack = new Stack<Element>();
         /// Index of next child for each \e open element
-        private Stack<IEnumerator<Element>?> iterStack;
+        private Stack<IEnumerator<Element>?> iterStack =
+            new Stack<IEnumerator<Element>?>();
         /// Position of \e current attribute to parse (in \e current element)
         private int attributeIndex;
 
@@ -73,7 +69,7 @@ namespace Sla.CORE
 
         public override void ingestStream(StreamReader s)
         {
-            document = Globals.xml_tree(s);
+            document = Xml.xml_tree(s);
             rootElement = document.getRoot();
         }
 
@@ -235,17 +231,17 @@ namespace Sla.CORE
         public override bool readBool()
         {
             Element el = elStack.Peek();
-            return Globals.xml_readbool(el.getAttributeValue(attributeIndex));
+            return Xml.xml_readbool(el.getAttributeValue(attributeIndex));
         }
 
-        public override bool readBool(ref AttributeId attribId)
+        public override bool readBool(AttributeId attribId)
         {
             Element el = elStack.Peek();
             if (attribId == AttributeId.ATTRIB_CONTENT) {
-                return Globals.xml_readbool(el.getContent());
+                return Xml.xml_readbool(el.getContent());
             }
             int index = findMatchingAttribute(el, attribId.getName());
-            return Globals.xml_readbool(el.getAttributeValue(index));
+            return Xml.xml_readbool(el.getAttributeValue(index));
         }
 
         public override long readSignedInteger()

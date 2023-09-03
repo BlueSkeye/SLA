@@ -499,7 +499,7 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         public void decodeFlowOverride(Decoder decoder)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_FLOWOVERRIDELIST);
+            uint elemId = decoder.openElement(ElementId.ELEM_FLOWOVERRIDELIST);
             while(true) {
                 uint subId = decoder.openElement();
                 if (subId != ElementId.ELEM_FLOW) {
@@ -554,7 +554,7 @@ namespace Sla.DECCORE
                 throw new CORE.LowlevelError("Could not find save_state tag");
             }
             XmlDecode decoder = new XmlDecode(this, el);
-            ElementId elemId = decoder.openElement(ElementId.ELEM_SAVE_STATE);
+            uint elemId = decoder.openElement(ElementId.ELEM_SAVE_STATE);
             loadersymbols_parsed = false;
             while (true) {
                 uint attribId = decoder.getNextAttributeId();
@@ -921,7 +921,7 @@ namespace Sla.DECCORE
             }
             XmlDecode decoder = new XmlDecode(this, el);
 
-            ElementId elemId = decoder.openElement(ElementId.ELEM_PROCESSOR_SPEC);
+            uint elemId = decoder.openElement(ElementId.ELEM_PROCESSOR_SPEC);
             while (true) {
                 ElementId subId = decoder.peekElement();
                 if (subId == 0) {
@@ -998,7 +998,7 @@ namespace Sla.DECCORE
             }
             XmlDecode decoder = new XmlDecode(this, el);
 
-            ElementId elemId = decoder.openElement(ElementId.ELEM_COMPILER_SPEC);
+            uint elemId = decoder.openElement(ElementId.ELEM_COMPILER_SPEC);
             while (true) {
                 ElementId subId = decoder.peekElement();
                 if (subId == 0) {
@@ -1145,7 +1145,7 @@ namespace Sla.DECCORE
             Element? expertag = store.getTag("experimental_rules");
             if (null != expertag) {
                 XmlDecode decoder = new XmlDecode(this, expertag);
-                ElementId elemId = decoder.openElement(ElementId.ELEM_EXPERIMENTAL_RULES);
+                uint elemId = decoder.openElement(ElementId.ELEM_EXPERIMENTAL_RULES);
                 while (decoder.peekElement() != 0) {
                     decodeDynamicRule(decoder);
                 }
@@ -1158,7 +1158,7 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         protected void decodeDynamicRule(Decoder decoder)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_RULE);
+            uint elemId = decoder.openElement(ElementId.ELEM_RULE);
             string rulename = string.Empty;
             string groupname = string.Empty;
             bool enabled = false;
@@ -1236,7 +1236,7 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         protected void decodeProtoEval(Decoder decoder)
         {
-            ElementId elemId = decoder.openElement();
+            uint elemId = decoder.openElement();
             string modelName = decoder.readString(AttributeId.ATTRIB_NAME);
             ProtoModel? res = getModel(modelName);
             if (null == res)
@@ -1264,7 +1264,7 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         protected void decodeDefaultProto(Decoder decoder)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_DEFAULT_PROTO);
+            uint elemId = decoder.openElement(ElementId.ELEM_DEFAULT_PROTO);
             while (decoder.peekElement() != 0) {
                 if (null != defaultfp) {
                     throw new CORE.LowlevelError("More than one default prototype model");
@@ -1282,7 +1282,7 @@ namespace Sla.DECCORE
         /// \param rangeProps is where the partially parsed ranges are stored
         protected void decodeGlobal(Decoder decoder, List<RangeProperties> rangeProps)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_GLOBAL);
+            uint elemId = decoder.openElement(ElementId.ELEM_GLOBAL);
             while (decoder.peekElement() != 0) {
                 RangeProperties added = new RangeProperties();
                 rangeProps.Add(added);
@@ -1347,7 +1347,7 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         protected void decodeReadOnly(Decoder decoder)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_READONLY);
+            uint elemId = decoder.openElement(ElementId.ELEM_READONLY);
             while (decoder.peekElement() != 0) {
                 Sla.CORE.Range range = new Sla.CORE.Range();
                 range.decode(decoder);
@@ -1362,7 +1362,7 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         protected void decodeVolatile(Decoder decoder)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_VOLATILE);
+            uint elemId = decoder.openElement(ElementId.ELEM_VOLATILE);
             userops.decodeVolatile(decoder, this);
             while (decoder.peekElement() != 0) {
                 Sla.CORE.Range range = new Sla.CORE.Range();
@@ -1379,7 +1379,7 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         protected void decodeReturnAddress(Decoder decoder)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_RETURNADDRESS);
+            uint elemId = decoder.openElement(ElementId.ELEM_RETURNADDRESS);
             ElementId subId = decoder.peekElement();
             if (subId != 0) {
                 if (null != defaultReturnAddr.space) {
@@ -1396,7 +1396,7 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         protected void decodeIncidentalCopy(Decoder decoder)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_INCIDENTALCOPY);
+            uint elemId = decoder.openElement(ElementId.ELEM_INCIDENTALCOPY);
             while (decoder.peekElement() != 0) {
                 VarnodeData vdata = new VarnodeData();
                 vdata.decode(decoder);
@@ -1416,7 +1416,7 @@ namespace Sla.DECCORE
             // Only allocate once
             LanedRegister lanedRegister;
 
-            ElementId elemId = decoder.openElement(ElementId.ELEM_REGISTER_DATA);
+            uint elemId = decoder.openElement(ElementId.ELEM_REGISTER_DATA);
             while (decoder.peekElement() != 0) {
                 if (lanedRegister.decode(decoder)) {
                     int sizeIndex = lanedRegister.getWholeSize();
@@ -1441,7 +1441,7 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         protected void decodeStackPointer(Decoder decoder)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_STACKPOINTER);
+            uint elemId = decoder.openElement(ElementId.ELEM_STACKPOINTER);
             string registerName;
             // Default stack growth is in negative direction
             bool stackGrowth = true;
@@ -1490,7 +1490,7 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         protected void decodeDeadcodeDelay(Decoder decoder)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_DEADCODEDELAY);
+            uint elemId = decoder.openElement(ElementId.ELEM_DEADCODEDELAY);
             AddrSpace spc = decoder.readSpace(AttributeId.ATTRIB_SPACE);
             int delay = (int)decoder.readSignedInteger(AttributeId.ATTRIB_DELAY);
             if (delay >= 0) {
@@ -1506,7 +1506,7 @@ namespace Sla.DECCORE
         /// Alter the range of addresses for which a pointer is allowed to be inferred.
         protected void decodeInferPtrBounds(Decoder decoder)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_INFERPTRBOUNDS);
+            uint elemId = decoder.openElement(ElementId.ELEM_INFERPTRBOUNDS);
             while (decoder.peekElement() != 0) {
                 Sla.CORE.Range range = new Sla.CORE.Range();
                 range.decode(decoder);
@@ -1522,7 +1522,7 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         protected void decodeFuncPtrAlign(Decoder decoder)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_FUNCPTR);
+            uint elemId = decoder.openElement(ElementId.ELEM_FUNCPTR);
             int align = (int)decoder.readSignedInteger(AttributeId.ATTRIB_ALIGN);
             decoder.closeElement(elemId);
 
@@ -1546,7 +1546,7 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         protected void decodeSpacebase(Decoder decoder)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_SPACEBASE);
+            uint elemId = decoder.openElement(ElementId.ELEM_SPACEBASE);
             string nameString = decoder.readString(AttributeId.ATTRIB_NAME);
             string registerName = decoder.readString(AttributeId.ATTRIB_REGISTER);
             AddrSpace basespace = decoder.readSpace(AttributeId.ATTRIB_SPACE);
@@ -1561,7 +1561,7 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         protected void decodeNoHighPtr(Decoder decoder)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_NOHIGHPTR);
+            uint elemId = decoder.openElement(ElementId.ELEM_NOHIGHPTR);
             while (decoder.peekElement() != 0) {
                 // Iterate over every range tag in the list
                 Sla.CORE.Range range = new Sla.CORE.Range();
@@ -1577,7 +1577,7 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         protected void decodePreferSplit(Decoder decoder)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_PREFERSPLIT);
+            uint elemId = decoder.openElement(ElementId.ELEM_PREFERSPLIT);
             string style = decoder.readString(AttributeId.ATTRIB_STYLE);
             if (style != "inhalf") {
                 throw new CORE.LowlevelError($"Unknown prefersplit style: {style}");
@@ -1598,7 +1598,7 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         protected void decodeAggressiveTrim(Decoder decoder)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_AGGRESSIVETRIM);
+            uint elemId = decoder.openElement(ElementId.ELEM_AGGRESSIVETRIM);
             while (true) {
                 AttributeId attribId = decoder.getNextAttributeId();
                 if (attribId == 0) {

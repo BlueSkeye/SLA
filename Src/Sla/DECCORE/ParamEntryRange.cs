@@ -34,17 +34,17 @@ namespace Sla.DECCORE
         }
 
         /// \brief Helper class for subsorting on position
-        internal class SubsortPosition
+        internal class SubsortPosition : IComparable<SubsortPosition>
         {
             /// The position value
             private int position;
 
-            /// Constructor for use with rangemap
+            // Constructor for use with rangemap
             public SubsortPosition()
             {
             }
 
-            /// Construct given position
+            // Construct given position
             public SubsortPosition(int pos)
             {
                 position = pos;
@@ -55,9 +55,23 @@ namespace Sla.DECCORE
             {
                 position = val ? 1000000 : 0;
             }
+
+            public int CompareTo(SubsortPosition? other)
+            {
+                if (null == other) throw new ApplicationException();
+                if (this < other) return -1;
+                if (this > other) return 1;
+                return 0;
+            }
+
             public static bool operator <(SubsortPosition op1, SubsortPosition op2)
             {
                 return op1.position<op2.position;
+            }
+
+            public static bool operator >(SubsortPosition op1, SubsortPosition op2)
+            {
+                return op1.position > op2.position;
             }
         }
 

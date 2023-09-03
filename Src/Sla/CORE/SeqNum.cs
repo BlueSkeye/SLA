@@ -120,7 +120,7 @@ namespace Sla.CORE
         internal static SeqNum decode(Sla.CORE.Decoder decoder)
         {
             uint uniq = uint.MaxValue;
-            ElementId elemId = decoder.openElement(ElementId.ELEM_SEQNUM);
+            uint elemId = decoder.openElement(ElementId.ELEM_SEQNUM);
             Address pc = Address.decode(decoder); // Recover address
             while(true) {
                 AttributeId attribId = decoder.getNextAttributeId();

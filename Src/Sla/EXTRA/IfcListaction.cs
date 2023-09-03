@@ -15,7 +15,7 @@ namespace Sla.EXTRA
         {
             if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("Decompile action not loaded");
-            dcp.conf.allacts.getCurrent().print(*status.fileoptr, 0, 0);
+            dcp.conf.allacts.getCurrent().print(status.fileoptr, 0, 0);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Sla.CORE;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -8,7 +9,6 @@ using System.Threading.Tasks;
 namespace Sla.DECCORE
 {
     /// \brief P-code emitter that dumps its raw Varnodes and PcodeOps to an in memory cache
-    ///
     /// This is used for emulation when full Varnode and PcodeOp objects aren't needed
     internal class PcodeEmitCache : PcodeEmit
     {
@@ -22,13 +22,43 @@ namespace Sla.DECCORE
         private uint uniq;
 
         /// Clone and cache a raw VarnodeData
-        private VarnodeData createVarnode(VarnodeData var);
+        /// Create an internal copy of the VarnodeData and cache it.
+        /// \param var is the incoming VarnodeData being dumped
+        /// \return the cloned VarnodeData
+        private VarnodeData createVarnode(VarnodeData var)
+        {
+            VarnodeData res = new VarnodeData();
+            res = var;
+            varcache.Add(res);
+            return res;
+        }
 
         /// Constructor
         public PcodeEmitCache(List<PcodeOpRaw> ocache, List<VarnodeData> vcache,
-            List<OpBehavior> @in, ulong uniqReserve);
+            List<OpBehavior> @in, ulong uniqReserve)
+        {
+            opcache = ocache;
+            varcache = vcache;
+            inst = @in;
+            uniq = (uint)uniqReserve;
+        }
 
-        public override void dump(Address addr, OpCode opc, VarnodeData outvar, VarnodeData vars,
-            int isize);
+        public override void dump(Address addr, OpCode opc, VarnodeData? outvar,
+            VarnodeData[] vars, int isize)
+        {
+            PcodeOpRaw op = new PcodeOpRaw();
+            op.setSeqNum(addr, uniq);
+            opcache.Add(op);
+            op.setBehavior(inst[(int)opc]);
+            uniq += 1;
+            if (outvar != (VarnodeData)null) {
+                VarnodeData outvn = createVarnode(outvar);
+                op.setOutput(outvn);
+            }
+            for (int i = 0; i < isize; ++i) {
+                VarnodeData invn = createVarnode(vars + i);
+                op.addInput(invn);
+            }
+        }
     }
 }

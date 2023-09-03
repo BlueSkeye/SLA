@@ -66,7 +66,7 @@ namespace Sla.DECCORE
         /// \param vn is the given Varnode
         /// \param op is the PcodeOp reading the Varnode
         /// \return an IntPromotionCode (excluding NO_PROMOTION)
-        public abstract int localExtensionType(Varnode vn, PcodeOp op);
+        public abstract IntPromotionCode localExtensionType(Varnode vn, PcodeOp op);
 
         /// \brief Calculate the integer promotion code of a given Varnode
         /// Recursively examine the expression defining the Varnode as necessary

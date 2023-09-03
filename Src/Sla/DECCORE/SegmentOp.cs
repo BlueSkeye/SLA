@@ -104,7 +104,7 @@ namespace Sla.DECCORE
 
         public override void decode(Sla.CORE.Decoder decoder)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_SEGMENTOP);
+            uint elemId = decoder.openElement(ElementId.ELEM_SEGMENTOP);
             spc = (AddrSpace)null;
             injectId = -1;
             baseinsize = 0;

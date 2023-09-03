@@ -1,13 +1,4 @@
-﻿using Sla.EXTRA;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml;
+﻿using Sla.CORE;
 
 namespace Sla.EXTRA
 {
@@ -35,16 +26,17 @@ namespace Sla.EXTRA
 
         public abstract UnifyConstraint clone();
 
-        public override void initialize(UnifyState state)
+        public virtual void initialize(UnifyState state)
         {
             // Default initialization (with only 1 state)
-            TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
-            traverse.initialize(1);    // Initialize with only one state
+            TraverseCountState traverse = (TraverseCountState)state.getTraverse(uniqid);
+            // Initialize with only one state
+            traverse.initialize(1);
         }
 
-        public abstract bool step(UnifyState state)
+        public virtual bool step(UnifyState state)
         {
-            TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
+            TraverseCountState traverse = (TraverseCountState)state.getTraverse(uniqid);
             if (!traverse.step()) return false;
             ulong ourconst = expr.getConstant(state);
             if (istrue)
@@ -52,32 +44,32 @@ namespace Sla.EXTRA
             return (ourconst == 0);
         }
 
-        public override void buildTraverseState(UnifyState state)
+        public virtual void buildTraverseState(UnifyState state)
         {
             // Build the default boolean traversal state
             if (uniqid != state.numTraverse())
                 throw new LowlevelError("Traverse id does not match index");
-            TraverseConstraint* newt = new TraverseCountState(uniqid);
+            TraverseConstraint newt = new TraverseCountState(uniqid);
             state.registerTraverseConstraint(newt);
         }
 
-        public override void setId(int id)
+        public virtual void setId(int id)
         {
             uniqid = id;
             id += 1;
         }
 
-        public override void collectTypes(List<UnifyDatatype> typelist)
+        public virtual void collectTypes(List<UnifyDatatype> typelist)
         {
         }
 
-        public override int getBaseIndex() => -1;
+        public virtual int getBaseIndex() => -1;
 
         public abstract void print(TextWriter s, UnifyCPrinter printstate);
 
-        public override bool isDummy() => false;
+        public virtual bool isDummy() => false;
 
-        public override void removeDummy()
+        public virtual void removeDummy()
         {
         }
     }

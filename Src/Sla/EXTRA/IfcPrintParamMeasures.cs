@@ -19,8 +19,8 @@ namespace Sla.EXTRA
                 throw new IfaceExecutionError("No function selected");
 
             ParamIDAnalysis pidanalysis = new ParamIDAnalysis(dcp.fd, false);
-            pidanalysis.savePretty(*status.fileoptr, true);
-            *status.fileoptr << "\n";
+            pidanalysis.savePretty(status.fileoptr, true);
+            status.fileoptr << "\n";
         }
     }
 }

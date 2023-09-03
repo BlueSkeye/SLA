@@ -32,9 +32,16 @@ namespace Sla.DECCORE
             /// \return \b true if \b this comes before \b op2
             public static bool operator <(MergePair op1, MergePair op2)
             {
-                uint s1 = side1.getCreateIndex();
+                uint s1 = op1.side1.getCreateIndex();
                 uint s2 = op2.side1.getCreateIndex();
-                return (s1 != s2) ? (s1 < s2) : (side2.getCreateIndex() < op2.side2.getCreateIndex());
+                return (s1 != s2) ? (s1 < s2) : (op1.side2.getCreateIndex() < op2.side2.getCreateIndex());
+            }
+
+            public static bool operator >(MergePair op1, MergePair op2)
+            {
+                uint s1 = op1.side1.getCreateIndex();
+                uint s2 = op2.side1.getCreateIndex();
+                return (s1 != s2) ? (s1 > s2) : (op1.side2.getCreateIndex() > op2.side2.getCreateIndex());
             }
         }
 
@@ -63,7 +70,7 @@ namespace Sla.DECCORE
         /// The new joined condition block
         private BlockBasic joinblock;
         /// Map from the MergePair of Varnodes to the merged Varnode
-        private Dictionary<MergePair, Varnode> mergeneed;
+        private Dictionary<MergePair, Varnode?> mergeneed;
 
         /// Search for duplicate conditional expressions
         /// Given two conditional blocks, determine if the corresponding conditional
@@ -137,16 +144,16 @@ namespace Sla.DECCORE
         /// \param in2 is the index of the edge coming from \b block2
         private void checkExitBlock(BlockBasic exit, int in1, int in2)
         {
-            IEnumerator<PcodeOp> iter = exit.beginOp();
-            bool completed = !iter.MoveNext();
+            LinkedListNode<PcodeOp>? iter = exit.beginOp();
+            bool completed = (null != iter);
 
             while (!completed) {
-                PcodeOp op = iter.Current;
-                completed = !iter.MoveNext();
+                PcodeOp op = iter.Value;
+                completed = (null != (iter = iter.Next));
                 if (op.code() == OpCode.CPUI_MULTIEQUAL) {
                     // Anything merging from our two root blocks -block1- and -block2-
-                    Varnode vn1 = op.getIn(in1);
-                    Varnode vn2 = op.getIn(in2);
+                    Varnode vn1 = op.getIn(in1) ?? throw new ApplicationException();
+                    Varnode vn2 = op.getIn(in2) ?? throw new ApplicationException();
                     if (vn1 != vn2) {
                         mergeneed[new MergePair(vn1, vn2)] = null;
                     }
@@ -174,20 +181,21 @@ namespace Sla.DECCORE
                 hi = in2;
                 lo = in1;
             }
-            IEnumerator<PcodeOp> iter = exit.beginOp();
-            bool completed = !iter.MoveNext();
+            LinkedListNode<PcodeOp>? iter = exit.beginOp();
+            bool completed = (null != iter);
             while (!completed) {
-                PcodeOp op = iter.Current;
+                PcodeOp op = iter.Value;
                 // Advance iterator before inserts happen
-                completed = !iter.MoveNext();
+                completed = (null != (iter = iter.Next));
                 if (op.code() == OpCode.CPUI_MULTIEQUAL) {
-                    Varnode vn1 = op.getIn(in1);
-                    Varnode vn2 = op.getIn(in2);
+                    Varnode vn1 = op.getIn(in1) ?? throw new ApplicationException();
+                    Varnode vn2 = op.getIn(in2) ?? throw new ApplicationException();
                     if (vn1 == vn2) {
                         data.opRemoveInput(op, hi);
                     }
                     else {
-                        Varnode subvn = mergeneed[new MergePair(vn1, vn2)];
+                        Varnode subvn = mergeneed[new MergePair(vn1, vn2)]
+                            ?? throw new ApplicationException();
                         data.opRemoveInput(op, hi);
                         data.opSetInput(op, subvn, lo);
                     }
@@ -219,7 +227,7 @@ namespace Sla.DECCORE
                 Varnode outvn = data.newUniqueOut(vn1.getSize(), multi);
                 data.opSetInput(multi, vn1, 0);
                 data.opSetInput(multi, vn2, 1);
-                iter.Value = outvn;
+                mergeneed[iter.Key] = outvn;
                 data.opInsertEnd(multi, joinblock);
             }
         }

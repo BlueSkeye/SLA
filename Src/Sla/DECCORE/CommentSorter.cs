@@ -18,7 +18,7 @@ namespace Sla.DECCORE
     /// within the header.
     internal class CommentSorter
     {
-        public enum HeaderCommentFlag
+        public enum HeaderCommentFlag: uint
         {
             /// Basic header comments
             header_basic = 0,
@@ -49,6 +49,16 @@ namespace Sla.DECCORE
                 return (op1.index < op2.index);
             }
 
+            public static bool operator >(Subsort op1, Subsort op2)
+            {
+                if (op1.index == op2.index) {
+                    return (op1.order == op2.order)
+                        ? (op1.pos > op2.pos)
+                        : (op1.order > op2.order);
+                }
+                return (op1.index > op2.index);
+            }
+
             /// \brief Initialize a key for a header comment
             /// \param headerType can be either \b header_basic or \b header_unplaced
             public void setHeader(CommentSorter.HeaderCommentFlag headerType)
@@ -61,7 +71,7 @@ namespace Sla.DECCORE
             /// \brief Initialize a key for a basic block position
             /// \param i is the index of the basic block
             /// \param ord is the position within the block
-            public void setBlock(int i, uint ord)
+            public void setBlock(int i, HeaderCommentFlag ord)
             {
                 index = i;
                 order = ord;
@@ -128,11 +138,11 @@ namespace Sla.DECCORE
 
             // Try to find block containing comment
             // Find op at lowest address greater or equal to comment's address
-            PcodeOpTree::const_iterator opiter = fd.beginOp(comm.getAddr());
+            PcodeOpTree.Enumerator opiter = fd.beginOp(comm.getAddr());
             PcodeOp? backupOp = null;
             if (opiter != fd.endOpAll()) {
                 // If there is an op at or after the comment
-                PcodeOp op = (*opiter).second;
+                PcodeOp op = opiter.Current.Value;
                 BlockBasic? block = op.getParent();
                 if (block == null) {
                     throw new LowlevelError("Dead op reaching CommentSorter");
@@ -140,7 +150,7 @@ namespace Sla.DECCORE
                 if (block.contains(comm.getAddr())) {
                     // If the op's block contains the address
                     // Associate comment with this op
-                    subsort.setBlock(block.getIndex(), (uint)op.getSeqNum().getOrder());
+                    subsort.setBlock(block.getIndex(), (HeaderCommentFlag)op.getSeqNum().getOrder());
                     return true;
                 }
                 if (comm.getAddr() == op.getAddr()) {
@@ -158,14 +168,15 @@ namespace Sla.DECCORE
                 if (block.contains(comm.getAddr())) {
                     // If the op's block contains the address
                     // Treat the comment as being in this block at the very end
-                    subsort.setBlock(block.getIndex(), 0xffffffff);
+                    subsort.setBlock(block.getIndex(), (HeaderCommentFlag)0xffffffff);
                     return true;
                 }
             }
             if (backupOp != null) {
                 // Its possible the op migrated from its original basic block.
                 // Since the address matches exactly, hang the comment on it
-                subsort.setBlock(backupOp.getParent().getIndex(), (uint)backupOp.getSeqNum().getOrder());
+                subsort.setBlock(backupOp.getParent().getIndex(),
+                    (HeaderCommentFlag)backupOp.getSeqNum().getOrder());
                 return true;
             }
             if (fd.beginOpAll() == fd.endOpAll()) {

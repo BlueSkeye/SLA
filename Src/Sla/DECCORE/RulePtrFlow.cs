@@ -129,15 +129,17 @@ namespace Sla.DECCORE
             hasTruncations = glb.getDefaultDataSpace().isTruncated();
         }
 
-        private virtual Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RulePtrFlow(getGroup(), glb);
         }
 
-        private void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
-            if (!hasTruncations) return;    // Only stick ourselves into pool if aggresiveness is turned on
+            if (!hasTruncations)
+                // Only stick ourselves into pool if aggresiveness is turned on
+                return;
             oplist.Add(OpCode.CPUI_STORE);
             oplist.Add(OpCode.CPUI_LOAD);
             oplist.Add(OpCode.CPUI_COPY);
@@ -150,20 +152,19 @@ namespace Sla.DECCORE
             oplist.Add(OpCode.CPUI_PTRADD);
         }
 
-        private int applyOp(PcodeOp op, Funcdata data)
-        { // Push pointer-ness 
+        public override int applyOp(PcodeOp op, Funcdata data)
+        {
+            // Push pointer-ness 
             Varnode vn;
-            AddrSpace* spc;
+            AddrSpace spc;
             int madeChange = 0;
 
-            switch (op.code())
-            {
+            switch (op.code()) {
                 case OpCode.CPUI_LOAD:
                 case OpCode.CPUI_STORE:
-                    vn = op.getIn(1);
-                    spc = op.getIn(0).getSpaceFromConst();
-                    if (vn.getSize() > spc.getAddrSize())
-                    {
+                    vn = op.getIn(1) ?? throw new ApplicationException();
+                    spc = op.getIn(0).getSpaceFromConst() ?? throw new ApplicationException();
+                    if (vn.getSize() > spc.getAddrSize()) {
                         vn = truncatePointer(spc, op, vn, 1, data);
                         madeChange = 1;
                     }
@@ -172,10 +173,9 @@ namespace Sla.DECCORE
                     break;
                 case OpCode.CPUI_CALLIND:
                 case OpCode.CPUI_BRANCHIND:
-                    vn = op.getIn(0);
+                    vn = op.getIn(0) ?? throw new ApplicationException();
                     spc = data.getArch().getDefaultCodeSpace();
-                    if (vn.getSize() > spc.getAddrSize())
-                    {
+                    if (vn.getSize() > spc.getAddrSize()) {
                         vn = truncatePointer(spc, op, vn, 0, data);
                         madeChange = 1;
                     }
@@ -183,16 +183,17 @@ namespace Sla.DECCORE
                         madeChange = 1;
                     break;
                 case OpCode.CPUI_NEW:
-                    vn = op.getOut();
+                    vn = op.getOut() ?? throw new ApplicationException();
                     if (propagateFlowToReads(vn))
                         madeChange = 1;
                     break;
                 case OpCode.CPUI_INDIRECT:
-                    if (!op.isPtrFlow()) return 0;
-                    vn = op.getOut();
+                    if (!op.isPtrFlow())
+                        return 0;
+                    vn = op.getOut() ?? throw new ApplicationException();
                     if (propagateFlowToReads(vn))
                         madeChange = 1;
-                    vn = op.getIn(0);
+                    vn = op.getIn(0) ?? throw new ApplicationException();
                     if (propagateFlowToDef(vn))
                         madeChange = 1;
                     break;
@@ -200,22 +201,21 @@ namespace Sla.DECCORE
                 case OpCode.CPUI_PTRSUB:
                 case OpCode.CPUI_PTRADD:
                     if (!op.isPtrFlow()) return 0;
-                    vn = op.getOut();
+                    vn = op.getOut() ?? throw new ApplicationException();
                     if (propagateFlowToReads(vn))
                         madeChange = 1;
-                    vn = op.getIn(0);
+                    vn = op.getIn(0) ?? throw new ApplicationException();
                     if (propagateFlowToDef(vn))
                         madeChange = 1;
                     break;
                 case OpCode.CPUI_MULTIEQUAL:
                 case OpCode.CPUI_INT_ADD:
                     if (!op.isPtrFlow()) return 0;
-                    vn = op.getOut();
+                    vn = op.getOut() ?? throw new ApplicationException();
                     if (propagateFlowToReads(vn))
                         madeChange = 1;
-                    for (int i = 0; i < op.numInput(); ++i)
-                    {
-                        vn = op.getIn(i);
+                    for (int i = 0; i < op.numInput(); ++i) {
+                        vn = op.getIn(i) ?? throw new ApplicationException();
                         if (propagateFlowToDef(vn))
                             madeChange = 1;
                     }

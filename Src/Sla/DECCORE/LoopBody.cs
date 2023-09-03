@@ -227,7 +227,7 @@ namespace Sla.DECCORE
         /// \param body is the list FlowBlock objects in the loop body, which we assume are marked.
         public void findExit(List<FlowBlock> body)
         {
-            List<FlowBlock> trialexit;
+            List<FlowBlock> trialexit = new List<FlowBlock>();
             FlowBlock tail;
 
             for (int j = 0; j < tails.Count; ++j) {
@@ -307,7 +307,8 @@ namespace Sla.DECCORE
                 return;
             }
             int prefindex;
-            FlowBlock trial;
+            // Initialization for preventing CS0165 on last code line
+            FlowBlock trial = tails[0];
             for (prefindex = 0; prefindex < tails.Count; ++prefindex) {
                 trial = tails[prefindex];
                 int sizeout = trial.sizeOut();
@@ -479,7 +480,7 @@ namespace Sla.DECCORE
             FlowBlock? holdout = null;
             while (!completed) {
                 int outedge;
-                FlowBlock inbl = iter.Current.getCurrentEdge(outedge, graph);
+                FlowBlock inbl = iter.Current.getCurrentEdge(out outedge, graph);
                 completed = !iter.MoveNext();
                 if (inbl == null) {
                     continue;
@@ -522,7 +523,7 @@ namespace Sla.DECCORE
         {
             foreach (FloatingEdge iter in exitedges) {
                 int outedge;
-                FlowBlock? inloop = iter.getCurrentEdge(outedge, graph);
+                FlowBlock? inloop = iter.getCurrentEdge(out outedge, graph);
                 if (inloop != null) {
                     inloop.setLoopExit(outedge);
                 }
@@ -536,7 +537,7 @@ namespace Sla.DECCORE
         {
             foreach (FloatingEdge iter in exitedges) {
                 int outedge;
-                FlowBlock inloop = iter.getCurrentEdge(outedge, graph);
+                FlowBlock inloop = iter.getCurrentEdge(out outedge, graph);
                 if (inloop != null) {
                     inloop.clearLoopExit(outedge);
                 }
@@ -547,7 +548,12 @@ namespace Sla.DECCORE
         {
             return (op1.depth > op2.depth);
         }
-        
+
+        public static bool operator >(LoopBody op1, LoopBody op2)
+        {
+            return (op1.depth < op2.depth);
+        }
+
         ///< Order loop bodies by depth
         /// Merge loop bodies that share the same \e head
         /// Look for LoopBody records that share a \b head. Merge each \b tail

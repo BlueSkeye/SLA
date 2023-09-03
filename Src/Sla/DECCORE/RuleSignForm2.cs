@@ -29,21 +29,23 @@ namespace Sla.DECCORE
         {
             Varnode constVn = op.getIn(1);
             if (!constVn.isConstant()) return 0;
-            Varnode inVn = op.getIn(0);
+            Varnode inVn = op.getIn(0) ?? throw new ApplicationException();
             int sizeout = inVn.getSize();
             if ((int)constVn.getOffset() != sizeout * 8 - 1) return 0;
             if (!inVn.isWritten()) return 0;
-            PcodeOp subOp = inVn.getDef();
+            PcodeOp subOp = inVn.getDef() ?? throw new ApplicationException();
             if (subOp.code() != OpCode.CPUI_SUBPIECE) return 0;
-            int c = subOp.getIn(1).getOffset();
-            Varnode multOut = subOp.getIn(0);
+            int c = (int)subOp.getIn(1).getOffset();
+            Varnode multOut = subOp.getIn(0) ?? throw new ApplicationException();
             int multSize = multOut.getSize();
-            if (c + sizeout != multSize) return 0;  // Must be extracting high part
+            if (c + sizeout != multSize)
+                // Must be extracting high part
+                return 0;
             if (!multOut.isWritten()) return 0;
-            PcodeOp multOp = multOut.getDef();
+            PcodeOp multOp = multOut.getDef() ?? throw new ApplicationException();
             if (multOp.code() != OpCode.CPUI_INT_MULT) return 0;
             int slot;
-            PcodeOp sextOp = null;
+            PcodeOp? sextOp = null;
             for (slot = 0; slot < 2; ++slot) {
                 // Search for the INT_SEXT
                 Varnode vn = multOp.getIn(slot);
@@ -52,16 +54,16 @@ namespace Sla.DECCORE
                 if (sextOp.code() == OpCode.CPUI_INT_SEXT) break;
             }
             if (slot > 1) return 0;
-            Varnode a = sextOp.getIn(0);
+            Varnode a = sextOp.getIn(0) ?? throw new ApplicationException();
             if (a.isFree() || a.getSize() != sizeout) return 0;
-            Varnode otherVn = multOp.getIn(1 - slot);
+            Varnode otherVn = multOp.getIn(1 - slot) ?? throw new ApplicationException();
             // otherVn must be a positive integer and small enough so the INT_MULT can't overflow into the sign-bit
             if (otherVn.isConstant()) {
                 if (otherVn.getOffset() > Globals.calc_mask((uint)sizeout)) return 0;
                 if (2 * sizeout > multSize) return 0;
             }
             else if (otherVn.isWritten()) {
-                PcodeOp zextOp = otherVn.getDef();
+                PcodeOp zextOp = otherVn.getDef() ?? throw new ApplicationException();
                 if (zextOp.code() != OpCode.CPUI_INT_ZEXT) return 0;
                 if (zextOp.getIn(0).getSize() + sizeout > multSize) return 0;
             }

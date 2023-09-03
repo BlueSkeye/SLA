@@ -34,7 +34,7 @@ namespace Sla.EXTRA
                 dcp.conf.clearAnalysis(fd); // Clear any old analysis
                 dcp.conf.allacts.getCurrent().reset(*fd);
                 dcp.conf.allacts.getCurrent().perform(*fd);
-                IfcPrintInputs::print(fd, *status.fileoptr);
+                IfcPrintInputs::print(fd, status.fileoptr);
             }
             catch (LowlevelError err)
             {

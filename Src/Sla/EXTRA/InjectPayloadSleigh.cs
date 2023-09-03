@@ -16,7 +16,7 @@ namespace Sla.EXTRA
         /// \param decoder is the XML stream decoder
         protected void decodeBody(Decoder decoder)
         {
-            ElementId elemId = decoder.openElement();       // Tag may not be present
+            uint elemId = decoder.openElement();       // Tag may not be present
             if (elemId == ElementId.ELEM_BODY) {
                 parsestring = decoder.readString(AttributeId.ATTRIB_CONTENT);
                 decoder.closeElement(elemId);
@@ -63,7 +63,7 @@ namespace Sla.EXTRA
         internal override void decode(Sla.CORE.Decoder decoder)
         {
             // Restore a raw <pcode> tag.  Used for uponentry, uponreturn
-            ElementId elemId = decoder.openElement(ElementId.ELEM_PCODE);
+            uint elemId = decoder.openElement(ElementId.ELEM_PCODE);
             decodePayloadAttributes(decoder);
             decodePayloadParams(decoder);
             decodeBody(decoder);
@@ -75,7 +75,7 @@ namespace Sla.EXTRA
             tpl.saveXml(s, -1);
         }
 
-        protected override string getSource() => source;
+        internal override string getSource() => source;
 
         public static void checkParameterRestrictions(InjectContextSleigh con,
             List<InjectParameter> inputlist, List<InjectParameter> output, string source)

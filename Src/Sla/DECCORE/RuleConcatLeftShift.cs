@@ -31,7 +31,7 @@ namespace Sla.DECCORE
             if (!shiftop.getIn(1).isConstant())
                 // Must be a constant shift
                 return 0;
-            int sa = shiftop.getIn(1).getOffset();
+            int sa = (int)shiftop.getIn(1).getOffset();
             if ((sa & 7) != 0)
                 // Not a multiple of 8
                 return 0;

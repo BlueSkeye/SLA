@@ -10,6 +10,7 @@ using System.Xml.Linq;
 
 namespace Sla.CORE
 {
+#if BFD_SUPPORTED
     internal class BfdArchitecture : SleighArchitecture
     {
         ///< How much to adjust the virtual memory address
@@ -121,4 +122,5 @@ namespace Sla.CORE
         {
         }
     }
+#endif
 }

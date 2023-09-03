@@ -16,6 +16,7 @@ namespace Sla.SLEIGH
         private int errorcount;
         private string firsterror;
         private ConstructTpl? result;
+        internal static PcodeSnippet pcode;
 
         protected override uint allocateTemp()
         {
@@ -189,7 +190,8 @@ namespace Sla.SLEIGH
         public bool parseStream(TextReader s)
         {
             lexer.initialize(s);
-            pcode = this;           // Setup global object for yyparse
+            // Setup global object for yyparse
+            pcode = this;
             int res = yyparse();
             if (res != 0) {
                 reportError((Location)null,"Syntax error");

@@ -22,7 +22,7 @@ namespace Sla.DECCORE
         {
             return (!grouplist.contains(getGroup())) ? null : new RuleDoubleLoad(getGroup());
         }
-        public virtual void getOpList(List<uint> oplist)
+        public virtual void getOpList(List<OpCode> oplist)
         {
             oplist.Add(OpCode.CPUI_PIECE);
         }

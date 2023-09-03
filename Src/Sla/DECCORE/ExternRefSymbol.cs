@@ -67,7 +67,7 @@ namespace Sla.DECCORE
 
         public override void decode(Sla.CORE.Decoder decoder)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_EXTERNREFSYMBOL);
+            uint elemId = decoder.openElement(ElementId.ELEM_EXTERNREFSYMBOL);
             name = string.Empty;           // Name is empty
             displayName = string.Empty;
             while(true) {

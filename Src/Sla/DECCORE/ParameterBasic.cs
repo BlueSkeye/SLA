@@ -16,12 +16,15 @@ namespace Sla.DECCORE
         /// Data-type of the parameter
         private Datatype type;
         /// Lock and other properties from ParameterPieces flags
-        private uint flags;
+        private ParameterPieces.Flags flags;
 
         /// Construct from components
-        public ParameterBasic(string nm, Address ad, Datatype tp, uint fl)
+        public ParameterBasic(string nm, Address ad, Datatype tp, ParameterPieces.Flags fl)
         {
-            name = nm; addr = ad; type = tp; flags = fl;
+            name = nm;
+            addr = ad;
+            type = tp;
+            flags = fl;
         }
 
         ///< Construct a \e void parameter
@@ -39,30 +42,36 @@ namespace Sla.DECCORE
 
         public override int getSize() => type.getSize();
 
-        public override bool isTypeLocked() => ((flags&ParameterPieces.Flags.typelock)!= 0);
+        public override bool isTypeLocked()
+            => ((flags & ParameterPieces.Flags.typelock) != 0);
 
-        public override bool isNameLocked() => ((flags&ParameterPieces.Flags.namelock)!= 0);
+        public override bool isNameLocked()
+            => ((flags & ParameterPieces.Flags.namelock) != 0);
 
-        public override bool isSizeTypeLocked() => ((flags&ParameterPieces::sizelock)!= 0);
+        public override bool isSizeTypeLocked()
+            => ((flags & ParameterPieces.Flags.sizelock) != 0);
 
-        public override bool isThisPointer() => ((flags&ParameterPieces.Flags.isthis)!= 0);
+        public override bool isThisPointer()
+            => ((flags & ParameterPieces.Flags.isthis) != 0);
 
-        public override bool isIndirectStorage() => ((flags&ParameterPieces.Flags.indirectstorage)!= 0);
+        public override bool isIndirectStorage()
+            => ((flags & ParameterPieces.Flags.indirectstorage) != 0);
 
-        public override bool isHiddenReturn() => ((flags&ParameterPieces.Flags.hiddenretparm)!= 0);
+        public override bool isHiddenReturn()
+            => ((flags & ParameterPieces.Flags.hiddenretparm) != 0);
 
-        public override bool isNameUndefined() => (name.size()== 0);
+        public override bool isNameUndefined() => (name.Length == 0);
 
         public override void setTypeLock(bool val)
         {
-            if (val)
-            {
+            if (val) {
                 flags |= ParameterPieces.Flags.typelock;
-                if (type.getMetatype() == type_metatype.TYPE_UNKNOWN) // Check if we are locking type_metatype.TYPE_UNKNOWN
-                    flags |= ParameterPieces::sizelock;
+                if (type.getMetatype() == type_metatype.TYPE_UNKNOWN)
+                    // Check if we are locking type_metatype.TYPE_UNKNOWN
+                    flags |= ParameterPieces.Flags.sizelock;
             }
             else
-                flags &= ~((uint)(ParameterPieces.Flags.typelock | ParameterPieces::sizelock));
+                flags &= ~(ParameterPieces.Flags.typelock | ParameterPieces.Flags.sizelock);
         }
 
         public override void setNameLock(bool val)
@@ -70,7 +79,7 @@ namespace Sla.DECCORE
             if (val)
                 flags |= ParameterPieces.Flags.namelock;
             else
-                flags &= ~((uint)ParameterPieces.Flags.namelock);
+                flags &= ~ParameterPieces.Flags.namelock;
         }
 
         public override void setThisPointer(bool val)
@@ -78,13 +87,12 @@ namespace Sla.DECCORE
             if (val)
                 flags |= ParameterPieces.Flags.isthis;
             else
-                flags &= ~((uint)ParameterPieces.Flags.isthis);
+                flags &= ~ParameterPieces.Flags.isthis;
         }
 
         public override void overrideSizeLockType(Datatype ct)
         {
-            if (type.getSize() == ct.getSize())
-            {
+            if (type.getSize() == ct.getSize()) {
                 if (!isSizeTypeLocked())
                     throw new LowlevelError("Overriding parameter that is not size locked");
                 type = ct;

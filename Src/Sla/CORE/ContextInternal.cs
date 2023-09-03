@@ -250,7 +250,7 @@ namespace Sla.CORE
 
         public override int getContextSize() => size;
 
-        protected override void registerVariable(ref string nm, int sbit, int ebit)
+        internal override void registerVariable(string nm, int sbit, int ebit)
         {
             if (!database.empty()) {
                 throw new LowlevelError(
@@ -327,9 +327,9 @@ namespace Sla.CORE
             encoder.closeElement(ElementId.ELEM_CONTEXT_POINTS);
         }
 
-        protected override void decode(Sla.CORE.Decoder decoder)
+        internal override void decode(Sla.CORE.Decoder decoder)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_CONTEXT_POINTS);
+            uint elemId = decoder.openElement(ElementId.ELEM_CONTEXT_POINTS);
             while(true) {
                 uint subId = decoder.openElement();
                 if (subId == 0) {
@@ -359,9 +359,9 @@ namespace Sla.CORE
             decoder.closeElement(elemId);
         }
 
-        protected override void decodeFromSpec(Decoder decoder)
+        internal override void decodeFromSpec(Decoder decoder)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_CONTEXT_DATA);
+            uint elemId = decoder.openElement(ElementId.ELEM_CONTEXT_DATA);
             while(true) {
                 uint subId = decoder.openElement();
                 if (subId == 0) {

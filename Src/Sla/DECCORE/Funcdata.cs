@@ -168,7 +168,7 @@ namespace Sla.DECCORE
             HighVariable? otherHigh = (HighVariable)null;
             // Look for a conflicting HighVariable
             IEnumerator<Varnode> iter = beginLoc(entry.getSize(), entry.getAddr());
-            while (iter != endLoc()) {
+            while (iter.MoveNext()) {
                 otherVn = iter.Current;
                 if (otherVn.getSize() != entry.getSize()) break;
                 if (otherVn.getAddr() != entry.getAddr()) break;
@@ -177,7 +177,6 @@ namespace Sla.DECCORE
                     otherHigh = tmpHigh;
                     break;
                 }
-                ++iter;
             }
             if (otherHigh == (HighVariable)null) {
                 vn.setSymbolEntry(entry);
@@ -1053,9 +1052,8 @@ namespace Sla.DECCORE
         private static void encodeVarnode(Sla.CORE.Encoder encoder, IEnumerator<Varnode> iter,
             IEnumerator<Varnode> enditer)
         {
-            Varnode vn;
-            while (iter != enditer) {
-                vn = *iter++;
+            while (iter.MoveNext()) {
+                Varnode vn = iter.Current;
                 vn.encode(encoder);
             }
         }
@@ -1148,7 +1146,6 @@ namespace Sla.DECCORE
                     default:
                         break;
                 }
-                ++iter;
             }
             return (PcodeOp)null;
         }
@@ -1605,13 +1602,13 @@ namespace Sla.DECCORE
 
             PcodeOp? op = (PcodeOp)null;
             if (type == Override.Branching.BRANCH)
-                op = findPrimaryBranch(iter, enditer, false, true, true);
+                op = findPrimaryBranch(iter, false, true, true);
             else if (type == Override.Branching.CALL)
-                op = findPrimaryBranch(iter, enditer, true, false, true);
+                op = findPrimaryBranch(iter, true, false, true);
             else if (type == Override.Branching.CALL_RETURN)
-                op = findPrimaryBranch(iter, enditer, true, true, true);
+                op = findPrimaryBranch(iter, true, true, true);
             else if (type == Override.Branching.RETURN)
-                op = findPrimaryBranch(iter, enditer, true, true, false);
+                op = findPrimaryBranch(iter, true, true, false);
 
             if ((op == (PcodeOp)null) || (!op.isDead()))
                 throw new LowlevelError("Could not apply flowoverride");
@@ -1801,9 +1798,9 @@ namespace Sla.DECCORE
             size = -1;
             ulong id = 0;
             AddrSpace stackid = glb.getStackSpace();
-            ElementId elemId = decoder.openElement(ElementId.ELEM_FUNCTION);
+            uint elemId = decoder.openElement(ElementId.ELEM_FUNCTION);
             while(true) {
-                AttributeId attribId = decoder.getNextAttributeId();
+                uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == AttributeId.ATTRIB_NAME)
                     name = decoder.readString();
@@ -1828,7 +1825,7 @@ namespace Sla.DECCORE
                 throw new LowlevelError("Missing function size");
             baseaddr = Address.decode(decoder);
             while(true) {
-                ElementId subId = decoder.peekElement();
+                uint subId = decoder.peekElement();
                 if (subId == 0) break;
                 if (subId == ElementId.ELEM_LOCALDB) {
                     if (localmap != (ScopeLocal)null)
@@ -1887,7 +1884,7 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         public void decodeJumpTable(Sla.CORE.Decoder decoder)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_JUMPTABLELIST);
+            uint elemId = decoder.openElement(ElementId.ELEM_JUMPTABLELIST);
             while (decoder.peekElement() != 0) {
                 JumpTable jt = new JumpTable(glb);
                 jt.decode(decoder);
@@ -2259,30 +2256,38 @@ namespace Sla.DECCORE
         /// \return the recovered value
         public int fillinExtrapop()
         {
-            if (hasNoCode())        // If no code to make a decision on
-                return funcp.getExtraPop(); // either we already know it or we don't
+            if (hasNoCode())
+                // If no code to make a decision on
+                // either we already know it or we don't
+                return funcp.getExtraPop();
 
             if (funcp.getExtraPop() != ProtoModel.extrapop_unknown)
-                return funcp.getExtraPop(); // If we already know it, just return it
+                // If we already know it, just return it
+                return funcp.getExtraPop();
 
             IEnumerator<PcodeOp> iter = beginOp(OpCode.CPUI_RETURN);
-            if (!iter.MoveNext()) return 0; // If no return statements, answer is irrelevant
+            if (!iter.MoveNext())
+                // If no return statements, answer is irrelevant
+                return 0;
 
             PcodeOp retop = iter.Current;
             byte[] buffer = new byte[4];
-            glb.loader.loadFill(buffer, 4, retop.getAddr());
+            glb.loader.loadFill(buffer, 0, 4, retop.getAddr());
 
             // We are assuming x86 code here
-            int extrapop = 4;      // The default case
+            // The default case
+            int extrapop = 4;
             if (buffer[0] == 0xc2) {
-                extrapop = buffer[2];   // Pull out immediate 16-bits
+                // Pull out immediate 16-bits
+                extrapop = buffer[2];
                 extrapop <<= 8;
                 extrapop += buffer[1];
-                extrapop += 4;      // extra 4 for the return address
+                // extra 4 for the return address
+                extrapop += 4;
             }
-            funcp.setExtraPop(extrapop); // Save what we have learned on the prototype
+            // Save what we have learned on the prototype
+            funcp.setExtraPop(extrapop);
             return extrapop;
-
         }
 
         // Varnode routines
@@ -2395,9 +2400,11 @@ namespace Sla.DECCORE
         /// \return the newly allocated \e annotation Varnode
         public Varnode newVarnodeIop(PcodeOp op)
         {
-            Datatype ct = glb.types.getBase(sizeof(op), type_metatype.TYPE_UNKNOWN);
+            Datatype ct = glb.types.getBase(TypeFactory.PcodeOpSize,
+                type_metatype.TYPE_UNKNOWN);
             AddrSpace cspc = glb.getIopSpace();
-            Varnode vn = vbank.create(sizeof(op), new Address(cspc, (ulong)op), ct);
+            Varnode vn = vbank.create(TypeFactory.PcodeOpSize, new Address(cspc, (ulong)op),
+                ct);
             assignHigh(vn);
             return vn;
         }
@@ -2409,8 +2416,10 @@ namespace Sla.DECCORE
         /// \return the newly allocated constant Varnode
         public Varnode newVarnodeSpace(AddrSpace spc)
         {
-            Datatype ct = glb.types.getBase(sizeof(spc), type_metatype.TYPE_UNKNOWN);
-            Varnode vn = vbank.create(sizeof(spc), glb.createConstFromSpace(spc), ct);
+            Datatype ct = glb.types.getBase(TypeFactory.AddressSpaceSize,
+                type_metatype.TYPE_UNKNOWN);
+            Varnode vn = vbank.create(TypeFactory.AddressSpaceSize,
+                glb.createConstFromSpace(spc), ct);
             assignHigh(vn);
             return vn;
         }
@@ -2423,9 +2432,11 @@ namespace Sla.DECCORE
         /// \return the newly allocated \e annotation Varnode
         public Varnode newVarnodeCallSpecs(FuncCallSpecs fc)
         {
-            Datatype ct = glb.types.getBase(sizeof(fc), type_metatype.TYPE_UNKNOWN);
+            Datatype ct = glb.types.getBase(TypeFactory.FuncCallSpecsSize,
+                type_metatype.TYPE_UNKNOWN);
             AddrSpace cspc = glb.getFspecSpace();
-            Varnode vn = vbank.create(sizeof(fc), new Address(cspc, (ulong)fc), ct);
+            Varnode vn = vbank.create(TypeFactory.FuncCallSpecsSize,
+                new Address(cspc, (ulong)fc), ct);
             assignHigh(vn);
             return vn;
         }
@@ -2522,13 +2533,10 @@ namespace Sla.DECCORE
         {
             Address endaddr = addr + (sz - 1);
             List<Varnode> inlist = new List<Varnode>();
-            VarnodeDefSet.Enumerator iter =
-                vbank.beginDef(Varnode.varnode_flags.input, addr);
-            VarnodeDefSet.Enumerator enditer =
-                vbank.endDef(Varnode.varnode_flags.input, endaddr);
-            while (iter != enditer) {
+            IEnumerator<Varnode> iter = vbank.beginDef(Varnode.varnode_flags.input, addr);
+            IEnumerator<Varnode> enditer = vbank.endDef(Varnode.varnode_flags.input, endaddr);
+            while (iter.MoveNext()) {
                 Varnode vn = iter.Current;
-                ++iter;
                 if (vn.getOffset() + (uint)(vn.getSize() - 1) > endaddr.getOffset())
                     throw new LowlevelError("Cannot properly adjust input varnodes");
                 inlist.Add(vn);
@@ -3202,19 +3210,23 @@ namespace Sla.DECCORE
                         warning(s.ToString(), defop.getAddr());
                     }
                 }
-                return false;       // No change was made
+                // No change was made
+                return false;
             }
 
             if (vn.getSize() > sizeof(ulong))
-                return false;       // Constant will exceed precision
+                // Constant will exceed precision
+                return false;
 
             ulong res;
             byte[] bytes = new byte[32];
             try {
-                glb.loader.loadFill(bytes, vn.getSize(), vn.getAddr());
+                glb.loader.loadFill(bytes, 0, vn.getSize(), vn.getAddr());
             }
-            catch (DataUnavailError err) { // Could not get value from LoadImage
-                vn.clearFlags(Varnode.varnode_flags.@readonly); // Treat as writeable
+            catch (DataUnavailError) {
+                // Could not get value from LoadImage
+                // Treat as writeable
+                vn.clearFlags(Varnode.varnode_flags.@readonly);
                 return true;
             }
 
@@ -3322,12 +3334,14 @@ namespace Sla.DECCORE
         /// isIndirectOnly() returns \b true.
         public void markIndirectOnly()
         {
-            VarnodeDefSet.Enumerator iter = beginDef(Varnode.varnode_flags.input);
-            VarnodeDefSet.Enumerator enditer = endDef(Varnode.varnode_flags.input);
-            for (; iter != enditer; ++iter) {
+            IEnumerator<Varnode> iter = beginDef(Varnode.varnode_flags.input);
+            IEnumerator<Varnode> enditer = endDef(Varnode.varnode_flags.input);
+            while (iter.MoveNext()) {
                 // Loop over all inputs
                 Varnode vn = iter.Current;
-                if (!vn.isIllegalInput()) continue; // Only check illegal inputs
+                if (!vn.isIllegalInput())
+                    // Only check illegal inputs
+                    continue;
                 if (checkIndirectUse(vn))
                     vn.setFlags(Varnode.varnode_flags.indirectonly);
             }
@@ -3368,33 +3382,33 @@ namespace Sla.DECCORE
             while (iter.MoveNext()) {
                 // WARNING : see behavior
                 throw new NotImplementedException();
-                op = iter++;       // Increment before removing descendant
-                i = op.getSlot(vn);
-                if (op.isMarker()) {
-                    // Do not put constant directly in marker
-                    if (copyop == (PcodeOp)null) {
-                        if (vn.isWritten()) {
-                            copyop = newOp(1, vn.getDef().getAddr());
-                            opSetOpcode(copyop, OpCode.CPUI_COPY);
-                            newrep = newUniqueOut(vn.getSize(), copyop);
-                            opSetInput(copyop, newConstant(vn.getSize(), val), 0);
-                            opInsertAfter(copyop, vn.getDef());
-                        }
-                        else {
-                            BlockBasic bb = (BlockBasic)getBasicBlocks().getBlock(0);
-                            copyop = newOp(1, bb.getStart());
-                            opSetOpcode(copyop, OpCode.CPUI_COPY);
-                            newrep = newUniqueOut(vn.getSize(), copyop);
-                            opSetInput(copyop, newConstant(vn.getSize(), val), 0);
-                            opInsertBegin(copyop, bb);
-                        }
-                    }
-                    else
-                        newrep = copyop.getOut();
-                }
-                else
-                    newrep = newConstant(vn.getSize(), val);
-                opSetInput(op, newrep, i);
+                //op = iter++;       // Increment before removing descendant
+                //i = op.getSlot(vn);
+                //if (op.isMarker()) {
+                //    // Do not put constant directly in marker
+                //    if (copyop == (PcodeOp)null) {
+                //        if (vn.isWritten()) {
+                //            copyop = newOp(1, vn.getDef().getAddr());
+                //            opSetOpcode(copyop, OpCode.CPUI_COPY);
+                //            newrep = newUniqueOut(vn.getSize(), copyop);
+                //            opSetInput(copyop, newConstant(vn.getSize(), val), 0);
+                //            opInsertAfter(copyop, vn.getDef());
+                //        }
+                //        else {
+                //            BlockBasic bb = (BlockBasic)getBasicBlocks().getBlock(0);
+                //            copyop = newOp(1, bb.getStart());
+                //            opSetOpcode(copyop, OpCode.CPUI_COPY);
+                //            newrep = newUniqueOut(vn.getSize(), copyop);
+                //            opSetInput(copyop, newConstant(vn.getSize(), val), 0);
+                //            opInsertBegin(copyop, bb);
+                //        }
+                //    }
+                //    else
+                //        newrep = copyop.getOut();
+                //}
+                //else
+                //    newrep = newConstant(vn.getSize(), val);
+                //opSetInput(op, newrep, i);
             }
         }
 
@@ -3700,7 +3714,7 @@ namespace Sla.DECCORE
             }
             iter = vbank.beginLoc(entry.getSize(), entry.getAddr(), usestart, uint.MaxValue);
             // TODO: Use a better end iterator
-            for (; iter != enditer; ++iter) {
+            while (iter.MoveNext()) {
                 Varnode vn = iter.Current;
                 Address usepoint = vn.getUsePoint(this);
                 if (entry.inUse(usepoint))

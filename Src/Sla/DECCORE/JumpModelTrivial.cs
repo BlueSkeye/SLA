@@ -26,7 +26,7 @@ namespace Sla.DECCORE
         public override bool recoverModel(Funcdata fd, PcodeOp indop, uint matchsize,
             uint maxtablesize)
         {
-            size = indop.getParent().sizeOut();
+            size = (uint)indop.getParent().sizeOut();
             return ((size != 0) && (size <= matchsize));
         }
 

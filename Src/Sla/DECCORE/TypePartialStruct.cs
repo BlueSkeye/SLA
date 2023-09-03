@@ -30,7 +30,7 @@ namespace Sla.DECCORE
             offset = op.offset;
         }
 
-        private TypePartialStruct(Datatype contain, int off, int sz, Datatype strip)
+        internal TypePartialStruct(Datatype contain, int off, int sz, Datatype strip)
             : base(sz, type_metatype.TYPE_PARTIALSTRUCT)
         {
 #if CPUI_DEBUG
@@ -95,10 +95,14 @@ namespace Sla.DECCORE
         public override int compareDependency(Datatype op)
         {
             if (submeta != op.getSubMeta()) return (submeta < op.getSubMeta()) ? -1 : 1;
-            TypePartialStruct tp = (TypePartialStruct)op;    // Both must be partial
-            if (container != tp.container) return (container < tp.container) ? -1 : 1;    // Compare absolute pointers
-            if (offset != tp.offset) return (offset < tp.offset) ? -1 : 1;
-            return (op.getSize() - size);
+            // Both must be partial
+            TypePartialStruct tp = (TypePartialStruct)op;
+            if (container != tp.container)
+                // Compare absolute pointers
+                return container.CompareTo(tp.container);
+            return (offset != tp.offset) 
+                ? (offset < tp.offset) ? -1 : 1
+                : (op.getSize() - size);
         }
 
         internal override Datatype clone() => new TypePartialStruct(this);

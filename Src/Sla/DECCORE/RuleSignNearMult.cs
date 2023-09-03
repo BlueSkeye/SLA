@@ -43,21 +43,26 @@ namespace Sla.DECCORE
             if (i == 2) return 0;
             Varnode x = addop.getIn(1 - i);
             if (x.isFree()) return 0;
-            int n = unshiftop.getIn(1).getOffset();
+            int n = (int)unshiftop.getIn(1).getOffset();
             if (n <= 0) return 0;
             n = shiftvn.getSize() * 8 - n;
             if (n <= 0) return 0;
             ulong mask = Globals.calc_mask((uint)shiftvn.getSize());
             mask = (mask << n) & mask;
-            if (mask != op.getIn(1).getOffset()) return 0;
+            if (mask != op.getIn(1).getOffset())
+                return 0;
             Varnode sgnvn = unshiftop.getIn(0);
             if (!sgnvn.isWritten()) return 0;
             PcodeOp sshiftop = sgnvn.getDef();
-            if (sshiftop.code() != OpCode.CPUI_INT_SRIGHT) return 0;
-            if (!sshiftop.getIn(1).isConstant()) return 0;
-            if (sshiftop.getIn(0) != x) return 0;
-            int val = sshiftop.getIn(1).getOffset();
-            if (val != 8 * x.getSize() - 1) return 0;
+            if (sshiftop.code() != OpCode.CPUI_INT_SRIGHT)
+                return 0;
+            if (!sshiftop.getIn(1).isConstant())
+                return 0;
+            if (sshiftop.getIn(0) != x)
+                return 0;
+            int val = (int)sshiftop.getIn(1).getOffset();
+            if (val != 8 * x.getSize() - 1)
+                return 0;
 
             ulong pow = 1;
             pow <<= n;

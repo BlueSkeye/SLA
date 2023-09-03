@@ -76,17 +76,18 @@ namespace Sla.DECCORE
         /// \param slot is the input slot being read
         /// \param newoff is used to pass back any remaining offset into the field which still must be resolved
         /// \return the field to use with truncation or null if there is no appropriate field
-        public override TypeField findTruncation(int offset, int sz, PcodeOp op, int slot, int newoff)
+        public override TypeField? findTruncation(int offset, int sz, PcodeOp op, int slot,
+            out int newoff)
         {
             // No new scoring is done, but if a cached result is available, return it.
             Funcdata fd = op.getParent().getFuncdata();
-            ResolvedUnion res = fd.getUnionField(this, op, slot);
-            if (res != (ResolvedUnion)null && res.getFieldNum() >= 0)
-            {
+            ResolvedUnion? res = fd.getUnionField(this, op, slot);
+            if (res != (ResolvedUnion)null && res.getFieldNum() >= 0) {
                 TypeField field = getField(res.getFieldNum());
                 newoff = offset - field.offset;
                 if (newoff + sz > field.type.getSize())
-                    return (TypeField)null; // Truncation spans more than one field
+                    // Truncation spans more than one field
+                    return (TypeField)null;
                 return field;
             }
             return (TypeField)null;
@@ -212,7 +213,8 @@ namespace Sla.DECCORE
             return -1;
         }
 
-        public override TypeField? resolveTruncation(int offset, PcodeOp op, int slot, int newoff)
+        public override TypeField? resolveTruncation(int offset, PcodeOp op, int slot,
+            out int newoff)
         {
             Funcdata fd = op.getParent().getFuncdata();
             ResolvedUnion? res = fd.getUnionField(this, op, slot);

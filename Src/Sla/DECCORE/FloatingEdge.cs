@@ -38,7 +38,7 @@ namespace Sla.DECCORE
         /// \param outedge will hold the index of the edge (outgoing relative to returned FlowBlock)
         /// \param graph is the containing BlockGraph
         /// \return the current \e top of the edge or NULL
-        public FlowBlock getCurrentEdge(int outedge, FlowBlock graph)
+        public FlowBlock getCurrentEdge(out int outedge, FlowBlock graph)
         {
             while (top.getParent() != graph) {
                 // Move up through collapse hierarchy to current graph

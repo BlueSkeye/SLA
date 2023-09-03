@@ -138,9 +138,9 @@ namespace Sla.EXTRA
 
         public override void decodeDebug(Sla.CORE.Decoder decoder)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_INJECTDEBUG);
+            uint elemId = decoder.openElement(ElementId.ELEM_INJECTDEBUG);
             while(true) {
-                ElementId subId = decoder.openElement();
+                uint subId = decoder.openElement();
                 if (subId != ElementId.ELEM_INJECT) break;
                 string name = decoder.readString(AttributeId.ATTRIB_NAME);
                 int type = (int)decoder.readSignedInteger(AttributeId.ATTRIB_TYPE);

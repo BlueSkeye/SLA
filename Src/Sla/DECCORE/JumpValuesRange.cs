@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Sla.DECCORE
 {
     /// \brief single entry switch variable that can take a range of values
@@ -46,7 +41,7 @@ namespace Sla.DECCORE
             rangeSize >>= 3;
             ulong left = range.getMin();
             int step = range.getStep();
-            ulong right = (left + step * nm) & range.getMask();
+            ulong right = (left + (uint)(step * nm)) & range.getMask();
             range.setRange(left, right, rangeSize, step);
         }
 
@@ -73,11 +68,11 @@ namespace Sla.DECCORE
 
         public override JumpValues clone()
         {
-            JumpValuesRange* res = new JumpValuesRange();
-            res.range = range;
-            res.normqvn = normqvn;
-            res.startop = startop;
-            return res;
+            return new JumpValuesRange() {
+                range = range,
+                normqvn = normqvn,
+                startop = startop
+            };
         }
     }
 }

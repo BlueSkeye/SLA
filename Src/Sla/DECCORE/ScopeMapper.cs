@@ -1,4 +1,5 @@
 ﻿using Sla.CORE;
+using Sla.EXTRA;
 
 namespace Sla.DECCORE
 {
@@ -40,8 +41,8 @@ namespace Sla.DECCORE
         public Scope getScope() => scope;
 
         // friend class Database;
-        /// \brief Helper class for \e not doing any sub-sorting of overlapping ScopeMapper ranges
-        internal class NullSubsort
+        // Helper class for \e not doing any sub-sorting of overlapping ScopeMapper ranges
+        internal class NullSubsort : IComparable<NullSubsort>
         {
             public NullSubsort()
             {
@@ -57,6 +58,14 @@ namespace Sla.DECCORE
             {
             }
 
+            public int CompareTo(NullSubsort? other)
+            {
+                if (other == null) throw new ApplicationException();
+                if (this < other) return -1;
+                if (this > other) return 1;
+                return 0;
+            }
+
             // Compare operation (does nothing)
             public static bool operator <(NullSubsort op1, NullSubsort op2)
             {
@@ -66,6 +75,27 @@ namespace Sla.DECCORE
             public static bool operator >(NullSubsort op1, NullSubsort op2)
             {
                 return false;
+            }
+        }
+
+        internal class Instanciator : IRangemapSubsortTypeInstantiator<NullSubsort>
+        {
+            internal static Instanciator Instance = new Instanciator();
+
+            private Instanciator()
+            {
+            }
+
+            /// \brief Given a boolean value, construct the earliest/latest possible sub-sort
+            /// \param val is \b true for the latest and \b false for the earliest possible sub-sort
+            public NullSubsort Create(bool value)
+            {
+                return new NullSubsort(value);
+            }
+
+            public NullSubsort Create(NullSubsort cloned)
+            {
+                return new NullSubsort(cloned);
             }
         }
     }

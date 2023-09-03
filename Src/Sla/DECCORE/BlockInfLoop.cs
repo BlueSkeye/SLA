@@ -18,9 +18,9 @@ namespace Sla.DECCORE
         public override void markLabelBumpUp(bool bump)
         {
             // infloops steal lower blocks labels
-            @base.markLabelBumpUp(true);
+            base.markLabelBumpUp(true);
             if (!bump) {
-                clearFlag(f_label_bumpup);
+                clearFlag(block_flags.f_label_bumpup);
             }
         }
 
@@ -34,7 +34,7 @@ namespace Sla.DECCORE
         public override void printHeader(TextWriter s)
         {
             s.Write("Infinite loop block ");
-            @base.printHeader(s);
+            base.printHeader(s);
         }
 
         public override void emit(PrintLanguage lng) 

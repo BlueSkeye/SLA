@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Sla.DECCORE
 {
     internal class FunctionModifier : TypeModifier
@@ -16,15 +8,17 @@ namespace Sla.DECCORE
         
         public FunctionModifier(List<TypeDeclarator> p,bool dtdtdt)
         {
-            paramlist = *p;
-            if (paramlist.size() == 1)
-            {
-                TypeDeclarator* decl = paramlist[0];
-                if (decl.numModifiers() == 0)
-                { // Check for void as an inputtype
-                    Datatype* ct = decl.getBaseType();
-                    if ((ct != (Datatype)null) && (ct.getMetatype() == type_metatype.TYPE_VOID))
-                        paramlist.clear();
+            paramlist = p;
+            if (paramlist.size() == 1) {
+                TypeDeclarator decl = paramlist[0];
+                if (decl.numModifiers() == 0) {
+                    // Check for void as an inputtype
+                    Datatype? ct = decl.getBaseType();
+                    if (   (ct != (Datatype)null)
+                        && (ct.getMetatype() == type_metatype.TYPE_VOID))
+                    {
+                        paramlist.Clear();
+                    }
                 }
             }
             dotdotdot = dtdtdt;
@@ -32,54 +26,57 @@ namespace Sla.DECCORE
 
         public void getInTypes(List<Datatype> intypes, Architecture glb)
         {
-            for (uint i = 0; i < paramlist.size(); ++i)
-            {
-                Datatype* ct = paramlist[i].buildType(glb);
+            for (int i = 0; i < paramlist.size(); ++i) {
+                Datatype ct = paramlist[i].buildType(glb) ?? throw new ApplicationException();
                 intypes.Add(ct);
             }
         }
 
         public void getInNames(List<string> innames)
         {
-            for (uint i = 0; i < paramlist.size(); ++i)
+            for (int i = 0; i < paramlist.size(); ++i)
                 innames.Add(paramlist[i].getIdentifier());
         }
 
         public bool isDotdotdot() => dotdotdot;
     
-        public override uint getType() => function_mod;
+        public override Modifier getType() => Modifier.function_mod;
 
         public override bool isValid()
         {
-            for (uint i = 0; i < paramlist.size(); ++i)
-            {
-                TypeDeclarator* decl = paramlist[i];
+            for (int i = 0; i < paramlist.size(); ++i) {
+                TypeDeclarator decl = paramlist[i];
                 if (!decl.isValid()) return false;
-                if (decl.numModifiers() == 0)
-                {
-                    Datatype* ct = decl.getBaseType();
-                    if ((ct != (Datatype)null) && (ct.getMetatype() == type_metatype.TYPE_VOID))
-                        return false;       // Extra void type
+                if (decl.numModifiers() == 0) {
+                    Datatype? ct = decl.getBaseType();
+                    if (   (ct != (Datatype)null)
+                        && (ct.getMetatype() == type_metatype.TYPE_VOID))
+                    {
+                        // Extra void type
+                        return false;
+                    }
                 }
             }
             return true;
         }
 
-        public override Datatype modType(Datatype @base, TypeDeclarator decl, Architecture glb)
+        public override Datatype modType(Datatype? @base, TypeDeclarator decl,
+            Architecture glb)
         {
-            List<Datatype*> intypes;
+            List<Datatype> intypes = new List<Datatype>();
 
             // Varargs is encoded as extra null pointer in paramlist
             bool dotdotdot = false;
-            if ((!paramlist.empty()) && (paramlist.GetLastItem() == (TypeDeclarator*)0))
+            if (   !paramlist.empty()
+                && (paramlist.GetLastItem() == (TypeDeclarator)null))
             {
                 dotdotdot = true;
             }
 
             getInTypes(intypes, glb);
 
-            ProtoModel* protomodel = decl.getModel(glb);
-            return glb.types.getTypeCode(protomodel, base, intypes, dotdotdot);
+            ProtoModel protomodel = decl.getModel(glb) ?? throw new ApplicationException();
+            return glb.types.getTypeCode(protomodel, @base, intypes, dotdotdot);
         }
     }
 }

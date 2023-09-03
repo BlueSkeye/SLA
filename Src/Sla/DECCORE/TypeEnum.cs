@@ -79,7 +79,7 @@ namespace Sla.DECCORE
         /// \param typegrp is the factory owning \b this data-type
         internal void decode(Sla.CORE.Decoder decoder, TypeFactory typegrp)
         {
-            //  ElementId elemId = decoder.openElement();
+            //  uint elemId = decoder.openElement();
             decodeBasic(decoder);
             submeta = (metatype == type_metatype.TYPE_INT)
                 ? sub_metatype.SUB_INT_ENUM
@@ -92,10 +92,11 @@ namespace Sla.DECCORE
                 ulong val = 0;
                 string nm = string.Empty;
                 while(true) {
-                    AttributeId  attrib = decoder.getNextAttributeId();
+                    uint attrib = decoder.getNextAttributeId();
                     if (attrib == 0) break;
                     if (attrib == AttributeId.ATTRIB_VALUE) {
-                        long valsign = decoder.readSignedInteger(); // Value might be negative
+                        // Value might be negative
+                        long valsign = decoder.readSignedInteger();
                         val = (ulong)valsign & Globals.calc_mask((uint)size);
                     }
                     else if (attrib == AttributeId.ATTRIB_NAME)
@@ -123,7 +124,7 @@ namespace Sla.DECCORE
         public TypeEnum(int s, type_metatype m)
             : base(s, m)
         {
-            flags |= enumtype;
+            flags |= Properties.enumtype;
             submeta = (m == type_metatype.TYPE_INT)
                 ? sub_metatype.SUB_INT_ENUM
                 : sub_metatype.SUB_UINT_ENUM;
@@ -227,7 +228,7 @@ namespace Sla.DECCORE
             return 0;
         }
 
-        public override Datatype clone() => new TypeEnum(this);
+        internal override Datatype clone() => new TypeEnum(this);
 
         public override void encode(Sla.CORE.Encoder encoder)
         {

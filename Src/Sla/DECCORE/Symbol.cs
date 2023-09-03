@@ -1,13 +1,4 @@
 ﻿using Sla.CORE;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Formats.Asn1.AsnWriter;
 
 namespace Sla.DECCORE
 {
@@ -216,7 +207,8 @@ namespace Sla.DECCORE
             dispflags |= DisplayFlags.merge_problems;
         }
 
-        public bool isIsolated() => ((dispflags & DisplayFlags.isolate)!= 0); ///< Return \b true if \b this is isolated from speculative merging
+        // Return \b true if \b this is isolated from speculative merging
+        public bool isIsolated() => ((dispflags & DisplayFlags.isolate)!= 0);
 
         /// Set whether \b this Symbol should be speculatively merged
         /// If the given value is \b true, any Varnodes that map directly to \b this Symbol,
@@ -226,7 +218,8 @@ namespace Sla.DECCORE
         {
             if (val) {
                 dispflags |= DisplayFlags.isolate;
-                flags |= Varnode.varnode_flags.typelock;     // Isolated Symbol must be typelocked
+                // Isolated Symbol must be typelocked
+                flags |= Varnode.varnode_flags.typelock;
                 checkSizeTypeLock();
             }
             else
@@ -458,7 +451,7 @@ namespace Sla.DECCORE
 
         /// Encode \b this Symbol to a stream
         /// \param encoder is the stream encoder
-        public override void encode(Sla.CORE.Encoder encoder)
+        public virtual void encode(Sla.CORE.Encoder encoder)
         {
             encoder.openElement(ElementId.ELEM_SYMBOL);
             encodeHeader(encoder);
@@ -471,7 +464,7 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         public virtual void decode(Sla.CORE.Decoder decoder)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_SYMBOL);
+            uint elemId = decoder.openElement(ElementId.ELEM_SYMBOL);
             decodeHeader(decoder);
 
             decodeBody(decoder);
@@ -485,7 +478,7 @@ namespace Sla.DECCORE
         /// the exact address of the Symbol. With functions, the bytes consumed by a SymbolEntry
         /// may not match the data-type size.
         /// \return the number of bytes in a default SymbolEntry
-        public override int getBytesConsumed()
+        public virtual int getBytesConsumed()
         {
             return type.getSize();
         }

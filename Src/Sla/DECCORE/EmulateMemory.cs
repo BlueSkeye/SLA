@@ -12,7 +12,7 @@ namespace Sla.DECCORE
     /// The following p-code operations are stubbed out and will throw an exception:
     /// CALLOTHER, MULTIEQUAL, INDIRECT, CPOOLREF, SEGMENTOP, and NEW.
     /// Of course the derived class can override these.
-    internal class EmulateMemory : Emulate
+    internal abstract class EmulateMemory : Emulate
     {
         /// The memory state of the emulator
         protected MemoryState memstate;
@@ -22,8 +22,8 @@ namespace Sla.DECCORE
         protected override void executeUnary()
         {
             ulong in1 = memstate.getValue(currentOp.getInput(0));
-            ulong @out = currentBehave.evaluateUnary(currentOp.getOutput().size,
-                currentOp.getInput(0).size, in1);
+            ulong @out = currentBehave.evaluateUnary((int)currentOp.getOutput().size,
+                (int)currentOp.getInput(0).size, in1);
             memstate.setValue(currentOp.getOutput(), @out);
         }
 
@@ -31,8 +31,8 @@ namespace Sla.DECCORE
         {
             ulong in1 = memstate.getValue(currentOp.getInput(0));
             ulong in2 = memstate.getValue(currentOp.getInput(1));
-            ulong @out = currentBehave.evaluateBinary(currentOp.getOutput().size,
-                currentOp.getInput(0).size, in1, in2);
+            ulong @out = currentBehave.evaluateBinary((int)currentOp.getOutput().size,
+                (int)currentOp.getInput(0).size, in1, in2);
             memstate.setValue(currentOp.getOutput(), @out);
         }
 
@@ -42,7 +42,7 @@ namespace Sla.DECCORE
             AddrSpace spc = currentOp.getInput(0).getSpaceFromConst();
 
             off = AddrSpace.addressToByte(off, spc.getWordSize());
-            ulong res = memstate.getValue(spc, off, currentOp.getOutput().size);
+            ulong res = memstate.getValue(spc, off, (int)currentOp.getOutput().size);
             memstate.setValue(currentOp.getOutput(), res);
         }
 
@@ -56,7 +56,7 @@ namespace Sla.DECCORE
             AddrSpace spc = currentOp.getInput(0).getSpaceFromConst();
 
             off = AddrSpace.addressToByte(off, spc.getWordSize());
-            memstate.setValue(spc, off, currentOp.getInput(2).size, val);
+            memstate.setValue(spc, off, (int)currentOp.getInput(2).size, val);
         }
 
         protected override void executeBranch()
@@ -73,7 +73,7 @@ namespace Sla.DECCORE
         protected override void executeBranchind()
         {
             ulong off = memstate.getValue(currentOp.getInput(0));
-            setExecuteAddress(Address(currentOp.getAddr().getSpace(), off));
+            setExecuteAddress(new Address(currentOp.getAddr().getSpace(), off));
         }
 
         protected override void executeCall()
@@ -84,7 +84,7 @@ namespace Sla.DECCORE
         protected override void executeCallind()
         {
             ulong off = memstate.getValue(currentOp.getInput(0));
-            setExecuteAddress(Address(currentOp.getAddr().getSpace(), off));
+            setExecuteAddress(new Address(currentOp.getAddr().getSpace(), off));
         }
 
         protected override void executeCallother()

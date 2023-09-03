@@ -1033,7 +1033,7 @@ namespace Sla.DECCORE
         /// \return the new Symbol
         public Symbol? addMapSym(Sla.CORE.Decoder decoder)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_MAPSYM);
+            uint elemId = decoder.openElement(ElementId.ELEM_MAPSYM);
             ElementId subId = decoder.peekElement();
             Symbol sym;
             if (subId == ElementId.ELEM_SYMBOL)

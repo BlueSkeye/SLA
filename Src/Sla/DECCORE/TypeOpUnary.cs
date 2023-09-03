@@ -4,10 +4,9 @@ using Sla.DECCORE;
 namespace Sla.DECCORE
 {
     /// \brief A generic unary operator: one input and one output
-    ///
     /// All unary op-codes have data-type for the input value and a
     /// data-type for the output value
-    internal class TypeOpUnary : TypeOp
+    internal abstract class TypeOpUnary : TypeOp
     {
         private type_metatype metaout;  ///< The metatype of the output
         private type_metatype metain;       ///< The metatype of the input

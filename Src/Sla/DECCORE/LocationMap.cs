@@ -42,7 +42,7 @@ namespace Sla.DECCORE
             if ((iter != themap.end()) && (-1 != (where = addr.overlap(0, iter.Current.Key, (*iter).second.size)))) {
                 if (where + size <= (*iter).second.size) {
                     intersect = ((*iter).second.pass < pass) ? 2 : 0; // Completely contained in previous element
-                    return iter;
+                    return iter.Current;
                 }
                 addr = iter.Current.Key;
                 size = where + size;
@@ -78,8 +78,10 @@ namespace Sla.DECCORE
         {
             // First range after address
             IEnumerator iter = themap.upper_bound(addr);
-            if (iter == themap.begin()) return themap.end();
-            --iter;         // First range before or equal to address
+            if (iter == themap.begin())
+                return themap.end();
+            // First range before or equal to address
+            --iter;
             if (-1 != addr.overlap(0, iter.Current.Key, (*iter).second.size))
                 return iter;
             return themap.end();

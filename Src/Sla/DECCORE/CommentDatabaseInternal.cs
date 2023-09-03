@@ -9,7 +9,7 @@ namespace Sla.DECCORE
     internal class CommentDatabaseInternal : CommentDatabase
     {
         /// The sorted set of Comment objects
-        private SortedSet<Comment> commentset = new SortedSet<Comment>(CommentOrder.Singleton);
+        private CommentSet commentset = new CommentSet();
 
         /// Constructor
         public CommentDatabaseInternal()
@@ -32,22 +32,22 @@ namespace Sla.DECCORE
             commentset.Clear();
         }
 
-        public virtual void clearType(Address fad, uint tp)
+        public override void clearType(Address fad, Comment.comment_type tp)
         {
             Comment testcommbeg = new Comment(0, fad,
                 new Address(Address.mach_extreme.m_minimal), 0, "");
             Comment testcommend = new Comment(0, fad,
                 new Address(Address.mach_extreme.m_maximal), 65535, "");
 
-            CommentSet::iterator iterbegin = commentset.lower_bound(testcommbeg);
-            CommentSet::iterator iterend = commentset.lower_bound(testcommend);
-            CommentSet::iterator iter;
+            IEnumerator<Comment> iterbegin = commentset.lower_bound(testcommbeg);
+            IEnumerator<Comment> iterend = commentset.lower_bound(testcommend);
+            IEnumerator<Comment> iter;
             while (iterbegin != iterend) {
                 iter = iterbegin;
                 ++iter;
                 if ((iterbegin.Current.getType() & tp) != 0) {
                     // delete(iterbegin.Current);
-                    commentset.erase(iterbegin);
+                    commentset.Remove(iterbegin);
                 }
                 iterbegin = iter;
             }
@@ -62,7 +62,7 @@ namespace Sla.DECCORE
             bool completed;
             // Find first element greater
             while (!(completed = !iter.MoveNext())) {
-                int comparisonResult = CommentOrder.Singleton.CompareTo(iter.Current, newcom);
+                int comparisonResult = CommentOrder.Instance.CompareTo(iter.Current, newcom);
                 if (-1 == comparisonResult) {
                     if (null == comparisonCandidate) {
                         comparisonCandidate = iter.Current;
@@ -92,7 +92,7 @@ namespace Sla.DECCORE
             List<Comment> reverseOrderComments = new List<Comment>();
 
             foreach(Comment comment in commentset) {
-                if (0 < CommentOrder.Singleton.CompareTo(comment, newcom)) {
+                if (0 < CommentOrder.Instance.CompareTo(comment, newcom)) {
                     break;
                 }
                 reverseOrderComments.Insert(0, comment);
@@ -147,7 +147,7 @@ namespace Sla.DECCORE
 
         public override void decode(Sla.CORE.Decoder decoder)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_COMMENTDB);
+            uint elemId = decoder.openElement(ElementId.ELEM_COMMENTDB);
             while (decoder.peekElement() != 0) {
                 Comment com = new Comment();
                 com.decode(decoder);

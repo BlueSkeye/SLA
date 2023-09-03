@@ -45,9 +45,10 @@ namespace Sla.DECCORE
             s.Write($"[off={offset},sz={size}]");
         }
 
-        public override TypeField findTruncation(int off, int sz, PcodeOp op, int slot, int newoff)
+        public override TypeField? findTruncation(int off, int sz, PcodeOp op, int slot,
+            out int newoff)
         {
-            return container.findTruncation(off + offset, sz, op, slot, newoff);
+            return container.findTruncation(off + offset, sz, op, slot, out newoff);
         }
 
         public override int numDepend() => container.numDepend();
@@ -63,7 +64,7 @@ namespace Sla.DECCORE
 
         public override int compare(Datatype op, int level)
         {
-            int res = Datatype.compare(op, level);
+            int res = base.compare(op, level);
             if (res != 0) return res;
             // Both must be partial unions
             TypePartialUnion tp = (TypePartialUnion)op;
@@ -80,7 +81,8 @@ namespace Sla.DECCORE
         {
             if (submeta != op.getSubMeta()) return (submeta < op.getSubMeta()) ? -1 : 1;
             TypePartialUnion tp = (TypePartialUnion)op;  // Both must be partial unions
-            if (container != tp.container) return (container < tp.container) ? -1 : 1;    // Compare absolute pointers
+            // Compare absolute pointers
+            if (container != tp.container) return (container < tp.container) ? -1 : 1;
             if (offset != tp.offset) return (offset < tp.offset) ? -1 : 1;
             return (op.getSize() - size);
         }
@@ -104,12 +106,12 @@ namespace Sla.DECCORE
             int curOff = offset;
             while (curType != (Datatype)null && curType.getSize() > size) {
                 if (curType.getMetatype() == type_metatype.TYPE_UNION) {
-                    TypeField field = curType.resolveTruncation(curOff, op, slot, curOff);
+                    TypeField field = curType.resolveTruncation(curOff, op, slot, out curOff);
                     curType = (field == (TypeField)null) ? (Datatype)null : field.type;
                 }
                 else {
                     ulong newOff;
-                    curType = curType.getSubType(curOff, out newOff);
+                    curType = curType.getSubType((ulong)curOff, out newOff);
                     curOff = (int)newOff;
                 }
             }
@@ -129,7 +131,7 @@ namespace Sla.DECCORE
                 }
                 else {
                     ulong newOff;
-                    curType = curType.getSubType(curOff, out newOff);
+                    curType = curType.getSubType((ulong)curOff, out newOff);
                     curOff = (int)newOff;
                 }
             }
@@ -141,7 +143,7 @@ namespace Sla.DECCORE
         public override int findCompatibleResolve(Datatype ct)
             => container.findCompatibleResolve(ct);
 
-        public override TypeField resolveTruncation(int off, PcodeOp op, int slot, int newoff)
-            => container.resolveTruncation(off + offset, op, slot, newoff);
+        public override TypeField? resolveTruncation(int off, PcodeOp op, int slot, out int newoff)
+            => container.resolveTruncation(off + offset, op, slot, out newoff);
     }
 }

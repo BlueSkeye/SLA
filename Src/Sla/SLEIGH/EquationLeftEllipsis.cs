@@ -1,20 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Sla.SLEIGH
 {
-    internal class EquationLeftEllipsis : PatternExpression
+    internal abstract class EquationLeftEllipsis : PatternEquation
     {
         // Equation preceded by ellipses
         private PatternEquation eq;
 
         ~EquationLeftEllipsis()
         {
-            base.release(eq);
+            PatternEquation.release(eq);
         }
 
         public EquationLeftEllipsis(PatternEquation e)
@@ -41,7 +35,8 @@ namespace Sla.SLEIGH
 
         public override void operandOrder(Constructor ct, List<OperandSymbol> order)
         {
-            eq.operandOrder(ct, order);    // List operands
+            // List operands
+            eq.operandOrder(ct, order);
         }
     }
 }

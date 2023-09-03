@@ -1,20 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Sla.SLEIGH
 {
-    internal class ValExpressEquation : PatternEquation
+    internal abstract class ValExpressEquation : PatternEquation
     {
         protected PatternValue lhs;
         protected PatternExpression rhs;
         
         ~ValExpressEquation()
         {
-            PatternExpression::release(lhs);
-            PatternExpression::release(rhs);
+            PatternExpression.release(lhs);
+            PatternExpression.release(rhs);
         }
 
         public ValExpressEquation(PatternValue l, PatternExpression r)

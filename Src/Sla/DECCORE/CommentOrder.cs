@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Sla.DECCORE
 {
     /// \brief Compare two Comment pointers
@@ -11,7 +6,7 @@ namespace Sla.DECCORE
     /// then the sub-sort index.
     internal class CommentOrder : IComparer<Comment>
     {
-        internal static readonly CommentOrder Singleton = new CommentOrder();
+        internal static readonly CommentOrder Instance = new CommentOrder();
 
         /// Comparison operator
         /// \param a is the first Comment to compare

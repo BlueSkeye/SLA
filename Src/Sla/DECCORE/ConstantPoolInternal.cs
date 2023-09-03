@@ -55,7 +55,12 @@ namespace Sla.DECCORE
             /// \return \b true if \b this should be ordered before the other reference
             public static bool operator <(CheapSorter op1, CheapSorter op2)
             {
-                return (op1.a != op2.a) ? (op1.a <op2.a) : (op1.b <op2.b);
+                return (op1.a != op2.a) ? (op1.a <op2.a) : (op1.b < op2.b);
+            }
+
+            public static bool operator >(CheapSorter op1, CheapSorter op2)
+            {
+                return (op1.a != op2.a) ? (op1.a > op2.a) : (op1.b > op2.b);
             }
 
             /// \brief Convert the reference back to a formal array of integers
@@ -80,7 +85,7 @@ namespace Sla.DECCORE
             /// \param decoder is the stream decoder
             public void decode(Sla.CORE.Decoder decoder)
             {
-                ElementId elemId = decoder.openElement(ElementId.ELEM_REF);
+                uint elemId = decoder.openElement(ElementId.ELEM_REF);
                 a = decoder.readUnsignedInteger(AttributeId.ATTRIB_A);
                 b = decoder.readUnsignedInteger(AttributeId.ATTRIB_B);
                 decoder.closeElement(elemId);
@@ -127,14 +132,13 @@ namespace Sla.DECCORE
 
         public override void decode(Sla.CORE.Decoder decoder, TypeFactory typegrp)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_CONSTANTPOOL);
-            while (decoder.peekElement() != 0)
-            {
-                CheapSorter sorter;
+            uint elemId = decoder.openElement(ElementId.ELEM_CONSTANTPOOL);
+            while (decoder.peekElement() != 0) {
+                CheapSorter sorter = new CheapSorter();
                 sorter.decode(decoder);
-                List<ulong> refs;
+                List<ulong> refs = new List<ulong>();
                 sorter.apply(refs);
-                CPoolRecord* newrec = createRecord(refs);
+                CPoolRecord newrec = createRecord(refs);
                 newrec.decode(decoder, typegrp);
             }
             decoder.closeElement(elemId);

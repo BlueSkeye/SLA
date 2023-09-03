@@ -102,6 +102,11 @@ namespace Sla.DECCORE
             {
                 return (op1.vn != op2.vn) ? (op1.vn < op2.vn) : (op1.index < op2.index);
             }
+
+            public static bool operator >(VisitMark op1, VisitMark op2)
+            {
+                return (op1.vn != op2.vn) ? (op1.vn > op2.vn) : (op1.index > op2.index);
+            }
         }
 
         /// The factory containing data-types
@@ -648,7 +653,7 @@ namespace Sla.DECCORE
                     if (meta == type_metatype.TYPE_PTR) {
                         if (trial.inslot == 0) {
                             Datatype ptrto = ((TypePointer)trial.fitType).getPtrTo();
-                            if (ptrto.getSize() == trial.op.getIn(2).getOffset()) {
+                            if ((uint)ptrto.getSize() == trial.op.getIn(2).getOffset()) {
                                 score = 10;
                                 resType = trial.fitType;
                             }
@@ -863,7 +868,7 @@ namespace Sla.DECCORE
                 case OpCode.CPUI_PTRADD:
                     if (meta == type_metatype.TYPE_PTR) {
                         Datatype ptrto = ((TypePointer)trial.fitType).getPtrTo();
-                        if (ptrto.getSize() == def.getIn(2).getOffset())
+                        if ((uint)ptrto.getSize() == def.getIn(2).getOffset())
                             score = 10;
                         else
                             score = 2;
@@ -1055,13 +1060,14 @@ namespace Sla.DECCORE
                 ? (int)((TypePointer)parentType).getWordSize()
                 : 0;
             int numFields = result.baseType.numDepend();
-            scores.resize(numFields + 1, 0);
-            fields.resize(numFields + 1, (Datatype)null);
+            scores.resize(numFields + 1, delegate() { return 0; });
+            fields.resize(numFields + 1, delegate() { return (Datatype)null; });
             Varnode vn;
             if (slot < 0) {
                 vn = op.getOut() ?? throw new ApplicationException();
                 if (vn.getSize() != parentType.getSize())
-                    scores[0] -= 10;        // Data-type does not even match size of Varnode
+                    // Data-type does not even match size of Varnode
+                    scores[0] -= 10;
                 else
                     trialCurrent.Add(new Trial(vn, parentType, 0, false));
             }
@@ -1080,10 +1086,12 @@ namespace Sla.DECCORE
                 if (wordSize != 0) {
                     if (fieldType.getMetatype() == type_metatype.TYPE_ARRAY)
                         isArray = true;
-                    fieldType = typegrp.getTypePointerStripArray(parentType.getSize(), fieldType, wordSize);
+                    fieldType = typegrp.getTypePointerStripArray(parentType.getSize(),
+                        fieldType, (uint)wordSize);
                 }
                 if (vn.getSize() != fieldType.getSize())
-                    scores[i + 1] -= 10;    // Data-type does not even match size of Varnode, don't create trial
+                    // Data-type does not even match size of Varnode, don't create trial
+                    scores[i + 1] -= 10;
                 else if (slot < 0) {
                     trialCurrent.Add(new Trial(vn, fieldType, i + 1, isArray));
                 }
@@ -1112,10 +1120,10 @@ namespace Sla.DECCORE
         {
             typegrp = tgrp;
             result = new ResolvedUnion(unionType);
-            Varnode vn = op.getOut();
+            Varnode vn = op.getOut() ?? throw new ApplicationException();
             int numFields = unionType.numDepend();
-            scores.resize(numFields + 1, 0);
-            fields.resize(numFields + 1, (Datatype)null);
+            scores.resize(numFields + 1, delegate() { return 0; });
+            fields.resize(numFields + 1, delegate() { return (Datatype)null; });
             fields[0] = unionType;
             scores[0] = -10;
             for (int i = 0; i < numFields; ++i) {
@@ -1146,10 +1154,11 @@ namespace Sla.DECCORE
         {
             typegrp = tgrp;
             result = new ResolvedUnion(unionType);
-            Varnode vn = (slot < 0) ? op.getOut() : op.getIn(slot);
+            Varnode vn = ((slot < 0) ? op.getOut() : op.getIn(slot))
+                ?? throw new ApplicationException();
             int numFields = unionType.numDepend();
-            scores.resize(numFields + 1, 0);
-            fields.resize(numFields + 1, (Datatype)null);
+            scores.resize(numFields + 1, delegate() { return 0; });
+            fields.resize(numFields + 1, delegate() { return (Datatype)null; });
             fields[0] = unionType;
             scores[0] = -10;        // Assume the untruncated entire union is not a good fit
             for (int i = 0; i < numFields; ++i) {
@@ -1159,9 +1168,11 @@ namespace Sla.DECCORE
                 Datatype? ct = scoreTruncation(unionField.type, vn, offset - unionField.offset, i + 1);
                 if (ct != (Datatype)null) {
                     if (slot < 0)
-                        trialCurrent.Add(new Trial(vn, ct, i + 1, false));        // Try to flow backward
+                        // Try to flow backward
+                        trialCurrent.Add(new Trial(vn, ct, i + 1, false));
                     else
-                        trialCurrent.Add(new Trial(op, slot, ct, i + 1, false));  // Flow downward
+                        // Flow downward
+                        trialCurrent.Add(new Trial(op, slot, ct, i + 1, false));
                     visited.Add(new VisitMark(vn, i + 1));
                 }
             }

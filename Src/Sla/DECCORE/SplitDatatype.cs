@@ -250,7 +250,7 @@ namespace Sla.DECCORE
             int sizeLeft = inBase.getSize();
             if (inCategory == 1) {
                 while (sizeLeft > 0) {
-                    Datatype? curOut = getComponent(outBase, curOff, outHole);
+                    Datatype? curOut = getComponent(outBase, curOff, out outHole);
                     if (curOut == (Datatype)null) return false;
                     // Throw away primitive data-type if it is a constant
                     Datatype curIn = inConstant
@@ -443,7 +443,7 @@ namespace Sla.DECCORE
                 PcodeOp subpiece = data.newOp(2, followOp.getAddr());
                 data.opSetOpcode(subpiece, OpCode.CPUI_SUBPIECE);
                 data.opSetInput(subpiece, rootVn, 0);
-                data.opSetInput(subpiece, data.newConstant(4, off), 1);
+                data.opSetInput(subpiece, data.newConstant(4, (ulong)off), 1);
                 Varnode outVn = data.newVarnodeOut(dt.getSize(), addr, subpiece);
                 inVarnodes.Add(outVn);
                 outVn.updateType(dt, false, false);
@@ -561,23 +561,23 @@ namespace Sla.DECCORE
                     : dataTypePieces[i].outType;
                 int byteOffset = baseOffset + dataTypePieces[i].offset;
                 Datatype tmpType = baseType;
-                ulong curOff = byteOffset;
+                ulong curOff = (ulong)byteOffset;
                 Varnode inPtr = rootVn;
                 do {
                     ulong newOff;
                     PcodeOp newOp;
                     Datatype newType;
-                    if (curOff >= tmpType.getSize()) {
+                    if (curOff >= (uint)tmpType.getSize()) {
                         // An offset bigger than current data-type indicates an array
                         // The new data-type will be the same as current data-type
                         newType = tmpType;
                         // But new offset will be old offset modulo data-type size
                         long sNewOff = (long)curOff % tmpType.getSize();
-                        newOff = (sNewOff < 0) ? (sNewOff + tmpType.getSize()) : sNewOff;
+                        newOff = (ulong)((sNewOff < 0) ? (sNewOff + tmpType.getSize()) : sNewOff);
 
                     }
                     else {
-                        newType = tmpType.getSubType(curOff, newOff);
+                        newType = tmpType.getSubType(curOff, out newOff);
                         if (newType == (Datatype)null) {
                             // Null should only be returned for a hole in a structure, in which case use precomputed data-type
                             newType = matchType;
@@ -593,9 +593,9 @@ namespace Sla.DECCORE
                         newOp = data.newOp(3, followOp.getAddr());
                         data.opSetOpcode(newOp, OpCode.CPUI_PTRADD);
                         data.opSetInput(newOp, inPtr, 0);
-                        Varnode indexVn = data.newConstant(inPtr.getSize(), finalOffset);
+                        Varnode indexVn = data.newConstant(inPtr.getSize(), (ulong)finalOffset);
                         data.opSetInput(newOp, indexVn, 1);
-                        data.opSetInput(newOp, data.newConstant(inPtr.getSize(), sz), 2);
+                        data.opSetInput(newOp, data.newConstant(inPtr.getSize(), (ulong)sz), 2);
                         Datatype indexType = types.getBase(indexVn.getSize(), type_metatype.TYPE_INT);
                         indexVn.updateType(indexType, false, false);
                     }
@@ -647,7 +647,7 @@ namespace Sla.DECCORE
 
         public SplitDatatype(Funcdata func)
         {
-            data = new Funcdata(func);
+            data = func;
             Architecture glb = func.getArch();
             types = glb.types;
             splitStructures =
@@ -792,7 +792,7 @@ namespace Sla.DECCORE
             if (!storeRoot.find(storeOp, outType))
                 return false;
 
-            RootPointer loadRoot;
+            RootPointer loadRoot = new RootPointer();
             if (loadOp != (PcodeOp)null) {
                 if (!loadRoot.find(loadOp, inType))
                     return false;
@@ -820,7 +820,7 @@ namespace Sla.DECCORE
             else
                 buildInSubpieces(inVn, storeOp, inVarnodes);
 
-            List<Varnode> storePtrs;
+            List<Varnode> storePtrs = new List<Varnode>();
             buildPointers(storeRoot.pointer, storeRoot.ptrType, storeRoot.baseOffset, storeOp, storePtrs, false);
             AddrSpace storeSpace = storeOp.getIn(0).getSpaceFromConst();
             // Preserve original STORE object, so that INDIRECT references are still valid

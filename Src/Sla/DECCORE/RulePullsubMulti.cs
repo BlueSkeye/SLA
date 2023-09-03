@@ -241,10 +241,10 @@ namespace Sla.DECCORE
             new_op = data.newOp(2, newaddr);
             data.opSetOpcode(new_op, OpCode.CPUI_SUBPIECE);
             if (usetmp)
-                outvn = data.newUniqueOut(outsize, new_op);
+                outvn = data.newUniqueOut((int)outsize, new_op);
             else {
-                smalladdr1.renormalize(outsize);
-                outvn = data.newVarnodeOut(outsize, smalladdr1, new_op);
+                smalladdr1.renormalize((int)outsize);
+                outvn = data.newVarnodeOut((int)outsize, smalladdr1, new_op);
             }
             data.opSetInput(new_op, basevn, 0);
             data.opSetInput(new_op, data.newConstant(4, shift), 1);

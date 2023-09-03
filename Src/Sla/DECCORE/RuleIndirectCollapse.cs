@@ -53,7 +53,7 @@ namespace Sla.DECCORE
                             // Convert INDIRECT to a SUBPIECE
                             ulong trunc;
                             if (vn1.getSpace().isBigEndian())
-                                trunc = vn1.getOffset() + vn1.getSize() - (vn2.getOffset() + vn2.getSize());
+                                trunc = vn1.getOffset() + (uint)vn1.getSize() - (vn2.getOffset() + (uint)vn2.getSize());
                             else
                                 trunc = vn2.getOffset() - vn1.getOffset();
                             data.opUninsert(op);

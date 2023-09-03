@@ -4,18 +4,18 @@ using Sla.DECCORE;
 namespace Sla.EXTRA
 {
     /// \brief Root class for all decompiler specific commands
-    ///
     /// Commands share the data object IfaceDecompData and are capable of
     /// iterating over all functions in the program/architecture.
-    internal class IfaceDecompCommand : IfaceCommand
+    internal abstract class IfaceDecompCommand : IfaceCommand
     {
-        protected IfaceStatus status;          ///< The console owning \b this command
-        protected IfaceDecompData dcp;           ///< Data common to decompiler commands
+        // The console owning \b this command
+        protected IfaceStatus status;
+        // Data common to decompiler commands
+        protected IfaceDecompData dcp;
 
-        ///< Iterate recursively over all functions in given scope
-        /// Runs over every function in the scope, or any sub-scope , calling
-        /// iterationCallback()
-        /// \param scope is the given scope
+        // Iterate recursively over all functions in given scope
+        // Runs over every function in the scope, or any sub-scope , calling iterationCallback()
+        // \param scope is the given scope
         protected void iterateScopesRecursive(Scope scope)
         {
             if (!scope.isGlobal()) return;
@@ -26,15 +26,15 @@ namespace Sla.EXTRA
             }
         }
 
-        ///< Iterate over all functions in a given scope
-        /// Runs over every function in the scope calling iterationCallback().
-        /// \param scope is the given scope
+        // Iterate over all functions in a given scope
+        // Runs over every function in the scope calling iterationCallback().
+        // \param scope is the given scope
         protected void iterateFunctionsAddrOrder(Scope scope)
         {
             IEnumerator<SymbolEntry> miter = scope.begin();
             while (miter.MoveNext()) {
                 Symbol sym = miter.Current.getSymbol();
-                FunctionSymbol fsym = (FunctionSymbol)(sym);
+                FunctionSymbol? fsym = sym as FunctionSymbol;
                 if (fsym != (FunctionSymbol)null)
                     iterationCallback(fsym.getFunction());
             }
@@ -43,7 +43,7 @@ namespace Sla.EXTRA
         public override void setData(IfaceStatus root, IfaceData data)
         {
             status = root;
-            dcp = (IfaceDecompData*)data;
+            dcp = (IfaceDecompData)data;
         }
 
         public override string getModule() => "decompile";
@@ -53,7 +53,7 @@ namespace Sla.EXTRA
         /// \brief Perform the per-function aspect of \b this command.
         ///
         /// \param fd is the particular function to operate on
-        public override void iterationCallback(Funcdata fd)
+        public virtual void iterationCallback(Funcdata fd)
         {
         }
 
@@ -78,12 +78,12 @@ namespace Sla.EXTRA
             if (dcp.cgraph == (CallGraph)null)
                 throw new IfaceExecutionError("No callgraph present");
 
-            CallGraphNode* node;
-            node = dcp.cgraph.initLeafWalk();
-            while (node != (CallGraphNode)null)
-            {
-                if (node.getName().size() == 0) continue; // Skip if has no name
-                Funcdata* fd = node.getFuncdata();
+            CallGraphNode? node = dcp.cgraph.initLeafWalk();
+            while (node != (CallGraphNode)null) {
+                if (node.getName().Length == 0)
+                    // Skip if has no name
+                    continue;
+                Funcdata? fd = node.getFuncdata();
                 if (fd != (Funcdata)null)
                     iterationCallback(fd);
                 node = dcp.cgraph.nextLeaf(node);

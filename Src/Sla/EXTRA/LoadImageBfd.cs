@@ -3,6 +3,7 @@ using Sla.DECCORE;
 
 namespace Sla.EXTRA
 {
+#if BFD_SUPPORTED
     internal class LoadImageBfd : LoadImage
     {
         private static int bfdinit = 0;        // Is the library (globally) initialized
@@ -19,7 +20,7 @@ namespace Sla.EXTRA
         private /*mutable*/ asection secinfoptr;
 
         // Find section containing given offset
-        private asection findSection(ulong offset, ulong ssize)
+        private asection findSection(ulong offset, out ulong secsize)
         {
             // Return section containing offset, or closest greater section
             asection p;
@@ -136,11 +137,12 @@ namespace Sla.EXTRA
             cursize = bufsize;      // Read an entire buffer
 
             while (cursize > 0) {
-                p = findSection(curaddr, secsize);
+                p = findSection(curaddr, out secsize);
                 if (p == (asection)null) {
                     if (offset == 0)        // Initial address not mapped
                         break;
-                    memset(buffer + offset, 0, cursize); // Fill out the rest of the buffer with 0
+                    // Fill out the rest of the buffer with 0
+                    Array.Fill(buffer, (byte)0, (int)offset, cursize);
                     memcpy(ptr, buffer, size);
                     return;
                 }
@@ -296,4 +298,5 @@ namespace Sla.EXTRA
             }
         }
     }
+#endif
 }

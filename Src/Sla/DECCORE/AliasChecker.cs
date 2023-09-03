@@ -1,12 +1,4 @@
 ﻿using Sla.CORE;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Runtime.Intrinsics.Arm;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.DECCORE
 {
@@ -67,12 +59,11 @@ namespace Sla.DECCORE
                 RangeList localrange = proto.getLocalRange();
                 RangeList paramrange = proto.getParamRange();
 
-                Range local = localrange.getFirstRange();
-                Range param = paramrange.getLastRange();
-                if ((local != (Range)null)&& (param != (Range)null)) {
+                Sla.CORE.Range? local = localrange.getFirstRange();
+                Sla.CORE.Range? param = paramrange.getLastRange();
+                if ((local != (Sla.CORE.Range)null)&& (param != (Sla.CORE.Range)null)) {
                     localBoundary = param.getLast();
-                    if (direction == -1)
-                    {
+                    if (direction == -1) {
                         localBoundary = paramrange.getFirstRange().getFirst();
                         localExtreme = localBoundary;
                     }
@@ -88,20 +79,27 @@ namespace Sla.DECCORE
         {
             calculated = true;
             aliasBoundary = localExtreme;
-            Varnode spacebase = fd.findSpacebaseInput(space);
-            if (spacebase == (Varnode)null) return; // No possible alias
+            Varnode? spacebase = fd.findSpacebaseInput(space);
+            if (spacebase == (Varnode)null)
+                // No possible alias
+                return;
 
             gatherAdditiveBase(spacebase, addBase);
-            for (IEnumerator<AddBase> iter = addBase.begin(); iter != addBase.end(); ++iter)
-            {
-                ulong offset = gatherOffset((iter).@base);
-                offset = AddrSpace.addressToByte(offset, space.getWordSize()); // Convert to byte offset
+            IEnumerator<AddBase> iter = addBase.GetEnumerator();
+            while (iter.MoveNext()) {
+                ulong offset = gatherOffset(iter.Current.@base);
+                // Convert to byte offset
+                offset = AddrSpace.addressToByte(offset, space.getWordSize());
                 alias.Add(offset);
                 if (direction == 1) {
-                    if (offset < localBoundary) continue; // Parameter ref
+                    if (offset < localBoundary)
+                        // Parameter ref
+                        continue;
                 }
                 else {
-                    if (offset > localBoundary) continue; // Parameter ref
+                    if (offset > localBoundary)
+                        // Parameter ref
+                        continue;
                 }
                 // Always consider anything AFTER a pointer reference as
                 // aliased, regardless of the stack direction
@@ -129,9 +127,10 @@ namespace Sla.DECCORE
             fd = f;
             space = spc;
             calculated = false;     // Defer calculation
-            addBase.clear();
-            alias.clear();
-            direction = space.stackGrowsNegative() ? 1 : -1;       // direction == 1 for normal negative stack growth
+            addBase.Clear();
+            alias.Clear();
+            // direction == 1 for normal negative stack growth
+            direction = space.stackGrowsNegative() ? 1 : -1;
             deriveBoundaries(fd.getFuncProto());
             if (!defer)
                 gatherInternal();
@@ -202,8 +201,9 @@ namespace Sla.DECCORE
                     op = iter.Current;
                     switch (op.code()) {
                         case OpCode.CPUI_COPY:
-                            nonadduse = true;   // Treat COPY as both non-add use and part of ADD expression
-                            subvn = op.getOut();
+                            // Treat COPY as both non-add use and part of ADD expression
+                            nonadduse = true;
+                            subvn = op.getOut() ?? throw new ApplicationException();
                             if (!subvn.isMark()) {
                                 subvn.setMark();
                                 vnqueue.Add(new AddBase(subvn, indexvn));
@@ -215,10 +215,10 @@ namespace Sla.DECCORE
                                 nonadduse = true;
                                 break;
                             }
-                            othervn = op.getIn(1);
+                            othervn = op.getIn(1) ?? throw new ApplicationException();
                             if (!othervn.isConstant())
                                 indexvn = othervn;
-                            subvn = op.getOut();
+                            subvn = op.getOut() ?? throw new ApplicationException();
                             if (!subvn.isMark()) {
                                 subvn.setMark();
                                 vnqueue.Add(new AddBase(subvn, indexvn));
@@ -226,23 +226,25 @@ namespace Sla.DECCORE
                             break;
                         case OpCode.CPUI_INT_ADD:
                         case OpCode.CPUI_PTRADD:
-                            othervn = op.getIn(1); // Check if something else is being added in besides a constant
+                            // Check if something else is being added in besides a constant
+                            othervn = op.getIn(1) ?? throw new ApplicationException();
                             if (othervn == vn)
-                                othervn = op.getIn(0);
+                                othervn = op.getIn(0) ?? throw new ApplicationException();
                             if (!othervn.isConstant())
                                 indexvn = othervn;
                             goto case OpCode.CPUI_PTRSUB;
                         // fallthru
                         case OpCode.CPUI_PTRSUB:
                         case OpCode.CPUI_SEGMENTOP:
-                            subvn = op.getOut();
+                            subvn = op.getOut() ?? throw new ApplicationException();
                             if (!subvn.isMark()) {
                                 subvn.setMark();
                                 vnqueue.Add(new AddBase(subvn, indexvn));
                             }
                             break;
                         default:
-                            nonadduse = true;   // Used in non-additive expression
+                            // Used in non-additive expression
+                            nonadduse = true;
                             break;
                     }
                 }
@@ -253,20 +255,20 @@ namespace Sla.DECCORE
                 vnqueue[i].@base.clearMark();
         }
 
-        /// \brief If the given Varnode is a sum result, return the constant portion of this sum.
-        ///
-        /// Treat \b vn as the result of a series of ADD operations.
-        /// Examine all the constant terms of this sum and add them together by traversing
-        /// the syntax tree rooted at \b vn, backwards, only through additive operations.
-        /// \param vn is the given Varnode to gather off of
-        /// \return the resulting sub-sum
+        // \brief If the given Varnode is a sum result, return the constant portion of
+        // this sum.
+        // Treat \b vn as the result of a series of ADD operations.
+        // Examine all the constant terms of this sum and add them together by traversing
+        // the syntax tree rooted at \b vn, backwards, only through additive operations.
+        // \param vn is the given Varnode to gather off of
+        // \return the resulting sub-sum
         public static ulong gatherOffset(Varnode vn)
         {
             ulong retval;
             Varnode othervn;
 
             if (vn.isConstant()) return vn.getOffset();
-            PcodeOp? def = vn.getDef();
+            PcodeOp? def = vn.getDef() ?? throw new ApplicationException();
             if (def == (PcodeOp)null) return 0;
             switch (def.code()) {
                 case OpCode.CPUI_COPY:
@@ -295,6 +297,7 @@ namespace Sla.DECCORE
                     break;
                 default:
                     retval = 0;
+                    break;
             }
             return retval & Globals.calc_mask((uint)vn.getSize());
         }

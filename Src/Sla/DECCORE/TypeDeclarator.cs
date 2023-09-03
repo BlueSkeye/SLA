@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.EXTRA;
 
 namespace Sla.DECCORE
 {
@@ -14,9 +7,12 @@ namespace Sla.DECCORE
         // friend class CParse;
         internal List<TypeModifier> mods;
         internal Datatype? basetype;
-        private string ident;           // variable identifier associated with type
-        internal string model;           // name of model associated with function pointer
-        internal CParse.Flags flags;            // Specifiers qualifiers
+        // variable identifier associated with type
+        private string ident;
+        // name of model associated with function pointer
+        internal string model;
+        // Specifiers qualifiers
+        internal CParse.Flags flags;
         
         public TypeDeclarator()
         {
@@ -37,13 +33,13 @@ namespace Sla.DECCORE
             //    delete mods[i];
         }
 
-        private Datatype? getBaseType() => basetype;
+        internal Datatype? getBaseType() => basetype;
 
-        private int numModifiers() => mods.size();
+        internal int numModifiers() => mods.size();
 
         internal string getIdentifier() => ident;
 
-        private ProtoModel? getModel(Architecture glb)
+        internal ProtoModel? getModel(Architecture glb)
         {
             // Get prototype model
             ProtoModel? protomodel = (ProtoModel)null;

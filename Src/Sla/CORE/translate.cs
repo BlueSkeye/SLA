@@ -88,7 +88,7 @@ namespace Sla.CORE {
         ///< Restore \b this from a stream
         public void decode(Sla.CORE.Decoder decoder)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_TRUNCATE_SPACE);
+            uint elemId = decoder.openElement(ElementId.ELEM_TRUNCATE_SPACE);
             spaceName = decoder.readString(AttributeId.ATTRIB_SPACE);
             size = (uint)decoder.readUnsignedInteger(AttributeId.ATTRIB_SIZE);
             decoder.closeElement(elemId);
@@ -136,7 +136,7 @@ namespace Sla.CORE {
             VarnodeData[] invar = new VarnodeData[16];
             VarnodeData? outptr; //  = ref outvar;
 
-            ElementId elemId = decoder.openElement(ElementId.ELEM_OP);
+            uint elemId = decoder.openElement(ElementId.ELEM_OP);
             isize = (int)decoder.readSignedInteger(AttributeId.ATTRIB_SIZE);
             if (isize <= 16) {
                 opcode = PcodeOpRaw.decode(decoder, isize, invar, out outptr);
@@ -324,7 +324,7 @@ namespace Sla.CORE {
             return contain;
         }
         
-        public override void saveXml(StreamWriter s)
+        public override void saveXml(TextWriter s)
         {
             s.Write("<space_base");
             saveBasicAttributes(s);
@@ -334,7 +334,7 @@ namespace Sla.CORE {
 
         public virtual void decode(ref Decoder decoder)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_SPACE_BASE);
+            uint elemId = decoder.openElement(ElementId.ELEM_SPACE_BASE);
             decodeBasicAttributes(decoder);
             contain = decoder.readSpace(AttributeId.ATTRIB_CONTAIN);
             decoder.closeElement(elemId);
@@ -581,7 +581,7 @@ namespace Sla.CORE {
             // The first space should always be the constant space
             insertSpace(new ConstantSpace(this, trans));
 
-            ElementId elemId = decoder.openElement(ElementId.ELEM_SPACES);
+            uint elemId = decoder.openElement(ElementId.ELEM_SPACES);
             string defname = decoder.readString(AttributeId.ATTRIB_DEFAULTSPACE);
             while (decoder.peekElement() != 0) {
                 insertSpace(decodeSpace(decoder, trans));
@@ -1278,11 +1278,12 @@ namespace Sla.CORE {
         ///< Mark a space as truncated from its original size
         /// Mark the named space as truncated from its original size
         /// \param tag is a description of the space and how it should be truncated
-        public void truncateSpace(ref TruncationTag tag)
+        public void truncateSpace(TruncationTag tag)
         {
-            AddrSpace spc = getSpaceByName(tag.getName());
+            AddrSpace? spc = getSpaceByName(tag.getName());
             if (spc == null) {
-                throw new LowlevelError("Unknown space in <truncate_space> command: " + tag.getName());
+                throw new LowlevelError(
+                    $"Unknown space in <truncate_space> command: {tag.getName()}");
             }
             spc.truncateSpace(tag.getSize());
         }

@@ -28,12 +28,12 @@ namespace Sla.DECCORE
             Varnode vn;
             int offset1, offset2;
 
-            vn = op.getIn(0);
+            vn = op.getIn(0) ?? throw new ApplicationException();
             if (!vn.isWritten()) return 0;
-            op2 = vn.getDef();
+            op2 = vn.getDef() ?? throw new ApplicationException();
             if (op2.code() != OpCode.CPUI_SUBPIECE) return 0;
-            offset1 = op.getIn(1).getOffset();
-            offset2 = op2.getIn(1).getOffset();
+            offset1 = (int)(op.getIn(1).getOffset());
+            offset2 = (int)(op2.getIn(1).getOffset());
 
             data.opSetInput(op, op2.getIn(0), 0);  // Skip middleman
             data.opSetInput(op, data.newConstant(4, (ulong)(offset1 + offset2)), 1);

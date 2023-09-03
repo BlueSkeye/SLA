@@ -1,15 +1,6 @@
 ﻿using Sla.CORE;
 using Sla.DECCORE;
-using Sla.EXTRA;
 using Sla.SLEIGH;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace Sla.EXTRA
 {
@@ -22,16 +13,18 @@ namespace Sla.EXTRA
     ///
     /// Generally a \e language \e id (i.e. x86:LE:64:default) is provided, then this
     /// object is able to automatically load in configuration and construct the Translate object.
-    internal class SleighArchitecture : Architecture
+    internal abstract class SleighArchitecture : Architecture
     {
         private static Dictionary<int, Sleigh> translators = new Dictionary<int, Sleigh>();      ///< Map from language index to instantiated translators
         private static List<LanguageDescription> description = new List<LanguageDescription>(); ///< List of languages we know about
-        private int languageindex;                 ///< Index (within LanguageDescription array) of the active language
-        private string filename;                    ///< Name of active load-image file
-        private string target;                  ///< The \e language \e id of the active load-image
+        // Index (within LanguageDescription array) of the active language
+        private int languageindex;
+        // Name of active load-image file
+        private string filename;
+        // The \e language \e id of the active load-image
+        private string target;
 
         /// \brief Read a SLEIGH .ldefs file
-        ///
         /// Any \<language> tags are added to the LanguageDescription array
         /// \param specfile is the filename of the .ldefs file
         /// \param errs is an output stream for printing error messages
@@ -52,9 +45,9 @@ namespace Sla.EXTRA
                 return;
             }
 
-            ElementId elemId = decoder.openElement(ElementId.ELEM_LANGUAGE_DEFINITIONS);
+            uint elemId = decoder.openElement(ElementId.ELEM_LANGUAGE_DEFINITIONS);
             while (true) {
-                ElementId subId = decoder.peekElement();
+                uint subId = decoder.peekElement();
                 if (subId == 0) break;
                 if (subId == ElementId.ELEM_LANGUAGE) {
                     LanguageDescription newDescription = new LanguageDescription();
@@ -231,7 +224,7 @@ namespace Sla.EXTRA
 
             string processorfile;
             string compilerfile;
-            string slafile;
+            string slafile = string.Empty;
 
             specpaths.findFile(out processorfile, language.getProcessorSpec());
             specpaths.findFile(out compilerfile, compilertag.getSpec());
@@ -248,7 +241,7 @@ namespace Sla.EXTRA
                 serr.Write($"\n{err.ToString()}");
                 throw new SleighError(serr.ToString());
             }
-            catch (CORE.LowlevelError err) {
+            catch (CORE.LowlevelError) {
                 TextWriter serr = new StringWriter();
                 serr.Write($"Error reading processor specification: {processorfile}");
                 serr.Write("\n {err.ToString()}");

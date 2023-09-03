@@ -175,9 +175,9 @@ namespace Sla.CORE {
         /// \e size, \e wordsize, and \e physical attributes which
         /// are common with all address spaces derived from AddrSpace
         /// \param s the stream where the attributes are written
-        internal void saveBasicAttributes(StreamWriter s)
+        internal void saveBasicAttributes(TextWriter s)
         {
-            Xml.a_v(s, "name", name);
+            Xml.a_v(s, "name", name ?? throw new ApplicationException());
             Xml.a_v_i(s, "index", index);
             Xml.a_v_b(s, "bigendian", isBigEndian());
             Xml.a_v_i(s, "delay", delay);
@@ -808,7 +808,7 @@ namespace Sla.CORE {
         public virtual void decode(Sla.CORE.Decoder decoder)
         {
             // Multiple tags: <space>, <space_other>, <space_unique>
-            ElementId elemId = decoder.openElement();
+            uint elemId = decoder.openElement();
             decodeBasicAttributes(decoder);
             decoder.closeElement(elemId);
         }

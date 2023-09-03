@@ -39,6 +39,11 @@ namespace Sla.DECCORE
             return (op1.index<op2.index);
         }
 
+        public static bool operator >(BlockVarnode op1, BlockVarnode op2)
+        {
+            return (op1.index > op2.index);
+        }
+
         /// Get the Varnode represented by \b this
         public Varnode getVarnode() => vn;
 

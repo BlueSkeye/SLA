@@ -50,7 +50,7 @@ namespace Sla.DECCORE
         /// \param typegrp is the factory owning \b this data-type
         internal override void decode(Sla.CORE.Decoder decoder, TypeFactory typegrp)
         {
-            //  ElementId elemId = decoder.openElement();
+            //  uint elemId = decoder.openElement();
             flags |= Properties.is_ptrrel;
             decodeBasic(decoder);
             metatype = type_metatype.TYPE_PTR;        // Don't use type_metatype.TYPE_PTRREL internally
@@ -79,7 +79,7 @@ namespace Sla.DECCORE
         }
 
         /// Internal constructor for decode
-        protected TypePointerRel()
+        internal TypePointerRel()
             : base()
         {
             offset = 0;

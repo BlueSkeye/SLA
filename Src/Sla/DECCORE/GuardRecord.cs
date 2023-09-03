@@ -44,7 +44,8 @@ namespace Sla.DECCORE
             indpath = path;
             range = rng;
             vn = v;
-            baseVn = quasiCopy(v, bitsPreserved);       // Look for varnode whose bits are copied
+            // Look for varnode whose bits are copied
+            baseVn = quasiCopy(v, out bitsPreserved);
             unrolled = unr;
         }
 
@@ -144,7 +145,9 @@ namespace Sla.DECCORE
                 case OpCode.CPUI_INT_MULT:
                 case OpCode.CPUI_SUBPIECE:
                     if (op2.getIn(0) != op1.getIn(0)) return 0;
-                    if (matching_constants(op2.getIn(1), op1.getIn(1)))
+                    if (Varnode.matching_constants(
+                        op2.getIn(1) ?? throw new ApplicationException(),
+                        op1.getIn(1) ?? throw new ApplicationException()))
                         return 1;
                     break;
                 default:
@@ -163,7 +166,7 @@ namespace Sla.DECCORE
         /// \param vn is the given Varnode
         /// \param bitsPreserved will hold the number of least significant bits preserved by the sequence
         /// \return the earliest source of the quasi-copy, which may just be the given Varnode
-        public static Varnode quasiCopy(Varnode vn, int bitsPreserved)
+        public static Varnode quasiCopy(Varnode vn, out int bitsPreserved)
         {
             bitsPreserved = Globals.mostsigbit_set(vn.getNZMask()) + 1;
             if (bitsPreserved == 0) return vn;

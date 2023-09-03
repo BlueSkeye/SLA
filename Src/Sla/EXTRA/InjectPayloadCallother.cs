@@ -1,8 +1,5 @@
 ﻿using Sla.CORE;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Sla.DECCORE;
 
 namespace Sla.EXTRA
 {
@@ -13,9 +10,9 @@ namespace Sla.EXTRA
         {
         }
 
-        public override void decode(Sla.CORE.Decoder decoder)
+        internal override void decode(Sla.CORE.Decoder decoder)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_CALLOTHERFIXUP);
+            uint elemId = decoder.openElement(ElementId.ELEM_CALLOTHERFIXUP);
             name = decoder.readString(AttributeId.ATTRIB_TARGETOP);
             uint subId = decoder.openElement();
             if (subId != ELEM_PCODE)

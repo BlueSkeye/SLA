@@ -33,12 +33,12 @@ namespace Sla.DECCORE
             OpCode opc = otherop.code();
             Varnode rootvn;
             if (opc == OpCode.CPUI_INT_SEXT)
-                rootvn = otherop.getIn(0);
+                rootvn = otherop.getIn(0) ?? throw new ApplicationException();
             else if (opc == OpCode.CPUI_PIECE)
-                rootvn = otherop.getIn(1);
+                rootvn = otherop.getIn(1) ?? throw new ApplicationException();
             else
                 return 0;
-            ulong mask = Globals.calc_mask(rootvn.getSize());
+            ulong mask = Globals.calc_mask((uint)rootvn.getSize());
             if (mask != cvn1.getOffset())
                 return 0;
             if (rootvn.isFree())

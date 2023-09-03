@@ -28,6 +28,11 @@ namespace Sla.DECCORE
             {
                 return (op1.slot < op2.slot);
             }
+
+            public static bool operator >(PEntry op1, PEntry op2)
+            {
+                return (op1.slot > op2.slot);
+            }
         }
 
         /// True if scoring against input parameters, \b false for outputs

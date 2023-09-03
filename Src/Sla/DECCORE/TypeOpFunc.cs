@@ -7,7 +7,7 @@ namespace Sla.DECCORE
     ///
     /// The operator takes one or more inputs (with the same data-type by default)
     /// and produces one output with  specific data-type
-    internal class TypeOpFunc : TypeOp
+    internal abstract class TypeOpFunc : TypeOp
     {
         /// The metatype of the output
         private type_metatype metaout;

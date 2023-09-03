@@ -20,6 +20,7 @@ namespace Sla.DECCORE
 
         /// RawLoadImage constructor
         public RawLoadImage(string f)
+            : base(f)
         {
             vma = 0;
             thefile = null;

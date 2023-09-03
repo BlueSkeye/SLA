@@ -126,7 +126,7 @@ namespace Sla.DECCORE
         /// \param ps is the number of bytes in a page (must be power of 2)
         /// \param ul is the underlying MemoryBank
         public MemoryPageOverlay(AddrSpace spc, int ws, int ps, MemoryBank ul)
-            : base(spc, ws, ps)
+            : base(spc, (uint)ws, (uint)ps)
         {
             underlie = ul;
         }

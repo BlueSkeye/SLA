@@ -31,7 +31,7 @@ namespace Sla.CORE
             return baseSpace;
         }
 
-        public override void saveXml(StreamWriter s)
+        public override void saveXml(TextWriter s)
         {
             s.Write("<space_overlay");
             Xml.a_v(s, "name", name);
@@ -42,7 +42,7 @@ namespace Sla.CORE
         
         public virtual void decode(ref Decoder decoder)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_SPACE_OVERLAY);
+            uint elemId = decoder.openElement(ElementId.ELEM_SPACE_OVERLAY);
             name = decoder.readString(AttributeId.ATTRIB_NAME);
             index = (int)decoder.readSignedInteger(AttributeId.ATTRIB_INDEX);
             baseSpace = decoder.readSpace(AttributeId.ATTRIB_BASE);

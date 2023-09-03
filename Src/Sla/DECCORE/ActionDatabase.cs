@@ -293,7 +293,7 @@ namespace Sla.DECCORE
         /// Build the universal action
         /// Construct the \b universal Action that contains all possible components
         /// \param conf is the Architecture that will use the Action
-        public void universalAction(Architecture glb)
+        public void universalAction(Architecture conf)
         {
             IEnumerator<Rule> iter;
             ActionGroup act;
@@ -330,12 +330,15 @@ namespace Sla.DECCORE
             actmainloop.addAction(new ActionDirectWrite("protorecovery_b", false));
             actmainloop.addAction(new ActionActiveParam("protorecovery"));
             actmainloop.addAction(new ActionReturnRecovery("protorecovery"));
-            //      actmainloop.addAction( new ActionParamShiftStop("paramshift") );
-            actmainloop.addAction(new ActionRestrictLocal("localrecovery")); // Do before dead code removed
+            // actmainloop.addAction( new ActionParamShiftStop("paramshift") );
+            // Do before dead code removed
+            actmainloop.addAction(new ActionRestrictLocal("localrecovery"));
             actmainloop.addAction(new ActionDeadCode("deadcode"));
-            actmainloop.addAction(new ActionDynamicMapping("dynamic")); // Must come before restructurevarnode and infertypes
+            // Must come before restructurevarnode and infertypes
+            actmainloop.addAction(new ActionDynamicMapping("dynamic"));
             actmainloop.addAction(new ActionRestructureVarnode("localrecovery"));
-            actmainloop.addAction(new ActionSpacebase("base"));    // Must come before infertypes and nonzeromask
+            // Must come before infertypes and nonzeromask
+            actmainloop.addAction(new ActionSpacebase("base"));
             actmainloop.addAction(new ActionNonzeroMask("analysis"));
             actmainloop.addAction(new ActionInferTypes("typerecovery"));
             actstackstall = new ActionGroup(Action.ruleflags.rule_repeatapply, "stackstall");
@@ -468,9 +471,11 @@ namespace Sla.DECCORE
             actprop.addRule(new RuleDoubleLoad("doubleload"));
             actprop.addRule(new RuleDoubleStore("doubleprecis"));
             actprop.addRule(new RuleDoubleIn("doubleprecis"));
-            for (iter = conf.extra_pool_rules.begin(); iter != conf.extra_pool_rules.end(); ++iter)
-                actprop.addRule(*iter); // Add CPU specific rules
-            conf.extra_pool_rules.clear(); // Rules are now absorbed into universal
+            foreach (Rule rule in conf.extra_pool_rules)
+                // Add CPU specific rules
+                actprop.addRule(rule);
+            // Rules are now absorbed into universal
+            conf.extra_pool_rules.Clear();
             actstackstall.addAction(actprop);
             actstackstall.addAction(new ActionLaneDivide("base"));
             actstackstall.addAction(new ActionMultiCse("analysis"));
@@ -478,7 +483,8 @@ namespace Sla.DECCORE
             actstackstall.addAction(new ActionDeindirect("deindirect"));
             actstackstall.addAction(new ActionStackPtrFlow("stackptrflow", stackspace));
             actmainloop.addAction(actstackstall);
-            actmainloop.addAction(new ActionRedundBranch("deadcontrolflow")); // dead code removal
+            // dead code removal
+            actmainloop.addAction(new ActionRedundBranch("deadcontrolflow"));
             actmainloop.addAction(new ActionBlockStructure("blockrecovery"));
             actmainloop.addAction(new ActionConstantPtr("typerecovery"));
 
@@ -534,12 +540,14 @@ namespace Sla.DECCORE
             act.addAction(new ActionAssignHigh("merge"));
             act.addAction(new ActionMergeRequired("merge"));
             act.addAction(new ActionMarkExplicit("merge"));
-            act.addAction(new ActionMarkImplied("merge")); // This must come BEFORE general merging
+            // This must come BEFORE general merging
+            act.addAction(new ActionMarkImplied("merge"));
             act.addAction(new ActionMergeMultiEntry("merge"));
             act.addAction(new ActionMergeCopy("merge"));
             act.addAction(new ActionDominantCopy("merge"));
             act.addAction(new ActionDynamicSymbols("dynamic"));
-            act.addAction(new ActionMarkIndirectOnly("merge")); // Must come after required merges but before speculative
+            // Must come after required merges but before speculative
+            act.addAction(new ActionMarkIndirectOnly("merge"));
             act.addAction(new ActionMergeAdjacent("merge"));
             act.addAction(new ActionMergeType("merge"));
             act.addAction(new ActionHideShadow("merge"));

@@ -1,7 +1,7 @@
 ﻿
 namespace Sla
 {
-    internal static partial class SortedSet
+    internal static partial class Extensions
     {
         /// <summary>Returns an iterator pointing to the first element in the range [first,last) which does not compare less than val.</summary>
         /// <typeparam name="T"></typeparam>
@@ -9,6 +9,7 @@ namespace Sla
         internal static IEnumerator<T> lower_bound<T>(this SortedSet<T> from, T value)
             where T : class
         {
+            throw new NotImplementedException();
         }
     }
 }

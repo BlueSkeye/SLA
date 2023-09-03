@@ -24,10 +24,16 @@ namespace Sla.EXTRA
             b = j;
         }
 
-        internal static bool operator <(AddrLink op1, AddrLink op2)
+        public static bool operator <(AddrLink op1, AddrLink op2)
         {
             if (op1.a != op2.a) return (op1.a < op2.a);
             return (op1.b < op2.b);
+        }
+
+        public static bool operator >(AddrLink op1, AddrLink op2)
+        {
+            if (op1.a != op2.a) return (op1.a > op2.a);
+            return (op1.b > op2.b);
         }
     }
 }

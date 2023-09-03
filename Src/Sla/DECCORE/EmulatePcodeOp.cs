@@ -39,9 +39,9 @@ namespace Sla.DECCORE
         protected virtual ulong getLoadImageValue(AddrSpace spc, ulong offset, int sz)
         {
             LoadImage loadimage = glb.loader ?? throw new BugException();
-            ulong res;
-
-            loadimage.loadFill((byte*)&res, sizeof(ulong), new Address(spc, offset));
+            byte[] buffer = new byte[sizeof(ulong)];
+            loadimage.loadFill(buffer, 0, sizeof(ulong), new Address(spc, offset));
+            ulong res = Globals.GetUInt64(buffer);
 
             if ((Globals.HOST_ENDIAN == 1) != spc.isBigEndian())
                 res = Globals.byte_swap(res, sizeof(ulong));

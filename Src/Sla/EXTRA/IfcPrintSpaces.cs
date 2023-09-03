@@ -26,24 +26,24 @@ namespace Sla.EXTRA
             {
                 AddrSpace* spc = manage.getSpace(i);
                 if (spc == (AddrSpace)null) continue;
-                *status.fileoptr << dec << spc.getIndex() << " : '" << spc.getShortcut() << "' " << spc.getName();
+                status.fileoptr << dec << spc.getIndex() << " : '" << spc.getShortcut() << "' " << spc.getName();
                 if (spc.getType() == spacetype.IPTR_CONSTANT)
-                    *status.fileoptr << " constant ";
+                    status.fileoptr << " constant ";
                 else if (spc.getType() == spacetype.IPTR_PROCESSOR)
-                    *status.fileoptr << " processor";
+                    status.fileoptr << " processor";
                 else if (spc.getType() == spacetype.IPTR_SPACEBASE)
-                    *status.fileoptr << " spacebase";
+                    status.fileoptr << " spacebase";
                 else if (spc.getType() == spacetype.IPTR_INTERNAL)
-                    *status.fileoptr << " internal ";
+                    status.fileoptr << " internal ";
                 else
-                    *status.fileoptr << " special  ";
+                    status.fileoptr << " special  ";
                 if (spc.isBigEndian())
-                    *status.fileoptr << " big  ";
+                    status.fileoptr << " big  ";
                 else
-                    *status.fileoptr << " small";
-                *status.fileoptr << " addrsize=" << spc.getAddrSize() << " wordsize=" << spc.getWordSize();
-                *status.fileoptr << " delay=" << spc.getDelay();
-                *status.fileoptr << endl;
+                    status.fileoptr << " small";
+                status.fileoptr << " addrsize=" << spc.getAddrSize() << " wordsize=" << spc.getWordSize();
+                status.fileoptr << " delay=" << spc.getDelay();
+                status.fileoptr << endl;
             }
         }
     }

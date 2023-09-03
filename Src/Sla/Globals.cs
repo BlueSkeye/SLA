@@ -36,6 +36,26 @@ namespace Sla
         };
 #endif
 
+        public static ulong GetUInt64(byte[] from)
+        {
+            if (from.Length < sizeof(ulong)) throw new ArgumentException();
+            ulong result = 0;
+            if (Globals.HOST_ENDIAN == 1) {
+                // Big endian
+                for (int index = 0; index < sizeof(ulong); index++) {
+                    result += ((uint)from[index] << (8 * index));
+                }
+            }
+            else {
+                // Little endian
+                for (int index = sizeof(ulong) - 1; 0 <= index; index--) {
+                    result <<= 8;
+                    result += from[index];
+                }
+            }
+            return result;
+        }
+
         /// \param size is the desired size in bytes
         /// \return a value appropriate for masking off the first \e size bytes
         public static ulong calc_mask(uint size)
@@ -854,17 +874,18 @@ public static bool signbit_negative(ulong val, int size)
         }
         internal static void segvHandler(int sig)
         {
-            exit(1);            // Just die - prevents OS from popping-up a dialog
+            // Just die - prevents OS from popping-up a dialog
+            exit(1);
         }
 
         internal static int pcodelex()
         {
-            return pcode.lex();
+            return PcodeSnippet.pcode.lex();
         }
 
         internal static int pcodeerror(string s)
         {
-            pcode.reportError((Location)null, s);
+            PcodeSnippet.pcode.reportError((Location)null, s);
             return 0;
         }
 
@@ -916,7 +937,8 @@ public static bool signbit_negative(ulong val, int size)
         /// \return the corresponding OpCode value
         public static OpCode get_opcode(ref string nm)
         {
-            int min = 1;           // Don't include BLANK
+            // Don't include BLANK
+            int min = 1;
             int max = (int)OpCode.CPUI_MAX - 1;
             int cur, ind;
 

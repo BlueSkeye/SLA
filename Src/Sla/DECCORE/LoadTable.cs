@@ -45,6 +45,8 @@ namespace Sla.DECCORE
         /// Compare \b this with another table by address
         public static bool operator <(LoadTable op1, LoadTable op2) => (op1.addr < op2.addr);
 
+        public static bool operator >(LoadTable op1, LoadTable op2) => (op1.addr > op2.addr);
+
         /// Encode a description of \b this as an \<loadtable> element
         /// \param encoder is the stream encoder
         public void encode(Sla.CORE.Encoder encoder)
@@ -60,9 +62,9 @@ namespace Sla.DECCORE
         /// Decode \b this table from a \<loadtable> element
         public void decode(Sla.CORE.Decoder decoder)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_LOADTABLE);
-            size = decoder.readSignedInteger(AttributeId.ATTRIB_SIZE);
-            num = decoder.readSignedInteger(AttributeId.ATTRIB_NUM);
+            uint elemId = decoder.openElement(ElementId.ELEM_LOADTABLE);
+            size = (int)decoder.readSignedInteger(AttributeId.ATTRIB_SIZE);
+            num = (int)decoder.readSignedInteger(AttributeId.ATTRIB_NUM);
             addr = Address.decode(decoder);
             decoder.closeElement(elemId);
         }
@@ -77,9 +79,9 @@ namespace Sla.DECCORE
             IEnumerator<LoadTable> lastiter;
             int count = 1;
             IEnumerator<LoadTable> iter = table.GetEnumerator();
+            if (!iter.MoveNext()) throw new ApplicationException();
             lastiter = iter;
-            Address nextaddr = (*iter).addr + (*iter).size * (*iter).num;
-            ++iter;
+            Address nextaddr = iter.Current.addr + iter.Current.size * iter.Current.num;
             while (iter.MoveNext()) {
                 if ((iter.Current.addr == nextaddr) && (iter.Current.size == (*lastiter).size)) {
                     (*lastiter).num += iter.Current.num;
@@ -93,7 +95,7 @@ namespace Sla.DECCORE
                     count += 1;
                 }
             }
-            table.resize(count, new LoadTable(nextaddr, 0));
+            table.resize(count, delegate() { return new LoadTable(nextaddr, 0); });
         }
     }
 }

@@ -45,7 +45,7 @@ namespace Sla.DECCORE
         {
             range.space = addr.getSpace();
             range.offset = addr.getOffset();
-            range.size = size;
+            range.size = (uint)size;
             type = EffectType.unknown_effect;
         }
 
@@ -56,14 +56,14 @@ namespace Sla.DECCORE
         {
             range.space = entry.getSpace();
             range.offset = entry.getBase();
-            range.size = entry.getSize();
+            range.size = (uint)entry.getSize();
             type = t;
         }
 
         /// Construct an effect on a memory range
         /// \param data is the memory range affected
         /// \param t is the effect type
-        public EffectRecord(VarnodeData addr, EffectType t)
+        public EffectRecord(VarnodeData data, EffectType t)
         {
             range = data;
             type = t;
@@ -76,7 +76,7 @@ namespace Sla.DECCORE
         public Address getAddress() => new Address(range.space, range.offset);
 
         /// Get the size of the affected range
-        public int getSize() => range.size;
+        public int getSize() => (int)range.size;
 
         /// Equality operator
         public static bool operator ==(EffectRecord op1, EffectRecord op2)
@@ -86,7 +86,7 @@ namespace Sla.DECCORE
         }
 
         /// Inequality operator
-        public bool operator !=(EffectRecord op1, EffectRecord op2)
+        public static bool operator !=(EffectRecord op1, EffectRecord op2)
         {
             if (op1.range != op2.range) return true;
             return (op1.type != op2.type);
@@ -98,8 +98,10 @@ namespace Sla.DECCORE
         public void encode(Sla.CORE.Encoder encoder)
         {
             Address addr = new Address(range.space, range.offset);
-            if ((type == EffectType.unaffected) || (type == EffectType.killedbycall) || (type == EffectType.return_address))
-                addr.encode(encoder, range.size);
+            if (   (type == EffectType.unaffected)
+                || (type == EffectType.killedbycall)
+                || (type == EffectType.return_address))
+                addr.encode(encoder, (int)range.size);
             else
                 throw new LowlevelError("Bad EffectRecord type");
         }
@@ -111,7 +113,7 @@ namespace Sla.DECCORE
         public void decode(EffectType grouptype, Sla.CORE.Decoder decoder)
         {
             type = grouptype;
-            range.decode(decoder);
+            range = VarnodeData.decode(decoder);
         }
 
         /// \brief Compare two EffectRecords by their start Address

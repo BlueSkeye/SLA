@@ -195,11 +195,10 @@ namespace Sla.DECCORE
                 encoder.writeUnsignedInteger(AttributeId.ATTRIB_COLOR, (uint)hl);
             if (ct != (Datatype)null) {
                 encoder.writeString(AttributeId.ATTRIB_NAME, ct.getName());
-                if (ct.getId() != 0)
-                {
+                if (ct.getId() != 0) {
                     encoder.writeUnsignedInteger(AttributeId.ATTRIB_ID, ct.getId());
                 }
-                encoder.writeSignedInteger(AttributeId.ATTRIB_OFF, o);
+                encoder.writeSignedInteger(AttributeId.ATTRIB_OFF, off);
                 if (op != (PcodeOp)null)
                     encoder.writeUnsignedInteger(AttributeId.ATTRIB_OPREF, op.getTime());
             }

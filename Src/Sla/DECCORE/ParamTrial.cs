@@ -291,6 +291,29 @@ namespace Sla.DECCORE
             return (a.size < b.size);
         }
 
+        public static bool operator >(ParamTrial a, ParamTrial b)
+        {
+            if (a.entry == (ParamEntry)null) return false;
+            if (b.entry == (ParamEntry)null) return true;
+            int grpa = a.entry.getGroup();
+            int grpb = b.entry.getGroup();
+            if (grpa != grpb)
+                return (grpa < grpb);
+            if (a.entry != b.entry)
+                // Compare entry pointers directly
+                return (a.entry > b.entry);
+            if (a.entry.isExclusion()) {
+                return (a.offset > b.offset);
+            }
+            if (a.addr != b.addr) {
+                if (a.entry.isReverseStack())
+                    return (b.addr > a.addr);
+                else
+                    return (a.addr > b.addr);
+            }
+            return (a.size > b.size);
+        }
+
         /// Set fixed position
         public void setFixedPosition(int pos)
         {

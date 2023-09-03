@@ -31,22 +31,26 @@ namespace Sla.DECCORE
         {
             if (!op.getIn(1).isConstant()) return 0;
 
-            Varnode shiftin = op.getIn(0);
+            Varnode shiftin = op.getIn(0) ?? throw new ApplicationException();
             if (!shiftin.isWritten()) return 0;
-            PcodeOp concat = shiftin.getDef();
+            PcodeOp concat = shiftin.getDef() ?? throw new ApplicationException();
             if (concat.code() != OpCode.CPUI_PIECE) return 0;
 
-            int sa = op.getIn(1).getOffset();
+            int sa = (int)op.getIn(1).getOffset();
             int leastsize = concat.getIn(1).getSize() * 8;
             if (sa < leastsize) return 0;   // Does shift throw away least sig part
-            Varnode mainin = concat.getIn(0);
+            Varnode mainin = concat.getIn(0) ?? throw new ApplicationException();
             if (mainin.isFree()) return 0;
             sa -= leastsize;
-            OpCode extcode = (op.code() == OpCode.CPUI_INT_RIGHT) ? OpCode.CPUI_INT_ZEXT : OpCode.CPUI_INT_SEXT;
+            OpCode extcode = (op.code() == OpCode.CPUI_INT_RIGHT)
+                ? OpCode.CPUI_INT_ZEXT
+                : OpCode.CPUI_INT_SEXT;
             if (sa == 0) {
                 // Exact cancelation
-                data.opRemoveInput(op, 1);  // Remove thrown away least
-                data.opSetOpcode(op, extcode); // Change to extension
+                // Remove thrown away least
+                data.opRemoveInput(op, 1);
+                // Change to extension
+                data.opSetOpcode(op, extcode);
                 data.opSetInput(op, mainin, 0);
             }
             else {
@@ -58,7 +62,7 @@ namespace Sla.DECCORE
 
                 // Adjust the shift amount
                 data.opSetInput(op, newvn, 0);
-                data.opSetInput(op, data.newConstant(op.getIn(1).getSize(), sa), 1);
+                data.opSetInput(op, data.newConstant(op.getIn(1).getSize(), (ulong)sa), 1);
                 data.opInsertBefore(extop, op);
             }
             return 1;

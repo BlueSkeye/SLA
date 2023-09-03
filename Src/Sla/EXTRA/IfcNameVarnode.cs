@@ -44,8 +44,8 @@ namespace Sla.EXTRA
             Symbol sym = scope.addSymbol(token, ct, loc, pc).getSymbol();
             scope.setAttribute(sym, Varnode.varnode_flags.namelock);
 
-            *status.fileoptr << "Successfully added " << token;
-            *status.fileoptr << " to scope " << scope.getFullName() << endl;
+            status.fileoptr << "Successfully added " << token;
+            status.fileoptr << " to scope " << scope.getFullName() << endl;
         }
     }
 }

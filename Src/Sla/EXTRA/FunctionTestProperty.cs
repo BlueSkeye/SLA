@@ -14,11 +14,16 @@ namespace Sla.EXTRA
     /// The property may "match" more than once or not at all.
     internal class FunctionTestProperty
     {
-        private int minimumMatch;      ///< Minimum number of times property is expected to match
-        private int maximumMatch;      ///< Maximum number of times property is expected to match
-        private string name;            ///< Name of the test, to be printed in test summaries
-        private std::regex pattern;     ///< Regular expression to match against a line of output
-        private /*mutable*/ uint count;		///< Number of times regular expression has been seen
+        // Minimum number of times property is expected to match
+        private int minimumMatch;
+        // Maximum number of times property is expected to match
+        private int maximumMatch;
+        // Name of the test, to be printed in test summaries
+        private string name;
+        // Regular expression to match against a line of output
+        private std::regex pattern;
+        // Number of times regular expression has been seen
+        private /*mutable*/ uint count;
 
         /// Get the name of the property
         public string getName() => name;
@@ -43,10 +48,8 @@ namespace Sla.EXTRA
         public void restoreXml(Element el)
         {
             name = el.getAttributeValue("name");
-            istringstream s1 = new istringstream(el.getAttributeValue("min"));
-            s1 >> minimumMatch;
-            istringstream s2 = new istringstream(el.getAttributeValue("max"));
-            s2 >> maximumMatch;
+            minimumMatch = int.Parse(el.getAttributeValue("min"));
+            maximumMatch = int.Parse(el.getAttributeValue("max"));
             pattern = std::regex(el.getContent());
         }
     }

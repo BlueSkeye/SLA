@@ -3,43 +3,10 @@
 namespace Sla.DECCORE
 {
     /// \brief The base datatype class for the decompiler.
-    ///
     /// Used for symbols, function prototypes, type propagation etc.
-    internal abstract class Datatype
+    internal abstract class Datatype : IComparable<Datatype>
     {
         protected static sub_metatype[] base2sub = new sub_metatype[15];
-
-        /// Boolean properties of datatypes
-        [Flags()]
-        internal enum Properties
-        {
-            /// This is a basic type which will never be redefined
-            coretype = 1,
-            /// ASCII character data
-            chartype = 2,
-            /// An enumeration type (as well as an integer)
-            enumtype = 4,
-            /// An enumeration type where all values are of 2^^n form
-            poweroftwo = 8,
-            /// 16-bit wide chars in unicode UTF16
-            utf16 = 16,
-            /// 32-bit wide chars in unicode UTF32
-            utf32 = 32,
-            /// Structure that should be treated as a string
-            opaque_string = 64,
-            /// May be other structures with same name different lengths
-            variable_length = 128,
-            /// Datatype has a stripped form for formal declarations
-            has_stripped = 0x100,
-            /// Datatype is a TypePointerRel
-            is_ptrrel = 0x200,
-            /// Set if \b this (recursive) data-type has not been fully defined yet
-            type_incomplete = 0x400,
-            /// Datatype (union, pointer to union) needs resolution before propagation
-            needs_resolution = 0x800,
-            /// 3-bits encoding display format, 0=none, 1=hex, 2=dec, 3=oct, 4=bin, 5=char
-            force_format = 0x7000,
-        }
 
         // friend class TypeFactory;
         // friend struct DatatypeCompare;
@@ -59,6 +26,8 @@ namespace Sla.DECCORE
         internal sub_metatype submeta;
         /// The immediate data-type being typedefed by \e this
         internal Datatype? typedefImm;
+        private static ulong _nextUniqueId;
+        private ulong _uniqueId;
 
         /// Recover basic data-type properties
         /// Restore the basic properties (name,size,id) of a data-type from an XML element
@@ -70,7 +39,7 @@ namespace Sla.DECCORE
             metatype = type_metatype.TYPE_VOID;
             id = 0;
             while (true) {
-                AttributeId attrib = decoder.getNextAttributeId();
+                uint attrib = decoder.getNextAttributeId();
                 if (attrib == 0) break;
                 if (attrib == AttributeId.ATTRIB_NAME) {
                     name = decoder.readString();
@@ -107,10 +76,11 @@ namespace Sla.DECCORE
             if (size < 0)
                 throw new LowlevelError("Bad size for type " + name);
             submeta = base2sub[(int)metatype];
-            if ((id == 0) && (name.Length > 0)) // If there is a type name
-                id = hashName(name);    // There must be some kind of id
-            if (isVariableLength())
-            {
+            if ((id == 0) && (name.Length > 0))
+                // If there is a type name
+                // There must be some kind of id
+                id = hashName(name);
+            if (isVariableLength()) {
                 // Id needs to be unique compared to another data-type with the same name
                 id = hashSize(id, size);
             }
@@ -126,11 +96,7 @@ namespace Sla.DECCORE
         internal void encodeBasic(type_metatype meta, Encoder encoder)
         {
             encoder.writeString(AttributeId.ATTRIB_NAME, name);
-            ulong saveId;
-            if (isVariableLength())
-                saveId = hashSize(id, size);
-            else
-                saveId = id;
+            ulong saveId = (isVariableLength()) ? hashSize(id, size) : id;
             if (saveId != 0) {
                 encoder.writeUnsignedInteger(AttributeId.ATTRIB_ID, saveId);
             }
@@ -161,7 +127,7 @@ namespace Sla.DECCORE
             encoder.writeUnsignedInteger(AttributeId.ATTRIB_ID, id);
             Symbol.DisplayFlags format = getDisplayFormat();
             if (format != 0)
-                encoder.writeString(AttributeId.ATTRIB_FORMAT, Datatype.decodeIntegerFormat(format));
+                encoder.writeString(AttributeId.ATTRIB_FORMAT, decodeIntegerFormat(format));
             typedefImm.encodeRef(encoder);
             encoder.closeElement(ElementId.ELEM_DEF);
         }
@@ -172,11 +138,11 @@ namespace Sla.DECCORE
             flags &= ~Properties.type_incomplete;
         }
 
-        /// Set a specific display format
-        /// The display format for the data-type is changed based on the given format.  A value of
-        /// zero clears any preexisting format.  Otherwise the value can be one of:
-        /// 1=\b hex, 2=\b dec, 3=\b oct, 4=\b bin, 5=\b char
-        /// \param format is the given format
+        // Set a specific display format
+        // The display format for the data-type is changed based on the given format.
+        // A value of zero clears any preexisting format. Otherwise the value can be one of:
+        // 1=\b hex, 2=\b dec, 3=\b oct, 4=\b bin, 5=\b char
+        // \param format is the given format
         internal void setDisplayFormat(uint format)
         {
             // Clear preexisting
@@ -219,13 +185,21 @@ namespace Sla.DECCORE
         internal static ulong hashSize(ulong id, int size)
         {
             ulong sizeHash = (uint)size;
-            sizeHash *= 0x98251033aecbabaf; // Hash the size
+            // Hash the size
+            sizeHash *= 0x98251033aecbabaf;
             id ^= sizeHash;
             return id;
         }
 
+        // ADDED for comparison purpose.
+        private Datatype()
+        {
+            _uniqueId = Interlocked.Increment(ref _nextUniqueId);
+        }
+        
         /// Construct the base data-type copying low-level properties of another
         public Datatype(Datatype op)
+            : this()
         {
             size = op.size;
             name = op.name;
@@ -237,8 +211,9 @@ namespace Sla.DECCORE
             typedefImm = op.typedefImm;
         }
 
-        /// Construct the base data-type providing size and meta-type
+        // Construct the base data-type providing size and meta-type
         public Datatype(int s, type_metatype m)
+            : this()
         {
             size = s;
             metatype = m;
@@ -260,28 +235,28 @@ namespace Sla.DECCORE
             => ((flags&(Properties.chartype | Properties.utf16 | Properties.utf32 | Properties.opaque_string))!= 0);
 
         /// Is this an enumerated type
-        public bool isEnumType() => ((flags& Properties.enumtype)!= 0);
+        public bool isEnumType() => ((flags & Properties.enumtype) != 0);
 
         /// Is this a flag-based enumeration
-        public bool isPowerOfTwo() => ((flags& Properties.poweroftwo)!= 0);
+        public bool isPowerOfTwo() => ((flags & Properties.poweroftwo) != 0);
 
         /// Does this print as an ASCII 'char'
-        public bool isASCII() => ((flags& Properties.chartype)!= 0);
+        public bool isASCII() => ((flags & Properties.chartype) != 0);
 
         /// Does this print as UTF16 'wchar'
-        public bool isUTF16() => ((flags& Properties.utf16)!= 0);
+        public bool isUTF16() => ((flags & Properties.utf16) != 0);
 
         /// Does this print as UTF32 'wchar'
-        public bool isUTF32() => ((flags& Properties.utf32)!= 0);
+        public bool isUTF32() => ((flags & Properties.utf32) != 0);
 
         ///< Is \b this a variable length structure
-        public bool isVariableLength() => ((flags& Properties.variable_length)!= 0);
+        public bool isVariableLength() => ((flags & Properties.variable_length) != 0);
 
-        /// Are these the same variable length data-type
-        /// If \b this and the other given data-type are both variable length and come from the
-        /// the same base data-type, return \b true.
-        /// \param ct is the other given data-type to compare with \b this
-        /// \return \b true if they are the same variable length data-type.
+        // Are these the same variable length data-type
+        // If \b this and the other given data-type are both variable length and come
+        // from the same base data-type, return \b true.
+        // \param ct is the other given data-type to compare with \b this
+        // \return \b true if they are the same variable length data-type.
         public bool hasSameVariableBase(Datatype ct)
         {
             if (!isVariableLength()) return false;
@@ -292,23 +267,23 @@ namespace Sla.DECCORE
         }
 
         /// Is \b this an opaquely encoded string
-        public bool isOpaqueString() => ((flags& Properties.opaque_string)!= 0);
+        public bool isOpaqueString() => ((flags & Properties.opaque_string) != 0);
 
         /// Is \b this a TypePointerRel
-        public bool isPointerRel() => ((flags & Properties.is_ptrrel)!= 0);
+        public bool isPointerRel() => ((flags & Properties.is_ptrrel) != 0);
 
         /// Is \b this a non-ephemeral TypePointerRel
         public bool isFormalPointerRel()
             => (flags & (Properties.is_ptrrel | Properties.has_stripped)) == Properties.is_ptrrel;
 
         /// Return \b true if \b this has a stripped form
-        public bool hasStripped() => (flags & Properties.has_stripped)!= 0;
+        public bool hasStripped() => (flags & Properties.has_stripped) != 0;
 
         /// Is \b this an incompletely defined data-type
-        public bool isIncomplete() => (flags & Properties.type_incomplete)!= 0;
+        public bool isIncomplete() => (flags & Properties.type_incomplete) != 0;
 
         /// Is \b this a union or a pointer to union
-        public bool needsResolution() => (flags & Properties.needs_resolution)!= 0;
+        public bool needsResolution() => (flags & Properties.needs_resolution) != 0;
 
         /// Get properties pointers inherit
         public Properties getInheritable() => (flags & Properties.coretype);
@@ -355,33 +330,36 @@ namespace Sla.DECCORE
             s.Write((name.Length > 0) ? name : $"unkbyte{size}");
         }
 
-        /// \brief Find an immediate subfield of \b this data-type
-        ///
-        /// Given a byte range within \b this data-type, determine the field it is contained in
-        /// and pass back the renormalized offset. This method applies to type_metatype.TYPE_STRUCT, type_metatype.TYPE_UNION, and
-        /// type_metatype.TYPE_PARTIALUNION, data-types that have field components. For type_metatype.TYPE_UNION and type_metatype.TYPE_PARTIALUNION, the
-        /// field may depend on the p-code op extracting or writing the value.
-        /// \param off is the byte offset into \b this
-        /// \param sz is the size of the byte range
-        /// \param op is the PcodeOp reading/writing the data-type
-        /// \param slot is the index of the Varnode being accessed, -1 for the output, >=0 for an input
-        /// \param newoff points to the renormalized offset to pass back
-        /// \return the containing field or NULL if the range is not contained
-        public virtual TypeField? findTruncation(int off, int sz, PcodeOp op, int slot, out int newoff)
+        // \brief Find an immediate subfield of \b this data-type
+        // Given a byte range within \b this data-type, determine the field it is contained
+        // in and pass back the renormalized offset. This method applies to
+        // type_metatype.TYPE_STRUCT, type_metatype.TYPE_UNION, and
+        // type_metatype.TYPE_PARTIALUNION, data-types that have field components. For
+        // type_metatype.TYPE_UNION and type_metatype.TYPE_PARTIALUNION, the field may
+        // depend on the p-code op extracting or writing the value.
+        // \param off is the byte offset into \b this
+        // \param sz is the size of the byte range
+        // \param op is the PcodeOp reading/writing the data-type
+        // \param slot is the index of the Varnode being accessed, -1 for the output, >=0 for an input
+        // \param newoff points to the renormalized offset to pass back
+        // \return the containing field or NULL if the range is not contained
+        public virtual TypeField? findTruncation(int off, int sz, PcodeOp op, int slot,
+            out int newoff)
         {
             newoff = 0;
             return (TypeField)null;
         }
 
-        /// Recover component data-type one-level down
-        /// Given an offset into \b this data-type, return the component data-type at that offset.
-        /// Also, pass back a "renormalized" offset suitable for recursize getSubType() calls:
-        /// i.e. if the original offset hits the exact start of the sub-type, 0 is passed back.
-        /// If there is no valid component data-type at the offset,
-        /// return NULL and pass back the original offset
-        /// \param off is the offset into \b this data-type
-        /// \param newoff is a pointer to the passed-back offset
-        /// \return a pointer to the component data-type or NULL
+        // Recover component data-type one-level down
+        // Given an offset into \b this data-type, return the component data-type at that
+        // offset. Also, pass back a "renormalized" offset suitable for recursize
+        // getSubType() calls: i.e. if the original offset hits the exact start of the
+        // sub-type, 0 is passed back. If there is no valid component data-type at the
+        // offset,
+        // return NULL and pass back the original offset
+        // \param off is the offset into \b this data-type
+        // \param newoff is a pointer to the passed-back offset
+        // \return a pointer to the component data-type or NULL
         public virtual Datatype? getSubType(ulong off, out ulong newoff)
         {
             // There is no subtype
@@ -432,12 +410,12 @@ namespace Sla.DECCORE
             if (!name.empty()) s.Write(name[0]);
         }
 
-        /// Order types for propagation
-        /// Order \b this with another data-type, in a way suitable for the type propagation algorithm.
-        /// Bigger types come earlier. More specific types come earlier.
-        /// \param op is the data-type to compare with \b this
-        /// \param level is maximum level to descend when recursively comparing
-        /// \return negative, 0, positive depending on ordering of types
+        // Order types for propagation
+        // Order \b this with another data-type, in a way suitable for the type propagation
+        // algorithm. Bigger types come earlier. More specific types come earlier.
+        // \param op is the data-type to compare with \b this
+        // \param level is maximum level to descend when recursively comparing
+        // \return negative, 0, positive depending on ordering of types
         public virtual int compare(Datatype op, int level)
         {
             if (size != op.size) return (op.size - size);
@@ -556,7 +534,9 @@ namespace Sla.DECCORE
         public int typeOrderBool(Datatype op)
         {
             if (this == op) return 0;
-            if (metatype == type_metatype.TYPE_BOOL) return 1;        // Never prefer bool over other data-types
+            if (metatype == type_metatype.TYPE_BOOL)
+                // Never prefer bool over other data-types
+                return 1;
             if (op.metatype == type_metatype.TYPE_BOOL) return -1;
             return compare(op, 10);
         }
@@ -640,6 +620,44 @@ namespace Sla.DECCORE
             else if (val == Symbol.DisplayFlags.force_char)
                 return "char";
             throw new LowlevelError("Unrecognized integer format encoding");
+        }
+
+        public int CompareTo(Datatype? other)
+        {
+            if (other == null) throw new ArgumentNullException();
+            return this._uniqueId.CompareTo(other._uniqueId);
+        }
+
+        /// Boolean properties of datatypes
+        [Flags()]
+        internal enum Properties
+        {
+            /// This is a basic type which will never be redefined
+            coretype = 1,
+            /// ASCII character data
+            chartype = 2,
+            /// An enumeration type (as well as an integer)
+            enumtype = 4,
+            /// An enumeration type where all values are of 2^^n form
+            poweroftwo = 8,
+            /// 16-bit wide chars in unicode UTF16
+            utf16 = 16,
+            /// 32-bit wide chars in unicode UTF32
+            utf32 = 32,
+            /// Structure that should be treated as a string
+            opaque_string = 64,
+            /// May be other structures with same name different lengths
+            variable_length = 128,
+            /// Datatype has a stripped form for formal declarations
+            has_stripped = 0x100,
+            /// Datatype is a TypePointerRel
+            is_ptrrel = 0x200,
+            /// Set if \b this (recursive) data-type has not been fully defined yet
+            type_incomplete = 0x400,
+            /// Datatype (union, pointer to union) needs resolution before propagation
+            needs_resolution = 0x800,
+            /// 3-bits encoding display format, 0=none, 1=hex, 2=dec, 3=oct, 4=bin, 5=char
+            force_format = 0x7000,
         }
     }
 }

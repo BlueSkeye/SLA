@@ -763,7 +763,7 @@ namespace Sla.DECCORE
         /// \param resolver acts as a factory and resolves cross-references
         public void decode(Sla.CORE.Decoder decoder, BlockMap resolver)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_BLOCK);
+            uint elemId = decoder.openElement(ElementId.ELEM_BLOCK);
             decodeHeader(decoder);
             decodeBody(decoder);
             decodeEdges(decoder, resolver);

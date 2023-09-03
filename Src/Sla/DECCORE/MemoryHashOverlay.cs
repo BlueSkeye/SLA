@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -33,21 +27,23 @@ namespace Sla.DECCORE
         protected override void insert(ulong addr, ulong val)
         {
             int size = address.size();
-            ulong offset = (addr >> alignshift) % size;
-            for (int i = 0; i < size; ++i)
-            {
-                if (address[offset] == addr)
-                { // Address has been seen before
-                    value[offset] = val;       // Replace old value
+            ulong offset = (addr >> alignshift) % (uint)size;
+            for (int i = 0; i < size; ++i) {
+                if (address[(int)offset] == addr) {
+                    // Address has been seen before
+                    // Replace old value
+                    value[(int)offset] = val;
                     return;
                 }
-                else if (address[offset] == (ulong)0xBADBEEF)
-                { // Address not seen before
-                    address[offset] = addr;             // Claim this hash slot
-                    value[offset] = val;                // Set value
+                else if (address[(int)offset] == (ulong)0xBADBEEF) {
+                    // Address not seen before
+                    // Claim this hash slot
+                    address[(int)offset] = addr;
+                    // Set value
+                    value[(int)offset] = val;
                     return;
                 }
-                offset = (offset + collideskip) % size;
+                offset = (offset + collideskip) % (uint)size;
             }
             throw new LowlevelError("Memory state hash_table is full");
         }
@@ -57,23 +53,22 @@ namespace Sla.DECCORE
         /// entry, forward the query to the underlying memory bank, or return 0 if there is no underlying bank
         /// \param addr is the aligned address of the word to retrieve
         /// \return the retrieved value
-        protected override ulong find(ulong addr)
-        { // Find address in hash-table, or return find from underlying memory
+        internal override ulong find(ulong addr)
+        {
+            // Find address in hash-table, or return find from underlying memory
             int size = address.size();
-            ulong offset = (addr >> alignshift) % size;
+            ulong offset = (addr >> alignshift) % (uint)size;
             for (int i = 0; i < size; ++i)
             {
-                if (address[offset] == addr) // Address has been seen before
-                    return value[offset];
-                else if (address[offset] == 0xBADBEEF) // Address not seen before
+                if (address[(int)offset] == addr) // Address has been seen before
+                    return value[(int)offset];
+                else if (address[(int)offset] == 0xBADBEEF) // Address not seen before
                     break;
-                offset = (offset + collideskip) % size;
+                offset = (offset + collideskip) % (uint)size;
             }
 
             // We didn't find the address in the hashtable
-            if (underlie == (MemoryBank)null)
-                return (ulong)0;
-            return underlie.find(addr);
+            return (underlie == (MemoryBank)null) ? (ulong)0 : underlie.find(addr);
         }
 
         /// Constructor for hash overlay
@@ -86,7 +81,7 @@ namespace Sla.DECCORE
         /// \param hashsize is the maximum number of entries in the hashtable
         /// \param ul is the underlying memory bank being overlayed
         public MemoryHashOverlay(AddrSpace spc, int ws, int ps, int hashsize, MemoryBank ul)
-            : base(spc, ws, ps)
+            : base(spc, (uint)ws, (uint)ps)
         {
             address = new List<ulong>(hashsize);
             for(int index = 0; index < hashsize; index++) {
@@ -96,10 +91,9 @@ namespace Sla.DECCORE
             underlie = ul;
             collideskip = 1023;
 
-            uint tmp = ws - 1;
+            uint tmp = (uint)ws - 1;
             alignshift = 0;
-            while (tmp != 0)
-            {
+            while (tmp != 0) {
                 alignshift += 1;
                 tmp >>= 1;
             }

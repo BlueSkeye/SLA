@@ -26,6 +26,13 @@ namespace Sla.SLACOMP
                 : (op1.qual.low < op2.qual.low);
         }
 
+        public static bool operator >(FieldContext op1, FieldContext op2)
+        {
+            return (op1.sym.getName() != op2.sym.getName())
+                ? (0 < string.Compare(op1.sym.getName(), op2.sym.getName()))
+                : (op1.qual.low > op2.qual.low);
+        }
+
         internal FieldContext(VarnodeSymbol s, FieldQuality q)
         {
             sym = s;

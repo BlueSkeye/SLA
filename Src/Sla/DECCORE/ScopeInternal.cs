@@ -2,6 +2,7 @@
 using Sla.DECCORE;
 using Sla.EXTRA;
 using System.Globalization;
+using System.Security.Cryptography;
 
 namespace Sla.DECCORE
 {
@@ -19,13 +20,13 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         private void decodeHole(Sla.CORE.Decoder decoder)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_HOLE);
+            uint elemId = decoder.openElement(ElementId.ELEM_HOLE);
             Varnode.varnode_flags flags = 0;
             Sla.CORE.Range range = new CORE.Range();
             range.decodeFromAttributes(decoder);
             decoder.rewindAttributes();
             while(true) {
-                AttributeId attribId = decoder.getNextAttributeId();
+                uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if ((attribId == AttributeId.ATTRIB_READONLY) && decoder.readBool())
                     flags |= Varnode.varnode_flags.@readonly;
@@ -46,7 +47,7 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         private void decodeCollision(Sla.CORE.Decoder decoder)
         {
-            ElementId elemId = decoder.openElement(ElementId.ELEM_COLLISION);
+            uint elemId = decoder.openElement(ElementId.ELEM_COLLISION);
             string nm = decoder.readString(AttributeId.ATTRIB_NAME);
             decoder.closeElement(elemId);
             IEnumerator<Symbol>? iter = findFirstByName(nm);
@@ -63,11 +64,11 @@ namespace Sla.DECCORE
         private void insertNameTree(Symbol sym)
         {
             sym.nameDedup = 0;
-            Tuple<SymbolNameTree::iterator, bool> nameres;
+            Tuple<IEnumerator<Symbol>, bool> nameres;
             nameres = nametree.insert(sym);
             if (!nameres.second) {
                 sym.nameDedup = 0xffffffff;
-                SymbolNameTree::iterator iter = nametree.upper_bound(sym);
+                IEnumerator<Symbol> iter = nametree.upper_bound(sym);
                 --iter; // Last symbol with this name
                 sym.nameDedup = iter.Current.nameDedup + 1;        // increment the dedup counter
                 nameres = nametree.insert(sym);
@@ -167,14 +168,15 @@ namespace Sla.DECCORE
             int off, int sz, RangeList uselim)
         {
             dynamicentry.Add(new SymbolEntry(sym, exfl, hash, off, sz, uselim));
-            IEnumerator<SymbolEntry> iter = dynamicentry.end();
-            --iter;
+            IEnumerator<SymbolEntry> iter = dynamicentry.GetReverseEnumerator();
+            if (!iter.MoveNext()) throw new ApplicationException();
             // Store reference to map entry in symbol
             sym.mapentry.Add(iter);
             if (sz == sym.type.getSize()) {
                 sym.wholeCount += 1;
-                if (sym.wholeCount == 2)
+                if (sym.wholeCount == 2) {
                     multiEntrySet.Add(sym);
+                }
             }
             return dynamicentry.GetLastItem();
         }
@@ -213,9 +215,9 @@ namespace Sla.DECCORE
 
         public override void clear()
         {
-            SymbolNameTree::iterator iter = nametree.begin();
+            IEnumerator<Symbol> iter = nametree.GetEnumerator();
             while (iter.MoveNext()) {
-                Symbol sym = *iter++;
+                Symbol sym = iter.Current;
                 removeSymbol(sym);
             }
             nextUniqueId = 0;
@@ -263,9 +265,9 @@ namespace Sla.DECCORE
                 }
             }
             else {
-                SymbolNameTree::iterator iter = nametree.begin();
-                while (iter.moveNext()) {
-                    Symbol sym = *iter++;
+                IEnumerator<Symbol> iter = nametree.GetEnumerator();
+                while (iter.MoveNext()) {
+                    Symbol sym = iter.Current;
                     if (sym.getCategory() >= 0) continue;
                     removeSymbol(sym);
                 }
@@ -274,9 +276,9 @@ namespace Sla.DECCORE
 
         public override void clearUnlocked()
         {
-            SymbolNameTree::iterator iter = nametree.begin();
-            while (iter.moveNext()) {
-                Symbol sym = *iter++;
+            IEnumerator<Symbol> iter = nametree.GetEnumerator();
+            while (iter.MoveNext()) {
+                Symbol sym = iter.Current;
                 if (sym.isTypeLocked()) {
                     // Only hold if TYPE locked
                     if (!sym.isNameLocked()) {
@@ -323,8 +325,8 @@ namespace Sla.DECCORE
                 }
             }
             else {
-                SymbolNameTree::iterator iter = nametree.begin();
-                while (iter.moveNext()) {
+                IEnumerator<Symbol> iter = nametree.GetEnumerator();
+                while (iter.MoveNext()) {
                     Symbol sym = iter.Current;
                     if (sym.getCategory() >= 0) continue;
                     if (sym.isTypeLocked()) {
@@ -363,20 +365,31 @@ namespace Sla.DECCORE
         public override MapIterator begin()
         {
             // The symbols are ordered via their mapping address
-            IEnumerator<EntryMap> iter = maptable.begin();
-            while (iter.MoveNext() && (iter.Current == (EntryMap)null)) { }
-            IEnumerator<SymbolEntry> curiter;
-            if (iter != maptable.end()) {
-                curiter = iter.Current.begin_list();
-                if (curiter == iter.Current.end_list()) {
-                    while ((iter != maptable.end()) && (curiter == iter.Current.end_list())) {
+            IEnumerator<EntryMap> iter = maptable.GetEnumerator();
+            bool iterationCompleted = false;
+            while(true) {
+                if (!iter.MoveNext()) {
+                    iterationCompleted = true;
+                    break;
+                }
+                if (iter.Current == (EntryMap)null) break;
+            }
+            IEnumerator<SymbolEntry> curiter = null;
+            if (!iterationCompleted) {
+                curiter = (iter.Current ?? throw new ApplicationException()).begin_list();
+                if (!curiter.MoveNext()
+                    /*curiter == iter.Current.end_list()*/)
+                {
+                    while (!iterationCompleted && (curiter == iter.Current.end_list())) {
                         do {
-                            ++iter;
-                        } while ((iter != maptable.end()) && (iter.Current == (EntryMap)null));
-                        if (iter != maptable.end())
+                            if (!iter.MoveNext()) {
+                                iterationCompleted = true;
+                                break;
+                            }
+                        } while (!iterationCompleted && (iter.Current == (EntryMap)null));
+                        if (!iterationCompleted)
                             curiter = iter.Current.begin_list();
                     }
-
                 }
             }
             return new MapIterator(maptable, iter, curiter);
@@ -504,12 +517,12 @@ namespace Sla.DECCORE
         {
             EntryMap? rangemap = maptable[addr.getSpace().getIndex()];
             if (rangemap != (EntryMap)null) {
-                Tuple<EntryMap::const_iterator, EntryMap::const_iterator> res;
+                Tuple<EntryMap.PartIterator, EntryMap.PartIterator> res;
                 if (usepoint.isInvalid())
-                    res = rangemap.find(addr.getOffset(), EntryMap::subsorttype(false),
-                        EntryMap::subsorttype(true));
+                    res = rangemap.find(addr.getOffset(), rangemap.CreateSubsortType(false),
+                        rangemap.CreateSubsortType(true));
                 else
-                    res = rangemap.find(addr.getOffset(), EntryMap::subsorttype(false),
+                    res = rangemap.find(addr.getOffset(), rangemap.CreateSubsortType(false),
                         EntryMap::subsorttype(usepoint));
                 while (res.first != res.second) {
                     --res.second;
@@ -528,12 +541,12 @@ namespace Sla.DECCORE
             SymbolEntry? bestentry = (SymbolEntry)null;
             EntryMap? rangemap = maptable[addr.getSpace().getIndex()];
             if (rangemap != (EntryMap)null) {
-                Tuple<EntryMap::const_iterator, EntryMap::const_iterator> res;
+                Tuple<EntryMap.PartIterator, EntryMap.PartIterator> res;
                 if (usepoint.isInvalid())
-                    res = rangemap.find(addr.getOffset(), EntryMap::subsorttype(false),
-                        EntryMap::subsorttype(true));
+                    res = rangemap.find(addr.getOffset(), rangemap.CreateSubsortType(false),
+                        rangemap.CreateSubsortType(true));
                 else
-                    res = rangemap.find(addr.getOffset(), EntryMap::subsorttype(false),
+                    res = rangemap.find(addr.getOffset(), rangemap.CreateSubsortType(false),
                         EntryMap::subsorttype(usepoint));
                 int oldsize = -1;
                 ulong end = addr.getOffset() + (uint)size - 1;
@@ -560,12 +573,12 @@ namespace Sla.DECCORE
             SymbolEntry? bestentry = (SymbolEntry)null;
             EntryMap? rangemap = maptable[addr.getSpace().getIndex()];
             if (rangemap != (EntryMap)null) {
-                Tuple<EntryMap::const_iterator, EntryMap::const_iterator> res;
+                Tuple<EntryMap.PartIterator, EntryMap.PartIterator> res;
                 if (usepoint.isInvalid())
-                    res = rangemap.find(addr.getOffset(), EntryMap::subsorttype(false),
-                        EntryMap::subsorttype(true));
+                    res = rangemap.find(addr.getOffset(), rangemap.CreateSubsortType(false),
+                        rangemap.CreateSubsortType(true));
                 else
-                    res = rangemap.find(addr.getOffset(), EntryMap::subsorttype(false),
+                    res = rangemap.find(addr.getOffset(), rangemap.CreateSubsortType(false),
                         EntryMap::subsorttype(usepoint));
                 int olddiff = -10000;
                 int newdiff;
@@ -596,7 +609,7 @@ namespace Sla.DECCORE
             FunctionSymbol sym;
             EntryMap? rangemap = maptable[addr.getSpace().getIndex()];
             if (rangemap != (EntryMap)null) {
-                Tuple<EntryMap::const_iterator, EntryMap::const_iterator> res;
+                Tuple<EntryMap.PartIterator, EntryMap.PartIterator> res;
                 res = rangemap.find(addr.getOffset());
                 while (res.first != res.second) {
                     SymbolEntry entry = &(*res.first);
@@ -616,7 +629,7 @@ namespace Sla.DECCORE
             ExternRefSymbol? sym = (ExternRefSymbol)null;
             EntryMap? rangemap = maptable[addr.getSpace().getIndex()];
             if (rangemap != (EntryMap)null) {
-                Tuple<EntryMap::const_iterator, EntryMap::const_iterator> res;
+                Tuple<EntryMap.PartIterator, EntryMap.PartIterator> res;
                 res = rangemap.find(addr.getOffset());
                 while (res.first != res.second) {
                     SymbolEntry entry = &(*res.first);
@@ -635,7 +648,7 @@ namespace Sla.DECCORE
             LabSymbol? sym = (LabSymbol)null;
             EntryMap? rangemap = maptable[addr.getSpace().getIndex()];
             if (rangemap != (EntryMap)null) {
-                Tuple<EntryMap::const_iterator, EntryMap::const_iterator> res;
+                Tuple<EntryMap.PartIterator, EntryMap.PartIterator> res;
                 res = rangemap.find(addr.getOffset(), EntryMap::subsorttype(false),
                     EntryMap::subsorttype(addr));
                 while (res.first != res.second) {
@@ -656,7 +669,7 @@ namespace Sla.DECCORE
         {
             EntryMap? rangemap = maptable[addr.getSpace().getIndex()];
             if (rangemap != (EntryMap)null) {
-                EntryMap::const_iterator iter;
+                EntryMap.PartIterator iter;
                 iter = rangemap.find_overlap(addr.getOffset(), addr.getOffset() + (uint)size - 1);
                 if (iter != rangemap.end())
                     return &(*iter);
@@ -893,12 +906,12 @@ namespace Sla.DECCORE
 
             if (!nametree.empty()) {
                 encoder.openElement(ElementId.ELEM_SYMBOLLIST);
-                IEnumerator<Symbol> iter;
-                for (iter = nametree.begin(); iter != nametree.end(); ++iter) {
+                IEnumerator<Symbol> iter = nametree.GetEnumerator();
+                while (iter.MoveNext()) {
                     Symbol sym = iter.Current;
                     int symbolType = 0;
                     if (!sym.mapentry.empty()) {
-                        SymbolEntry entry = sym.mapentry.front();
+                        SymbolEntry entry = sym.mapentry.First();
                         if (entry.isDynamic()) {
                             if (sym.getCategory() == Symbol.SymbolCategory.union_facet)
                                 continue;       // Don't save override
@@ -911,9 +924,9 @@ namespace Sla.DECCORE
                     else if (symbolType == 2)
                         encoder.writeString(AttributeId.ATTRIB_TYPE, "equate");
                     sym.encode(encoder);
-                    List<IEnumerator<SymbolEntry>> miter;
-                    for (miter = sym.mapentry.begin(); miter != sym.mapentry.end(); ++miter) {
-                        SymbolEntry entry = (*(*miter));
+                    IEnumerator<IEnumerator<SymbolEntry>> miter = sym.mapentry.GetEnumerator();
+                    while (miter.MoveNext()) {
+                        SymbolEntry entry = miter.Current.Current;
                         entry.encode(encoder);
                     }
                     encoder.closeElement(ElementId.ELEM_MAPSYM);
@@ -925,11 +938,12 @@ namespace Sla.DECCORE
 
         public override void decode(Sla.CORE.Decoder decoder)
         {
-            //  ElementId elemId = decoder.openElement(ElementId.ELEM_SCOPE);
-            //  name = el.getAttributeValue("name");	// Name must already be set in the constructor
+            //  uint elemId = decoder.openElement(ElementId.ELEM_SCOPE);
+            //  name = el.getAttributeValue("name");
+            // Name must already be set in the constructor
             bool rangeequalssymbols = false;
 
-            ElementId subId = decoder.peekElement();
+            uint subId = decoder.peekElement();
             if (subId == ElementId.ELEM_PARENT) {
                 decoder.skipElement();  // Skip <parent> tag processed elsewhere
                 subId = decoder.peekElement();
@@ -947,7 +961,7 @@ namespace Sla.DECCORE
             subId = decoder.openElement(ElementId.ELEM_SYMBOLLIST);
             if (subId != 0) {
                 while(true) {
-                    ElementId symId = decoder.peekElement();
+                    uint symId = decoder.peekElement();
                     if (symId == 0) break;
                     if (symId == ElementId.ELEM_MAPSYM) {
                         Symbol sym = addMapSym(decoder) ?? throw new ApplicationException();
@@ -1023,19 +1037,20 @@ namespace Sla.DECCORE
         /// Run through all the symbols whose name is undefined. Build a variable name, uniquify it, and
         /// rename the variable.
         /// \param base is the base index to start at for generating generic names
-        public override void assignDefaultNames(int @base)
+        public virtual void assignDefaultNames(int @base)
         {
-            IEnumerator<Symbol> iter;
-
             Symbol testsym = new Symbol((Scope)null, "$$undef", (Datatype)null);
-
-            iter = nametree.upper_bound(testsym);
-            while (iter != nametree.end()) {
-                Symbol sym = *iter;
+            Dictionary<Symbol, string> renamedSymbols = new Dictionary<Symbol, string>();
+            IEnumerator<Symbol> iter = nametree.upper_bound(testsym);
+            while (iter.MoveNext()) {
+                Symbol sym = iter.Current;
                 if (!sym.isNameUndefined()) break;
-                ++iter;     // Advance before renaming
                 string nm = buildDefaultName(sym, @base, (Varnode)null);
-                renameSymbol(sym, nm);
+                renamedSymbols.Add(sym, nm);
+            }
+
+            foreach(KeyValuePair<Symbol, string> renamed in renamedSymbols) {
+                renameSymbol(renamed.Key, renamed.Value);
             }
         }
 

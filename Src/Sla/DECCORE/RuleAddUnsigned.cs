@@ -52,7 +52,7 @@ namespace Sla.DECCORE
                 }
             }
             data.opSetOpcode(op, OpCode.CPUI_INT_SUB);
-            Varnode cvn = data.newConstant(constvn.getSize(), (-val) & mask);
+            Varnode cvn = data.newConstant(constvn.getSize(), (ulong)(-((long)val)) & mask);
             cvn.copySymbol(constvn);
             data.opSetInput(op, cvn, 1);
             return 1;

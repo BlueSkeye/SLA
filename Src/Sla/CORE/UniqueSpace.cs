@@ -42,7 +42,7 @@ namespace Sla.CORE
             setFlags(Properties.hasphysical);
         }
 
-        public override void saveXml(StreamWriter s)
+        public override void saveXml(TextWriter s)
         {
             s.Write("<space_unique");
             saveBasicAttributes(s);

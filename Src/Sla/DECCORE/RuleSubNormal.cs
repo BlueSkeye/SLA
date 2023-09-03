@@ -28,17 +28,18 @@ namespace Sla.DECCORE
 
         public override int applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode shiftout = op.getIn(0);
+            Varnode shiftout = op.getIn(0) ?? throw new ApplicationException();
             if (!shiftout.isWritten()) return 0;
-            PcodeOp shiftop = shiftout.getDef();
+            PcodeOp shiftop = shiftout.getDef() ?? throw new ApplicationException();
             OpCode opc = shiftop.code();
             if ((opc != OpCode.CPUI_INT_RIGHT) && (opc != OpCode.CPUI_INT_SRIGHT))
                 return 0;
-            if (!shiftop.getIn(1).isConstant()) return 0;
-            Varnode a = shiftop.getIn(0);
+            if (!shiftop.getIn(1).isConstant())
+                return 0;
+            Varnode a = shiftop.getIn(0) ?? throw new ApplicationException();
             if (a.isFree()) return 0;
-            int n = shiftop.getIn(1).getOffset();
-            int c = op.getIn(1).getOffset();
+            int n = (int)shiftop.getIn(1).getOffset();
+            int c = (int)op.getIn(1).getOffset();
             int k = (n / 8);
             int insize = a.getSize();
             int outsize = op.getOut().getSize();
@@ -47,17 +48,18 @@ namespace Sla.DECCORE
             if ((n + 8 * c + 8 * outsize < 8 * insize) && (n != k * 8)) return 0;
 
             // If totalcut + remain > original input
+            PcodeOp newop;
             if (k + c + outsize > insize) {
                 int truncSize = insize - c - k;
-                if (n == k * 8 && truncSize > 0 && Globals.popcount(truncSize) == 1) {
+                if (n == k * 8 && truncSize > 0 && Globals.popcount((ulong)truncSize) == 1) {
                     // We need an additional extension
                     c += k;
-                    PcodeOp newop = data.newOp(2, op.getAddr());
+                    newop = data.newOp(2, op.getAddr());
                     opc = (opc == OpCode.CPUI_INT_SRIGHT) ? OpCode.CPUI_INT_SEXT : OpCode.CPUI_INT_ZEXT;
                     data.opSetOpcode(newop, OpCode.CPUI_SUBPIECE);
                     data.newUniqueOut(truncSize, newop);
                     data.opSetInput(newop, a, 0);
-                    data.opSetInput(newop, data.newConstant(4, c), 1);
+                    data.opSetInput(newop, data.newConstant(4, (ulong)c), 1);
                     data.opInsertBefore(newop, op);
 
                     data.opSetInput(op, newop.getOut(), 0);
@@ -66,7 +68,8 @@ namespace Sla.DECCORE
                     return 1;
                 }
                 else
-                    k = insize - c - outsize; // Or we can shrink the cut
+                    // Or we can shrink the cut
+                    k = insize - c - outsize;
             }
 
             // if n == k*8, then a shift is unnecessary
@@ -75,24 +78,25 @@ namespace Sla.DECCORE
             if (n == 0) {
                 // Extra shift is unnecessary
                 data.opSetInput(op, a, 0);
-                data.opSetInput(op, data.newConstant(4, c), 1);
+                data.opSetInput(op, data.newConstant(4, (ulong)c), 1);
                 return 1;
             }
             else if (n >= outsize * 8) {
-                n = outsize * 8;        // Can only shift so far
+                // Can only shift so far
+                n = outsize * 8;
                 if (opc == OpCode.CPUI_INT_SRIGHT)
                     n -= 1;
             }
 
-            PcodeOp newop = data.newOp(2, op.getAddr());
+            newop = data.newOp(2, op.getAddr());
             data.opSetOpcode(newop, OpCode.CPUI_SUBPIECE);
             data.newUniqueOut(outsize, newop);
             data.opSetInput(newop, a, 0);
-            data.opSetInput(newop, data.newConstant(4, c), 1);
+            data.opSetInput(newop, data.newConstant(4, (ulong)c), 1);
             data.opInsertBefore(newop, op);
 
             data.opSetInput(op, newop.getOut(), 0);
-            data.opSetInput(op, data.newConstant(4, n), 1);
+            data.opSetInput(op, data.newConstant(4, (ulong)n), 1);
             data.opSetOpcode(op, opc);
             return 1;
         }

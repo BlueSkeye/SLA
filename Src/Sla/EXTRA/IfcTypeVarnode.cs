@@ -44,8 +44,8 @@ namespace Sla.EXTRA
             if (name.size() > 0)
                 scope.setAttribute(sym, Varnode.varnode_flags.namelock);
 
-            *status.fileoptr << "Successfully added " << sym.getName();
-            *status.fileoptr << " to scope " << scope.getFullName() << endl;
+            status.fileoptr << "Successfully added " << sym.getName();
+            status.fileoptr << " to scope " << scope.getFullName() << endl;
         }
     }
 }

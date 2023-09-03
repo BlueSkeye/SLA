@@ -16,10 +16,10 @@ namespace Sla.DECCORE
     internal class TypeCode : Datatype
     {
         // friend class TypeFactory;
-        /// If non-null, this describes the prototype of the underlying function
-        internal FuncProto proto;
-        /// Factory owning \b this
-        protected TypeFactory factory;
+        // If non-null, this describes the prototype of the underlying function
+        internal FuncProto? proto;
+        // Factory owning \b this
+        protected TypeFactory? factory;
 
         /// Establish a function pointer
         /// Turn on the data-type's function prototype
@@ -56,7 +56,7 @@ namespace Sla.DECCORE
         /// The prototype is copied @in.
         /// \param typegrp is the factory owning \b this
         /// \param fp is the prototype to set (may be null)
-        protected void setPrototype(TypeFactory typegrp,FuncProto fp)
+        internal void setPrototype(TypeFactory typegrp, FuncProto fp)
         {
             if (proto != (FuncProto)null) {
                 // delete proto;
@@ -120,7 +120,7 @@ namespace Sla.DECCORE
         {
             proto = (FuncProto)null;
             factory = (TypeFactory)null;
-            flags |= type_incomplete;
+            flags |= Properties.type_incomplete;
         }
 
         /// Compare surface characteristics of two TypeCodes
@@ -147,7 +147,7 @@ namespace Sla.DECCORE
                 string model1 = proto.getModelName();
                 string model2 = op.proto.getModelName();
                 if (model1 != model2)
-                    return (model1 < model2) ? -1 : 1;
+                    return string.Compare(model1, model2);
             }
             int nump = proto.numParams();
             int opnump = op.proto.numParams();
@@ -181,9 +181,11 @@ namespace Sla.DECCORE
 
         public override Datatype getSubType(ulong off, out ulong newoff)
         {
-            if (factory == (TypeFactory)null) return (Datatype)null;
             newoff = 0;
-            return factory.getBase(1, type_metatype.TYPE_CODE);  // Return code byte unattached to function prototype
+            if (factory == (TypeFactory)null)
+                return (Datatype)null;
+            // Return code byte unattached to function prototype
+            return factory.getBase(1, type_metatype.TYPE_CODE);
         }
 
         public override int compare(Datatype op, int level)
@@ -230,7 +232,8 @@ namespace Sla.DECCORE
                 Datatype param = proto.getParam(i).getType();
                 Datatype opparam = tc.proto.getParam(i).getType();
                 if (param != opparam)
-                    return (param < opparam) ? -1 : 1; // Compare pointers directly
+                    // Compare pointers directly
+                    return param.CompareTo(opparam);
             }
             Datatype otype = proto.getOutputType();
             Datatype opotype = tc.proto.getOutputType();
@@ -239,12 +242,10 @@ namespace Sla.DECCORE
                 return 1;
             }
             if (opotype == (Datatype)null) return -1;
-            if (otype != opotype)
-                return (otype < opotype) ? -1 : 1;
-            return 0;
+            return object.ReferenceEquals(otype, opotype) ? 0 : otype.CompareTo(opotype);
         }
 
-        internal override Datatype? clone() => new TypeCode(this);
+        internal override Datatype clone() => new TypeCode(this);
 
         public override void encode(Sla.CORE.Encoder encoder)
         {
