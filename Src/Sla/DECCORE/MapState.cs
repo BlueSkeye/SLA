@@ -84,7 +84,7 @@ namespace Sla.DECCORE
                 return;
             long sst = (long)AddrSpace.byteToAddress(st, spaceid.getWordSize());
             Globals.sign_extend(ref sst, (int)spaceid.getAddrSize() * 8 - 1);
-            sst = (long)AddrSpace.addressToByte(sst, spaceid.getWordSize());
+            sst = (long)AddrSpace.addressToByte((ulong)sst, spaceid.getWordSize());
             RangeHint newRange = new RangeHint(st, sz, sst, ct, fl, rt, hi);
             maplist.Add(newRange);
 #if OPACTION_DEBUG
@@ -195,7 +195,7 @@ namespace Sla.DECCORE
             ulong high = spaceid.wrapOffset(lastrange.getLast() + 1);
             long sst = (long)AddrSpace.byteToAddress(high, spaceid.getWordSize());
             Globals.sign_extend(ref sst, (int)(spaceid.getAddrSize() * 8 - 1));
-            sst = (long)AddrSpace.addressToByte(sst, spaceid.getWordSize());
+            sst = (long)AddrSpace.addressToByte((ulong)sst, spaceid.getWordSize());
             // Add extra range to bound any final open entry
             RangeHint termRange = new RangeHint(high, 1, sst, defaultType, 0, RangeHint.RangeType.endpoint, -2);
             maplist.Add(termRange);

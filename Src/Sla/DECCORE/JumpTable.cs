@@ -473,7 +473,7 @@ namespace Sla.DECCORE
         /// Eliminate any code involved in actually computing the destination address so
         /// it looks like the OpCode.CPUI_BRANCHIND operation does it all internally.
         /// \param fd is the function containing \b this switch
-        private void foldInNormalization(Funcdata fd)
+        internal void foldInNormalization(Funcdata fd)
         {
             Varnode? switchvn = jmodel.foldInNormalization(fd, indirect);
             if (switchvn != (Varnode)null) {
@@ -495,7 +495,7 @@ namespace Sla.DECCORE
         }
 
         // Hide any guard code for \b this switch
-        private bool foldInGuards(Funcdata fd) => jmodel.foldInGuards(fd, this);
+        internal bool foldInGuards(Funcdata fd) => jmodel.foldInGuards(fd, this);
 
         // Recover the raw jump-table addresses (the address table)
         // The addresses that the raw BRANCHIND op might branch to itself are recovered,
@@ -578,12 +578,14 @@ namespace Sla.DECCORE
         /// value that produces it is calculated and stored as the formal \e case label for the associated code block.
         /// \param fd is the (final instance of the) function containing the switch
         /// \return \b true if it looks like a multi-stage restart is needed.
-        private bool recoverLabels(Funcdata fd)
+        internal bool recoverLabels(Funcdata fd)
         {
-            if (!isRecovered())
+            if (!isRecovered()) {
                 throw new LowlevelError("Trying to recover jumptable labels without addresses");
+            }
 
-            // Unless the model is an override, move model (created on a flow copy) so we can create a current instance
+            // Unless the model is an override, move model (created on a flow copy) so we can
+            // create a current instance
             if (jmodel != (JumpModel)null) {
                 //if (origmodel != (JumpModel)null)
                 //    delete origmodel;

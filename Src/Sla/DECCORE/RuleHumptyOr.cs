@@ -81,7 +81,7 @@ namespace Sla.DECCORE
             if (b.isConstant() && c.isConstant())
             {
                 ulong totalbits = b.getOffset() | c.getOffset();
-                if (totalbits == Globals.calc_mask(a.getSize()))
+                if (totalbits == Globals.calc_mask((uint)a.getSize()))
                 {
                     // Between the two sides, we get all bits of a. Convert to COPY
                     data.opSetOpcode(op, OpCode.CPUI_COPY);

@@ -1,10 +1,5 @@
 ﻿using Sla.CORE;
 using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.EXTRA
 {
@@ -19,16 +14,14 @@ namespace Sla.EXTRA
         /// are calculated.
         public override void execute(TextReader s)
         {
-            string funcname;
+            string funcname = s.ReadString();
             Address offset;
-
-            s >> funcname;
 
             if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("No image loaded");
 
             string basename;
-            Scope* funcscope = dcp.conf.symboltab.resolveScopeFromSymbolName(funcname, "::", basename, (Scope)null);
+            Scope? funcscope = dcp.conf.symboltab.resolveScopeFromSymbolName(funcname, "::", basename, (Scope)null);
             if (funcscope == (Scope)null)
                 throw new IfaceExecutionError("Bad namespace: " + funcname);
             dcp.fd = funcscope.queryFunction(basename); // Is function already in database
@@ -36,7 +29,7 @@ namespace Sla.EXTRA
                 throw new IfaceExecutionError("Unknown function name: " + funcname);
 
             if (!dcp.fd.hasNoCode())
-                dcp.followFlow(*status.optr, 0);
+                dcp.followFlow(status.optr, 0);
         }
     }
 }

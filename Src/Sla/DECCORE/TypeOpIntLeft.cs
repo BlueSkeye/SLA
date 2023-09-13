@@ -26,12 +26,12 @@ namespace Sla.DECCORE
         {
             if (slot == 1)
                 return tlst.getBaseNoChar(op.getIn(1).getSize(), type_metatype.TYPE_INT);
-            return TypeOpBinary::getInputLocal(op, slot);
+            return base.getInputLocal(op, slot);
         }
 
         public override Datatype getOutputToken(PcodeOp op, CastStrategy castStrategy)
         {
-            Datatype* res1 = op.getIn(0).getHighTypeReadFacing(op);
+            Datatype res1 = op.getIn(0).getHighTypeReadFacing(op);
             if (res1.getMetatype() == type_metatype.TYPE_BOOL)
                 res1 = tlst.getBase(res1.getSize(), type_metatype.TYPE_INT);
             return res1;

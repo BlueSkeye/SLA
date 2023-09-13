@@ -95,7 +95,7 @@ namespace Sla.DECCORE
                     PcodeOp otherop = bvn.getDef();
                     if (otherop.code() == OpCode.CPUI_INT_MULT) {
                         if (!otherop.getIn(1).isConstant()) continue;
-                        if (otherop.getIn(1).getOffset() != Globals.calc_mask(otherop.getIn(1).getSize())) continue;
+                        if (otherop.getIn(1).getOffset() != Globals.calc_mask((uint)otherop.getIn(1).getSize())) continue;
                         bvn = otherop.getIn(0);
                     }
                     else if (otherop.code() == OpCode.CPUI_INT_2COMP)

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.EXTRA;
 
 namespace Sla.DECCORE
 {
@@ -41,13 +37,13 @@ namespace Sla.DECCORE
         /// \return the parsed boolean value
         public static bool onOrOff(string p)
         {
-            if (p.size() == 0)
+            if (p.Length == 0)
                 return true;
             if (p == "on")
                 return true;
             if (p == "off")
                 return false;
-            throw ParseError("Must specify toggle value, on/off");
+            throw new ParseError("Must specify toggle value, on/off");
         }
     }
 }

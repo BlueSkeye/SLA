@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
+using Sla.DECCORE;
 
 namespace Sla.EXTRA
 {
@@ -17,42 +14,41 @@ namespace Sla.EXTRA
         /// or failure back to the console.
         public override void execute(TextReader s)
         {
-            string optname;
-            string p1, p2, p3;
-
             if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("No load image present");
-            s >> ws >> optname >> ws;
-            if (optname.size() == 0)
+            s.ReadSpaces();
+            string optname = s.ReadString();
+            s.ReadSpaces();
+            if (optname.Length == 0)
                 throw new IfaceParseError("Missing option name");
-            if (!s.eof())
-            {
-                s >> p1 >> ws;
-                if (!s.eof())
-                {
-                    s >> p2 >> ws;
-                    if (!s.eof())
-                    {
-                        s >> p3 >> ws;
-                        if (!s.eof())
+            string p1 = string.Empty;
+            string p2 = string.Empty;
+            string p3 = string.Empty;
+            if (!s.EofReached()) {
+                p1 = s.ReadString();
+                s.ReadSpaces();
+                if (!s.EofReached()) {
+                    p2 = s.ReadString();
+                    s.ReadSpaces();
+                    if (!s.EofReached()) {
+                        p3 = s.ReadString();
+                        s.ReadSpaces();
+                        if (!s.EofReached())
                             throw new IfaceParseError("Too many option parameters");
                     }
                 }
             }
 
-            try
-            {
-                string res = dcp.conf.options.set(ElementId::find(optname), p1, p2, p3);
-                *status.optr << res << endl;
+            try {
+                string res = dcp.conf.options.set(ElementId.find(optname), p1, p2, p3);
+                status.optr.WriteLine(res);
             }
-            catch (ParseError err)
-            {
-                *status.optr << err.ToString() << endl;
+            catch (ParseError err) {
+                status.optr.WriteLine(err.ToString());
                 throw new IfaceParseError("Bad option");
             }
-            catch (RecovError err)
-            {
-                *status.optr << err.ToString() << endl;
+            catch (RecovError err) {
+                status.optr.WriteLine(err.ToString());
                 throw new IfaceExecutionError("Bad option");
             }
         }

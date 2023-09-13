@@ -28,7 +28,7 @@ namespace Sla.EXTRA
             if (sym == (Symbol)null)
                 throw new IfaceExecutionError("Unable to create symbol");
             string formatString;
-            s >> ws >> formatString;
+            s.ReadSpaces() >> formatString;
             uint format = Datatype.encodeIntegerFormat(formatString);
             sym.getScope().setDisplayFormat(sym, format);
             sym.getScope().setAttribute(sym, Varnode.varnode_flags.typelock);

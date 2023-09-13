@@ -53,7 +53,7 @@ namespace Sla.DECCORE
             orvn = othervn = savn = (Varnode)null; // Unnecessary initialization
             size = op.getOut().getSize();
             if (size > sizeof(ulong)) return 0; // FIXME: ulong should be arbitrary precision
-            fullmask = Globals.calc_mask(size);
+            fullmask = Globals.calc_mask((uint)size);
             for (i = 0; i < 2; ++i)
             {
                 shiftvn = op.getIn(i);

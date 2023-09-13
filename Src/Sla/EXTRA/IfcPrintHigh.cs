@@ -17,19 +17,17 @@ namespace Sla.EXTRA
         /// Information about every Varnode merged into the variable is displayed.
         public override void execute(TextReader s)
         {
-            string varname;
-            HighVariable* high;
-
-            if (dcp.fd == (Funcdata)null)
+            if (dcp.fd == (Funcdata)null) {
                 throw new IfaceExecutionError("No function selected");
-
-            s >> varname >> ws;
-
-            high = dcp.fd.findHigh(varname);
-            if (high == (HighVariable)null)   // Didn't find this name
+            }
+            string varname = s.ReadString();
+            s.ReadSpaces();
+            HighVariable? high = dcp.fd.findHigh(varname);
+            if (high == (HighVariable)null) {
+                // Didn't find this name
                 throw new IfaceExecutionError("Unknown variable name: " + varname);
-
-            high.printInfo(*status.optr);
+            }
+            high.printInfo(status.optr);
         }
     }
 }

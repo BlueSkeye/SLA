@@ -25,48 +25,90 @@ namespace Sla.DECCORE
         public string archid;
 
         // Configuration data
-        public int trim_recurse_max;  ///< How many levels to let parameter trims recurse
-        public int max_implied_ref;       ///< Maximum number of references to an implied var
-        public int max_term_duplication;  ///< Max terms duplicated without a new variable
-        public int max_basetype_size; ///< Maximum size of an "integer" type before creating an array type
-        public int min_funcsymbol_size;   ///< Minimum size of a function symbol
-        public uint max_jumptable_size;   ///< Maximum number of entries in a single JumpTable
-        public bool aggressive_ext_trim;   ///< Aggressively trim inputs that look like they are sign extended
-        public bool readonlypropagate; ///< true if readonly values should be treated as constants
-        public bool infer_pointers;        ///< True if we should infer pointers from constants that are likely addresses
-        public bool analyze_for_loops; ///< True if we should attempt conversion of \e whiledo loops to \e for loops
-        public List<AddrSpace> inferPtrSpaces = new List<AddrSpace>();  ///< Set of address spaces in which a pointer constant is inferable
-        public int funcptr_align;     ///< How many bits of alignment a function ptr has
-        public FlowInfo.FlowFlag flowoptions;            ///< options passed to flow following engine
-        public uint max_instructions; ///< Maximum instructions that can be processed in one function
-        public int alias_block_level; ///< Aliases blocked by 0=none, 1=struct, 2=array, 3=all
-        public OptionSplitDatatypes.Options split_datatype_config;    ///< Toggle for data-types splitting: Bit 0=structs, 1=arrays, 2=pointers
-        public List<Rule> extra_pool_rules = new List<Rule>(); ///< Extra rules that go in the main pool (cpu specific, experimental)
+        // How many levels to let parameter trims recurse
+        public int trim_recurse_max;
+        // Maximum number of references to an implied var
+        public int max_implied_ref;
+        // Max terms duplicated without a new variable
+        public int max_term_duplication;
+        // Maximum size of an "integer" type before creating an array type
+        public int max_basetype_size;
+        // Minimum size of a function symbol
+        public int min_funcsymbol_size;
+        // Maximum number of entries in a single JumpTable
+        public uint max_jumptable_size;
+        // Aggressively trim inputs that look like they are sign extended
+        public bool aggressive_ext_trim;
+        // true if readonly values should be treated as constants
+        public bool readonlypropagate;
+        // True if we should infer pointers from constants that are likely addresses
+        public bool infer_pointers;
+        // True if we should attempt conversion of \e whiledo loops to \e for loops
+        public bool analyze_for_loops;
+        // Set of address spaces in which a pointer constant is inferable
+        public List<AddrSpace> inferPtrSpaces = new List<AddrSpace>();
+        // How many bits of alignment a function ptr has
+        public int funcptr_align;
+        // options passed to flow following engine
+        public FlowInfo.FlowFlag flowoptions;
+        // Maximum instructions that can be processed in one function
+        public uint max_instructions;
+        // Aliases blocked by 0=none, 1=struct, 2=array, 3=all
+        public int alias_block_level;
+        // Toggle for data-types splitting: Bit 0=structs, 1=arrays, 2=pointers
+        public OptionSplitDatatypes.Options split_datatype_config;
+        // Extra rules that go in the main pool (cpu specific, experimental)
+        public List<Rule> extra_pool_rules = new List<Rule>();
 
-        public Database? symboltab;        ///< Memory map of global variables and functions
-        public ContextDatabase? context;   ///< Map from addresses to context settings
-        public Dictionary<string, ProtoModel> protoModels = new Dictionary<string, ProtoModel>(); ///< Parsed forms of possible prototypes
-        public ProtoModel? defaultfp;  ///< Parsed form of default prototype
-        public VarnodeData defaultReturnAddr;  ///< Default storage location of return address (for current function)
-        public ProtoModel? evalfp_current; ///< Function proto to use when evaluating current function
-        public ProtoModel? evalfp_called;  ///< Function proto to use when evaluating called functions
-        public TypeFactory? types;     ///< List of types for this binary
-        public Translate? translate; ///< Translation method for this binary
-        public LoadImage? loader;      ///< Method for loading portions of binary
-        public PcodeInjectLibrary? pcodeinjectlib; ///< Pcode injection manager
-        public RangeList nohighptr;          ///< Ranges for which high-level pointers are not possible
-        public CommentDatabase? commentdb; ///< Comments for this architecture
-        public StringManager? stringManager;   ///< Manager of decoded strings
-        public ConstantPool? cpool;        ///< Deferred constant values
-        public PrintLanguage print;           ///< Current high-level language printer
-        public List<PrintLanguage> printlist = new List<PrintLanguage>();   ///< List of high-level language printers supported
-        public OptionDatabase options;    ///< Options that can be configured
-        public List<TypeOp> inst = new List<TypeOp>();   ///< Registered p-code instructions
-        public UserOpManage userops;       ///< Specifically registered user-defined p-code ops
-        public List<PreferSplitRecord> splitrecords; ///< registers that we would prefer to see split for this processor
-        public List<LanedRegister> lanerecords;  ///< Vector registers that have preferred lane sizes
-        public ActionDatabase allacts; ///< Actions that can be applied in this architecture
-        public bool loadersymbols_parsed;   ///< True if loader symbols have been read
+        // Memory map of global variables and functions
+        public Database? symboltab;
+        // Map from addresses to context settings
+        public ContextDatabase? context;
+        // Parsed forms of possible prototypes
+        public Dictionary<string, ProtoModel> protoModels =
+            new Dictionary<string, ProtoModel>();
+        // Parsed form of default prototype
+        public ProtoModel? defaultfp;
+        // Default storage location of return address (for current function)
+        public VarnodeData defaultReturnAddr;
+        // Function proto to use when evaluating current function
+        public ProtoModel? evalfp_current;
+        // Function proto to use when evaluating called functions
+        public ProtoModel? evalfp_called;
+        // List of types for this binary
+        public TypeFactory? types;
+        // Translation method for this binary
+        public Translate? translate;
+        // Method for loading portions of binary
+        public LoadImage? loader;
+        // Pcode injection manager
+        public PcodeInjectLibrary? pcodeinjectlib;
+        // Ranges for which high-level pointers are not possible
+        public RangeList nohighptr;
+        // Comments for this architecture
+        public CommentDatabase? commentdb;
+        // Manager of decoded strings
+        public StringManager? stringManager;
+        // Deferred constant values
+        public ConstantPool? cpool;
+        // Current high-level language printer
+        public PrintLanguage print;
+        // List of high-level language printers supported
+        public List<PrintLanguage> printlist = new List<PrintLanguage>();
+        // Options that can be configured
+        public OptionDatabase options;
+        // Registered p-code instructions
+        public List<TypeOp> inst = new List<TypeOp>();
+        // Specifically registered user-defined p-code ops
+        public UserOpManage userops;
+        // registers that we would prefer to see split for this processor
+        public List<PreferSplitRecord> splitrecords = new List<PreferSplitRecord>();
+        // Vector registers that have preferred lane sizes
+        public List<LanedRegister> lanerecords = new List<LanedRegister>();
+        // Actions that can be applied in this architecture
+        public ActionDatabase allacts;
+        // True if loader symbols have been read
+        public bool loadersymbols_parsed;
 #if CPUI_STATISTICS
         /// Statistics collector
         public Statistics stats;
@@ -214,7 +256,8 @@ namespace Sla.DECCORE
             // Block structs and arrays by default, but not more primitive data-types
             alias_block_level = 2;
             split_datatype_config = OptionSplitDatatypes.Options.option_struct |
-                OptionSplitDatatypes.Options.option_array | OptionSplitDatatypes.Options.option_pointer;
+                OptionSplitDatatypes.Options.option_array |
+                OptionSplitDatatypes.Options.option_pointer;
             max_jumptable_size = 1024;
         }
 
@@ -331,7 +374,7 @@ namespace Sla.DECCORE
                     max = mid - 1;
                 }
                 else {
-                    return &lanerecords[mid];
+                    return lanerecords[mid];
                 }
             }
             return null;
@@ -369,7 +412,8 @@ namespace Sla.DECCORE
             // Clear stuff internal to function
             fd.clear();
             // Clear out any analysis generated comments
-            commentdb.clearType(fd.getAddress(), Comment.comment_type.warning | Comment.comment_type.warningheader);
+            commentdb.clearType(fd.getAddress(),
+                Comment.comment_type.warning | Comment.comment_type.warningheader);
         }
 
         /// Read any symbols from loader into database
@@ -387,7 +431,8 @@ namespace Sla.DECCORE
             LoadImageFunc record = new LoadImageFunc();
             while (loader.getNextSymbol(record)) {
                 string basename;
-                Scope scope = symboltab.findCreateScopeFromSymbolName(record.name, delim, out basename, null);
+                Scope scope = symboltab.findCreateScopeFromSymbolName(record.name, delim,
+                    out basename, null);
                 scope.addFunction(record.address, basename);
             }
             loader.closeSymbols();
@@ -432,7 +477,8 @@ namespace Sla.DECCORE
         public void setPrototype(PrototypePieces pieces)
         {
             string basename;
-            Scope? scope = symboltab.resolveScopeFromSymbolName(pieces.name, "::", out basename, null);
+            Scope? scope = symboltab.resolveScopeFromSymbolName(pieces.name, "::",
+                out basename, null);
             if (null == scope)
                 throw new ParseError($"Unknown namespace: {pieces.name}");
             Funcdata? fd = scope.queryFunction(basename);
@@ -479,7 +525,7 @@ namespace Sla.DECCORE
         /// Set all spacetype.IPTR_PROCESSOR and spacetype.IPTR_SPACEBASE spaces to be global
         public void globalify()
         {
-            Scope scope = symboltab.getGlobalScope();
+            Scope scope = symboltab.getGlobalScope() ?? throw new ApplicationException();
             int nm = numSpaces();
 
             for (int i = 0; i < nm; ++i) {
@@ -566,7 +612,7 @@ namespace Sla.DECCORE
                 }
             }
             while (true) {
-                ElementId subId = decoder.peekElement();
+                uint subId = decoder.peekElement();
                 if (0 == subId) {
                     break;
                 }
@@ -923,7 +969,7 @@ namespace Sla.DECCORE
 
             uint elemId = decoder.openElement(ElementId.ELEM_PROCESSOR_SPEC);
             while (true) {
-                ElementId subId = decoder.peekElement();
+                uint subId = decoder.peekElement();
                 if (subId == 0) {
                     break;
                 }
@@ -980,7 +1026,7 @@ namespace Sla.DECCORE
                     decoder.closeElementSkipping(subId);
                 }
                 else {
-                        throw new CORE.LowlevelError("Unknown element in <processor_spec>");
+                    throw new CORE.LowlevelError("Unknown element in <processor_spec>");
                 }
             }
             decoder.closeElement(elemId);
@@ -1000,7 +1046,7 @@ namespace Sla.DECCORE
 
             uint elemId = decoder.openElement(ElementId.ELEM_COMPILER_SPEC);
             while (true) {
-                ElementId subId = decoder.peekElement();
+                uint subId = decoder.peekElement();
                 if (subId == 0) {
                     break;
                 }
@@ -1114,16 +1160,13 @@ namespace Sla.DECCORE
             for (int i = 0; i < globalRanges.Count; ++i) {
                 addToGlobalScope(globalRanges[i]);
             }
-
             addOtherSpace();
 
             if (null == defaultfp) {
-                if (protoModels.Count > 0) {
-                    setDefaultModel((*protoModels.begin()).second);
-                }
-                else {
+                if (0 >= protoModels.Count) {
                     throw new CORE.LowlevelError("No default prototype specified");
                 }
+                setDefaultModel(protoModels.First().Value);
             }
             // We must have a __thiscall calling convention
             if (!protoModels.ContainsKey("__thiscall")) {
@@ -1163,7 +1206,7 @@ namespace Sla.DECCORE
             string groupname = string.Empty;
             bool enabled = false;
             while (true) {
-                AttributeId attribId = decoder.getNextAttributeId();
+                uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) {
                     break;
                 }
@@ -1177,7 +1220,8 @@ namespace Sla.DECCORE
                     enabled = decoder.readBool();
                 }
                 else {
-                    throw new CORE.LowlevelError("Dynamic rule tag contains illegal attribute");
+                    throw new CORE.LowlevelError(
+                        "Dynamic rule tag contains illegal attribute");
                 }
             }
             if (rulename.Length == 0) {
@@ -1193,7 +1237,8 @@ namespace Sla.DECCORE
             Rule dynrule = RuleGeneric.build(rulename, groupname, el.getContent());
             extra_pool_rules.Add(dynrule);
 #else
-            throw new CORE.LowlevelError("Dynamic rules have not been enabled for this decompiler");
+            throw new CORE.LowlevelError(
+                "Dynamic rules have not been enabled for this decompiler");
 #endif
             decoder.closeElement(elemId);
         }
@@ -1219,7 +1264,7 @@ namespace Sla.DECCORE
 
             res.decode(decoder);
 
-            ProtoModel other = getModel(res.getName());
+            ProtoModel? other = getModel(res.getName());
             if (other != null) {
                 string errMsg = $"Duplicate ProtoModel name: {res.getName()}";
                 // delete res;
@@ -1297,7 +1342,7 @@ namespace Sla.DECCORE
         /// \param props is information about a specific range
         protected void addToGlobalScope(RangeProperties props)
         {
-            Scope scope = symboltab.getGlobalScope();
+            Scope scope = symboltab.getGlobalScope() ?? throw new ApplicationException();
             Sla.CORE.Range range = new Sla.CORE.Range(props, this);
             AddrSpace spc = range.getSpace();
             inferPtrSpaces.Add(spc);
@@ -1323,8 +1368,9 @@ namespace Sla.DECCORE
         //explictly add the OTHER space and any overlays to the global scope
         protected void addOtherSpace()
         {
-            Scope scope = symboltab.getGlobalScope();
-            AddrSpace otherSpace = getSpaceByName(OtherSpace.NAME);
+            Scope scope = symboltab.getGlobalScope() ?? throw new ApplicationException();
+            AddrSpace otherSpace = getSpaceByName(OtherSpace.NAME)
+                ?? throw new ApplicationException();
             symboltab.addRange(scope, otherSpace, 0, otherSpace.getHighest());
             if (otherSpace.isOverlayBase()) {
                 int num = numSpaces();
@@ -1380,12 +1426,12 @@ namespace Sla.DECCORE
         protected void decodeReturnAddress(Decoder decoder)
         {
             uint elemId = decoder.openElement(ElementId.ELEM_RETURNADDRESS);
-            ElementId subId = decoder.peekElement();
+            uint subId = decoder.peekElement();
             if (subId != 0) {
                 if (null != defaultReturnAddr.space) {
                     throw new CORE.LowlevelError("Multiple <returnaddress> tags in .cspec");
                 }
-                defaultReturnAddr.decode(decoder);
+                defaultReturnAddr = VarnodeData.decode(decoder);
             }
             decoder.closeElement(elemId);
         }
@@ -1398,9 +1444,9 @@ namespace Sla.DECCORE
         {
             uint elemId = decoder.openElement(ElementId.ELEM_INCIDENTALCOPY);
             while (decoder.peekElement() != 0) {
-                VarnodeData vdata = new VarnodeData();
-                vdata.decode(decoder);
-                Sla.CORE.Range range = new Sla.CORE.Range(vdata.space, vdata.offset, vdata.offset+vdata.size - 1);
+                VarnodeData vdata = VarnodeData.decode(decoder);
+                Sla.CORE.Range range = new Sla.CORE.Range(vdata.space, vdata.offset,
+                    vdata.offset+vdata.size - 1);
                 symboltab.setPropertyRange(Varnode.varnode_flags.incidental_copy, range);
             }
             decoder.closeElement(elemId);
@@ -1414,7 +1460,7 @@ namespace Sla.DECCORE
         {
             List<uint> maskList = new List<uint>();
             // Only allocate once
-            LanedRegister lanedRegister;
+            LanedRegister lanedRegister = new LanedRegister();
 
             uint elemId = decoder.openElement(ElementId.ELEM_REGISTER_DATA);
             while (decoder.peekElement() != 0) {
@@ -1446,9 +1492,9 @@ namespace Sla.DECCORE
             // Default stack growth is in negative direction
             bool stackGrowth = true;
             bool isreversejustify = false;
-            AddrSpace basespace = null;
+            AddrSpace? basespace = null;
             while (true) {
-                AttributeId attribId = decoder.getNextAttributeId();
+                uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) {
                     break;
                 }
@@ -1474,7 +1520,8 @@ namespace Sla.DECCORE
             VarnodeData point = translate.getRegister(registerName);
             decoder.closeElement(elemId);
 
-            // If creating a stackpointer to a truncated space, make sure to truncate the stackpointer
+            // If creating a stackpointer to a truncated space, make sure to truncate the
+            // stackpointer
             int truncSize = (int)point.size;
             if (basespace.isTruncated() && (point.size > basespace.getAddrSize())) {
                 truncSize = (int)basespace.getAddrSize();
@@ -1586,7 +1633,7 @@ namespace Sla.DECCORE
             while (decoder.peekElement() != 0) {
                 PreferSplitRecord record = new PreferSplitRecord();
                 splitrecords.Add(record);
-                record.storage.decode(decoder);
+                record.storage = VarnodeData.decode(decoder);
                 record.splitoffset = record.storage.size() / 2;
             }
             decoder.closeElement(elemId);
@@ -1600,7 +1647,7 @@ namespace Sla.DECCORE
         {
             uint elemId = decoder.openElement(ElementId.ELEM_AGGRESSIVETRIM);
             while (true) {
-                AttributeId attribId = decoder.getNextAttributeId();
+                uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) {
                     break;
                 }

@@ -1,28 +1,27 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Sla.DECCORE
 {
     internal class GrammarLexer
     {
-        private Dictionary<int, string> filenamemap = new Dictionary<int, string>();  // All files ever seen
-        private Dictionary<int, FileStream> streammap = new Dictionary<int, FileStream>();
-        private List<int> filestack; // Stack of current files
-        private int buffersize;        // maximum characters in buffer
-        private char[] buffer;           // Current line being processed
-        private int bufstart;      // Next character to process
-        private int bufend;            // Next open position in buffer
+        // All files ever seen
+        private Dictionary<int, string> filenamemap = new Dictionary<int, string>();
+        private Dictionary<int, TextReader> streammap = new Dictionary<int, TextReader>();
+        // Stack of current files
+        private List<int> filestack = new List<int>();
+        // maximum characters in buffer
+        private int buffersize;
+        // Current line being processed
+        private char[] buffer;
+        // Next character to process
+        private int bufstart;
+        // Next open position in buffer
+        private int bufend;
         private int curlineno;
-        private FileStream? @in;            // Current stream
+        // Current stream
+        private TextReader? @in;
         private bool endoffile;
-        private State state;            // State of parser
+        // State of parser
+        private State state;
         private string error;
         
         private enum State
@@ -45,7 +44,8 @@ namespace Sla.DECCORE
         };
 
         private void bumpLine()
-        {               // Keep track of a newline
+        {
+            // Keep track of a newline
             curlineno += 1;
             bufstart = 0;
             bufend = 0;
@@ -114,7 +114,8 @@ namespace Sla.DECCORE
                             bufstart = bufend - 1;
                             break;
                         case ' ':
-                            break;          // Ignore since we are already open
+                            // Ignore since we are already open
+                            break;
                         case '\"':
                             state = State.doublequote;
                             bufstart = bufend - 1;
@@ -214,17 +215,20 @@ namespace Sla.DECCORE
                 case State.endofline_comment:
                     if (newline)
                         state = State.start;
-                    break;          // Anything else is part of comment
+                    // Anything else is part of comment
+                    break;
                 case State.c_comment:
                     if (lookahead == '/') {
                         if ((bufend > 1) && (buffer[bufend - 2] == '*'))
                             state = State.start;
                     }
-                    break;          // Anything else is part of comment
+                    // Anything else is part of comment
+                    break;
                 case State.doublequote:
                     if (lookahead == '\"')
                         state = State.doublequoteend;
-                    break;          // Anything else is part of string
+                    // Anything else is part of string
+                    break;
                 case State.doublequoteend:
                     state = State.start;
                     res = GrammarToken.Token.stringval;
@@ -234,18 +238,21 @@ namespace Sla.DECCORE
                         state = State.singlebackslash;
                     else if (lookahead == '\'')
                         state = State.singlequoteend;
-                    break;          // Anything else is part of string
+                    // Anything else is part of string
+                    break;
                 case State.singlequoteend:
                     state = State.start;
                     res = GrammarToken.Token.charconstant;
                     break;
-                case State.singlebackslash:   // Seen backslash in a single quoted string
+                case State.singlebackslash:
+                    // Seen backslash in a single quoted string
                     state = State.singlequote;
                     break;
                 case State.number:
                     if (lookahead == 'x') {
                         if (((bufend - bufstart) != 2) || (buffer[bufstart] != '0'))
-                            syntaxerror = true; // x only allowed as 0x hex indicator
+                            // x only allowed as 0x hex indicator
+                            syntaxerror = true;
                     }
                     else if ((lookahead >= '0') && (lookahead <= '9')) {
                     }
@@ -288,7 +295,7 @@ namespace Sla.DECCORE
             if (val < GrammarToken.Token.integer)
                 token.set(val);
             else {
-                token.set(val, buffer + bufstart, (bufend - bufstart) - 1);
+                token.set(val, buffer, bufstart, (bufend - bufstart) - 1);
             }
             token.setPosition(filestack.GetLastItem(), curlineno, bufstart);
         }
@@ -306,7 +313,7 @@ namespace Sla.DECCORE
             bufend = 0;
             curlineno = 0;
             state = State.start;
-            @in = (FileStream)null;
+            @in = (TextReader)null;
             endoffile = true;
         }
 
@@ -325,14 +332,14 @@ namespace Sla.DECCORE
             bufend = 0;
             curlineno = 0;
             state = State.start;
-            @in = (FileStream)null;
+            @in = (TextReader)null;
             endoffile = true;
             error = string.Empty;
         }
 
-        public FileStream getCurStream() => @in;
+        public TextReader? getCurStream() => @in;
 
-        public void pushFile(string filename, FileStream i)
+        public void pushFile(string filename, TextReader i)
         {
             int filenum = filenamemap.Count();
             filenamemap[filenum] = filename;
@@ -345,18 +352,18 @@ namespace Sla.DECCORE
         public void popFile()
         {
             filestack.RemoveLastItem();
-            if (filestack.empty())
-            {
+            if (filestack.empty()) {
                 endoffile = true;
                 return;
             }
             int filenum = filestack.GetLastItem();
-            @in = streammap[filenum];  // Get previous stream
+            // Get previous stream
+            @in = streammap[filenum];
         }
 
         public void getNextToken(GrammarToken token)
-        { // Read next token, return true if end of stream
-            char nextchar;
+        {
+            // Read next token, return true if end of stream
             GrammarToken.Token tok = GrammarToken.Token.badtoken;
             bool firsttimethru = true;
 
@@ -364,31 +371,36 @@ namespace Sla.DECCORE
                 token.set(GrammarToken.Token.endoffile);
                 return;
             }
-            do
-            {
-                if ((!firsttimethru) || (bufend == 0))
-                {
-                    if (bufend >= buffersize)
-                    {
+            if (@in == null) { throw new InvalidOperationException(); }
+            do {
+                char? nextchar;
+                if ((!firsttimethru) || (bufend == 0)) {
+                    if (bufend >= buffersize) {
                         setError("Line too long");
                         tok = GrammarToken.Token.badtoken;
                         break;
                     }
-                    @in.get(nextchar);
-                    if (!@in) {
+                    nextchar = @in.ReadCharacter();
+                    if (nextchar == null) {
                         endoffile = true;
                         break;
                     }
-                    buffer[bufend++] = nextchar;
+                    else {
+                        buffer[bufend++] = nextchar.Value;
+                    }
                 }
-                else
-                    nextchar = buffer[bufend - 1]; // Get old lookahead token
-                tok = moveState(nextchar);
+                else {
+                    // Get old lookahead token
+                    nextchar = buffer[bufend - 1];
+                }
+                tok = moveState(nextchar.Value);
                 firsttimethru = false;
             } while (tok == 0);
             if (endoffile) {
-                buffer[bufend++] = ' '; // Simulate a space
-                tok = moveState(' ');   // to let the final token resolve
+                // Simulate a space
+                buffer[bufend++] = ' ';
+                // to let the final token resolve
+                tok = moveState(' ');
                 if ((tok == 0) && (state != State.start) && (state != State.endofline_comment)) {
                     setError("Incomplete token");
                     tok = GrammarToken.Token.badtoken;

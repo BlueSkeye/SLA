@@ -15,8 +15,8 @@ namespace Sla.SLEIGH
 
         ~EquationCat()
         {
-            PatternEquation::release(left);
-            PatternEquation::release(right);
+            PatternEquation.release(left);
+            PatternEquation.release(right);
         }
 
         public EquationCat(PatternEquation l, PatternEquation r)

@@ -35,6 +35,13 @@ namespace Sla
         internal static IEnumerator<T> GetReverseEnumerator<T>(this List<T> from)
             => new ReverseEnumerator<T>(from);
 
+        internal static void InsertRange<T>(this List<T> into, int at, IEnumerable<T> range)
+        {
+            foreach (T item in range) {
+                into.Insert(at++, item);
+            }
+        }
+        
         internal static void RemoveLastItem<T>(this List<T> from)
         {
             int lastItemIndex = from.Count - 1;

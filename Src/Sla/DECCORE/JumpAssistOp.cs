@@ -54,7 +54,7 @@ namespace Sla.DECCORE
             defaultaddr = -1;
             calcsize = -1;
             while(true) {
-                ElementId subId = decoder.peekElement();
+                uint subId = decoder.peekElement();
                 if (subId == 0) break;
                 if (subId == ElementId.ELEM_CASE_PCODE) {
                     if (index2case != -1)

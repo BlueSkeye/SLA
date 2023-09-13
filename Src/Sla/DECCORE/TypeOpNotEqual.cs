@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -13,7 +9,7 @@ namespace Sla.DECCORE
             : base(t, OpCode.CPUI_INT_NOTEQUAL, "!=", type_metatype.TYPE_BOOL, type_metatype.TYPE_INT)
         {
             opflags = PcodeOp.Flags.binary | PcodeOp.Flags.booloutput | PcodeOp.Flags.commutative;
-            addlflags = inherits_sign;
+            addlflags = OperationType.inherits_sign;
             behave = new OpBehaviorNotEqual();
         }
 
@@ -24,9 +20,10 @@ namespace Sla.DECCORE
 
         public override Datatype getInputCast(PcodeOp op, int slot, CastStrategy castStrategy)
         {
-            Datatype* reqtype = op.getIn(0).getHighTypeReadFacing(op);    // Input arguments should be the same type
-            Datatype* othertype = op.getIn(1).getHighTypeReadFacing(op);
-            if (0 > othertype.typeOrder(*reqtype))
+            // Input arguments should be the same type
+            Datatype reqtype = op.getIn(0).getHighTypeReadFacing(op);
+            Datatype othertype = op.getIn(1).getHighTypeReadFacing(op);
+            if (0 > othertype.typeOrder(reqtype))
                 reqtype = othertype;
             if (castStrategy.checkIntPromotionForCompare(op, slot))
                 return reqtype;
@@ -34,10 +31,11 @@ namespace Sla.DECCORE
             return castStrategy.castStandard(reqtype, othertype, false, false);
         }
 
-        public override Datatype propagateType(Datatype alttype, PcodeOp op, Varnode invn, Varnode outvn,
-            int inslot, int outslot)
+        public override Datatype propagateType(Datatype alttype, PcodeOp op, Varnode invn,
+            Varnode outvn, int inslot, int outslot)
         {
-            return TypeOpEqual::propagateAcrossCompare(alttype, tlst, invn, outvn, inslot, outslot);
+            return TypeOpEqual.propagateAcrossCompare(alttype, tlst, invn, outvn, inslot,
+                outslot);
         }
     }
 }

@@ -33,8 +33,9 @@ namespace Sla.EXTRA
             if (dcp.fd == (Funcdata)null)
                 throw new IfaceExecutionError("No function selected");
 
-            s >> ws;
-            Address jmpaddr = new Address(parse_machaddr(s, discard,* dcp.conf.types));
+            s.ReadSpaces();
+            Address jmpaddr = new Address(
+                Grammar.parse_machaddr(s, out discard, dcp.conf.types));
             JumpTable jt = dcp.fd.installJumpTable(jmpaddr);
             List<Address> adtable;
             Address naddr;
@@ -44,7 +45,7 @@ namespace Sla.EXTRA
             s >> token;
             //   if (token == "norm") {
             //     naddr = parse_machaddr(s,discard,*dcp.conf.types);
-            //     s >> ws;
+            //     s.ReadSpaces();
             //     s >> h;
             //     s >> token;
             //   }
@@ -56,9 +57,10 @@ namespace Sla.EXTRA
             }
             if (token == "table")
             {
-                s >> ws;
-                while (!s.eof()) {
-                    Address addr = new Address(parse_machaddr(s, discard,* dcp.conf.types));
+                s.ReadSpaces();
+                while (!s.EofReached()) {
+                    Address addr = new Address(
+                        Grammar.parse_machaddr(s, out discard, dcp.conf.types));
                     adtable.Add(addr);
                 }
             }

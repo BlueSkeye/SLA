@@ -240,27 +240,25 @@ namespace Sla.DECCORE
         /// \param a is the first HighVariable to compare
         /// \param b is the second HighVariable
         /// \return \b true if the first HighVariable should be ordered before the second
-        private static bool compareHighByBlock(HighVariable a, HighVariable b)
+        private static int compareHighByBlock(HighVariable a, HighVariable b)
         {
             int result = a.getCover().compareTo(b.getCover());
-            if (result == 0) {
-                Varnode v1 = a.getInstance(0);
-                Varnode v2 = b.getInstance(0);
+            if (result != 0) return result;
+            Varnode v1 = a.getInstance(0);
+            Varnode v2 = b.getInstance(0);
 
-                if (v1.getAddr() == v2.getAddr()) {
-                    PcodeOp def1 = v1.getDef();
-                    PcodeOp def2 = v2.getDef();
-                    if (def1 == (PcodeOp)null) {
-                        return def2 != (PcodeOp)null;
-                    }
-                    else if (def2 == (PcodeOp)null) {
-                        return false;
-                    }
-                    return (def1.getAddr() < def2.getAddr());
+            if (v1.getAddr() == v2.getAddr()) {
+                PcodeOp def1 = v1.getDef();
+                PcodeOp def2 = v2.getDef();
+                if (def1 == (PcodeOp)null) {
+                    return (def2 == (PcodeOp)null) ? 1 : -1;
                 }
-                return (v1.getAddr() < v2.getAddr());
+                else if (def2 == (PcodeOp)null) {
+                    return 1;
+                }
+                return def1.getAddr().CompareTo(def2.getAddr());
             }
-            return (result < 0);
+            return v1.getAddr().CompareTo(v2.getAddr());
         }
 
         /// \brief Compare COPY ops first by Varnode input, then by block containing the op
@@ -270,17 +268,18 @@ namespace Sla.DECCORE
         /// \param op1 is the first PcodeOp being compared
         /// \param op2 is the second PcodeOp being compared
         /// \return \b true if the first PcodeOp should be ordered before the second
-        private static bool compareCopyByInVarnode(PcodeOp op1, PcodeOp op2)
+        private static int compareCopyByInVarnode(PcodeOp op1, PcodeOp op2)
         {
             Varnode inVn1 = op1.getIn(0);
             Varnode inVn2 = op2.getIn(0);
-            if (inVn1 != inVn2)     // First compare by Varnode inputs
-                return (inVn1.getCreateIndex() < inVn2.getCreateIndex());
+            if (inVn1 != inVn2)
+                // First compare by Varnode inputs
+                return inVn1.getCreateIndex().CompareTo(inVn2.getCreateIndex());
             int index1 = op1.getParent().getIndex();
             int index2 = op2.getParent().getIndex();
             if (index1 != index2)
-                return (index1 < index2);
-            return (op1.getSeqNum().getOrder() < op2.getSeqNum().getOrder());
+                return index1.CompareTo(index2);
+            return op1.getSeqNum().getOrder().CompareTo(op2.getSeqNum().getOrder());
         }
 
         /// \brief Determine if given Varnode is shadowed by another Varnode in the same HighVariable
@@ -360,7 +359,7 @@ namespace Sla.DECCORE
             PcodeOp edgeop;
             int slot, bound;
             uint opuindex = (int)CoverBlock.getUIndex(op);
-            IEnumerator<Varnode> viter = vlist.begin();
+            IEnumerator<Varnode> viter = vlist.GetEnumerator();
             IEnumerator<PcodeOp> oiter;
 
             while (viter.MoveNext()) {

@@ -1,10 +1,5 @@
 ﻿using Sla.CORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Sla.DECCORE;
 
 namespace Sla.EXTRA
 {
@@ -21,30 +16,29 @@ namespace Sla.EXTRA
             if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("No load image present");
 
-            string name;
-            s >> name >> ws;
-            if (name.size() == 0)
+            string name = s.ReadString();
+            s.ReadSpaces();
+            if (name.Length == 0)
                 throw new IfaceParseError("Missing tracked register name");
 
-            s.unsetf(ios::dec | ios::hex | ios::oct); // Let user specify base
-            ulong value = 0xbadbeef;
-            s >> value;
-            if (value == 0xbadbeef)
+            // s.unsetf(ios::dec | ios::hex | ios::oct); // Let user specify base
+            ulong value;
+            if (!ulong.TryParse(s.ReadString(), out value) || (0xbadbeef == value)) {
                 throw new IfaceParseError("Missing context value");
-
-            s >> ws;
-            if (s.eof())
-            {       // No range indicates default value
-                TrackedSet & track(dcp.conf.context.getTrackedDefault());
-                track.Add(TrackedContext());
+            }
+            s.ReadSpaces();
+            if (s.EofReached()) {
+                // No range indicates default value
+                TrackedSet track = dcp.conf.context.getTrackedDefault();
+                track.Add(new TrackedContext());
                 track.GetLastItem().loc = dcp.conf.translate.getRegister(name);
                 track.GetLastItem().val = value;
                 return;
             }
 
             int size1, size2;
-            Address addr1 = parse_machaddr(s, size1, *dcp.conf.types);
-            Address addr2 = parse_machaddr(s, size2, *dcp.conf.types);
+            Address addr1 = Grammar.parse_machaddr(s, out size1, dcp.conf.types);
+            Address addr2 = Grammar.parse_machaddr(s, out size2, dcp.conf.types);
 
             if (addr1.isInvalid() || addr2.isInvalid())
                 throw new IfaceParseError("Invalid address range");

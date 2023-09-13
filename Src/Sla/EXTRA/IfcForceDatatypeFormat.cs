@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.DECCORE;
 
 namespace Sla.EXTRA
 {
@@ -15,18 +10,17 @@ namespace Sla.EXTRA
         /// A display format attribute is set on the indicated data-type.
         public override void execute(TextReader s)
         {
-            Datatype* dt;
-
             string typeName;
-            s >> ws >> typeName;
-            dt = dcp.conf.types.findByName(typeName);
+            s.ReadSpaces();
+            typeName = s.ReadString();
+            Datatype? dt = dcp.conf.types.findByName(typeName);
             if (dt == (Datatype)null)
                 throw new IfaceExecutionError("Unknown data-type: " + typeName);
-            string formatString;
-            s >> ws >> formatString;
+            s.ReadSpaces();
+            string formatString = s.ReadString();
             uint format = Datatype.encodeIntegerFormat(formatString);
             dcp.conf.types.setDisplayFormat(dt, format);
-            *status.optr << "Successfully forced data-type display" << endl;
+            status.optr.WriteLine("Successfully forced data-type display");
         }
     }
 }

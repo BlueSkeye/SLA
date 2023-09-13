@@ -14,7 +14,7 @@ namespace Sla.SLEIGH
 
         ~EquationRightEllipsis()
         {
-            PatternEquation::release(eq);
+            PatternEquation.release(eq);
         }
 
         public EquationRightEllipsis(PatternEquation e)

@@ -14,7 +14,7 @@ namespace Sla.SLEIGH
         
         ~UnconstrainedEquation()
         {
-            PatternExpression::release(patex);
+            PatternExpression.release(patex);
         }
 
         public UnconstrainedEquation(PatternExpression p)

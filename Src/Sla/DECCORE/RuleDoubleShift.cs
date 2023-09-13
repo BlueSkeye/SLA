@@ -75,7 +75,7 @@ namespace Sla.DECCORE
                 sa2 = secop.getIn(1).getOffset();
             if (opc1 == opc2) {
                 if (sa1 + sa2 < 8 * size) {
-                    newvn = data.newConstant(4, sa1 + sa2);
+                    newvn = data.newConstant(4, (ulong)(sa1 + sa2));
                     data.opSetOpcode(op, opc1);
                     data.opSetInput(op, secop.getIn(0), 0);
                     data.opSetInput(op, newvn, 1);
@@ -89,7 +89,7 @@ namespace Sla.DECCORE
             }
             else if (sa1 == sa2 && size <= sizeof(ulong)) {
                 // FIXME:  precision
-                mask = Globals.calc_mask(size);
+                mask = Globals.calc_mask((uint)size);
                 if (opc1 == OpCode.CPUI_INT_LEFT)
                     mask = (mask << sa1) & mask;
                 else

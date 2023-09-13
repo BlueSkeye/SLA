@@ -1,11 +1,4 @@
 ﻿using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.EXTRA
 {
@@ -18,19 +11,18 @@ namespace Sla.EXTRA
         /// The resulting symbol is removed completely from the symbol table.
         public override void execute(TextReader s)
         {
-            string name;
-
-            s >> ws >> name;
-            if (name.size() == 0)
+            s.ReadSpaces();
+            string name = s.ReadString();
+            if (name.Length == 0)
                 throw new IfaceParseError("Missing symbol name");
 
-            List<Symbol*> symList;
+            List<Symbol> symList = new List<Symbol>();
             dcp.readSymbol(name, symList);
 
             if (symList.empty())
-                throw new IfaceExecutionError("No symbol named: " + name);
+                throw new IfaceExecutionError($"No symbol named: {name}");
             if (symList.size() > 1)
-                throw new IfaceExecutionError("More than one symbol named: " + name);
+                throw new IfaceExecutionError($"More than one symbol named: {name}");
             symList[0].getScope().removeSymbol(symList[0]);
         }
     }

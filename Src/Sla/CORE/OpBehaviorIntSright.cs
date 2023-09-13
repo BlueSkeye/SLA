@@ -16,7 +16,7 @@ namespace Sla.CORE
         public override ulong evaluateBinary(int sizeout, int sizein, ulong in1, ulong in2)
         {
             if (in2 >= (ulong)(8 * sizeout)) {
-                return Globals.signbit_negative(in1, sizein) ? Globals.calc_mask(sizeout) : 0;
+                return Globals.signbit_negative(in1, sizein) ? Globals.calc_mask((uint)sizeout) : 0;
             }
 
             ulong res;

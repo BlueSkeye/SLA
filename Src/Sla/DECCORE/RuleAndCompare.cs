@@ -66,13 +66,12 @@ namespace Sla.DECCORE
                 case OpCode.CPUI_INT_ZEXT:
                     basevn = subop.getIn(0);
                     baseconst = andop.getIn(1).getOffset();
-                    andconst = baseconst & Globals.calc_mask(basevn.getSize());
                     break;
                 default:
                     return 0;
             }
 
-            if (baseconst == Globals.calc_mask(andvn.getSize())) return 0; // Degenerate AND
+            if (baseconst == Globals.calc_mask((uint)andvn.getSize())) return 0; // Degenerate AND
             if (basevn.isFree()) return 0;
 
             constvn = data.newConstant(basevn.getSize(), andconst);

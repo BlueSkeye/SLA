@@ -1,29 +1,25 @@
 ﻿using Sla.CORE;
 using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.EXTRA
 {
     internal class CodeDataAnalysis : IfaceData
     {
-        public int alignment;       // Alignment of instructions
+        // Alignment of instructions
+        public int alignment;
         public Architecture glb;
         public DisassemblyEngine disengine;
         public RangeList modelhits;
-        public Dictionary<Address, CodeUnit> codeunit;
-        public Dictionary<AddrLink, uint> fromto_crossref;
-        public Dictionary<AddrLink, uint> tofrom_crossref;
-        public Dictionary<Address, CodeUnit>.Enumerator taintlist;
-        public List<Address> unlinkedstarts;
-        public List<TargetHit> targethits;
-        public Dictionary<Address, TargetFeature> targets;
+        public Dictionary<Address, CodeUnit> codeunit = new Dictionary<Address, CodeUnit>();
+        public Dictionary<AddrLink, CodeUnit.Flags> fromto_crossref =
+            new Dictionary<AddrLink, CodeUnit.Flags>();
+        public Dictionary<AddrLink, CodeUnit.Flags> tofrom_crossref =
+            new Dictionary<AddrLink, CodeUnit.Flags>();
+        public Dictionary<Address, CodeUnit> taintlist = new Dictionary<Address, CodeUnit>();
+        public List<Address> unlinkedstarts = new List<Address>();
+        public List<TargetHit> targethits = new List<TargetHit>();
+        public Dictionary<Address, TargetFeature> targets =
+            new Dictionary<Address, TargetFeature>();
         
         ~CodeDataAnalysis()
         {
@@ -38,7 +34,7 @@ namespace Sla.EXTRA
             codeunit.Clear();
             fromto_crossref.Clear();
             tofrom_crossref.Clear();
-            taintlist.clear();
+            taintlist.Clear();
             unlinkedstarts.Clear();
             targethits.Clear();
             targets.Clear();
@@ -46,15 +42,20 @@ namespace Sla.EXTRA
 
         public void pushTaintAddress(Address addr)
         {
-            Dictionary<Address, CodeUnit>.Enumerator iter;
-
-            iter = codeunit.upper_bound(addr); // First after
-            if (iter == codeunit.begin()) return;
-            --iter;         // Last before or equal
+            // First after
+            Dictionary<Address, CodeUnit>.Enumerator iter = codeunit.upper_bound(addr);
+            if (iter == codeunit.begin())
+                return;
+            // Last before or equal
+            --iter;
             CodeUnit cu = iter.Current.Value;
-            if (iter.Current.Key.getOffset() + cu.size - 1 < addr.getOffset()) return;
-            if ((cu.flags & CodeUnit.Flags.notcode) != 0) return; // Already visited
-            taintlist.Add(iter);
+            if (iter.Current.Key.getOffset() + cu.size - 1 < addr.getOffset())
+                return;
+            if ((cu.flags & CodeUnit.Flags.notcode) != 0) {
+                // Already visited
+                return;
+            }
+            taintlist.Add(iter.Current.Key, iter.Current.Value);
         }
 
         public void processTaint()
@@ -77,16 +78,18 @@ namespace Sla.EXTRA
                         taintlist.Add(iter);
                 }
             }
-            Dictionary<AddrLink, uint>.Enumerator ftiter, diter, enditer;
-            ftiter = fromto_crossref.lower_bound(new AddrLink(startaddr));
-            enditer = fromto_crossref.lower_bound(new AddrLink(endaddr));
-            fromto_crossref.erase(ftiter, enditer); // Erase all cross-references coming out of this block
+            Dictionary<AddrLink, uint>.Enumerator ftiter =
+                fromto_crossref.lower_bound(new AddrLink(startaddr));
+            Dictionary<AddrLink, uint>.Enumerator enditer =
+                fromto_crossref.lower_bound(new AddrLink(endaddr));
+            // Erase all cross-references coming out of this block
+            fromto_crossref.erase(ftiter, enditer);
 
             ftiter = tofrom_crossref.lower_bound(new AddrLink(startaddr));
             enditer = tofrom_crossref.lower_bound(new AddrLink(endaddr));
             while (ftiter != enditer) {
                 pushTaintAddress((*ftiter).first.b);
-                diter = ftiter;
+                Dictionary<AddrLink, uint>.Enumerator diter = ftiter;
                 ++ftiter;
                 tofrom_crossref.erase(diter);
             }
@@ -97,14 +100,12 @@ namespace Sla.EXTRA
         {
             // Commit all the code units in the List, build all the crossrefs
             Address curaddr = addr;
-            for (int i = 0; i < codevec.size(); ++i)
-            {
+            for (int i = 0; i < codevec.size(); ++i) {
                 codeunit[curaddr] = codevec[i];
                 curaddr = curaddr + codevec[i].size;
             }
-            Dictionary<AddrLink, uint>.Enumerator citer;
-            for (citer = fromto_vec.begin(); citer != fromto_vec.end(); ++citer)
-            {
+            Dictionary<AddrLink, uint>.Enumerator citer = fromto_vec.GetEnumerator();
+            while (citer.MoveNext()) {
                 AddrLink fromto = citer.Current.Key;
                 fromto_crossref[fromto] = citer.Current.Value;
                 AddrLink tofrom = new AddrLink(fromto.b, fromto.a );
@@ -116,10 +117,9 @@ namespace Sla.EXTRA
         public void clearHitBy()
         {
             // Clear all the "hit_by" flags from all code units
-            Dictionary<Address, CodeUnit>.Enumerator iter;
+            Dictionary<Address, CodeUnit>.Enumerator iter = codeunit.GetEnumerator();
 
-            for (iter = codeunit.begin(); iter != codeunit.end(); ++iter)
-            {
+            while (iter.MoveNext()) {
                 CodeUnit cu = iter.Current.Value;
                 cu.flags &= ~(CodeUnit.Flags.hit_by_fallthru | CodeUnit.Flags.hit_by_jump | CodeUnit.Flags.hit_by_call);
             }
@@ -128,13 +128,16 @@ namespace Sla.EXTRA
         public void clearCrossRefs(Address addr, Address endaddr)
         {
             // Clear all crossrefs originating from [addr,endaddr)
-            Dictionary<AddrLink, uint>.Enumerator startiter, iter, enditer, tfiter;
 
-            startiter = fromto_crossref.lower_bound(AddrLink(addr));
-            enditer = fromto_crossref.lower_bound(AddrLink(endaddr));
+            Dictionary<AddrLink, uint>.Enumerator startiter =
+                fromto_crossref.lower_bound(new AddrLink(addr));
+            Dictionary<AddrLink, uint>.Enumerator enditer =
+                fromto_crossref.lower_bound(new AddrLink(endaddr));
+            Dictionary<AddrLink, uint>.Enumerator iter;
             for (iter = startiter; iter != enditer; ++iter) {
                 AddrLink fromto = iter.Current.Key;
-                tfiter = tofrom_crossref.find(new AddrLink(fromto.b, fromto.a));
+                Dictionary<AddrLink, uint>.Enumerator tfiter =
+                    tofrom_crossref.find(new AddrLink(fromto.b, fromto.a));
                 if (tfiter != tofrom_crossref.end())
                     tofrom_crossref.erase(tfiter);
             }
@@ -144,10 +147,10 @@ namespace Sla.EXTRA
         public void clearCodeUnits(Address addr, Address endaddr)
         {
             // Clear all the code units in [addr,endaddr)
-            Dictionary<Address, CodeUnit>.Enumerator iter, enditer;
-
-            iter = codeunit.lower_bound(addr);
-            enditer = codeunit.lower_bound(endaddr);
+            Dictionary<Address, CodeUnit>.Enumerator iter =
+                codeunit.lower_bound(addr);
+            Dictionary<Address, CodeUnit>.Enumerator enditer =
+                codeunit.lower_bound(endaddr);
             codeunit.erase(iter, enditer);
             clearCrossRefs(addr, endaddr);
         }
@@ -158,16 +161,16 @@ namespace Sla.EXTRA
             TargetFeature targfeat = targets[addr];
             targfeat.name = nm;
             targfeat.featuremask = mask;
-            disengine.addTarget(addr);  // Tell the disassembler to search for address
+            // Tell the disassembler to search for address
+            disengine.addTarget(addr);
         }
 
-        public int getNumTargets() => targets.size();
+        public int getNumTargets() => targets.Count;
 
         public Address disassembleBlock(Address addr, Address endaddr)
         {
-            DisassemblyResult disresult;
-            List<CodeUnit> codevec;
-            Dictionary<AddrLink, uint> fromto_vec;
+            List<CodeUnit> codevec = new List<CodeUnit>();
+            Dictionary<AddrLink, uint> fromto_vec = new Dictionary<AddrLink, uint>();
             bool flowin = false;
             bool hardend = false;
 
@@ -185,6 +188,7 @@ namespace Sla.EXTRA
                 lastaddr = endaddr;
                 hardend = true;
             }
+            DisassemblyResult disresult = new DisassemblyResult();
             while (true) {
                 disengine.disassemble(curaddr, disresult);
                 CodeUnit addedUnit = new CodeUnit();
@@ -196,7 +200,7 @@ namespace Sla.EXTRA
                     break;
                 }
                 if ((disresult.flags & CodeUnit.Flags.jump) != 0) {
-                    fromto_vec[AddrLink(curaddr, disresult.jumpaddress)] = disresult.flags;
+                    fromto_vec[new AddrLink(curaddr, disresult.jumpaddress)] = disresult.flags;
                 }
                 addedUnit.flags = disresult.flags;
                 addedUnit.size = disresult.length;
@@ -205,7 +209,8 @@ namespace Sla.EXTRA
                     if ((!hardend) && (iter.Current.Value.flags & CodeUnit.Flags.notcode) != 0) {
                         if (iter.Current.Value.size == 1) {
                             Dictionary<Address, CodeUnit>.Enumerator iter2 = iter;
-                            ++iter;     // We delete the bad disassembly, as it looks like it is unaligned
+                            // We delete the bad disassembly, as it looks like it is unaligned
+                            ++iter;
                             codeunit.erase(iter2);
                             if (iter != codeunit.end()) {
                                 lastaddr = iter.Current.Key;
@@ -276,28 +281,29 @@ namespace Sla.EXTRA
         }
 
         public void findNotCodeUnits()
-        { // Mark any code units that have flow into "notcode" units as "notcode"
-          // Remove any references to or from these units
-            Dictionary<Address, CodeUnit>.Enumerator iter;
+        {
+            // Mark any code units that have flow into "notcode" units as "notcode"
+            // Remove any references to or from these units
+            Dictionary<Address, CodeUnit>.Enumerator iter = codeunit.GetEnumerator();
 
             // We spread the "notcode" attribute as a taint
             // We build the initial work list with known "notcode"
-            for (iter = codeunit.begin(); iter != codeunit.end(); ++iter) {
+            while (iter.MoveNext()) {
                 if ((iter.Current.Value.flags & CodeUnit.Flags.notcode) != 0)
-                    taintlist.Add(iter);
+                    taintlist.Add(iter.Current.Key, iter.Current.Value);
             }
-            while (!taintlist.empty())  // Propagate taint along fallthru and crossref edges
+            while (!taintlist.empty())
+                // Propagate taint along fallthru and crossref edges
                 processTaint();
         }
 
         public void markFallthruHits()
         {
             // Mark every code unit that has another code unit fall into it
-            Dictionary<Address, CodeUnit>.Enumerator iter;
 
-            Address fallthruaddr = new Address((AddrSpace)null,0);
-            iter = codeunit.begin();
-            for (iter = codeunit.begin(); iter != codeunit.end(); ++iter) {
+            Address fallthruaddr = new Address((AddrSpace)null, 0);
+            Dictionary<Address, CodeUnit>.Enumerator iter = codeunit.GetEnumerator();
+            while (iter.MoveNext()) {
                 CodeUnit cu = iter.Current.Value;
                 if ((cu.flags & CodeUnit.Flags.notcode) != 0) continue;
                 if (fallthruaddr == iter.Current.Key)
@@ -310,11 +316,11 @@ namespace Sla.EXTRA
         public void markCrossHits()
         {
             // Mark every codeunit hit by a call or jump
-            Dictionary<AddrLink, CodeUnit.Flags>.Enumerator iter;
-            Dictionary<Address, CodeUnit>.Enumerator fiter;
+            Dictionary<AddrLink, CodeUnit.Flags>.Enumerator iter =
+                tofrom_crossref.GetEnumerator();
 
-            for (iter = tofrom_crossref.begin(); iter != tofrom_crossref.end(); ++iter) {
-                fiter = codeunit.find(iter.Current.Key.a);
+            while (iter.MoveNext()) {
+                Dictionary<Address, CodeUnit>.Enumerator fiter = codeunit.find(iter.Current.Key.a);
                 if (fiter == codeunit.end()) continue;
                 CodeUnit.Flags fromflags = iter.Current.Value;
                 CodeUnit to = fiter.Current.Value;
@@ -340,13 +346,15 @@ namespace Sla.EXTRA
         }
 
         public void resolveThunkHit(Address codeaddr, ulong targethit)
-        { // Code unit make indirect jump to target
-          // Assume the address of the jump is another level of thunk
-          // Look for direct calls to it and include those as TargetHits
-            Dictionary<AddrLink, uint>.Enumerator iter, enditer;
-            iter = tofrom_crossref.lower_bound(new AddrLink(codeaddr));
+        {
+            // Code unit make indirect jump to target
+            // Assume the address of the jump is another level of thunk
+            // Look for direct calls to it and include those as TargetHits
+            Dictionary<AddrLink, uint>.Enumerator iter =
+                tofrom_crossref.lower_bound(new AddrLink(codeaddr));
             Address endaddr = codeaddr + 1;
-            enditer = tofrom_crossref.lower_bound(new AddrLink(endaddr));
+            Dictionary<AddrLink, uint>.Enumerator enditer =
+                tofrom_crossref.lower_bound(new AddrLink(endaddr));
             while (iter != enditer) {
                 CodeUnit.Flags flags = iter.Current.Value;
                 if ((flags & CodeUnit.Flags.call) != 0)
@@ -358,9 +366,9 @@ namespace Sla.EXTRA
         public void findUnlinked()
         {
             // Find all code units that have no jump/call/fallthru to them
-            Dictionary<Address, CodeUnit>.Enumerator iter;
+            Dictionary<Address, CodeUnit>.Enumerator iter = codeunit.GetEnumerator();
 
-            for (iter = codeunit.begin(); iter != codeunit.end(); ++iter) {
+            while (iter.MoveNext()) {
                 CodeUnit cu = iter.Current.Value;
                 if ((cu.flags & (CodeUnit.Flags.hit_by_fallthru | CodeUnit.Flags.hit_by_jump |
                         CodeUnit.Flags.hit_by_call | CodeUnit.Flags.notcode |
@@ -404,14 +412,13 @@ namespace Sla.EXTRA
             // disassembly for up to -max- instructions following it,
             // trying to get back on cut
             DisassemblyResult disresult;
-            List<CodeUnit> codevec;
-            Dictionary<AddrLink, uint> fromto_vec;
+            List<CodeUnit> codevec = new List<CodeUnit>();
+            Dictionary<AddrLink, uint> fromto_vec = new Dictionary<AddrLink, uint>();
             Address curaddr = addr;
-            Dictionary<Address, CodeUnit>.Enumerator iter;
             int count = 0;
 
-            iter = codeunit.lower_bound(addr);
-            if (iter == codeunit.end()) return false;
+            Dictionary<Address, CodeUnit>.Enumerator iter = codeunit.lower_bound(addr);
+            if (!iter.MoveNext()) return false;
             while(true) {
                 count += 1;
                 if (count >= max) return false;
@@ -419,13 +426,15 @@ namespace Sla.EXTRA
                     ++iter;
                     if (iter == codeunit.end()) return false;
                 }
-                if (curaddr == iter.Current.Key) break; // Back on cut
+                if (curaddr == iter.Current.Key)
+                    // Back on cut
+                    break;
                 disengine.disassemble(curaddr, disresult);
                 if (!disresult.success) return false;
                 CodeUnit addedUnit = new CodeUnit();
                 codevec.Add(addedUnit);
-                if ((disresult.flags & CodeUnit::jump) != 0) {
-                    fromto_vec[AddrLink(curaddr, disresult.jumpaddress)] = disresult.flags;
+                if ((disresult.flags & CodeUnit.Flags.jump) != 0) {
+                    fromto_vec[new AddrLink(curaddr, disresult.jumpaddress)] = disresult.flags;
                 }
                 addedUnit.flags = disresult.flags;
                 addedUnit.size = disresult.length;
@@ -438,13 +447,13 @@ namespace Sla.EXTRA
 
         public void findOffCut()
         {
-            Dictionary<AddrLink, uint>.Enumerator iter;
-            Dictionary<Address, CodeUnit>.Enumerator citer;
+            Dictionary<AddrLink, uint>.Enumerator iter = tofrom_crossref.begin();
+            bool iterationCompleted = !iter.MoveNext();
 
-            iter = tofrom_crossref.begin();
-            while (iter != tofrom_crossref.end()) {
-                Address addr = iter.Current.Key.a; // Destination of a jump
-                citer = codeunit.lower_bound(addr);
+            while (!iterationCompleted) {
+                // Destination of a jump
+                Address addr = iter.Current.Key.a;
+                Dictionary<Address, CodeUnit>.Enumerator citer = codeunit.lower_bound(addr);
                 if (citer != codeunit.end()) {
                     if (citer.Current.Key == addr) {
                         // Not off cut
@@ -456,30 +465,32 @@ namespace Sla.EXTRA
                             --citer;
                             checkErrantStart(citer);
                         }
-                        ++iter;
+                        iterationCompleted = !iter.MoveNext();
                         continue;
                     }
                 }
                 if (citer == codeunit.begin()) {
-                    ++iter;
+                    iterationCompleted = !iter.MoveNext();
                     continue;
                 }
-                --citer;            // Last lessthan or equal
+                // Last lessthan or equal
+                --citer;
                 if (citer.Current.Key == addr) {
-                    ++iter;
+                    iterationCompleted = !iter.MoveNext();
                     continue; // on cut
                 }
                 Address endaddr = citer.Current.Key + citer.Current.Value.size;
                 if (endaddr <= addr) {
-                    ++iter;
+                    iterationCompleted = !iter.MoveNext();
                     continue;
                 }
                 if (!checkErrantStart(citer)) {
-                    ++iter;
+                    iterationCompleted = !iter.MoveNext();
                     continue;
                 }
                 AddrLink addrlink = iter.Current.Key;
-                repairJump(addr, 10);   // This may delete tofrom_crossref nodes
+                // This may delete tofrom_crossref nodes
+                repairJump(addr, 10);
                 iter = tofrom_crossref.upper_bound(addrlink);
             }
         }
@@ -520,9 +531,10 @@ namespace Sla.EXTRA
 
         public void dumpCrossRefs(TextWriter s)
         {
-            Dictionary<AddrLink, CodeUnit.Flags>.Enumerator iter;
+            Dictionary<AddrLink, CodeUnit.Flags>.Enumerator iter =
+                fromto_crossref.GetEnumerator();
 
-            for (iter = fromto_crossref.begin(); iter != fromto_crossref.end(); ++iter) {
+            while (iter.MoveNext()) {
                 AddrLink addrlink = iter.Current.Key;
                 CodeUnit.Flags flags = iter.Current.Value;
 
@@ -535,9 +547,10 @@ namespace Sla.EXTRA
 
         public void dumpFunctionStarts(TextWriter s)
         {
-            Dictionary<AddrLink, CodeUnit.Flags>.Enumerator iter;
+            Dictionary<AddrLink, CodeUnit.Flags>.Enumerator iter =
+                tofrom_crossref.GetEnumerator();
 
-            for (iter = tofrom_crossref.begin(); iter != tofrom_crossref.end(); ++iter) {
+            while (iter.MoveNext()) {
                 AddrLink addrlink = iter.Current.Key;
                 CodeUnit.Flags flags = iter.Current.Value;
 
@@ -548,9 +561,9 @@ namespace Sla.EXTRA
 
         public void dumpUnlinked(TextWriter s)
         {
-            IEnumerator<Address> iter;
+            IEnumerator<Address> iter = unlinkedstarts.GetEnumerator();
 
-            for (iter = unlinkedstarts.begin(); iter != unlinkedstarts.end(); ++iter) {
+            while (iter.MoveNext()) {
                 s.WriteLine($"0x{iter.Current.getOffset():X}");
             }
         }
@@ -561,7 +574,7 @@ namespace Sla.EXTRA
             foreach (TargetHit target in targethits) {
                 Address funcaddr = target.funcstart;
                 Address addr = target.codeaddr;
-                string nm = (*targets.find(target.thunkaddr)).second.name;
+                string nm = targets.find(target.thunkaddr).second.name;
                 if (!funcaddr.isInvalid())
                     s.Write($"{funcaddr.getOffset():X} ");
                 else
@@ -572,14 +585,14 @@ namespace Sla.EXTRA
 
         public void runModel()
         {
-            LoadImage loadimage = glb.loader;
+            LoadImage loadimage = glb.loader ?? throw new ApplicationException();
             LoadImageSection secinfo;
             bool moresections;
             loadimage.openSectionInfo();
             Address lastaddr;
             do {
                 moresections = loadimage.getNextSection(secinfo);
-                Address endaddr = secinfo.address + secinfo.size;
+                Address endaddr = secinfo.address + (int)secinfo.size;
                 if (secinfo.size == 0) continue;
                 if (lastaddr.isInvalid())
                     lastaddr = endaddr;
@@ -592,9 +605,9 @@ namespace Sla.EXTRA
                 }
             } while (moresections);
             loadimage.closeSectionInfo();
-            CodeUnit & cu(codeunit[lastaddr]);
+            CodeUnit cu = codeunit[lastaddr];
             cu.size = 100;
-            cu.flags = CodeUnit::notcode;
+            cu.flags = CodeUnit.Flags.notcode;
             disassembleRangeList(modelhits);
             findNotCodeUnits();
             markFallthruHits();
@@ -604,7 +617,8 @@ namespace Sla.EXTRA
             markFallthruHits();
             markCrossHits();
             findUnlinked();
-            targethits.sort();      // Sort the list of hits by function containing hit
+            // Sort the list of hits by function containing hit
+            targethits.Sort();
         }
     }
 }

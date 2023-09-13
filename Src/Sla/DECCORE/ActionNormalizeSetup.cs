@@ -32,9 +32,10 @@ namespace Sla.DECCORE
 
         public override int apply(Funcdata data)
         {
-            FuncProto & fp(data.getFuncProto());
+            FuncProto fp = data.getFuncProto();
             fp.clearInput();
-            fp.setModelLock(false); // This will cause the model to get reevaluated
+            // This will cause the model to get reevaluated
+            fp.setModelLock(false);
             fp.setOutputLock(false);
 
             // FIXME:  This should probably save and restore symbols, model, and state

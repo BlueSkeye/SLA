@@ -29,8 +29,9 @@ namespace Sla.DECCORE
             charconstant = 0x104,
             identifier = 0x105,
             stringval = 0x106,
+
         }
-        
+
         private Token type;
 
         private struct /*union*/ tokenvalue
@@ -49,22 +50,23 @@ namespace Sla.DECCORE
             type = tp;
         }
 
-        private void set(Token tp, char[] ptr, int len)
+        // ADDED offset
+        internal void set(Token tp, char[] ptr, int offset, int len)
         {
             type = tp;
             switch (tp) {
                 case Token.integer:
-                    string charstring = new string(ptr, 0, len);
+                    string charstring = new string(ptr, offset, len);
                     long val = long.Parse(charstring);
                     value.integer = (ulong)val;
                     break;
                 case Token.identifier:
                 case Token.stringval:
-                    value.stringval = new string(ptr, 0, len);
+                    value.stringval = new string(ptr, offset, len);
                     break;
                 case Token.charconstant:
                     if (len == 1)
-                        value.integer = (ulong) * ptr;
+                        value.integer = (byte)ptr[offset];
                     else {
                         // Backslash
                         switch (ptr[1]) {
@@ -93,7 +95,7 @@ namespace Sla.DECCORE
                                 value.integer = 13;
                                 break;
                             default:
-                                value.integer = (ulong)ptr[1];
+                                value.integer = (byte)ptr[offset + 1];
                                 break;
                         }
                     }

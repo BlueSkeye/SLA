@@ -1,11 +1,4 @@
 ﻿using Sla.CORE;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
 
 namespace Sla.DECCORE
 {
@@ -47,7 +40,8 @@ namespace Sla.DECCORE
         /// \return the array of placeholders describing the split or null
         private TransformVar[]? setReplacement(Varnode vn, int numLanes, int skipLanes)
         {
-            if (vn.isMark())       // Already seen before
+            if (vn.isMark())
+                // Already seen before
                 return getSplit(vn, description, numLanes, skipLanes);
 
             if (vn.isConstant()) {
@@ -81,14 +75,13 @@ namespace Sla.DECCORE
         /// \param inVars is the array of input variables, 1 for each unary op
         /// \param outVars is the array of output variables, 1 for each unary op
         /// \param numLanes is the number of unary ops to create
-        private void buildUnaryOp(OpCode opc, PcodeOp op, TransformVar inVars, TransformVar outVars,
-            int numLanes)
+        private void buildUnaryOp(OpCode opc, PcodeOp op, TransformVar[] inVars,
+            TransformVar[] outVars, int numLanes)
         {
-            for (int i = 0; i < numLanes; ++i)
-            {
-                TransformOp* rop = newOpReplace(1, opc, op);
-                opSetOutput(rop, outVars + i);
-                opSetInput(rop, inVars + i, 0);
+            for (int i = 0; i < numLanes; ++i) {
+                TransformOp rop = newOpReplace(1, opc, op);
+                opSetOutput(rop, outVars[i]);
+                opSetInput(rop, inVars[i], 0);
             }
         }
 
@@ -101,15 +94,14 @@ namespace Sla.DECCORE
         /// \param in1Vars is the array of input[1] variables, 1 for each binar op
         /// \param outVars is the array of output variables, 1 for each binary op
         /// \param numLanes is the number of binary ops to create
-        private void buildBinaryOp(OpCode opc, PcodeOp op, TransformVar in0Vars, TransformVar in1Vars,
-            TransformVar outVars, int numLanes)
+        private void buildBinaryOp(OpCode opc, PcodeOp op, TransformVar[] in0Vars,
+            TransformVar[] in1Vars, TransformVar[] outVars, int numLanes)
         {
-            for (int i = 0; i < numLanes; ++i)
-            {
-                TransformOp* rop = newOpReplace(2, opc, op);
-                opSetOutput(rop, outVars + i);
-                opSetInput(rop, in0Vars + i, 0);
-                opSetInput(rop, in1Vars + i, 1);
+            for (int i = 0; i < numLanes; ++i) {
+                TransformOp rop = newOpReplace(2, opc, op);
+                opSetOutput(rop, outVars[i]);
+                opSetInput(rop, in0Vars[i], 0);
+                opSetInput(rop, in1Vars[i], 1);
             }
         }
 
@@ -123,52 +115,53 @@ namespace Sla.DECCORE
         /// \param numLanes is the number of lanes in the output
         /// \param skipLanes is the index of the least significant output lane within the global description
         /// \return \b true if the OpCode.CPUI_PIECE was modeled as natural lane copies
-        private bool buildPiece(PcodeOp op, TransformVar outVars, int numLanes, int skipLanes)
+        private bool buildPiece(PcodeOp op, TransformVar[] outVars, int numLanes,
+            int skipLanes)
         {
             int highLanes, highSkip;
             int lowLanes, lowSkip;
-            Varnode highVn = op.getIn(0);
-            Varnode lowVn = op.getIn(1);
+            Varnode highVn = op.getIn(0) ?? throw new ApplicationException();
+            Varnode lowVn = op.getIn(1) ?? throw new ApplicationException();
 
-            if (!description.restriction(numLanes, skipLanes, lowVn.getSize(), highVn.getSize(), highLanes, highSkip))
+            if (!description.restriction(numLanes, skipLanes, lowVn.getSize(),
+                highVn.getSize(), out highLanes, out highSkip))
                 return false;
-            if (!description.restriction(numLanes, skipLanes, 0, lowVn.getSize(), lowLanes, lowSkip))
+            if (!description.restriction(numLanes, skipLanes, 0, lowVn.getSize(),
+                out lowLanes, out lowSkip))
                 return false;
-            if (highLanes == 1)
-            {
+            if (highLanes == 1) {
                 TransformVar highRvn = getPreexistingVarnode(highVn);
                 TransformOp rop = newOpReplace(1, OpCode.CPUI_COPY, op);
                 opSetInput(rop, highRvn, 0);
-                opSetOutput(rop, outVars + (numLanes - 1));
+                opSetOutput(rop, outVars[numLanes - 1]);
             }
             else
             {   // Multi-lane high
-                TransformVar* highRvn = setReplacement(highVn, highLanes, highSkip);
-                if (highRvn == (TransformVar)null) return false;
+                TransformVar[]? highRvn = setReplacement(highVn, highLanes, highSkip);
+                if (highRvn == (TransformVar)null)
+                    return false;
                 int outHighStart = numLanes - highLanes;
-                for (int i = 0; i < highLanes; ++i)
-                {
-                    TransformOp* rop = newOpReplace(1, OpCode.CPUI_COPY, op);
-                    opSetInput(rop, highRvn + i, 0);
-                    opSetOutput(rop, outVars + (outHighStart + i));
+                for (int i = 0; i < highLanes; ++i) {
+                    TransformOp rop = newOpReplace(1, OpCode.CPUI_COPY, op);
+                    opSetInput(rop, highRvn[i], 0);
+                    opSetOutput(rop, outVars[outHighStart + i]);
                 }
             }
-            if (lowLanes == 1)
-            {
-                TransformVar* lowRvn = getPreexistingVarnode(lowVn);
-                TransformOp* rop = newOpReplace(1, OpCode.CPUI_COPY, op);
+            if (lowLanes == 1) {
+                TransformVar lowRvn = getPreexistingVarnode(lowVn);
+                TransformOp rop = newOpReplace(1, OpCode.CPUI_COPY, op);
                 opSetInput(rop, lowRvn, 0);
                 opSetOutput(rop, outVars);
             }
-            else
-            {   // Multi-lane low
-                TransformVar* lowRvn = setReplacement(lowVn, lowLanes, lowSkip);
-                if (lowRvn == (TransformVar)null) return false;
-                for (int i = 0; i < lowLanes; ++i)
-                {
-                    TransformOp* rop = newOpReplace(1, OpCode.CPUI_COPY, op);
-                    opSetInput(rop, lowRvn + i, 0);
-                    opSetOutput(rop, outVars + i);
+            else {
+                // Multi-lane low
+                TransformVar[]? lowRvn = setReplacement(lowVn, lowLanes, lowSkip);
+                if (lowRvn == (TransformVar)null)
+                    return false;
+                for (int i = 0; i < lowLanes; ++i) {
+                    TransformOp rop = newOpReplace(1, OpCode.CPUI_COPY, op);
+                    opSetInput(rop, lowRvn[i], 0);
+                    opSetOutput(rop, outVars[i]);
                 }
             }
             return true;
@@ -183,20 +176,20 @@ namespace Sla.DECCORE
         /// \param numLanes is the number of lanes in the output
         /// \param skipLanes is the index of the least significant output lane within the global description
         /// \return \b true if the operation was fully modeled
-        private bool buildMultiequal(PcodeOp op, TransformVar outVars, int numLanes, int skipLanes)
+        private bool buildMultiequal(PcodeOp op, TransformVar[] outVars, int numLanes,
+            int skipLanes)
         {
-            List<TransformVar*> inVarSets;
+            List<TransformVar[]> inVarSets = new List<TransformVar[]>();
             int numInput = op.numInput();
-            for (int i = 0; i < numInput; ++i)
-            {
-                TransformVar* inVn = setReplacement(op.getIn(i), numLanes, skipLanes);
-                if (inVn == (TransformVar)null) return false;
+            for (int i = 0; i < numInput; ++i) {
+                TransformVar[]? inVn = setReplacement(op.getIn(i), numLanes, skipLanes);
+                if (inVn == (TransformVar)null)
+                    return false;
                 inVarSets.Add(inVn);
             }
-            for (int i = 0; i < numLanes; ++i)
-            {
-                TransformOp* rop = newOpReplace(numInput, OpCode.CPUI_MULTIEQUAL, op);
-                opSetOutput(rop, outVars + i);
+            for (int i = 0; i < numLanes; ++i) {
+                TransformOp rop = newOpReplace(numInput, OpCode.CPUI_MULTIEQUAL, op);
+                opSetOutput(rop, outVars[i]);
                 for (int j = 0; j < numInput; ++j)
                     opSetInput(rop, inVarSets[j] + i, j);
             }
@@ -213,43 +206,43 @@ namespace Sla.DECCORE
         /// \return \b true if the OpCode.CPUI_STORE was successfully modeled on lanes
         private bool buildStore(PcodeOp op, int numLanes, int skipLanes)
         {
-            TransformVar* inVars = setReplacement(op.getIn(2), numLanes, skipLanes);
-            if (inVars == (TransformVar)null) return false;
+            TransformVar[]? inVars = setReplacement(op.getIn(2), numLanes, skipLanes);
+            if (inVars == (TransformVar)null)
+                return false;
             ulong spaceConst = op.getIn(0).getOffset();
             int spaceConstSize = op.getIn(0).getSize();
-            AddrSpace* spc = op.getIn(0).getSpaceFromConst(); // Address space being stored to
-            Varnode origPtr = op.getIn(1);
-            if (origPtr.isFree())
-            {
+            // Address space being stored to
+            AddrSpace spc = op.getIn(0).getSpaceFromConst();
+            Varnode origPtr = op.getIn(1) ?? throw new ApplicationException();
+            if (origPtr.isFree()) {
                 if (!origPtr.isConstant()) return false;
             }
-            TransformVar* basePtr = getPreexistingVarnode(origPtr);
+            TransformVar basePtr = getPreexistingVarnode(origPtr);
             int ptrSize = origPtr.getSize();
             Varnode valueVn = op.getIn(2);
-            for (int i = 0; i < numLanes; ++i)
-            {
-                TransformOp* ropStore = newOpReplace(3, OpCode.CPUI_STORE, op);
+            for (int i = 0; i < numLanes; ++i) {
+                TransformOp ropStore = newOpReplace(3, OpCode.CPUI_STORE, op);
                 int bytePos = description.getPosition(skipLanes + i);
                 int sz = description.getSize(skipLanes + i);
                 if (spc.isBigEndian())
-                    bytePos = valueVn.getSize() - (bytePos + sz);  // Convert position to address order
+                    // Convert position to address order
+                    bytePos = valueVn.getSize() - (bytePos + sz);
 
                 // Construct the pointer
-                TransformVar* ptrVn;
+                TransformVar ptrVn;
                 if (bytePos == 0)
                     ptrVn = basePtr;
-                else
-                {
+                else {
                     ptrVn = newUnique(ptrSize);
-                    TransformOp* addOp = newOp(2, OpCode.CPUI_INT_ADD, ropStore);
+                    TransformOp addOp = newOp(2, OpCode.CPUI_INT_ADD, ropStore);
                     opSetOutput(addOp, ptrVn);
                     opSetInput(addOp, basePtr, 0);
-                    opSetInput(addOp, newConstant(ptrSize, 0, bytePos), 1);
+                    opSetInput(addOp, newConstant(ptrSize, 0, (ulong)bytePos), 1);
                 }
 
                 opSetInput(ropStore, newConstant(spaceConstSize, 0, spaceConst), 0);
                 opSetInput(ropStore, ptrVn, 1);
-                opSetInput(ropStore, inVars + i, 2);
+                opSetInput(ropStore, inVars[i], 2);
             }
             return true;
         }
@@ -267,39 +260,38 @@ namespace Sla.DECCORE
         {
             ulong spaceConst = op.getIn(0).getOffset();
             int spaceConstSize = op.getIn(0).getSize();
-            AddrSpace* spc = op.getIn(0).getSpaceFromConst(); // Address space being stored to
-            Varnode origPtr = op.getIn(1);
-            if (origPtr.isFree())
-            {
+            // Address space being stored to
+            AddrSpace spc = op.getIn(0).getSpaceFromConst();
+            Varnode origPtr = op.getIn(1) ?? throw new ApplicationException();
+            if (origPtr.isFree()) {
                 if (!origPtr.isConstant()) return false;
             }
-            TransformVar* basePtr = getPreexistingVarnode(origPtr);
+            TransformVar basePtr = getPreexistingVarnode(origPtr);
             int ptrSize = origPtr.getSize();
             int outSize = op.getOut().getSize();
-            for (int i = 0; i < numLanes; ++i)
-            {
-                TransformOp* ropLoad = newOpReplace(2, OpCode.CPUI_LOAD, op);
+            for (int i = 0; i < numLanes; ++i) {
+                TransformOp ropLoad = newOpReplace(2, OpCode.CPUI_LOAD, op);
                 int bytePos = description.getPosition(skipLanes + i);
                 int sz = description.getSize(skipLanes + i);
                 if (spc.isBigEndian())
-                    bytePos = outSize - (bytePos + sz); // Convert position to address order
+                    // Convert position to address order
+                    bytePos = outSize - (bytePos + sz);
 
                 // Construct the pointer
-                TransformVar* ptrVn;
+                TransformVar ptrVn;
                 if (bytePos == 0)
                     ptrVn = basePtr;
-                else
-                {
+                else {
                     ptrVn = newUnique(ptrSize);
-                    TransformOp* addOp = newOp(2, OpCode.CPUI_INT_ADD, ropLoad);
+                    TransformOp addOp = newOp(2, OpCode.CPUI_INT_ADD, ropLoad);
                     opSetOutput(addOp, ptrVn);
                     opSetInput(addOp, basePtr, 0);
-                    opSetInput(addOp, newConstant(ptrSize, 0, bytePos), 1);
+                    opSetInput(addOp, newConstant(ptrSize, 0, (ulong)bytePos), 1);
                 }
 
                 opSetInput(ropLoad, newConstant(spaceConstSize, 0, spaceConst), 0);
                 opSetInput(ropLoad, ptrVn, 1);
-                opSetOutput(ropLoad, outVars + i);
+                opSetOutput(ropLoad, outVars[i]);
             }
             return true;
         }
@@ -315,27 +307,33 @@ namespace Sla.DECCORE
         /// \return \b true if the OpCode.CPUI_INT_RIGHT was successfully modeled on lanes
         private bool buildRightShift(PcodeOp op, TransformVar outVars, int numLanes, int skipLanes)
         {
-            if (!op.getIn(1).isConstant()) return false;
+            if (!op.getIn(1).isConstant())
+                return false;
             int shiftSize = (int)op.getIn(1).getOffset();
-            if ((shiftSize & 7) != 0) return false;     // Not a multiple of 8
+            if ((shiftSize & 7) != 0)
+                // Not a multiple of 8
+                return false;
             shiftSize /= 8;
             int startPos = shiftSize + description.getPosition(skipLanes);
             int startLane = description.getBoundary(startPos);
-            if (startLane < 0) return false;        // Shift does not end on a lane boundary
+            if (startLane < 0)
+                // Shift does not end on a lane boundary
+                return false;
             int srcLane = startLane;
             int destLane = skipLanes;
-            while (srcLane - skipLanes < numLanes)
-            {
-                if (description.getSize(srcLane) != description.getSize(destLane)) return false;
+            while (srcLane - skipLanes < numLanes) {
+                if (description.getSize(srcLane) != description.getSize(destLane))
+                    return false;
                 srcLane += 1;
                 destLane += 1;
             }
-            TransformVar* inVars = setReplacement(op.getIn(0), numLanes, skipLanes);
-            if (inVars == (TransformVar)null) return false;
-            buildUnaryOp(CPUI_COPY, op, inVars + (startLane - skipLanes), outVars, numLanes - (startLane - skipLanes));
-            for (int zeroLane = numLanes - (startLane - skipLanes); zeroLane < numLanes; ++zeroLane)
-            {
-                TransformOp* rop = newOpReplace(1, OpCode.CPUI_COPY, op);
+            TransformVar[]? inVars = setReplacement(op.getIn(0), numLanes, skipLanes);
+            if (inVars == (TransformVar)null)
+                return false;
+            buildUnaryOp(OpCode.CPUI_COPY, op, inVars + (startLane - skipLanes), outVars,
+                numLanes - (startLane - skipLanes));
+            for (int zeroLane = numLanes - (startLane - skipLanes); zeroLane < numLanes; ++zeroLane) {
+                TransformOp rop = newOpReplace(1, OpCode.CPUI_COPY, op);
                 opSetOutput(rop, outVars + zeroLane);
                 opSetInput(rop, newConstant(description.getSize(zeroLane), 0, 0), 0);
             }
@@ -409,19 +407,23 @@ namespace Sla.DECCORE
                     case OpCode.CPUI_INT_XOR:
                     case OpCode.CPUI_MULTIEQUAL: {
                             TransformVar outRvn = setReplacement(outvn, numLanes, skipLanes);
-                            if (outRvn == (TransformVar)null) return false;
+                            if (outRvn == (TransformVar)null)
+                                return false;
                             // Don't create the placeholder ops, let traceBackward make them
                             break;
                         }
                     case OpCode.CPUI_INT_RIGHT: {
                             if (!op.getIn(1).isConstant()) return false;  // Trace must come through op.getIn(0)
-                            TransformVar outRvn = setReplacement(outvn, numLanes, skipLanes);
-                            if (outRvn == (TransformVar)null) return false;
+                            TransformVar[]? outRvn = setReplacement(outvn, numLanes, skipLanes);
+                            if (outRvn == (TransformVar)null)
+                                return false;
                             // Don't create the placeholder ops, let traceBackward make them
                             break;
                         }
                     case OpCode.CPUI_STORE:
-                        if (op.getIn(2) != origvn) return false;   // Can only propagate through value being stored
+                        if (op.getIn(2) != origvn)
+                            // Can only propagate through value being stored
+                            return false;
                         if (!buildStore(op, numLanes, skipLanes))
                             return false;
                         break;
@@ -449,18 +451,21 @@ namespace Sla.DECCORE
             switch (op.code()) {
                 case OpCode.CPUI_INT_NEGATE:
                 case OpCode.CPUI_COPY: {
-                        TransformVar? inVars = setReplacement(op.getIn(0), numLanes, skipLanes);
-                        if (inVars == (TransformVar)null) return false;
-                        buildUnaryOp(op.code(), op, inVars, rvn, numLanes);
-                        break;
-                    }
+                        TransformVar[]? inVars = setReplacement(op.getIn(0), numLanes, skipLanes);
+                    if (inVars == (TransformVar)null)
+                            return false;
+                    buildUnaryOp(op.code(), op, inVars, rvn, numLanes);
+                    break;
+                }
                 case OpCode.CPUI_INT_AND:
                 case OpCode.CPUI_INT_OR:
                 case OpCode.CPUI_INT_XOR: {
-                        TransformVar? in0Vars = setReplacement(op.getIn(0), numLanes, skipLanes);
-                        if (in0Vars == (TransformVar)null) return false;
-                        TransformVar? in1Vars = setReplacement(op.getIn(1), numLanes, skipLanes);
-                        if (in1Vars == (TransformVar)null) return false;
+                        TransformVar[]? in0Vars = setReplacement(op.getIn(0), numLanes, skipLanes);
+                        if (in0Vars == (TransformVar)null)
+                                return false;
+                        TransformVar[]? in1Vars = setReplacement(op.getIn(1), numLanes, skipLanes);
+                        if (in1Vars == (TransformVar)null)
+                            return false;
                         buildBinaryOp(op.code(), op, in0Vars, in1Vars, rvn, numLanes);
                         break;
                     }
@@ -474,8 +479,9 @@ namespace Sla.DECCORE
                         int inLanes, inSkip;
                         if (!description.extension(numLanes, skipLanes, bytePos, inVn.getSize(), inLanes, inSkip))
                             return false;
-                        TransformVar? inVars = setReplacement(inVn, inLanes, inSkip);
-                        if (inVars == (TransformVar)null) return false;
+                        TransformVar[]? inVars = setReplacement(inVn, inLanes, inSkip);
+                        if (inVars == (TransformVar)null)
+                            return false;
                         buildUnaryOp(OpCode.CPUI_COPY, op, inVars + (skipLanes - inSkip), rvn, numLanes);
                         break;
                     }
@@ -530,7 +536,8 @@ namespace Sla.DECCORE
         public bool doTrace()
         {
             if (workList.empty())
-                return false;       // Nothing to do
+                // Nothing to do
+                return false;
             bool retval = true;
             while (!workList.empty()) {
                 // Process the work list until its done
@@ -539,7 +546,6 @@ namespace Sla.DECCORE
                     break;
                 }
             }
-
             clearVarnodeMarks();
             if (!retval) return false;
             return true;

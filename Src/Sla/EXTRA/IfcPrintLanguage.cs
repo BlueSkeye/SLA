@@ -19,8 +19,8 @@ namespace Sla.EXTRA
             if (dcp.fd == (Funcdata)null)
                 throw new IfaceExecutionError("No function selected");
 
-            s >> ws;
-            if (s.eof())
+            s.ReadSpaces();
+            if (s.EofReached())
                 throw new IfaceParseError("No print language specified");
             string langroot;
             s >> langroot;

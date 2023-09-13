@@ -1,11 +1,4 @@
 ﻿using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.EXTRA
 {
@@ -18,16 +11,18 @@ namespace Sla.EXTRA
         /// in the scope of the current function.
         public override void execute(TextReader s)
         {
-            string oldname, newname;
-
-            s >> ws >> oldname >> ws >> newname >> ws;
-            if (oldname.size() == 0)
+            s.ReadSpaces();
+            string oldname = s.ReadString();
+            s.ReadSpaces();
+            string newname  = s.ReadString();
+            s.ReadSpaces();
+            if (oldname.Length == 0)
                 throw new IfaceParseError("Missing old symbol name");
-            if (newname.size() == 0)
+            if (newname.Length == 0)
                 throw new IfaceParseError("Missing new name");
 
-            Symbol* sym;
-            List<Symbol*> symList;
+            Symbol sym;
+            List<Symbol> symList = new List<Symbol>();
             dcp.readSymbol(oldname, symList);
 
             if (symList.empty())

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
+﻿
 namespace Sla.DECCORE
 {
     /// \brief Create symbols that map out the local stack-frame for the function.
@@ -25,7 +19,7 @@ namespace Sla.DECCORE
         public override int apply(Funcdata data)
         {
             if (!data.isHighOn()) return 0;
-            ScopeLocal* l1 = data.getScopeLocal();
+            ScopeLocal l1 = data.getScopeLocal();
 
 #if OPACTION_DEBUG
             if ((flags & rule_debug) != 0)

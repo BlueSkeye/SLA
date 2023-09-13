@@ -17,7 +17,7 @@ namespace Sla.DECCORE
         /// Build name, type, and flags based on the placeholder address
         private void buildNameType()
         {
-            TypeFactory typegrp = scope.getArch().types;
+            TypeFactory typegrp = scope.getArch().types ?? throw new ApplicationException();
             type = typegrp.getTypeCode();
             type = typegrp.getTypePointer(refaddr.getAddrSize(), type, refaddr.getSpace().getWordSize());
             if (name.Length == 0) {
@@ -28,7 +28,7 @@ namespace Sla.DECCORE
                 name = s.ToString();
                 name += "_exref"; // Indicate this is an external reference variable
             }
-            if (displayName.size() == 0)
+            if (displayName.Length == 0)
                 displayName = name;
             flags |= Varnode.varnode_flags.externref | Varnode.varnode_flags.typelock;
         }

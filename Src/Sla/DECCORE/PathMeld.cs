@@ -211,24 +211,26 @@ namespace Sla.DECCORE
 
         /// Append a new set of paths to \b this set of paths
         /// The new paths must all start at the common end-point of the paths in
-        /// \b this container.  The new set of melded paths start at the original common start
+        /// \b this container. The new set of melded paths start at the original common start
         /// point for \b this container, flow through this old common end-point, and end at
         /// the new common end-point.
         /// \param op2 is the set of paths to be appended
         public void append(PathMeld op2)
         {
-            commonVn.insert(commonVn.begin(), op2.commonVn.begin(), op2.commonVn.end());
-            opMeld.insert(opMeld.begin(), op2.opMeld.begin(), op2.opMeld.end());
+            commonVn.InsertRange(0, op2.commonVn);
+            opMeld.InsertRange(0, op2.opMeld);
             // Renumber all the rootVn refs to varnodes we have moved
-            for (int i = op2.opMeld.size(); i < opMeld.size(); ++i)
-                opMeld[i].rootVn += op2.commonVn.size();
+            for (int i = op2.opMeld.size(); i < opMeld.size(); ++i) {
+                RootedOp scannedOp = opMeld[i];
+                scannedOp.rootVn += op2.commonVn.size();
+            }
         }
 
         /// Clear \b this to be an empty container
         public void clear()
         {
-            commonVn.clear();
-            opMeld.clear();
+            commonVn.Clear();
+            opMeld.Clear();
         }
 
         /// Meld a new path into \b this container

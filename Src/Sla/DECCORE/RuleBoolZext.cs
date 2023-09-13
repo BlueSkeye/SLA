@@ -52,7 +52,7 @@ namespace Sla.DECCORE
             if (multop1.code() != OpCode.CPUI_INT_MULT) return 0;
             if (!multop1.getIn(1).isConstant()) return 0;
             coeff = multop1.getIn(1).getOffset();
-            if (coeff != Globals.calc_mask(multop1.getIn(1).getSize()))
+            if (coeff != Globals.calc_mask((uint)multop1.getIn(1).getSize()))
                 return 0;
             size = multop1.getOut().getSize();
 
@@ -119,7 +119,7 @@ namespace Sla.DECCORE
             if (multop2.code() != OpCode.CPUI_INT_MULT) return 0;
             if (!multop2.getIn(1).isConstant()) return 0;
             coeff = multop2.getIn(1).getOffset();
-            if (coeff != Globals.calc_mask(size))
+            if (coeff != Globals.calc_mask((uint)size))
                 return 0;
             zextop2 = multop2.getIn(0).getDef();
             if (zextop2 == (PcodeOp)null) return 0;

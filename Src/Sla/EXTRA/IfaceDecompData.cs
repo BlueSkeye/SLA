@@ -139,7 +139,7 @@ namespace Sla.EXTRA
                 throw new IfaceExecutionError("No function selected");
 
             Address pc = new Address();
-            Address loc = new Address(parse_varnode(s, defsize, pc, uq, conf.types));
+            Address loc = Grammar.parse_varnode(s, out defsize, out pc, out uq, conf.types);
             if (loc.getSpace().getType() == spacetype.IPTR_CONSTANT) {
                 if (pc.isInvalid() || (uq == uint.MaxValue))
                     throw new IfaceParseError("Missing p-code sequence number");
@@ -147,7 +147,7 @@ namespace Sla.EXTRA
                 PcodeOp op = fd.findOp(seq);
                 if (op != (PcodeOp)null) {
                     for (int i = 0; i < op.numInput(); ++i) {
-                        Varnode tmpvn = op.getIn(i);
+                        Varnode tmpvn = op.getIn(i) ?? throw new ApplicationException();
                         if (tmpvn.getAddr() == loc) {
                             vn = tmpvn;
                             break;
@@ -171,7 +171,6 @@ namespace Sla.EXTRA
                     }
                 }
             }
-
             if (vn == (Varnode)null)
                 throw new IfaceExecutionError("Requested varnode does not exist");
             return vn;

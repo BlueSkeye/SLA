@@ -62,7 +62,7 @@ namespace Sla.DECCORE
             bool completed;
             // Find first element greater
             while (!(completed = !iter.MoveNext())) {
-                int comparisonResult = CommentOrder.Instance.CompareTo(iter.Current, newcom);
+                int comparisonResult = CommentOrder.Instance.Compare(iter.Current, newcom);
                 if (-1 == comparisonResult) {
                     if (null == comparisonCandidate) {
                         comparisonCandidate = iter.Current;
@@ -92,7 +92,7 @@ namespace Sla.DECCORE
             List<Comment> reverseOrderComments = new List<Comment>();
 
             foreach(Comment comment in commentset) {
-                if (0 < CommentOrder.Instance.CompareTo(comment, newcom)) {
+                if (0 < CommentOrder.Instance.Compare(comment, newcom)) {
                     break;
                 }
                 reverseOrderComments.Insert(0, comment);

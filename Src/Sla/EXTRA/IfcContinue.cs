@@ -1,10 +1,4 @@
 ﻿using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.EXTRA
 {
@@ -24,24 +18,23 @@ namespace Sla.EXTRA
             if (dcp.fd == (Funcdata)null)
                 throw new IfaceExecutionError("No function selected");
 
-            if (dcp.conf.allacts.getCurrent().getStatus() == Action::status_start)
+            if (dcp.conf.allacts.getCurrent().getStatus() == Sla.DECCORE.Action.statusflags.status_start)
                 throw new IfaceExecutionError("Decompilation has not been started");
-            if (dcp.conf.allacts.getCurrent().getStatus() == Action::status_end)
+            if (dcp.conf.allacts.getCurrent().getStatus() == Sla.DECCORE.Action.statusflags.status_end)
                 throw new IfaceExecutionError("Decompilation is already complete");
 
-            res = dcp.conf.allacts.getCurrent().perform(*dcp.fd); // Try to continue decompilation
-            if (res < 0)
-            {
-                *status.optr << "Break at ";
-                dcp.conf.allacts.getCurrent().printState(*status.optr);
+            // Try to continue decompilation
+            res = dcp.conf.allacts.getCurrent().perform(dcp.fd);
+            if (res < 0) {
+                status.optr.Write("Break at ");
+                dcp.conf.allacts.getCurrent().printState(status.optr);
             }
-            else
-            {
-                *status.optr << "Decompilation complete";
+            else {
+                status.optr.Write("Decompilation complete");
                 if (res == 0)
-                    *status.optr << " (no change)";
+                    status.optr.Write(" (no change)");
             }
-            *status.optr << endl;
+            status.optr.WriteLine();
         }
     }
 }

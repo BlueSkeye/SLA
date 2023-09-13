@@ -50,19 +50,19 @@ namespace Sla.DECCORE
 
         // friend class ConstantPool;
         /// Descriptor of type of the object
-        private ConstantPoolTagTypes tag;
+        internal ConstantPoolTagTypes tag;
         /// Additional boolean properties on the record
-        private MethodType flags;
+        internal MethodType flags;
         /// Name or token associated with the object
-        private string token;
+        internal string token;
         /// Constant value of the object (if known)
-        private ulong value;
+        internal ulong value;
         /// Data-type associated with the object
-        private Datatype? type;
+        internal Datatype? type;
         /// For string literals, the raw byte data of the string
-        private byte[]? byteData;
+        internal byte[]? byteData;
         /// The number of bytes in the data for a string literal
-        private int byteDataLen;
+        internal int byteDataLen;
 
         /// Construct an empty record
         public CPoolRecord()

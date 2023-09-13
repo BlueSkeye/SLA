@@ -28,7 +28,7 @@ namespace Sla.DECCORE
         /// The resolved data-type
         internal Datatype resolve;
         /// Union or Structure being resolved
-        private Datatype baseType;
+        internal Datatype baseType;
         /// Index of field referenced by \b resolve
         internal int fieldNum;
         /// If \b true, resolution cannot be overridden

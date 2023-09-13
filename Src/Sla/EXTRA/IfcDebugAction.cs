@@ -14,7 +14,7 @@ namespace Sla.EXTRA
   if (dcp.fd == (Funcdata *)0)
     throw new IfaceExecutionError("No function selected");
   string actionname;
-  s >> ws >> actionname;
+  s.ReadSpaces() >> actionname;
   if (actionname.empty())
     throw new IfaceParseError("Missing name of action to debug");
   if (!dcp.conf.allacts.getCurrent().turnOnDebug(actionname))

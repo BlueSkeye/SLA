@@ -109,7 +109,7 @@ namespace Sla.DECCORE
         protected void decodePayloadParams(Sla.CORE.Decoder decoder)
         {
             while(true) {
-                ElementId subId = decoder.peekElement();
+                uint subId = decoder.peekElement();
                 if (subId == ElementId.ELEM_INPUT) {
                     string paramName;
                     uint size;

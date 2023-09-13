@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -34,12 +29,13 @@ namespace Sla.DECCORE
             //  if (vn.isPersist()) return 0;
             if (!vn.hasNoDescend()) return 0;
             if (vn.isAutoLive()) return 0;
-            AddrSpace* spc = vn.getSpace();
+            AddrSpace spc = vn.getSpace();
             if (spc.doesDeadcode())
                 if (!data.deadRemovalAllowedSeen(spc))
                     return 0;
 
-            data.opDestroy(op);     // Get rid of unused op
+            // Get rid of unused op
+            data.opDestroy(op);
             return 1;
         }
     }

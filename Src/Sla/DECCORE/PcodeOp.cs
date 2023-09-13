@@ -298,10 +298,14 @@ namespace Sla.DECCORE
         public int numInput() => inrefs.size();
 
         /// Get the output Varnode of this op or \e null
-        public Varnode? getOut() => output;
+        public Varnode getOut() => output ?? throw new ApplicationException();
+
+        public Varnode? getOutAllowNull() => output;
 
         /// Get a specific input Varnode to this op
-        public Varnode? getIn(int slot) => inrefs[slot];
+        public Varnode getIn(int slot) => inrefs[slot] ?? throw new ApplicationException();
+
+        public Varnode? getInAllowNull(int slot) => inrefs[slot];
 
         /// Get the parent basic block
         public BlockBasic getParent() => (BlockBasic) parent;

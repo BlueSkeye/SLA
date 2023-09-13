@@ -278,7 +278,7 @@ namespace Sla.DECCORE
                 else
                     res = (val1 >> (skip * 8)) | (val2 << (size1 * 8));
             }
-            res &= (ulong)Globals.calc_mask(size);
+            res &= (ulong)Globals.calc_mask((uint)size);
             return res;
         }
 
@@ -302,14 +302,14 @@ namespace Sla.DECCORE
                 cursize = pagesize;
                 offalign = offset & ~pagemask;
                 skip = 0;
-                if (offalign != offset)
-                {
+                if (offalign != offset) {
                     skip = offset - offalign;
                     cursize -= skip;
                 }
-                if (size - count < cursize)
+                if (size - count < cursize) {
                     cursize = size - count;
-                setPage(offalign, val, skip, cursize);
+                }
+                setPage(offalign, val, (uint)skip, cursize);
                 count += cursize;
                 offset += cursize;
                 val += cursize;
@@ -341,7 +341,7 @@ namespace Sla.DECCORE
                 }
                 if (size - count < cursize)
                     cursize = size - count;
-                getPage(offalign, res, skip, cursize);
+                getPage(offalign, res, (uint)skip, cursize);
                 count += cursize;
                 offset += cursize;
                 res += cursize;

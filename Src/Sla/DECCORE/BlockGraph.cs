@@ -92,7 +92,7 @@ namespace Sla.DECCORE
                         }
                         if (mybl.isSwitchOut()) {
                             // Check for indirect branch out
-                            setFlag(edge_flags.f_switch_out);
+                            setFlag(block_flags.f_switch_out);
                         }
                     }
                 }
@@ -636,7 +636,7 @@ namespace Sla.DECCORE
             List<FlowBlock> tmplist = new List<FlowBlock>();
 
             while (true) {
-                ElementId subId = decoder.peekElement();
+                uint subId = decoder.peekElement();
                 if (subId != ElementId.ELEM_BHEAD) {
                     break;
                 }
@@ -1006,7 +1006,7 @@ namespace Sla.DECCORE
             BlockMultiGoto ret;
             FlowBlock targetbl = bl.getOut(outedge);
             bool isdefaultedge = bl.isDefaultBranch(outedge);
-            if (bl.getType() == block_flags.t_multigoto) {
+            if (bl.getType() == block_type.t_multigoto) {
                 // Already one goto edge from this same block, we add to existing structure
                 ret = (BlockMultiGoto)bl;
                 ret.addEdge(targetbl);

@@ -15,8 +15,8 @@ namespace Sla.SLEIGH
 
         ~EquationAnd()
         {
-            PatternEquation::release(left);
-            PatternEquation::release(right);
+            PatternEquation.release(left);
+            PatternEquation.release(right);
         }
 
         public EquationAnd(PatternEquation l, PatternEquation r)

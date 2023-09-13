@@ -16,10 +16,10 @@ namespace Sla.EXTRA
             int num;
             string historyline;
 
-            if (!s.eof())
+            if (!s.EofReached())
             {
                 s >> num >> ws;
-                if (!s.eof())
+                if (!s.EofReached())
                     throw new IfaceParseError("Too many parameters to history");
             }
             else

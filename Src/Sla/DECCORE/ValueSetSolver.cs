@@ -503,7 +503,7 @@ namespace Sla.DECCORE
                     Varnode constVn = op.getIn(1);
                     if (!constVn.isConstant())
                         return false;
-                    value = (value + constVn.getOffset()) & Globals.calc_mask(constVn.getSize());
+                    value = (value + constVn.getOffset()) & Globals.calc_mask((uint)constVn.getSize());
                     vn = op.getIn(0);
                 }
                 else

@@ -98,17 +98,15 @@ namespace Sla.DECCORE
             PcodeOp truncop = data.newOp(2, op.getAddr());
             data.opSetOpcode(truncop, OpCode.CPUI_SUBPIECE);
             data.opSetInput(truncop, data.newConstant(vn.getSize(), 0), 1);
-            if (vn.getSpace().getType() == spacetype.IPTR_INTERNAL)
-            {
-                newvn = data.newUniqueOut(spc.getAddrSize(), truncop);
+            if (vn.getSpace().getType() == spacetype.IPTR_INTERNAL) {
+                newvn = data.newUniqueOut((int)spc.getAddrSize(), truncop);
             }
-            else
-            {
+            else {
                 Address addr = vn.getAddr();
                 if (addr.isBigEndian())
                     addr = addr + (vn.getSize() - spc.getAddrSize());
-                addr.renormalize(spc.getAddrSize());
-                newvn = data.newVarnodeOut(spc.getAddrSize(), addr, truncop);
+                addr.renormalize((int)spc.getAddrSize());
+                newvn = data.newVarnodeOut((int)spc.getAddrSize(), addr, truncop);
             }
             data.opSetInput(op, newvn, slot);
             data.opSetInput(truncop, vn, 0);

@@ -319,7 +319,7 @@ namespace Sla.SLEIGH
             OpTpl op = new OpTpl(opc);
             VarnodeTpl constvn = new VarnodeTpl(new ConstTpl(constantspace),
                 new ConstTpl(ConstTpl.const_type.real, constval),
-                new ConstTpl(ConstTpl.const_type.real, constsz));
+                new ConstTpl(ConstTpl.const_type.real, (ulong)constsz));
             VarnodeTpl outvn = buildTemporary();
             op.addInput(res.outvn);
             op.addInput(constvn);

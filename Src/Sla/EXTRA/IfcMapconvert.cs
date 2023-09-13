@@ -19,33 +19,35 @@ namespace Sla.EXTRA
         /// \e address of the p-code op using the constant plus a dynamic \e hash is also given.
         public override void execute(TextReader s)
         {
-            if (dcp.fd == (Funcdata)null)
+            if (dcp.fd == (Funcdata)null) {
                 throw new IfaceExecutionError("No function loaded");
-            string name;
+            }
             ulong value;
             ulong hash;
             int size;
-            uint format = 0;
+            Symbol.DisplayFlags format = 0;
 
-            s >> name;      // Parse the format token
+            // Parse the format token
+            string name = s.ReadString();
             if (name == "hex")
-                format = Symbol::force_hex;
+                format = Symbol.DisplayFlags.force_hex;
             else if (name == "dec")
-                format = Symbol::force_dec;
+                format = Symbol.DisplayFlags.force_dec;
             else if (name == "bin")
-                format = Symbol::force_bin;
+                format = Symbol.DisplayFlags.force_bin;
             else if (name == "oct")
-                format = Symbol::force_oct;
+                format = Symbol.DisplayFlags.force_oct;
             else if (name == "char")
-                format = Symbol::force_char;
+                format = Symbol.DisplayFlags.force_char;
             else
                 throw new IfaceParseError("Bad convert format");
 
-            s >> ws >> hex >> value;
-            Address addr = parse_machaddr(s, size, *dcp.conf.types); // Read pc address of hash
-
-            s >> hex >> hash;       // Parse the hash value
-
+            s.ReadSpaces();
+            s >> hex >> value;
+            // Read pc address of hash
+            Address addr = Grammar.parse_machaddr(s, out size, dcp.conf.types);
+            // Parse the hash value
+            s >> hex >> hash;
             dcp.fd.getScopeLocal().addEquateSymbol("", format, value, addr, hash);
         }
     }

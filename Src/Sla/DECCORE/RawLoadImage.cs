@@ -57,7 +57,7 @@ namespace Sla.DECCORE
             }
         }
 
-        public override void loadFill(byte[] ptr, int size, Address addr)
+        public override void loadFill(byte[] ptr, int index, int size, Address addr)
         {
             ulong curaddr = addr.getOffset();
             ulong offset = 0;
@@ -71,7 +71,7 @@ namespace Sla.DECCORE
                         // Initial address not within file
                         break;
                     // Fill out the rest of the buffer with 0
-                    Array.Fill(ptr, (byte)0, (int)offset, size);
+                    Array.Fill(ptr, (byte)0, (int)(index + (long)offset), size);
                     return;
                 }
                 readsize = (ulong)size;
@@ -79,7 +79,7 @@ namespace Sla.DECCORE
                     // Adjust to biggest possible read
                     readsize = filesize - curaddr;
                 thefile.Seek((long)curaddr, SeekOrigin.Begin);
-                thefile.Read(ptr, (int)offset, (int)readsize);
+                thefile.Read(ptr, (int)(index + (long)offset), (int)readsize);
                 offset += readsize;
                 size -= (int)readsize;
                 curaddr += readsize;

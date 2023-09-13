@@ -89,10 +89,12 @@ namespace Sla
         /// is les than or equal to value.</returns>
         internal static LinkedListNode<T>? upper_bound<T>(this LinkedList<T> from, T value)
         {
+            throw new NotImplementedException();
         }
 
         internal static LinkedListNode<T>? upper_bound<T>(this LinkedList<T> from, T value, Comparison<T> comparer)
         {
+            throw new NotImplementedException();
         }
     }
 }

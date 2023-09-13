@@ -68,7 +68,7 @@ namespace Sla.DECCORE
                 if (multOp.code() != OpCode.CPUI_INT_MULT) continue;
                 Varnode constVn = multOp.getIn(1) ?? throw new ApplicationException();
                 if (!constVn.isConstant()) continue;
-                if (constVn.getOffset() != Globals.calc_mask(constVn.getSize())) continue;
+                if (constVn.getOffset() != Globals.calc_mask((uint)constVn.getSize())) continue;
                 Varnode @base = op.getIn(1 - slot);
                 Varnode signExt = multOp.getIn(0) ?? throw new ApplicationException();
                 if (!signExt.isWritten()) continue;

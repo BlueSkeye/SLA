@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Sla.CORE
 {
     /// \brief A low-level machine address for labelling bytes and data.
@@ -16,7 +10,7 @@ namespace Sla.CORE
     /// to particular registers. However, an arbitrary address could refer to anything,
     /// RAM, ROM, cpu register, data segment, coprocessor, stack, nvram, etc.
     /// An Address represents an offset \e only, not an offset and length
-    public class Address : IComparable<Address>
+    public class Address : IComparable<Address>, IEquatable<Address>
     {
         /// Pointer to our address space
         internal AddrSpace? @base;
@@ -189,6 +183,12 @@ namespace Sla.CORE
         public static bool operator ==(Address op1, Address op2)
         {
             return ((op1.@base == op2.@base) && (op1.offset == op2.offset));
+        }
+
+        public bool Equals(Address? other)
+        {
+            if (other == null) { return false; }
+            return (other == this);
         }
 
         /// Compare two addresses for inequality

@@ -31,7 +31,7 @@ namespace Sla.DECCORE
     
         public override int apply(Funcdata data)
         {
-            BlockGraph graph = new BlockGraph(data.getStructure());
+            BlockGraph graph = data.getStructure();
 
             if (graph.getSize() == 0) {
                 return 0;

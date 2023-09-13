@@ -49,35 +49,45 @@ namespace Sla.DECCORE
             Varnode multvn = subop.getIn(0);
             if (!multvn.isWritten()) return 0;
             PcodeOp multop = multvn.getDef();
-            if (multop.code() != OpCode.CPUI_INT_MULT) return 0;
+            if (multop.code() != OpCode.CPUI_INT_MULT)
+                return 0;
             ulong multConst;
-            int constExtType = multop.getIn(1).isConstantExtended(multConst);
-            if (constExtType < 0) return 0;
+            int constExtType = multop.getIn(1).isConstantExtended(out multConst);
+            if (constExtType < 0)
+                return 0;
 
             Varnode extvn = multop.getIn(0);
-            if (!extvn.isWritten()) return 0;
+            if (!extvn.isWritten())
+                return 0;
             PcodeOp extop = extvn.getDef();
             OpCode opc = extop.code();
             if (opc == OpCode.CPUI_INT_ZEXT) {
-                if (op.code() == OpCode.CPUI_INT_SRIGHT) return 0;
+                if (op.code() == OpCode.CPUI_INT_SRIGHT)
+                    return 0;
             }
             else if (opc == OpCode.CPUI_INT_SEXT) {
-                if (op.code() == OpCode.CPUI_INT_RIGHT) return 0;
+                if (op.code() == OpCode.CPUI_INT_RIGHT)
+                    return 0;
             }
 
             ulong newc;
             if (n < 64 || (extvn.getSize() <= 8)) {
                 ulong pow = 1;
-                pow <<= n;          // Calculate 2^n
+                // Calculate 2^n
+                pow <<= n;
                 newc = multConst + pow;
             }
             else {
-                if (constExtType != 2) return 0; // TODO: Can't currently represent
-                if (!Globals.signbit_negative(multConst, 8)) return 0;
+                if (constExtType != 2)
+                    // TODO: Can't currently represent
+                    return 0;
+                if (!Globals.signbit_negative(multConst, 8))
+                    return 0;
                 // Adding 2^64 to a sign-extended 64-bit value with its sign set, causes all the
                 // set extension bits to be cancelled out, converting it into a
                 // zero-extended 64-bit value.
-                constExtType = 1;       // Set extension of constant to INT_ZEXT
+                // Set extension of constant to INT_ZEXT
+                constExtType = 1;
             }
             Varnode x = extop.getIn(0);
 
@@ -115,7 +125,7 @@ namespace Sla.DECCORE
                 data.opSetOpcode(newshiftop, shiftopc);
                 Varnode newshiftvn = data.newUniqueOut(extvn.getSize(), newshiftop);
                 data.opSetInput(newshiftop, newmultvn, 0);
-                data.opSetInput(newshiftop, data.newConstant(4, n), 1);
+                data.opSetInput(newshiftop, data.newConstant(4, (ulong)n), 1);
                 data.opInsertBefore(newshiftop, op);
 
                 data.opSetOpcode(addop, OpCode.CPUI_SUBPIECE);

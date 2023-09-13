@@ -257,7 +257,7 @@ namespace Sla.DECCORE
                 TransformVar newVar = res[i];
                 int byteSize = description.getSize(i);
                 if (vn.isConstant())
-                    newVar.initialize(TransformVar.ReplaceType.constant, vn, byteSize * 8, byteSize, (vn.getOffset() >> bitpos) & Globals.calc_mask(byteSize));
+                    newVar.initialize(TransformVar.ReplaceType.constant, vn, byteSize * 8, byteSize, (vn.getOffset() >> bitpos) & Globals.calc_mask((uint)byteSize));
                 else {
                     TransformVar.ReplaceType type = preserveAddress(vn, byteSize * 8, bitpos)
                         ? TransformVar.ReplaceType.piece
@@ -288,7 +288,7 @@ namespace Sla.DECCORE
                 int byteSize = description.getSize(startLane + i);
                 TransformVar newVar = res[i];
                 if (vn.isConstant())
-                    newVar.initialize(TransformVar.ReplaceType.constant, vn, byteSize * 8, byteSize, (vn.getOffset() >> bitpos) & Globals.calc_mask(byteSize));
+                    newVar.initialize(TransformVar.ReplaceType.constant, vn, byteSize * 8, byteSize, (vn.getOffset() >> bitpos) & Globals.calc_mask((uint)byteSize));
                 else {
                     TransformVar.ReplaceType type = preserveAddress(vn, byteSize * 8, bitpos)
                         ? TransformVar.ReplaceType.piece

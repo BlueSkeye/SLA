@@ -175,9 +175,9 @@ namespace Sla.SLEIGH
         public void restoreXml(Element el, SleighBase trans)
         {
             uint size = uint.Parse(el.getAttributeValue("scopesize"));
-            table.resize(size, (SymbolScope)null);
+            table.resize((int)size, (SymbolScope)null);
             size = uint.Parse(el.getAttributeValue("symbolsize"));
-            symbollist.resize(size, (SleighSymbol)null);
+            symbollist.resize((int)size, (SleighSymbol)null);
             IEnumerator<Element> iter = el.getChildren().GetEnumerator();
             for (int i = 0; i < table.size(); ++i) {
                 if (!iter.MoveNext()) throw new ApplicationException();

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 using TrackedSet = System.Collections.Generic.List<Sla.CORE.TrackedContext>;
 
 namespace Sla.CORE
@@ -272,7 +266,7 @@ namespace Sla.CORE
         /// \param begad is the starting address of the given range
         /// \param endad is the ending address of the given range
         /// \param value is the new value to set
-        protected void setVariableRegion(ref string nm, ref Address begad, ref Address endad,
+        internal void setVariableRegion(ref string nm, ref Address begad, ref Address endad,
             uint value)
         {
             ContextBitRange bitrange = getVariable(nm);

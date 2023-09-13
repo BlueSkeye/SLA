@@ -18,8 +18,8 @@ namespace Sla.EXTRA
         {
             string filename;
 
-            s >> ws;
-            if (s.eof())
+            s.ReadSpaces();
+            if (s.EofReached())
                 throw new IfaceParseError("filename parameter required for source");
 
             s >> filename;

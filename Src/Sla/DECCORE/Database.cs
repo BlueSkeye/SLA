@@ -140,11 +140,10 @@ namespace Sla.DECCORE
         /// \param parent is the parent Scope or NULL
         public void attachScope(Scope newscope, Scope parent)
         {
-            if (parent == (Scope)null)
-            {
+            if (parent == (Scope)null) {
                 if (globalscope != (Scope)null)
                     throw new CORE.LowlevelError("Multiple global scopes");
-                if (newscope.name.size() != 0)
+                if (newscope.name.Length != 0)
                     throw new CORE.LowlevelError("Global scope does not have empty name");
                 globalscope = newscope;
                 idmap[globalscope.uniqueId] = globalscope;
@@ -497,7 +496,7 @@ namespace Sla.DECCORE
                     idByNameHash = decoder.readBool();
             }
             while(true) {
-                ElementId subId = decoder.peekElement();
+                uint subId = decoder.peekElement();
                 if (subId != ElementId.ELEM_PROPERTY_CHANGEPOINT) break;
                 decoder.openElement();
                 Varnode.varnode_flags val =

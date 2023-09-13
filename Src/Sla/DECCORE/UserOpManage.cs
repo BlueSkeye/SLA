@@ -98,8 +98,8 @@ namespace Sla.DECCORE
         {
             List<string> basicops = new List<string>();
             glb.translate.getUserOpNames(basicops);
-            for (uint i = 0; i < basicops.size(); ++i) {
-                if (basicops[i].size() == 0) continue;
+            for (int i = 0; i < basicops.size(); ++i) {
+                if (basicops[i].Length == 0) continue;
                 UserPcodeOp userop = new UnspecializedPcodeOp(glb, basicops[i], i);
                 registerOp(userop);
             }

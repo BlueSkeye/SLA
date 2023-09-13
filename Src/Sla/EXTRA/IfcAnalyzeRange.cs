@@ -23,7 +23,7 @@ namespace Sla.EXTRA
 
             bool useFullWidener;
             string token;
-            s >> ws >> token;
+            s.ReadSpaces() >> token;
             if (token == "full")
                 useFullWidener = true;
             else if (token == "partial") {

@@ -38,7 +38,7 @@ namespace Sla.EXTRA
         /// \param status is the command line interface to register commands with
         public static void registerAllCommands(IfaceStatus status)
         {
-            for (uint i = 0; i < thelist.size(); ++i)
+            for (int i = 0; i < thelist.size(); ++i)
                 thelist[i].registerCommands(status);
         }
     }

@@ -78,11 +78,11 @@ namespace Sla.DECCORE
             }
         }
 
-        internal class Instanciator : IRangemapSubsortTypeInstantiator<NullSubsort>
+        internal class SubsorttypeInstanciator : IRangemapSubsortTypeInstantiator<NullSubsort>
         {
-            internal static Instanciator Instance = new Instanciator();
+            internal static SubsorttypeInstanciator Instance = new SubsorttypeInstanciator();
 
-            private Instanciator()
+            private SubsorttypeInstanciator()
             {
             }
 

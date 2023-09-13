@@ -12,8 +12,10 @@ namespace Sla.DECCORE
         /// \param a is the first Comment to compare
         /// \param b is the second
         /// \return \b true is the first is ordered before the second
-        public int CompareTo(Comment a, Comment b)
+        public int Compare(Comment? a, Comment? b)
         {
+            if (a == null) throw new ArgumentNullException(nameof(a));
+            if (b == null) throw new ArgumentNullException(nameof(b));
             if (a.getFuncAddr() != b.getFuncAddr()) {
                 return a.getFuncAddr().CompareTo(b.getFuncAddr());
             }

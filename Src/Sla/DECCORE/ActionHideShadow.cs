@@ -11,7 +11,7 @@ namespace Sla.DECCORE
     internal class ActionHideShadow : Action
     {
         public ActionHideShadow(string g)
-            : base(rule_onceperfunc,"hideshadow", g)
+            : base(ruleflags.rule_onceperfunc,"hideshadow", g)
         {
         }
 
@@ -22,21 +22,18 @@ namespace Sla.DECCORE
 
         public override int apply(Funcdata data)
         {
-            VarnodeDefSet::const_iterator iter, enditer;
-            HighVariable* high;
-
-            enditer = data.endDef(Varnode.varnode_flags.written);
-            for (iter = data.beginDef(); iter != enditer; ++iter)
-            {
-                high = (*iter).getHigh();
+            IEnumerator<Varnode> enditer = data.endDef(Varnode.varnode_flags.written);
+            IEnumerator<Varnode> iter = data.beginDef();
+            while (iter.MoveNext()) {
+                HighVariable high = iter.Current.getHigh();
                 if (high.isMark()) continue;
                 if (data.getMerge().hideShadows(high))
                     count += 1;
                 high.setMark();
             }
-            for (iter = data.beginDef(); iter != enditer; ++iter)
-            {
-                high = (*iter).getHigh();
+            iter = data.beginDef();
+            while (iter.MoveNext()) {
+                high = iter.Current.getHigh();
                 high.clearMark();
             }
             return 0;

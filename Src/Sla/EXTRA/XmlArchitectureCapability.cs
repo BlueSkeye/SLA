@@ -32,7 +32,7 @@ namespace Sla.EXTRA
             try { s = new StreamReader(File.OpenRead(filename)); }
             catch { return false; }
             int val1, val2, val3;
-            s >> ws;
+            s.ReadSpaces();
             val1 = s.get();
             val2 = s.get();
             val3 = s.get();

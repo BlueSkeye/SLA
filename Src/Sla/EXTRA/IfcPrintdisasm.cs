@@ -23,19 +23,19 @@ namespace Sla.EXTRA
             int size;
             // TODO add partial listings
 
-            s >> ws;
-            if (s.eof()) {
+            s.ReadSpaces();
+            if (s.EofReached()) {
                 if (dcp.fd == (Funcdata)null)
                     throw new IfaceExecutionError("No function selected");
-                status.fileoptr << "Assembly listing for " << dcp.fd.getName() << endl;
+                status.fileoptr.WriteLine("Assembly listing for {dcp.fd.getName()}");
                 addr = dcp.fd.getAddress();
                 size = dcp.fd.getSize();
                 glb = dcp.fd.getArch();
             }
             else {
-                addr = parse_machaddr(s, size, *dcp.conf.types); // Read beginning address
-                s >> ws;
-                Address offset2 = parse_machaddr(s, size, *dcp.conf.types);
+                addr = Grammar.parse_machaddr(s, out size, dcp.conf.types); // Read beginning address
+                s.ReadSpaces();
+                Address offset2 = Grammar.parse_machaddr(s, out size, dcp.conf.types);
                 size = (int)(offset2.getOffset() - addr.getOffset());
                 glb = dcp.conf;
             }

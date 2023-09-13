@@ -1,4 +1,5 @@
 ﻿using Sla.CORE;
+using Sla.DECCORE;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -18,23 +19,24 @@ namespace Sla.EXTRA
         public override void execute(TextReader s)
         {
             int size;
-            byte* buffer;
-            Address offset = parse_machaddr(s, size, *dcp.conf.types);
-            string filename;
+            byte[] buffer;
+            Address offset = Grammar.parse_machaddr(s, out size, dcp.conf.types);
 
-            s >> ws;
-            if (s.eof())
+            s.ReadSpaces();
+            if (s.EofReached())
                 throw new IfaceParseError("Missing file name for binary dump");
-            s >> filename;
-            ofstream os;
-            os.open(filename.c_str());
-            if (!os)
-                throw new IfaceExecutionError("Unable to open file " + filename);
-
-            buffer = dcp.conf.loader.load(size, offset);
-            os.write((char*)buffer,size);
-            delete[] buffer;
-            os.close();
+            string filename = s.ReadString();
+            TextWriter os;
+            try { os = new StreamWriter(File.OpenWrite(filename)); }
+            catch {
+                throw new IfaceExecutionError($"Unable to open file {filename}");
+            }
+            try {
+                buffer = dcp.conf.loader.load(size, offset);
+                os.Write(buffer, size);
+                // delete[] buffer;
+            }
+            finally { os.Close(); }
         }
     }
 }

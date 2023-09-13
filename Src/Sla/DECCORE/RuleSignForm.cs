@@ -43,7 +43,7 @@ namespace Sla.DECCORE
 
             data.opSetInput(op, a, 0);
             int n = 8 * a.getSize() - 1;
-            data.opSetInput(op, data.newConstant(4, n), 1);
+            data.opSetInput(op, data.newConstant(4, (ulong)n), 1);
             data.opSetOpcode(op, OpCode.CPUI_INT_SRIGHT);
             return 1;
         }

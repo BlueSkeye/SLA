@@ -1,11 +1,5 @@
 ﻿using Sla.CORE;
 using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.EXTRA
 {
@@ -28,10 +22,13 @@ namespace Sla.EXTRA
                 throw new IfaceExecutionError("No function selected");
 
             Address pc;
-            Address loc = new Address(parse_varnode(s, size, pc, uq,* dcp.conf.types)); // Get specified varnode
+            // Get specified varnode
+            Address loc = Grammar.parse_varnode(s, out size, out pc, out uq, dcp.conf.types);
 
-            s >> ws >> token;       // Get the new name of the varnode
-            if (token.size() == 0)
+            s.ReadSpaces();
+            // Get the new name of the varnode
+            s >> token;
+            if (token.Length == 0)
                 throw new IfaceParseError("Must specify name");
 
             Datatype ct = dcp.conf.types.getBase(size, type_metatype.TYPE_UNKNOWN);
@@ -44,8 +41,8 @@ namespace Sla.EXTRA
             Symbol sym = scope.addSymbol(token, ct, loc, pc).getSymbol();
             scope.setAttribute(sym, Varnode.varnode_flags.namelock);
 
-            status.fileoptr << "Successfully added " << token;
-            status.fileoptr << " to scope " << scope.getFullName() << endl;
+            status.fileoptr.WriteLine(
+                $"Successfully added {token} to scope {scope.getFullName()}");
         }
     }
 }

@@ -351,7 +351,7 @@ namespace Sla.SLEIGH
                 if (element.getName() == "pair") {
                     Constructor ct;
                     uint id = uint.Parse(element.getAttributeValue("id"));
-                    ct = sub.getConstructor(id);
+                    ct = sub.getConstructor((int)id);
                     DisjointPattern pat = DisjointPattern.restoreDisjoint(element.getChildren().First());
                     //This increments num      addConstructorPair(pat,ct);
                     list.Add(new Tuple<DisjointPattern, Constructor>(pat, ct));

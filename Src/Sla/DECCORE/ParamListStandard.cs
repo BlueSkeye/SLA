@@ -874,7 +874,7 @@ namespace Sla.DECCORE
                 }
             }
             for (; ; ) {
-                ElementId subId = decoder.peekElement();
+                uint subId = decoder.peekElement();
                 if (subId == 0) break;
                 if (subId == ElementId.ELEM_PENTRY) {
                     parsePentry(decoder, effectlist, numgroup, normalstack, autokilledbycall, splitFloat, false);

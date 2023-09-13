@@ -1,18 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
+﻿
 namespace Sla.DECCORE
 {
     /// \brief Set the (already) recovered output data-type as a formal part of the prototype
     internal class ActionOutputPrototype : Action
     {
         public ActionOutputPrototype(string g)
-            : base(rule_onceperfunc,"outputprototype", g)
+            : base(ruleflags.rule_onceperfunc,"outputprototype", g)
         {
         }
 
@@ -23,13 +16,11 @@ namespace Sla.DECCORE
 
         public override int apply(Funcdata data)
         {
-            ProtoParameter* outparam = data.getFuncProto().getOutput();
-            if ((!outparam.isTypeLocked()) || outparam.isSizeTypeLocked())
-            {
-                PcodeOp op = data.getFirstReturnOp();
-                List<Varnode> vnlist;
-                if (op != (PcodeOp)null)
-                {
+            ProtoParameter outparam = data.getFuncProto().getOutput();
+            if ((!outparam.isTypeLocked()) || outparam.isSizeTypeLocked()) {
+                PcodeOp? op = data.getFirstReturnOp();
+                List<Varnode> vnlist = new List<Varnode>();
+                if (op != (PcodeOp)null) {
                     for (int i = 1; i < op.numInput(); ++i)
                         vnlist.Add(op.getIn(i));
                 }

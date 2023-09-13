@@ -42,10 +42,11 @@ namespace Sla.EXTRA
         ///
         /// Given a set of tokens partially describing a command, provide the most narrow
         /// range of IfaceCommand objects that could be referred to.
+        /// REPLACED first, last -> commands + commandIndex
         /// \param first will hold an iterator to the first command in the range
         /// \param last will hold an iterator (one after) the last command in the range
         /// \param input is the list of command tokens to match on
-        private void restrictCom(IEnumerator<IfaceCommand> first, IEnumerator<IfaceCommand> last,
+        private void restrictCom(List<IfaceCommand> commands, ref int commandIndex,
             List<string> input)
         {
             IEnumerator<IfaceCommand> newfirst, newlast;
@@ -54,9 +55,11 @@ namespace Sla.EXTRA
             dummy.addWords(input);
             newfirst = lower_bound(first, last, dummy, compare_ifacecommand);
             dummy.removeWord();
-            string temp = input.GetLastItem(); // Make copy of last word
-            temp[temp.Length - 1] += 1; // temp will now be greater than any word
-                                        // whose first letters match input.GetLastItem()
+            // Make copy of last word
+            string temp = input.GetLastItem();
+            // temp will now be greater than any word
+            // whose first letters match input.GetLastItem()
+            temp[temp.Length - 1] += 1;
             dummy.addWord(temp);
             newlast = upper_bound(first, last, dummy, compare_ifacecommand);
             first = newfirst;
@@ -65,7 +68,7 @@ namespace Sla.EXTRA
 
         /// \brief Read the next command line
         /// \param line is filled in with the next command to execute
-        protected abstract void readLine(string line);
+        protected abstract void readLine(out string line);
 
         /// Store the given command line into \e history
         /// The line is saved in a circular history buffer
@@ -96,47 +99,62 @@ namespace Sla.EXTRA
         /// and passed back.
         /// \param expand will hold the list of expanded tokens
         /// \param s is the input stream tokens are read from
+        /// REPLACED first, last -> commands
         /// \param first will hold the beginning of the matching range of commands
         /// \param last will hold the end of the matching range of commands
         /// \return the number of matching commands
-        protected int expandCom(List<string> expand, TextReader s, IEnumerator<IfaceCommand> first,
-            IEnumerator<IfaceCommand> last)
+        protected int expandCom(List<string> expand, TextReader s,
+            List<IfaceCommand> commands)
         {
-            int pos;           // Which word are we currently expanding
-            string tok;
-            bool res;
-
-            expand.Clear();     // Make sure command list is empty
-            res = true;
-            if (first == last)      // If subrange is empty, return 0
+            // Make sure command list is empty
+            expand.Clear();
+            bool res = true;
+            if (0 == commands.Count)
+                // If subrange is empty, return 0
                 return 0;
-            for (pos = 0; ; ++pos) {
-                s >> ws;            // Skip whitespace
-                if (first == (last - 1)) {
+            int commandIndex = 0;
+            // Which word are we currently expanding
+            for (int pos = 0; ; ++pos) {
+                // Skip whitespace
+                s.ReadSpaces();
+                if (commandIndex == (commands.Count - 1)) {
                     // If subrange is unique
-                    if (s.eof())        // If no more input
-                        for (; pos < first.Current.numWords(); ++pos) // Automatically provide missing words
-                            expand.Add((*first).getCommandWord(pos));
-                    if (first.Current.numWords() == pos) // If all words are matched
-                        return 1;       // Finished
+                    IfaceCommand currentCommand = commands[commandIndex];
+                    if (s.EofReached()) {
+                        // If no more input
+                        for (; pos < currentCommand.numWords(); ++pos)
+                            // Automatically provide missing words
+                            expand.Add(currentCommand.getCommandWord(pos));
+                    }
+                    if (currentCommand.numWords() == pos)
+                        // If all words are matched
+                        // Finished
+                        return 1;
                 }
-                if (!res) {           // Last word was ambiguous
-                    if (!s.eof())
-                        return (last - first);
-                    return (first - last);  // Negative number to indicate last word incomplete
+                if (!res) {
+                    // Last word was ambiguous
+                    return (!s.EofReached())
+                        ? (commands.Count - commandIndex)
+                        // Negative number to indicate last word incomplete
+                        : (commandIndex - commands.Count);
                 }
-                if (s.eof()) {       // if no other words
+                if (s.EofReached()) {
+                    // if no other words
                     if (expand.empty())
-                        return (first - last);
-                    return (last - first);  // return number of matches
+                        return (commandIndex - commands.Count);
+                    // return number of matches
+                    return (commands.Count - commandIndex);
                 }
-                s >> tok;           // Get next token
+                // Get next token
+                string tok = s.ReadString();
                 expand.Add(tok);
-                restrictCom(first, last, expand);
-                if (first == last)      // If subrange is empty, return 0
+                restrictCom(commands, ref commandIndex, expand);
+                // If subrange is empty, return 0
+                if (commands.Count <= commandIndex)
                     return 0;
-                res = maxmatch(tok, first.Current.getCommandWord(pos), (*(last - 1)).getCommandWord(pos));
-                expand.GetLastItem() = tok;
+                res = maxmatch(tok, commands[commandIndex].getCommandWord(pos),
+                    commands.Last().getCommandWord(pos));
+                expand.SetLastItem(tok);
             }
         }
 
@@ -316,12 +334,12 @@ namespace Sla.EXTRA
             saveHistory(line);
 
             List<string> fullcommand = new List<string>();
-            IEnumerator<IfaceCommand> first = comlist.begin();
+            IEnumerator<IfaceCommand> first = comlist.GetEnumerator();
             IEnumerator<IfaceCommand> last = comlist.end();
             TextReader @is = new StringReader(line);
-            int match;
 
-            match = expandCom(fullcommand, @is, first, last); // Try to expand the command
+            // Try to expand the command
+            int match = expandCom(fullcommand, @is, first, last);
             if (match == 0) {
                 optr.WriteLine("ERROR: Invalid command");
                 return false;

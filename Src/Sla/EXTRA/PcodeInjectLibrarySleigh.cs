@@ -143,7 +143,8 @@ namespace Sla.EXTRA
                 uint subId = decoder.openElement();
                 if (subId != ElementId.ELEM_INJECT) break;
                 string name = decoder.readString(AttributeId.ATTRIB_NAME);
-                int type = (int)decoder.readSignedInteger(AttributeId.ATTRIB_TYPE);
+                InjectPayload.InjectionType type =
+                    (InjectPayload.InjectionType)decoder.readSignedInteger(AttributeId.ATTRIB_TYPE);
                 int id = getPayloadId(type, name);
                 InjectPayloadDynamic? payload = getPayload(id) as InjectPayloadDynamic;
                 if (payload == (InjectPayloadDynamic)null) {

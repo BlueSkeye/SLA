@@ -1,11 +1,4 @@
 ﻿using Sla.CORE;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Sla.DECCORE
 {
@@ -18,10 +11,11 @@ namespace Sla.DECCORE
     /// filled in by ActionStackPtrFlow.
     internal class ActionExtraPopSetup : Action
     {
-        private AddrSpace stackspace;      ///< The stack space to analyze
+        // The stack space to analyze
+        private AddrSpace stackspace;
         
         public ActionExtraPopSetup(string g,AddrSpace ss)
-            : base(rule_onceperfunc,"extrapopsetup", g)
+            : base(ruleflags.rule_onceperfunc,"extrapopsetup", g)
         {
             stackspace = ss;
         }
@@ -36,10 +30,12 @@ namespace Sla.DECCORE
             FuncCallSpecs fc;
             PcodeOp op;
 
-            if (stackspace == (AddrSpace)null) return 0; // No stack to speak of
+            if (stackspace == (AddrSpace)null)
+                // No stack to speak of
+                return 0;
             VarnodeData point = stackspace.getSpacebase(0);
             Address sb_addr = new Address(point.space, point.offset);
-            int sb_size = point.size;
+            int sb_size = (int)point.size;
 
             for (int i = 0; i < data.numCalls(); ++i) {
                 fc = data.getCallSpecs(i);
@@ -47,15 +43,15 @@ namespace Sla.DECCORE
                 op = data.newOp(2, fc.getOp().getAddr());
                 data.newVarnodeOut(sb_size, sb_addr, op);
                 data.opSetInput(op, data.newVarnode(sb_size, sb_addr), 0);
-                if (fc.getExtraPop() != ProtoModel.extrapop_unknown)
-                { // We know exactly how stack pointer is changed
+                if (fc.getExtraPop() != ProtoModel.extrapop_unknown) {
+                    // We know exactly how stack pointer is changed
                     fc.setEffectiveExtraPop(fc.getExtraPop());
                     data.opSetOpcode(op, OpCode.CPUI_INT_ADD);
-                    data.opSetInput(op, data.newConstant(sb_size, fc.getExtraPop()), 1);
+                    data.opSetInput(op, data.newConstant(sb_size, (ulong)fc.getExtraPop()), 1);
                     data.opInsertAfter(op, fc.getOp());
                 }
-                else
-                {           // We don't know exactly, so we create INDIRECT
+                else {
+                    // We don't know exactly, so we create INDIRECT
                     data.opSetOpcode(op, OpCode.CPUI_INDIRECT);
                     data.opSetInput(op, data.newVarnodeIop(fc.getOp()), 1);
                     data.opInsertBefore(op, fc.getOp());

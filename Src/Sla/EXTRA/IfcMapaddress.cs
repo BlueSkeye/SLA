@@ -22,31 +22,29 @@ namespace Sla.EXTRA
         /// Otherwise the symbol is created relative to the global scope.
         public override void execute(TextReader s)
         {
-            Datatype* ct;
+            Datatype ct;
             string name;
             int size;
-            Address addr = parse_machaddr(s, size, *dcp.conf.types); // Read required address;
+            Address addr = Grammar.parse_machaddr(s, out size, dcp.conf.types); // Read required address;
 
-            s >> ws;
+            s.ReadSpaces();
             ct = parse_type(s, name, dcp.conf); // Parse the required type
-            if (dcp.fd != (Funcdata)null)
-            {
-                Symbol* sym;
-                sym = dcp.fd.getScopeLocal().addSymbol(name, ct, addr, new Address()).getSymbol();
+            if (dcp.fd != (Funcdata)null) {
+                Symbol sym = dcp.fd.getScopeLocal().addSymbol(name, ct, addr, new Address()).getSymbol();
                 sym.getScope().setAttribute(sym, Varnode.varnode_flags.namelock | Varnode.varnode_flags.typelock);
             }
-            else
-            {
-                Symbol* sym;
-                uint flags = Varnode.varnode_flags.namelock | Varnode.varnode_flags.typelock;
+            else {
+                Symbol sym;
+                Varnode.varnode_flags flags =
+                    Varnode.varnode_flags.namelock | Varnode.varnode_flags.typelock;
                 flags |= dcp.conf.symboltab.getProperty(addr); // Inherit existing properties
                 string basename;
-                Scope* scope = dcp.conf.symboltab.findCreateScopeFromSymbolName(name, "::", basename, (Scope)null);
+                Scope scope = dcp.conf.symboltab.findCreateScopeFromSymbolName(name, "::", basename, (Scope)null);
                 sym = scope.addSymbol(basename, ct, addr, new Address()).getSymbol();
                 sym.getScope().setAttribute(sym, flags);
-                if (scope.getParent() != (Scope)null)
-                {       // If this is a global namespace scope
-                    SymbolEntry* e = sym.getFirstWholeMap();       // Adjust range
+                if (scope.getParent() != (Scope)null) {
+                    // If this is a global namespace scope
+                    SymbolEntry e = sym.getFirstWholeMap();       // Adjust range
                     dcp.conf.symboltab.addRange(scope, e.getAddr().getSpace(), e.getFirst(), e.getLast());
                 }
             }

@@ -589,17 +589,17 @@ namespace Sla.DECCORE
         /// \param a is the first LoopBody to compare
         /// \param b is the second LoopBody to compare
         /// \return \b true if the first LoopBody comes before the second
-        public static bool compare_ends(LoopBody a, LoopBody b)
+        public static int compare_ends(LoopBody a, LoopBody b)
         {
             int aindex = a.head.getIndex();
             int bindex = b.head.getIndex();
             if (aindex != bindex) {
-                return (aindex < bindex);
+                return aindex.CompareTo(bindex);
             }
             // Only compare the first tail
             aindex = a.tails[0].getIndex();
             bindex = b.tails[0].getIndex();
-            return (aindex < bindex);
+            return aindex.CompareTo(bindex);
         }
 
         /// Compare just the \b head

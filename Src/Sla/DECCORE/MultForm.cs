@@ -45,7 +45,7 @@ namespace Sla.DECCORE
             if (op.code() == OpCode.CPUI_INT_AND)
             {
                 if (!op.getIn(1).isConstant()) return false;
-                if (op.getIn(1).getOffset() != Globals.calc_mask(small.getSize())) return false;
+                if (op.getIn(1).getOffset() != Globals.calc_mask((uint)small.getSize())) return false;
                 Varnode whole = op.getIn(0);
                 if (!small.isWritten()) return false;
                 PcodeOp sub = small.getDef();

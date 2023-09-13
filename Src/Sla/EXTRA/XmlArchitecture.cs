@@ -1,10 +1,4 @@
 ﻿using Sla.CORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace Sla.EXTRA
 {
@@ -15,10 +9,10 @@ namespace Sla.EXTRA
         
         protected override void buildLoader(DocumentStorage store)
         {
-            collectSpecFiles(*errorstream);
-            Element* el = store.getTag("binaryimage");
+            collectSpecFiles(errorstream);
+            Element? el = store.getTag("binaryimage");
             if (el == (Element)null) {
-                Document* doc = store.openDocument(getFilename());
+                Document doc = store.openDocument(getFilename());
                 store.registerTag(doc.getRoot());
                 el = store.getTag("binaryimage");
             }
@@ -27,15 +21,16 @@ namespace Sla.EXTRA
             loader = new LoadImageXml(getFilename(), el);
         }
 
-        // virtual void resolveArchitecture(void);   		///< Inherit SleighArchitecture's version
+        // Inherit SleighArchitecture's version
+        // virtual void resolveArchitecture(void);
 
         /// Read in image information (which uses translator)
         protected override void postSpecFile()
         {
-            Architecture::postSpecFile();
-            ((LoadImageXml*)loader).open(translate);
+            Architecture.postSpecFile();
+            ((LoadImageXml)loader).open(translate);
             if (adjustvma != 0)
-                loader.adjustVma(adjustvma);
+                loader.adjustVma((ulong)adjustvma);
         }
 
         /// Prepend extra stuff to specify binary file and spec
@@ -44,59 +39,46 @@ namespace Sla.EXTRA
         {
             encoder.openElement(ElementId.ELEM_XML_SAVEFILE);
             encodeHeader(encoder);
-            encoder.writeUnsignedInteger(AttributeId.ATTRIB_ADJUSTVMA, adjustvma);
-            ((LoadImageXml*)loader).encode(encoder); // Save the LoadImage
+            encoder.writeUnsignedInteger(AttributeId.ATTRIB_ADJUSTVMA, (ulong)adjustvma);
+            ((LoadImageXml)loader).encode(encoder); // Save the LoadImage
             types.encodeCoreTypes(encoder);
-            SleighArchitecture::encode(encoder); // Save the rest of the state
+            // Save the rest of the state
+            base.encode(encoder);
             encoder.closeElement(ElementId.ELEM_XML_SAVEFILE);
         }
 
         public override void restoreXml(DocumentStorage store)
         {
-            Element el = store.getTag("xml_savefile");
+            Element? el = store.getTag("xml_savefile");
             if (el == (Element)null)
                 throw new CORE.LowlevelError("Could not find xml_savefile tag");
 
             restoreXmlHeader(el);
-            {
-                istringstream s = new istringstream(el.getAttributeValue("adjustvma"));
-                s.unsetf(ios::dec | ios::hex | ios::oct);
-                s >> adjustvma;
-            }
-            List list = el.getChildren();
-            List::const_iterator iter;
+            TextReader s = new StringReader(el.getAttributeValue("adjustvma"));
+            // s.unsetf(ios::dec | ios::hex | ios::oct);
+            adjustvma = long.Parse(s.ReadString());
+            IEnumerator<Element> iter = el.getChildren().GetEnumerator();
 
-            iter = list.begin();
-            if (iter != list.end())
-            {
-                if ((*iter).getName() == "binaryimage")
-                {
-                    store.registerTag(*iter);
-                    ++iter;
+            if (iter.MoveNext()) {
+                if (iter.Current.getName() == "binaryimage") {
+                    store.registerTag(iter.Current);
                 }
             }
-            if (iter != list.end())
-            {
-                if ((*iter).getName() == "specextensions")
-                {
-                    store.registerTag(*iter);
-                    ++iter;
+            if (iter.MoveNext()) {
+                if (iter.Current.getName() == "specextensions") {
+                    store.registerTag(iter.Current);
                 }
             }
-            if (iter != list.end())
-            {
-                if ((*iter).getName() == "coretypes")
-                {
-                    store.registerTag(*iter);
-                    ++iter;
+            if (iter.MoveNext()) {
+                if (iter.Current.getName() == "coretypes") {
+                    store.registerTag(iter.Current);
                 }
             }
-            init(store);            // Load the image and configure
-
-            if (iter != list.end())
-            {
-                store.registerTag(*iter);
-                SleighArchitecture::restoreXml(store);
+            // Load the image and configure
+            init(store);
+            if (iter.MoveNext()) {
+                store.registerTag(iter.Current);
+                base.restoreXml(store);
             }
         }
 

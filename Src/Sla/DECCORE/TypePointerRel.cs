@@ -122,7 +122,7 @@ namespace Sla.DECCORE
             ulong byteOff = AddrSpace.addressToByte(addrOff, wordsize);
             if (ptrto.getMetatype() == type_metatype.TYPE_STRUCT && byteOff < ptrto.getSize())
                 return false;
-            byteOff = (byteOff + offset) & Globals.calc_mask(size);
+            byteOff = (byteOff + offset) & Globals.calc_mask((uint)size);
             return (byteOff < parent.getSize());
         }
 

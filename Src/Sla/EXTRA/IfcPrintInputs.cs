@@ -25,10 +25,9 @@ namespace Sla.EXTRA
             List<Varnode> vnlist = new List<Varnode>();
             bool res = false;
             vnlist.Add(vn);
-            uint proc = 0;
+            int proc = 0;
             while (proc < vnlist.size()) {
-                Varnode tmpvn = vnlist[proc];
-                proc += 1;
+                Varnode tmpvn = vnlist[proc++];
                 IEnumerator<PcodeOp> iter = tmpvn.beginDescend();
                 while (iter.MoveNext()) {
                     PcodeOp op = iter.Current;
@@ -65,7 +64,7 @@ namespace Sla.EXTRA
             List<Varnode> vnlist = new List<Varnode>();
             int res = 0;
             vnlist.Add(vn);
-            uint proc = 0;
+            int proc = 0;
             while (proc < vnlist.size()) {
                 Varnode tmpvn = vnlist[proc];
                 proc += 1;

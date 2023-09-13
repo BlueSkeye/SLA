@@ -825,7 +825,7 @@ namespace Sla.SLACOMP
             bool seennonemptyexport = false;
 
             for (int i = 0; i < numconstruct; ++i) {
-                ct = sym.getConstructor((uint)i);
+                ct = sym.getConstructor(i);
                 if (!checkConstructorSection(ct, ct.getTempl()))
                     testresult = false;
                 int numsection = ct.getNumSections();
@@ -938,16 +938,19 @@ namespace Sla.SLACOMP
                 SubtableSymbol cur = path.GetLastItem();
                 int ctind = state.GetLastItem();
                 if (ctind >= cur.getNumConstructors()) {
-                    path.RemoveLastItem();        // Table is fully traversed
+                    // Table is fully traversed
+                    path.RemoveLastItem();
                     state.RemoveLastItem();
                     ctstate.RemoveLastItem();
-                    postorder.Add(cur);   // Post the traversed table
+                    // Post the traversed table
+                    postorder.Add(cur);
                 }
                 else {
-                    Constructor ct = cur.getConstructor((uint)ctind);
+                    Constructor ct = cur.getConstructor(ctind);
                     int oper = ctstate.GetLastItem();
                     if (oper >= ct.getNumOperands()) {
-                        state.SetLastItem(ctind + 1); // Constructor fully traversed
+                        // Constructor fully traversed
+                        state.SetLastItem(ctind + 1);
                         ctstate.SetLastItem(0);
                     }
                     else {
@@ -1385,7 +1388,7 @@ namespace Sla.SLACOMP
                 int numconstruct = sym.getNumConstructors();
                 Constructor ct;
                 for (int j = 0; j < numconstruct; ++j) {
-                    ct = sym.getConstructor((uint)j);
+                    ct = sym.getConstructor(j);
 
                     int numsections = ct.getNumSections();
                     for (int k = -1; k < numsections; ++k) {
@@ -1409,7 +1412,7 @@ namespace Sla.SLACOMP
                 SubtableSymbol sym = postorder[i];
                 int numconstruct = sym.getNumConstructors();
                 for (int j = 0; j < numconstruct; ++j) {
-                    Constructor ct = sym.getConstructor((uint)j);
+                    Constructor ct = sym.getConstructor(j);
 
                     int numsections = ct.getNumSections();
                     for (int k = -1; k < numsections; ++k) {
@@ -1429,7 +1432,7 @@ namespace Sla.SLACOMP
                 SubtableSymbol sym = postorder[i];
                 int numconstruct = sym.getNumConstructors();
                 for (int j = 0; j < numconstruct; ++j) {
-                    Constructor ct = sym.getConstructor((uint)j);
+                    Constructor ct = sym.getConstructor(j);
                     optimize(ct);
                 }
             }

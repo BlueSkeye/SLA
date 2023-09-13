@@ -1167,8 +1167,8 @@ namespace Sla.SLACOMP
         //    void check_to_endofline(istream &s)
 
         //    { // Make sure there is nothing to the end of the line
-        //        s >> ws;
-        //        if (!s.eof())
+        //        s.ReadSpaces();
+        //        if (!s.EofReached())
         //            if (s.peek() != '#')
         //                preproc_error("Extra characters in preprocessor directive");
         //    }
@@ -1176,9 +1176,9 @@ namespace Sla.SLACOMP
         //    string read_identifier(istream &s)
 
         //    {  // Read a proper identifier from the stream
-        //        s >> ws;   // Skip any whitespace
+        //        s.ReadSpaces();   // Skip any whitespace
         //        string res;
-        //        while (!s.eof())
+        //        while (!s.EofReached())
         //        {
         //            char tok = s.peek();
         //            if (isalnum(tok) || (tok == '_'))
@@ -1197,7 +1197,7 @@ namespace Sla.SLACOMP
         //    {  // Grab string surrounded by double quotes from stream or call preprocess_error
         //        int val;
 
-        //        s >> ws;   // Skip any whitespace
+        //        s.ReadSpaces();   // Skip any whitespace
         //        val = s.get();
         //        if (val != '\"')
         //            preproc_error("Expecting double quoted string");
@@ -1220,12 +1220,12 @@ namespace Sla.SLACOMP
         //        char tok = ' ';
         //        string macroname;
 
-        //        s >> ws >> tok;
+        //        s.ReadSpaces() >> tok;
         //        if (tok != '(')
         //            preproc_error("Badly formed \"defined\" operator");
         //        macroname = read_identifier(s);
         //        int res = Parsing.slgh.getPreprocValue(macroname, macroname) ? 1 : 0;
-        //        s >> ws >> tok;
+        //        s.ReadSpaces() >> tok;
         //        if (tok != ')')
         //            preproc_error("Badly formed \"defined\" operator");
         //        return res;
@@ -1235,12 +1235,12 @@ namespace Sla.SLACOMP
 
         //    {               // We have seen an if or elif
         //                    // return 1 if condition is true or else 0
-        //        s >> ws;
+        //        s.ReadSpaces();
         //        if (s.peek() == '(')
         //        {       // Parenthetical expression spawns recursion
         //            int val = s.get();
         //            int res = preprocess_if(s);
-        //            s >> ws;
+        //            s.ReadSpaces();
         //            val = s.get();
         //            if (val != ')')
         //                preproc_error("Unbalanced parentheses");
@@ -1266,7 +1266,7 @@ namespace Sla.SLACOMP
         //        s >> tok;
         //        comp += tok;
 
-        //        s >> ws;
+        //        s.ReadSpaces();
         //        if (s.peek() == '\"')            // Read right-hand side string
         //            preprocess_string(s, rhs);
         //        else
@@ -1289,8 +1289,8 @@ namespace Sla.SLACOMP
 
         //    {
         //        int res = read_boolean_clause(s);
-        //        s >> ws;
-        //        while ((!s.eof()) && (s.peek() != ')'))
+        //        s.ReadSpaces();
+        //        while ((!s.EofReached()) && (s.peek() != ')'))
         //        {
         //            string boolop;
         //            char tok;
@@ -1307,7 +1307,7 @@ namespace Sla.SLACOMP
         //                res = res ^ res2;
         //            else
         //                preproc_error("Syntax error in expression");
-        //            s >> ws;
+        //            s.ReadSpaces();
         //        }
         //        return res;
         //    }
@@ -1374,7 +1374,7 @@ namespace Sla.SLACOMP
         //                filebuffers.Add(FileStreamState());   // Save state of current file
         //                filebuffers.GetLastItem().lastbuffer = YY_CURRENT_BUFFER;
         //                filebuffers.GetLastItem().file = (FILE*)0;
-        //                s >> ws;
+        //                s.ReadSpaces();
         //                string fname;
         //                preprocess_string(s, fname);
         //                expand_preprocmacros(fname);
@@ -1395,7 +1395,7 @@ namespace Sla.SLACOMP
         //                string varname;
         //                string value;
         //                varname = read_identifier(s);   // Get name of variable being defined
-        //                s >> ws;
+        //                s.ReadSpaces();
         //                if (s.peek() == '\"')
         //                    preprocess_string(s, value);
         //                else
@@ -1443,7 +1443,7 @@ namespace Sla.SLACOMP
         //        else if (type == "if")
         //        {
         //            int truth = preprocess_if(s);
-        //            if (!s.eof())
+        //            if (!s.EofReached())
         //                preproc_error("Unbalanced parentheses");
         //            ifstack.Add(truth);
         //        }
@@ -1460,7 +1460,7 @@ namespace Sla.SLACOMP
         //            else
         //            {
         //                int truth = preprocess_if(s);
-        //                if (!s.eof())
+        //                if (!s.EofReached())
         //                    preproc_error("Unbalanced parentheses");
         //                if (truth == 0)
         //                    ifstack.GetLastItem() = 0;

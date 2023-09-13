@@ -1,4 +1,5 @@
 ﻿using Sla.CORE;
+using Sla.DECCORE;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -17,12 +18,11 @@ namespace Sla.EXTRA
         public override void execute(TextReader s)
         {
             int size;
-            byte* buffer;
-            Address offset = parse_machaddr(s, size, *dcp.conf.types);
+            Address offset = Grammar.parse_machaddr(s, out size, dcp.conf.types);
 
-            buffer = dcp.conf.loader.load(size, offset);
+            byte[] buffer = dcp.conf.loader.load(size, offset);
             print_data(status.fileoptr, buffer, size, offset);
-            delete[] buffer;
+            // delete[] buffer;
         }
     }
 }

@@ -24,7 +24,7 @@ namespace Sla.DECCORE
         public override void decode(Sla.CORE.Decoder decoder)
         {
             injectid = (uint)glb.pcodeinjectlib.decodeInject("userop", "", InjectPayload.InjectionType.CALLOTHERFIXUP_TYPE, decoder);
-            name = glb.pcodeinjectlib.getCallOtherTarget(injectid);
+            name = glb.pcodeinjectlib.getCallOtherTarget((int)injectid);
             UserPcodeOp? @base = glb.userops.getOp(name);
             // This tag overrides the base functionality of a userop
             // so the core userop name and index may already be defined

@@ -25,7 +25,7 @@ namespace Sla.DECCORE
 
             Varnode vn1 = op.getIn(0);
             Varnode vn2 = op.getIn(1);
-            ulong mask = Globals.calc_mask(vn1.getSize());
+            ulong mask = Globals.calc_mask((uint)vn1.getSize());
             mask = (mask ^ (mask >> 1));    // Only high-bit is set
             ulong nzmask1 = vn1.getNZMask();
             if ((nzmask1 != mask) && ((nzmask1 & mask) != 0)) // If high-bit is set AND some other bit
@@ -100,7 +100,7 @@ namespace Sla.DECCORE
                     {
                         coeff = feedOp.getIn(1);
                         if (!coeff.isConstant()) return 0;
-                        if (coeff.getOffset() != Globals.calc_mask(coeff.getSize())) return 0;
+                        if (coeff.getOffset() != Globals.calc_mask((uint)coeff.getSize())) return 0;
                         avn = feedOp.getIn(0);
                         if (avn.isFree()) return 0;
                         data.opSetInput(op, avn, 0);
@@ -108,7 +108,7 @@ namespace Sla.DECCORE
                         return 1;
                     }
                 }
-                else if (lvn.getOffset() == Globals.calc_mask(lvn.getSize()))
+                else if (lvn.getOffset() == Globals.calc_mask((uint)lvn.getSize()))
                 {
                     feedOp = rvn.getDef();
                     feedOpCode = feedOp.code();
@@ -132,7 +132,7 @@ namespace Sla.DECCORE
                         {
                             // We have -1 s< SUB( avn, #hi )
                             data.opSetInput(op, avn, 1);
-                            data.opSetInput(op, data.newConstant(avn.getSize(), Globals.calc_mask(avn.getSize())), 0);
+                            data.opSetInput(op, data.newConstant(avn.getSize(), Globals.calc_mask((uint)avn.getSize())), 0);
                             return 1;
                         }
                     }
@@ -172,7 +172,7 @@ namespace Sla.DECCORE
                         if (avn.isFree())
                             return 0;
                         data.opSetInput(op, avn, 1);
-                        data.opSetInput(op, data.newConstant(avn.getSize(), Globals.calc_mask(avn.getSize())), 0);
+                        data.opSetInput(op, data.newConstant(avn.getSize(), Globals.calc_mask((uint)avn.getSize())), 0);
                         return 1;
                     }
                 }
@@ -188,7 +188,7 @@ namespace Sla.DECCORE
                     {
                         coeff = feedOp.getIn(1);
                         if (!coeff.isConstant()) return 0;
-                        if (coeff.getOffset() != Globals.calc_mask(coeff.getSize())) return 0;
+                        if (coeff.getOffset() != Globals.calc_mask((uint)coeff.getSize())) return 0;
                         avn = feedOp.getIn(0);
                         if (avn.isFree()) return 0;
                         data.opSetInput(op, avn, 1);
@@ -226,7 +226,7 @@ namespace Sla.DECCORE
                             avn = feedOp.getIn(0);
                             if (avn.isFree()) return 0;
                             data.opSetInput(op, avn, 1);
-                            data.opSetInput(op, data.newConstant(avn.getSize(), Globals.calc_mask(avn.getSize())), 0);
+                            data.opSetInput(op, data.newConstant(avn.getSize(), Globals.calc_mask((uint)avn.getSize())), 0);
                             return 1;
                         }
                         else if (feedOpCode == OpCode.CPUI_INT_AND)

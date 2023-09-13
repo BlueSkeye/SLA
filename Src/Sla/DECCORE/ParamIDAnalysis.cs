@@ -48,12 +48,9 @@ namespace Sla.DECCORE
             }
             else {
                 // Need to list input varnodes that are outside of the model
-                VarnodeDefSet::const_iterator iter, enditer;
-                iter = fd.beginDef(Varnode.varnode_flags.input);
-                enditer = fd.endDef(Varnode.varnode_flags.input);
-                while (iter != enditer) {
+                IEnumerator<Varnode> iter = fd.beginDef(Varnode.varnode_flags.input);
+                while (iter.MoveNext()) {
                     Varnode invn = iter.Current;
-                    ++iter;
                     InputParamMeasures.Add(new ParamMeasure(invn.getAddr(), invn.getSize(),
                         invn.getType(), ParamMeasure.ParamIDIO.INPUT));
                     InputParamMeasures.GetLastItem().calculateRank(true, invn, (PcodeOp)null);

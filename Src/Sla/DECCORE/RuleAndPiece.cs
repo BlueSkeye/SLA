@@ -58,7 +58,7 @@ namespace Sla.DECCORE
                 if (pieceop.code() != OpCode.CPUI_PIECE) continue;
                 othervn = op.getIn(1 - i);
                 othermask = othervn.getNZMask();
-                if (othermask == Globals.calc_mask(size)) continue;
+                if (othermask == Globals.calc_mask((uint)size)) continue;
                 if (othermask == 0) continue; // Handled by andmask
                 highvn = pieceop.getIn(0);
                 if (!highvn.isHeritageKnown()) continue;

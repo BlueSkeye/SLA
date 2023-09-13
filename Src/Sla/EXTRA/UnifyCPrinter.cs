@@ -134,12 +134,13 @@ namespace Sla.EXTRA
 
         public void addNames(Dictionary<string, int> nmmap)
         {
-            IEnumerator<KeyValuePair<string, int>> iter = nmmap.begin();
+            IEnumerator<KeyValuePair<string, int>> iter = nmmap.GetEnumerator();
 
             while (iter.MoveNext()) {
                 int slot = iter.Current.Value;
-                if (namemap.size() <= slot)
+                if (namemap.size() <= slot) {
                     throw new LowlevelError("Name indices do not match constraint");
+                }
                 namemap[slot] = iter.Current.Key;
             }
         }

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.EXTRA;
 
 namespace Sla.DECCORE
 {
@@ -20,12 +16,12 @@ namespace Sla.DECCORE
         /// of the associated code's nesting depth.
         public override string apply(Architecture glb, string p1, string p2, string p3)
         {
-            istringstream s = new istringstream(p1);
-            s.unsetf(ios::dec | ios::hex | ios::oct);
+            TextReader s = new StringReader(p1);
+            // s.unsetf(ios::dec | ios::hex | ios::oct);
             int val = -1;
-            s >> val;
-            if (val == -1)
-                throw ParseError("Must specify integer comment indent");
+            if (!int.TryParse(s.ReadString(), out val)) {
+                throw new ParseError("Must specify integer comment indent");
+            }
             glb.print.setLineCommentIndent(val);
             return "Comment indent set to " + p1;
         }

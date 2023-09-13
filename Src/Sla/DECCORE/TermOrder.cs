@@ -30,7 +30,7 @@ namespace Sla.DECCORE
         /// \param op1 is the first term to compare
         /// \param op2 is the second term
         /// \return \b true if the first term is less than the second
-        private static bool additiveCompare(AdditiveEdge op1, AdditiveEdge op2)
+        private static int additiveCompare(AdditiveEdge op1, AdditiveEdge op2)
         {
             return (-1 == op1.getVarnode().termOrder(op2.getVarnode()));
         }

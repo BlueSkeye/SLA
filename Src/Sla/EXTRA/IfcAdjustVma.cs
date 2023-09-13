@@ -20,7 +20,7 @@ namespace Sla.EXTRA
             if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("No load image present");
             s.unsetf(ios::dec | ios::hex | ios::oct); // Let user specify base
-            s >> ws >> adjust;
+            s.ReadSpaces() >> adjust;
             if (adjust == 0uL)
                 throw new IfaceParseError("No adjustment parameter");
             dcp.conf.loader.adjustVma(adjust);

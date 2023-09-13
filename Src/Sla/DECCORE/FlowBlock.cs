@@ -102,7 +102,7 @@ namespace Sla.DECCORE
         /// Collection of block_flags
         internal block_flags flags;
         /// The parent block to which \b this belongs
-        private FlowBlock parent;
+        internal FlowBlock parent;
         /// Immediate dominating block
         internal FlowBlock immed_dom;
         /// Back reference to a BlockCopy of \b this
@@ -284,7 +284,7 @@ namespace Sla.DECCORE
         }
 
         /// Swap the first and second \e out edges
-        private void swapEdges()
+        internal void swapEdges()
         {
 #if BLOCKCONSISTENT_DEBUG
             if (outofthis.Count != 2) {
@@ -317,7 +317,7 @@ namespace Sla.DECCORE
         /// Remove an \e out edge label
         /// \param i is the index of the outgoing edge
         /// \param lab is the edge label to remove
-        private void clearOutEdgeFlag(int i, edge_flags lab)
+        internal void clearOutEdgeFlag(int i, edge_flags lab)
         {
             FlowBlock bbout = outofthis[i].point;
             outofthis[i].label &= ~lab;
@@ -413,7 +413,7 @@ namespace Sla.DECCORE
         }
 
         /// Eliminate duplicate edges
-        private void dedup()
+        internal void dedup()
         {
             List<FlowBlock> duplist = new List<FlowBlock>();
 
@@ -736,7 +736,7 @@ namespace Sla.DECCORE
         {
             while(true)
             {
-                ElementId subId = decoder.peekElement();
+                uint subId = decoder.peekElement();
                 if (subId != ElementId.ELEM_EDGE)
                     break;
                 decodeNextInEdge(decoder, resolver);
@@ -1280,24 +1280,25 @@ namespace Sla.DECCORE
         }
 
         /// Compare FlowBlock by index
-        public static bool compareBlockIndex(FlowBlock bl1, FlowBlock bl2)
+        public static int compareBlockIndex(FlowBlock bl1, FlowBlock bl2)
         {
-            return (bl1.getIndex() < bl2.getIndex());
+            return bl1.getIndex().CompareTo(bl2.getIndex());
         }
 
+        // REPLACED Protoype
         /// Final FlowBlock comparison
         /// Comparator for ordering the final 0-exit blocks
         /// \param bl1 is the first FlowBlock to compare
         /// \param bl2 is the second FlowBlock
         /// \return true if the first comes before the second
-        public static bool compareFinalOrder(FlowBlock bl1, FlowBlock bl2)
+        public static int compareFinalOrder(FlowBlock bl1, FlowBlock bl2)
         {
             if (bl1.getIndex() == 0) {
                 // Make sure the entry point comes first
-                return true;
+                return -1;
             }
             if (bl2.getIndex() == 0) {
-                return false;
+                return 1;
             }
             PcodeOp? op1 = bl1.lastOp();
             PcodeOp? op2 = bl2.lastOp();
@@ -1306,23 +1307,23 @@ namespace Sla.DECCORE
                 // Make sure return blocks come last
                 if (null != op2) {
                     if ((op1.code() == OpCode.CPUI_RETURN) && (op2.code() != OpCode.CPUI_RETURN)) {
-                        return false;
+                        return 1;
                     }
                     else if ((op1.code() != OpCode.CPUI_RETURN) && (op2.code() == OpCode.CPUI_RETURN)) {
-                        return true;
+                        return -1;
                     }
                 }
                 if (op1.code() == OpCode.CPUI_RETURN) {
-                    return false;
+                    return 1;
                 }
             }
             else if (null != op2) {
                 if (op2.code() == OpCode.CPUI_RETURN) {
-                    return true;
+                    return -1;
                 }
             }
             // Otherwise use index
-            return (bl1.getIndex() < bl2.getIndex());
+            return (bl1.getIndex().CompareTo(bl2.getIndex()));
         }
 
         /// Find the common dominator of two FlowBlocks

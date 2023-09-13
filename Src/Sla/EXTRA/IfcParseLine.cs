@@ -23,8 +23,8 @@ namespace Sla.EXTRA
             if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("No load image present");
 
-            s >> ws;
-            if (s.eof())
+            s.ReadSpaces();
+            if (s.EofReached())
                 throw new IfaceParseError("No input");
 
             try

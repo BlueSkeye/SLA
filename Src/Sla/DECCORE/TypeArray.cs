@@ -52,8 +52,9 @@ namespace Sla.DECCORE
             arraysize = op.arraysize;
         }
 
-        /// Construct given an array size and element data-type
+        // Construct given an array size and element data-type
         public TypeArray(int n, Datatype ao)
+            : base(n * ao.getSize(), type_metatype.TYPE_ARRAY)
         {
             arraysize = n;
             arrayof = ao;

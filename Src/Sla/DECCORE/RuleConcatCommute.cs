@@ -79,13 +79,13 @@ namespace Sla.DECCORE
                         hi = logicop.getIn(0);
                         lo = op.getIn(1);
                         val <<= 8 * lo.getSize();
-                        val |= Globals.calc_mask(lo.getSize());
+                        val |= Globals.calc_mask((uint)lo.getSize());
                     }
                     else
                     {
                         hi = op.getIn(0);
                         lo = logicop.getIn(0);
-                        val |= (calc_mask(hi.getSize()) << 8 * lo.getSize());
+                        val |= (Globals.calc_mask((uint)hi.getSize()) << 8 * lo.getSize());
                     }
                 }
                 else

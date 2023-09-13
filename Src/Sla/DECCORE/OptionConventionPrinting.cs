@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Sla.DECCORE
 {
     internal class OptionConventionPrinting : ArchOption
@@ -20,7 +15,7 @@ namespace Sla.DECCORE
             bool val = onOrOff(p1);
             if (glb.print.getName() != "c-language")
                 return "Can only set convention printing for C language";
-            PrintC* lng = (PrintC*)glb.print;
+            PrintC lng = (PrintC)glb.print;
             lng.setConvention(val);
             string prop;
             prop = val ? "on" : "off";

@@ -64,7 +64,7 @@ namespace Sla.DECCORE
         /// Unique id, 0=unassigned
         internal ulong symbolId;
         /// List of storage locations labeled with \b this Symbol
-        internal List<IEnumerator<SymbolEntry>> mapentry = new List<IEnumerator<SymbolEntry>>();
+        internal List<SymbolEntry> mapentry = new List<SymbolEntry>();
         /// Scope associated with current depth resolution
         protected /*mutable const*/ Scope? depthScope;
         /// Number of namespace elements required to resolve symbol in current scope
@@ -235,7 +235,7 @@ namespace Sla.DECCORE
         {
             if (mapentry.empty())
                 throw new LowlevelError("No mapping for symbol: " + name);
-            return mapentry[0].Current;
+            return mapentry[0];
         }
 
         /// Get first mapping of the symbol that contains the given Address
@@ -247,7 +247,7 @@ namespace Sla.DECCORE
         {
             SymbolEntry res;
             for (int i = 0; i < mapentry.size(); ++i) {
-                res = mapentry[i].Current;
+                res = mapentry[i];
                 Address entryaddr = res.getAddr();
                 if (addr.getSpace() != entryaddr.getSpace()) continue;
                 if (addr.getOffset() < entryaddr.getOffset()) continue;
@@ -263,7 +263,7 @@ namespace Sla.DECCORE
         public int numEntries() => mapentry.Count;
 
         /// Return the i-th SymbolEntry for \b this Symbol
-        public SymbolEntry getMapEntry(int i) => mapentry[i].Current;
+        public SymbolEntry getMapEntry(int i) => mapentry[i];
 
         /// Position of given SymbolEntry within \b this multi-entry Symbol
         /// Among all the SymbolEntrys that map \b this entire Symbol, calculate
@@ -274,7 +274,7 @@ namespace Sla.DECCORE
         {
             int pos = 0;
             for (int i = 0; i < mapentry.size(); ++i) {
-                SymbolEntry tmp = mapentry[i].Current;
+                SymbolEntry tmp = mapentry[i];
                 if (tmp == entry)
                     return pos;
                 if (entry.getSize() == type.getSize())
@@ -371,7 +371,7 @@ namespace Sla.DECCORE
             category = SymbolCategory.no_category;
             symbolId = 0;
             while (true) {
-                AttributeId attribId = decoder.getNextAttributeId();
+                uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == AttributeId.ATTRIB_CAT) {
                     category = (SymbolCategory)decoder.readSignedInteger();

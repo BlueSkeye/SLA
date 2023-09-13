@@ -42,8 +42,8 @@ namespace Sla.DECCORE
         /// Release resources (from last injection)
         public virtual void clear()
         {
-            inputlist.clear();
-            output.clear();
+            inputlist.Clear();
+            output.Clear();
         }
 
         /// \brief Encode \b this context to a stream as a \<context> element

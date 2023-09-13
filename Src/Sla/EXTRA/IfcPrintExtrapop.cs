@@ -1,10 +1,4 @@
 ﻿using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.EXTRA
 {
@@ -12,83 +6,71 @@ namespace Sla.EXTRA
     {
         /// \class IfcPrintExtrapop
         /// \brief Print change to stack pointer for called function: `print extrapop [<functionname>]`
-        ///
         /// For the selected function, the extra amount each called function changes the stack pointer
         /// (over popping the return value) is printed to console.  The function is selected by
         /// name, or if no name is given, the \e current function is selected.
         public override void execute(TextReader s)
         {
-            string name;
-
-            s >> ws >> name;
-            if (name.size() == 0)
-            {
-                if (dcp.fd != (Funcdata)null)
-                {
+            s.ReadSpaces();
+            string name = s.ReadString();
+            if (name.Length == 0) {
+                if (dcp.fd != (Funcdata)null) {
                     int num = dcp.fd.numCalls();
-                    for (int i = 0; i < num; ++i)
-                    {
+                    for (int i = 0; i < num; ++i) {
                         FuncCallSpecs fc = dcp.fd.getCallSpecs(i);
-                        *status.optr << "ExtraPop for " << fc.getName() << '(';
-                        *status.optr << fc.getOp().getAddr() << ')';
+                        status.optr.Write($"ExtraPop for {fc.getName()}({fc.getOp().getAddr()})");
                         int expop = fc.getEffectiveExtraPop();
-                        *status.optr << " ";
+                        status.optr.Write(" ");
                         if (expop == ProtoModel.extrapop_unknown)
-                            *status.optr << "unknown";
+                            status.optr.Write("unknown");
                         else
-                            *status.optr << dec << expop;
-                        *status.optr << '(';
+                            status.optr.Write(expop);
+                        status.optr.Write("(");
                         expop = fc.getExtraPop();
                         if (expop == ProtoModel.extrapop_unknown)
-                            *status.optr << "unknown";
+                            status.optr.Write("unknown");
                         else
-                            *status.optr << dec << expop;
-                        *status.optr << ')' << endl;
+                            status.optr.Write(expop);
+                        status.optr.WriteLine(')');
                     }
                 }
-                else
-                {
+                else {
                     int expop = dcp.conf.defaultfp.getExtraPop();
-                    *status.optr << "Default extra pop = ";
+                    status.optr.Write("Default extra pop = ");
                     if (expop == ProtoModel.extrapop_unknown)
-                        *status.optr << "unknown" << endl;
+                        status.optr.WriteLine("unknown");
                     else
-                        *status.optr << dec << expop << endl;
+                        status.optr.WriteLine(expop);
                 }
             }
-            else
-            {
-                Funcdata* fd;
-                fd = dcp.conf.symboltab.getGlobalScope().queryFunction(name);
+            else {
+                Funcdata? fd = dcp.conf.symboltab.getGlobalScope().queryFunction(name);
                 if (fd == (Funcdata)null)
                     throw new IfaceExecutionError("Unknown function: " + name);
                 int expop = fd.getFuncProto().getExtraPop();
-                *status.optr << "ExtraPop for function " << name << " is ";
+                status.optr.Write($"ExtraPop for function {name} is ");
                 if (expop == ProtoModel.extrapop_unknown)
-                    *status.optr << "unknown" << endl;
+                    status.optr.WriteLine("unknown");
                 else
-                    *status.optr << dec << expop << endl;
-                if (dcp.fd != (Funcdata)null)
-                {
+                    status.optr.WriteLine(expop);
+                if (dcp.fd != (Funcdata)null) {
                     int num = dcp.fd.numCalls();
-                    for (int i = 0; i < num; ++i)
-                    {
+                    for (int i = 0; i < num; ++i) {
                         FuncCallSpecs fc = dcp.fd.getCallSpecs(i);
-                        if (fc.getName() == fd.getName())
-                        {
+                        if (fc.getName() == fd.getName()) {
                             expop = fc.getEffectiveExtraPop();
-                            *status.optr << "For this function, extrapop = ";
+                            status.optr.Write("For this function, extrapop = ");
                             if (expop == ProtoModel.extrapop_unknown)
-                                *status.optr << "unknown";
+                                status.optr.Write("unknown");
                             else
-                                *status.optr << dec << expop;
-                            *status.optr << '(';
+                                status.optr.Write(expop);
+                            status.optr.Write('(');
                             expop = fc.getExtraPop();
                             if (expop == ProtoModel.extrapop_unknown)
-                                *status.optr << "unknown";
+                                status.optr.Write("unknown");
                             else
-                                *status.optr << dec << expop;
-                            *status.optr << ')' << endl;
+                                status.optr.Write(expop);
+                            status.optr.WriteLine(')');
                         }
                     }
                 }

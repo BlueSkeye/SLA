@@ -1,11 +1,5 @@
 ﻿using Sla.CORE;
 using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.EXTRA
 {
@@ -23,29 +17,29 @@ namespace Sla.EXTRA
         {
             int size;
             uint uq;
-            Datatype* ct;
             string name;
 
             if (dcp.fd == (Funcdata)null)
                 throw new IfaceExecutionError("No function selected");
 
             Address pc;
-            Address loc = new Address(parse_varnode(s, size, pc, uq,* dcp.conf.types)); // Get specified varnode
-            ct = parse_type(s, name, dcp.conf);
+            // Get specified varnode
+            Address loc = Grammar.parse_varnode(s, out size, out pc, out uq, dcp.conf.types);
+            Datatype ct = Grammar.parse_type(s, out name, dcp.conf);
 
-            dcp.conf.clearAnalysis(dcp.fd); // Make sure varnodes are cleared
+            // Make sure varnodes are cleared
+            dcp.conf.clearAnalysis(dcp.fd);
 
-            Scope scope = dcp.fd.getScopeLocal().discoverScope(loc, size, pc);
+            Scope? scope = dcp.fd.getScopeLocal().discoverScope(loc, size, pc);
             if (scope == (Scope)null) // Variable does not have natural scope
                 scope = dcp.fd.getScopeLocal();   // force it to be in function scope
             Symbol sym = scope.addSymbol(name, ct, loc, pc).getSymbol();
             scope.setAttribute(sym, Varnode.varnode_flags.typelock);
             sym.setIsolated(true);
-            if (name.size() > 0)
+            if (name.Length > 0)
                 scope.setAttribute(sym, Varnode.varnode_flags.namelock);
-
-            status.fileoptr << "Successfully added " << sym.getName();
-            status.fileoptr << " to scope " << scope.getFullName() << endl;
+            status.fileoptr.WriteLine(
+                $"Successfully added {sym.getName()} to scope {scope.getFullName()}");
         }
     }
 }

@@ -1,10 +1,4 @@
 ﻿using Sla.CORE;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Numerics;
-using System.Threading.Tasks;
 
 namespace Sla.DECCORE
 {
@@ -56,9 +50,10 @@ namespace Sla.DECCORE
         /// \param decoder is the given stream decoder
         /// \param typegrp is the TypeFactory used to resolve data-type references in XML
         /// \return the newly allocated and initialized CPoolRecord
-        public CPoolRecord decodeRecord(List<ulong> refs, Decoder decoder, TypeFactory typegrp)
+        public CPoolRecord decodeRecord(List<ulong> refs, Decoder decoder,
+            TypeFactory typegrp)
         {
-            CPoolRecord* newrec = createRecord(refs);
+            CPoolRecord newrec = createRecord(refs);
             newrec.decode(decoder, typegrp);
             return newrec;
         }

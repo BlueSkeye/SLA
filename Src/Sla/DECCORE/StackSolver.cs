@@ -123,7 +123,7 @@ namespace Sla.DECCORE
             VarnodeData spacebasedata = id.getSpacebase(spcbase);
             spacebase = new Address(spacebasedata.space, spacebasedata.offset);
 
-            VarnodeLocSet.Enumerator begiter = data.beginLoc(spacebasedata.size, spacebase);
+            VarnodeLocSet.Enumerator begiter = data.beginLoc((int)spacebasedata.size, spacebase);
             // VarnodeLocSet.Enumerator enditer = data.endLoc(spacebasedata.size, spacebase);
 
             while (begiter.MoveNext()) {

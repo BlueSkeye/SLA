@@ -1,4 +1,5 @@
 ﻿using Sla.CORE;
+using Sla.DECCORE;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -21,30 +22,29 @@ namespace Sla.EXTRA
             if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("No load image present");
 
-            string name;
-            s >> name >> ws;
+            string name = s.ReadString();
+            s.ReadSpaces();
 
-            if (name.size() == 0)
+            if (name.Length == 0)
                 throw new IfaceParseError("Missing context variable name");
 
-            s.unsetf(ios::dec | ios::hex | ios::oct); // Let user specify base
+            // s.unsetf(ios::dec | ios::hex | ios::oct); // Let user specify base
             uint value = 0xbadbeef;
-            s >> value;
-            if (value == 0xbadbeef)
+            if (!uint.TryParse(s.ReadString(), out value) || value == 0xbadbeef)
                 throw new IfaceParseError("Missing context value");
 
-            s >> ws;
+            s.ReadSpaces();
 
-            if (s.eof())
-            {       // No range indicates default value
+            if (s.EofReached()) {
+                // No range indicates default value
                 dcp.conf.context.setVariableDefault(name, value);
                 return;
             }
 
             // Otherwise parse the range
             int size1, size2;
-            Address addr1 = parse_machaddr(s, size1, *dcp.conf.types); // Read begin address
-            Address addr2 = parse_machaddr(s, size2, *dcp.conf.types); // Read end address
+            Address addr1 = Grammar.parse_machaddr(s, out size1, dcp.conf.types); // Read begin address
+            Address addr2 = Grammar.parse_machaddr(s, out size2, dcp.conf.types); // Read end address
 
             if (addr1.isInvalid() || addr2.isInvalid())
                 throw new IfaceParseError("Invalid address range");

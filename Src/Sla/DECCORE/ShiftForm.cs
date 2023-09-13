@@ -171,10 +171,10 @@ namespace Sla.DECCORE
                 return false;
 
             @out.initPartial(@in.getSize(), reslo, reshi);
-            existop = SplitVarnode::prepareShiftOp(@out, @in);
+            existop = SplitVarnode.prepareShiftOp(@out, @in);
             if (existop == (PcodeOp)null)
                 return false;
-            SplitVarnode::createShiftOp(data, @out, @in, salo, existop, opc);
+            SplitVarnode.createShiftOp(data, @out, @in, salo, existop, opc);
             return true;
         }
 
@@ -188,10 +188,10 @@ namespace Sla.DECCORE
                 return false;
 
             @out.initPartial(@in.getSize(), reslo, reshi);
-            existop = SplitVarnode::prepareShiftOp(@out, @in);
+            existop = SplitVarnode.prepareShiftOp(@out, @in);
             if (existop == (PcodeOp)null)
                 return false;
-            SplitVarnode::createShiftOp(data, @out, @in, salo, existop, opc);
+            SplitVarnode.createShiftOp(data, @out, @in, salo, existop, opc);
             return true;
         }
     }

@@ -1225,7 +1225,8 @@ namespace Sla.DECCORE
         /// \param a is the first FuncCallSpecs to compare
         /// \param b is the second to compare
         /// \return \b true if the first should be ordered before the second
-        public static bool compareByEntryAddress(FuncCallSpecs a, FuncCallSpecs b) => a.entryaddress < b.entryaddress;
+        public static int compareByEntryAddress(FuncCallSpecs a, FuncCallSpecs b)
+            => a.entryaddress.CompareTo(b.entryaddress);
 
         /// \brief Calculate the number of times an individual sub-function is called.
         ///

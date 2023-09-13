@@ -625,7 +625,7 @@ namespace Sla.DECCORE
             buildParamList(strategystring); // Allocate input and output ParamLists
             while(true)
             {
-                ElementId subId = decoder.peekElement();
+                uint subId = decoder.peekElement();
                 if (subId == 0) break;
                 if (subId == ElementId.ELEM_INPUT) {
                     input.decode(decoder, effectlist, stackgrowsnegative);

@@ -17,6 +17,27 @@ namespace Sla.DECCORE
         /// Pointer to the actual ParamEntry
         private ParamEntry entry;
 
+        /// Initialize the range
+        public ParamEntryRange(/*inittype*/InitData data, ulong f, ulong l)
+        {
+            first = f;
+            last = l;
+            position = data.position;
+            entry = data.entry;
+        }
+
+        /// Get the first address in the range
+        public ulong getFirst() => first;
+
+        /// Get the last address in the range
+        public ulong getLast() => last;
+
+        /// Get the sub-subsort object
+        public /*subsorttype*/ SubsortPosition getSubsort() => new SubsortPosition(position);
+
+        /// Get pointer to actual ParamEntry
+        public ParamEntry getParamEntry() => entry;
+
         /// \brief Helper class for initializing ParamEntryRange in a range map
         internal class InitData
         {
@@ -25,7 +46,7 @@ namespace Sla.DECCORE
             internal int position;
             /// Underlying ParamEntry being assigned to the ParamEntryRange
             internal ParamEntry entry;
-            
+
             public InitData(int pos, ParamEntry e)
             {
                 position = pos;
@@ -66,7 +87,7 @@ namespace Sla.DECCORE
 
             public static bool operator <(SubsortPosition op1, SubsortPosition op2)
             {
-                return op1.position<op2.position;
+                return op1.position < op2.position;
             }
 
             public static bool operator >(SubsortPosition op1, SubsortPosition op2)
@@ -74,23 +95,5 @@ namespace Sla.DECCORE
                 return op1.position > op2.position;
             }
         }
-
-        /// Initialize the range
-        public ParamEntryRange(/*inittype*/InitData data, ulong f, ulong l)
-        {
-            first = f; last = l; position = data.position; entry = data.entry;
-        }
-
-        /// Get the first address in the range
-        public ulong getFirst() => first;
-
-        /// Get the last address in the range
-        public ulong getLast() => last;
-
-        /// Get the sub-subsort object
-        public /*subsorttype*/ SubsortPosition getSubsort() => new SubsortPosition(position);
-
-        /// Get pointer to actual ParamEntry
-        public ParamEntry getParamEntry() => entry;
     }
 }

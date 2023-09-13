@@ -44,19 +44,19 @@ namespace Sla.DECCORE
         private struct MultiPredicate
         {
             /// Base MULTIEQUAL op
-            private PcodeOp op;
+            internal PcodeOp op;
             /// Input slot containing path that sets zero
-            private int zeroSlot;
+            internal int zeroSlot;
             /// Final block in path that sets zero
-            private FlowBlock zeroBlock;
-            /// Conditional block determining if zero is set or not
-            private FlowBlock condBlock;
-            /// CBRANCH determining if zero is set
-            private PcodeOp cbranch;
-            /// Other (non-zero) Varnode getting set on other path
-            private Varnode otherVn;
-            /// True if path to zero set is the \b true path out of condBlock
-            private bool zeroPathIsTrue;
+            internal FlowBlock zeroBlock;
+            // Conditional block determining if zero is set or not
+            internal FlowBlock condBlock;
+            // CBRANCH determining if zero is set
+            internal PcodeOp cbranch;
+            // Other (non-zero) Varnode getting set on other path
+            internal Varnode otherVn;
+            // True if path to zero set is the \b true path out of condBlock
+            internal bool zeroPathIsTrue;
 
             /// \brief  Check if \b vn is produced by a 2-branch MULTIEQUAL, one side of which is a zero constant
             /// \param vn is the given Varnode

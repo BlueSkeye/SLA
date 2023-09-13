@@ -233,7 +233,7 @@ namespace Sla.DECCORE
         /// \param stp is the desired step (1,2,4,8,..)
         public CircleRange(ulong lft, ulong rgt, int size, int stp)
         {
-            mask = Globals.calc_mask(size);
+            mask = Globals.calc_mask((uint)size);
             step = stp;
             left = lft;
             right = rgt;
@@ -259,7 +259,7 @@ namespace Sla.DECCORE
         /// \param size is the size of the mask in bytes
         public CircleRange(ulong val, int size)
         {
-            mask = Globals.calc_mask(size);
+            mask = Globals.calc_mask((uint)size);
             step = 1;
             left = val;
             right = (left + 1) & mask;
@@ -273,7 +273,7 @@ namespace Sla.DECCORE
         /// \param stp is the step/stride of the range
         public void setRange(ulong lft, ulong rgt, int size, int step)
         {
-            mask = Globals.calc_mask(size);
+            mask = Globals.calc_mask((uint)size);
             left = lft;
             right = rgt;
             step = stp;
@@ -287,7 +287,7 @@ namespace Sla.DECCORE
         /// \param size is the size of the mask in bytes
         public void setRange(ulong val, int size)
         {
-            mask = Globals.calc_mask(size);
+            mask = Globals.calc_mask((uint)size);
             step = 1;
             left = val;
             right = (left + 1) & mask;
@@ -299,7 +299,7 @@ namespace Sla.DECCORE
         /// \param size is the size (in bytes) of the range
         public void setFull(int size)
         {
-            mask = Globals.calc_mask(size);
+            mask = Globals.calc_mask((uint)size);
             step = 1;
             left = 0;
             right = 0;
@@ -600,7 +600,7 @@ namespace Sla.DECCORE
             isempty = false;
             if (trans == 0)
             {
-                mask = Globals.calc_mask(size);
+                mask = Globals.calc_mask((uint)size);
                 if (hasstep)
                 {       // All zeros
                     step = 1;

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Sla.DECCORE
 {
     internal class OptionNullPrinting : ArchOption
@@ -20,7 +15,7 @@ namespace Sla.DECCORE
             bool val = onOrOff(p1);
             if (glb.print.getName() != "c-language")
                 return "Only c-language accepts the null printing option";
-            PrintC* lng = (PrintC*)glb.print;
+            PrintC lng = (PrintC)glb.print;
             lng.setNULLPrinting(val);
             string prop;
             prop = val ? "on" : "off";

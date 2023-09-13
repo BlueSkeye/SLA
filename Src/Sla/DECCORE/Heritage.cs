@@ -1136,7 +1136,8 @@ namespace Sla.DECCORE
                                         unknownStackStorage = true;
                                 }
                                 else {
-                                    StackNode nextNode = new StackNode(outVn, curNode.offset, curNode.traversals | StackNode::nonconstant_index);
+                                    StackNode nextNode = new StackNode(outVn, curNode.offset,
+                                        curNode.traversals | StackNode.IndexType.nonconstant_index);
                                     if (nextNode.iter != nextNode.vn.endDescend()) {
                                         outVn.setMark();
                                         path.Add(nextNode);
@@ -1463,7 +1464,7 @@ namespace Sla.DECCORE
             }
             vnCollect.setActiveHeritage();
             write.Add(vnCollect);
-            active.registerTrial(truncAddr, vData.size);
+            active.registerTrial(truncAddr, (int)vData.size);
             return true;
         }
 
@@ -1515,7 +1516,7 @@ namespace Sla.DECCORE
                     ulong off = addr.getOffset();
                     bool tryregister = true;
                     if (spc.getType() == spacetype.IPTR_SPACEBASE) {
-                        if (fc.getSpacebaseOffset() != FuncCallSpecs.Offsets.offset_unknown)
+                        if (fc.getSpacebaseOffset() != FuncCallSpecs.offset_unknown)
                             off = spc.wrapOffset(off - fc.getSpacebaseOffset());
                         else
                             tryregister = false; // Do not attempt to register this stack loc as a trial
@@ -1641,7 +1642,7 @@ namespace Sla.DECCORE
                 return;
             Address truncAddr = new Address(vData.space, vData.offset);
             ParamActive active = fd.getActiveOutput();
-            active.registerTrial(truncAddr, vData.size);
+            active.registerTrial(truncAddr, (int)vData.size);
             int offset = (int)(vData.offset - addr.getOffset());  // Number of least significant bytes to truncate
             if (vData.space.isBigEndian())
                 offset = (int)((size - vData.size) - offset);
@@ -1927,11 +1928,11 @@ namespace Sla.DECCORE
             refine[lastpos] = size - lastpos;
             remove13Refinement(refine);
             List<Varnode> newvn = new List<Varnode>();
-            for (uint i = 0; i < readvars.size(); ++i)
+            for (int i = 0; i < readvars.size(); ++i)
                 refineRead(readvars[i], addr, refine, newvn);
-            for (uint i = 0; i < writevars.size(); ++i)
+            for (int i = 0; i < writevars.size(); ++i)
                 refineWrite(writevars[i], addr, refine, newvn);
-            for (uint i = 0; i < inputvars.size(); ++i)
+            for (int i = 0; i < inputvars.size(); ++i)
                 refineInput(inputvars[i], addr, refine, newvn);
 
             // Alter the disjoint cover (both locally and globally) to reflect our refinement

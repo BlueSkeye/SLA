@@ -1,11 +1,6 @@
 ﻿using Sla.CORE;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+
+using TrackedSet = System.Collections.Generic.List<Sla.CORE.TrackedContext>;
 
 namespace Sla.DECCORE
 {
@@ -29,33 +24,30 @@ namespace Sla.DECCORE
 
         public override int apply(Funcdata data)
         {
-            FuncCallSpecs fc;
-            PcodeOp op;
+            if (data.getBasicBlocks().getSize() == 0)
+                // No blocks
+                return 0;
+            // Get start block, which is constructed to have nothing falling into it
+            BlockBasic bb = (BlockBasic)data.getBasicBlocks().getBlock(0);
 
-            if (stackspace == (AddrSpace)null) return 0; // No stack to speak of
-            VarnodeData point = stackspace.getSpacebase(0);
-            Address sb_addr = new Address(point.space, point.offset);
-            int sb_size = point.size;
+            int injectid = data.getFuncProto().getInjectUponEntry();
+            if (injectid >= 0) {
+                InjectPayload payload = data.getArch().pcodeinjectlib.getPayload(injectid);
+                data.doLiveInject(payload, bb.getStart(), bb, bb.beginOp());
+            }
 
-            for (int i = 0; i < data.numCalls(); ++i) {
-                fc = data.getCallSpecs(i);
-                if (fc.getExtraPop() == 0) continue; // Stack pointer is undisturbed
-                op = data.newOp(2, fc.getOp().getAddr());
-                data.newVarnodeOut(sb_size, sb_addr, op);
-                data.opSetInput(op, data.newVarnode(sb_size, sb_addr), 0);
-                if (fc.getExtraPop() != ProtoModel.extrapop_unknown)
-                { // We know exactly how stack pointer is changed
-                    fc.setEffectiveExtraPop(fc.getExtraPop());
-                    data.opSetOpcode(op, OpCode.CPUI_INT_ADD);
-                    data.opSetInput(op, data.newConstant(sb_size, fc.getExtraPop()), 1);
-                    data.opInsertAfter(op, fc.getOp());
-                }
-                else
-                {           // We don't know exactly, so we create INDIRECT
-                    data.opSetOpcode(op, OpCode.CPUI_INDIRECT);
-                    data.opSetInput(op, data.newVarnodeIop(fc.getOp()), 1);
-                    data.opInsertBefore(op, fc.getOp());
-                }
+            TrackedSet trackset = data.getArch().context.getTrackedSet(data.getAddress());
+
+            for (int i = 0; i < trackset.size(); ++i) {
+                TrackedContext ctx = trackset[i];
+
+                Address addr = new Address(ctx.loc.space, ctx.loc.offset);
+                PcodeOp op = data.newOp(1, bb.getStart());
+                data.newVarnodeOut((int)ctx.loc.size, addr, op);
+                Varnode vnin = data.newConstant((int)ctx.loc.size, ctx.val);
+                data.opSetOpcode(op, OpCode.CPUI_COPY);
+                data.opSetInput(op, vnin, 0);
+                data.opInsertBegin(op, bb);
             }
             return 0;
         }

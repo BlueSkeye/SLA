@@ -19,20 +19,19 @@ namespace Sla.EXTRA
         /// if it exists, otherwise the symbol is added to the global scope.
         public override void execute(TextReader s)
         {
-            string name;
-            s >> name;
-            if (name.size() == 0)
+            string name = s.ReadString();
+            if (name.Length == 0)
                 throw new IfaceParseError("Need label name and address");
             int size;
-            Address addr = parse_machaddr(s, size, *dcp.conf.types); // Read address
+            Address addr = Grammar.parse_machaddr(s, out size, dcp.conf.types); // Read address
 
-            Scope* scope;
+            Scope scope;
             if (dcp.fd != (Funcdata)null)
                 scope = dcp.fd.getScopeLocal();
             else
                 scope = dcp.conf.symboltab.getGlobalScope();
 
-            Symbol* sym = scope.addCodeLabel(addr, name);
+            Symbol sym = scope.addCodeLabel(addr, name);
             scope.setAttribute(sym, Varnode.varnode_flags.namelock | Varnode.varnode_flags.typelock);
         }
     }

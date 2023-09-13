@@ -42,7 +42,8 @@ namespace Sla.DECCORE
                     default:
                         return (AddrSpace)null;
                 }
-                if (op == (PcodeOp)null) break;
+                if (op == (PcodeOp)null)
+                    break;
             }
             IEnumerator<PcodeOp> iter = vn.beginDescend();
             while (iter.MoveNext()) {
@@ -115,7 +116,7 @@ namespace Sla.DECCORE
             Varnode outvn;
             if (vn.getTypeReadFacing(op).getMetatype() == type_metatype.TYPE_PTR) {
                 // Are we explicitly marked as a pointer
-                rampoint = glb.resolveConstant(spc, vn.getOffset(), vn.getSize(), ref op.getAddr(),
+                rampoint = glb.resolveConstant(spc, vn.getOffset(), vn.getSize(), op.getAddr(),
                     out fullEncoding);
                 needexacthit = false;
             }
@@ -202,7 +203,7 @@ namespace Sla.DECCORE
                     rampoint = null;
                     return (SymbolEntry)null;
                 }
-                rampoint = glb.resolveConstant(spc, vn.getOffset(), vn.getSize(), ref op.getAddr(), out fullEncoding);
+                rampoint = glb.resolveConstant(spc, vn.getOffset(), vn.getSize(), op.getAddr(), out fullEncoding);
             }
 
             if (rampoint.isInvalid()) {

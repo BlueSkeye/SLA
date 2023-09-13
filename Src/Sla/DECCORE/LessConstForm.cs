@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -26,8 +21,11 @@ namespace Sla.DECCORE
         // where #constextend is built from #const by postpending either all 0 bits or 1 bits
         public bool applyRule(SplitVarnode i, PcodeOp op, bool workishi, Funcdata data)
         {
-            if (!workishi) return false;
-            if (i.getHi() == (Varnode)null) return false; // We don't necessarily need the lo part
+            if (!workishi)
+                return false;
+            if (i.getHi() == (Varnode)null)
+                // We don't necessarily need the lo part
+                return false;
             @in = i;
             vn = @in.getHi();
             inslot = op.getSlot(vn);
@@ -41,28 +39,25 @@ namespace Sla.DECCORE
 
             ulong val = cvn.getOffset() << 8 * losize;
             if (hilessequalform != (inslot == 1))
-                val |= Globals.calc_mask(losize);
+                val |= Globals.calc_mask((uint)losize);
 
-            // This rule can apply and mess up less,equal rules, so we only apply it if it directly affects a branch
+            // This rule can apply and mess up less,equal rules, so we only apply it if
+            // it directly affects a branch
             PcodeOp desc = op.getOut().loneDescend();
             if (desc == (PcodeOp)null) return false;
             if (desc.code() != OpCode.CPUI_CBRANCH) return false;
 
             constin.initPartial(@in.getSize(), val);
 
-            if (inslot == 0)
-            {
-                if (SplitVarnode.prepareBoolOp(@in, constin, op))
-                {
-                    SplitVarnode::replaceBoolOp(data, op, @in, constin, op.code());
+            if (inslot == 0) {
+                if (SplitVarnode.prepareBoolOp(@in, constin, op)) {
+                    SplitVarnode.replaceBoolOp(data, op, @in, constin, op.code());
                     return true;
                 }
             }
-            else
-            {
-                if (SplitVarnode.prepareBoolOp(constin, @in, op))
-                {
-                    SplitVarnode::replaceBoolOp(data, op, constin, @in, op.code());
+            else {
+                if (SplitVarnode.prepareBoolOp(constin, @in, op)) {
+                    SplitVarnode.replaceBoolOp(data, op, constin, @in, op.code());
                     return true;
                 }
             }

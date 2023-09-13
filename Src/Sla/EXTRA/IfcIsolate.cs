@@ -17,7 +17,7 @@ namespace Sla.EXTRA
         {
             string symbolName;
 
-            s >> ws >> symbolName;
+            s.ReadSpaces() >> symbolName;
             if (symbolName.size() == 0)
                 throw new IfaceParseError("Missing symbol name");
 

@@ -1,12 +1,4 @@
 ﻿using Sla.CORE;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Sla.DECCORE
 {
@@ -32,20 +24,19 @@ namespace Sla.DECCORE
 
         public override int applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode invn = op.getIn(0);
-            Varnode outvn = op.getOut();
+            Varnode invn = op.getIn(0) ?? throw new ApplicationException();
+            Varnode outvn = op.getOut() ?? throw new ApplicationException();
             int insize = invn.getSize();
             int outsize = outvn.getSize();
-            if (outsize > insize)
-            {
-                SubfloatFlow subflow = new SubfloatFlow(&data,outvn,insize);
+            if (outsize > insize) {
+                SubfloatFlow subflow = new SubfloatFlow(data,outvn,insize);
                 if (!subflow.doTrace()) return 0;
                 subflow.apply();
             }
-            else
-            {
-                SubfloatFlow subflow = new SubfloatFlow(&data,invn,outsize);
-                if (!subflow.doTrace()) return 0;
+            else {
+                SubfloatFlow subflow = new SubfloatFlow(data,invn,outsize);
+                if (!subflow.doTrace())
+                    return 0;
                 subflow.apply();
             }
             return 1;

@@ -73,7 +73,7 @@ namespace Sla.DECCORE
                 int sgn;
                 if (offset == 0)
                     sgn = 1;
-                else if (offset == Globals.calc_mask(compSize))
+                else if (offset == Globals.calc_mask((uint)compSize))
                     sgn = -1;
                 else
                     continue;

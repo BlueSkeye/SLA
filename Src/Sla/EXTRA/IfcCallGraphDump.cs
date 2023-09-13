@@ -15,7 +15,7 @@ namespace Sla.EXTRA
                 throw new IfaceExecutionError("No callgraph has been built");
 
             string name;
-            s >> ws >> name;
+            s.ReadSpaces() >> name;
             if (name.size() == 0)
                 throw new IfaceParseError("Need file name to write callgraph to");
 

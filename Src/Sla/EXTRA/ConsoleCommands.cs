@@ -11,14 +11,15 @@ namespace Sla.EXTRA
     /// \brief A console command run as part of a test sequence
     internal class ConsoleCommands : IfaceStatus
     {
-        private List<string> commands = new List<string>();     ///< Sequence of commands
-        private uint pos;                ///< Position of next command to execute
+        // Sequence of commands
+        private List<string> commands = new List<string>();
+        // Position of next command to execute
+        private int pos;
         
-        protected override void readLine(string line)
+        protected override void readLine(out string line)
         {
-            if (pos >= commands.size())
-            {
-                line.clear();
+            if (pos >= commands.size()) {
+                line = string.Empty;
                 return;
             }
             line = commands[pos];

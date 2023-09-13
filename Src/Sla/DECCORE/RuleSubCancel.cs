@@ -91,7 +91,7 @@ namespace Sla.DECCORE
             data.opSetInput(op, thruvn, 0);
 
             if (opc == OpCode.CPUI_SUBPIECE)
-                data.opSetInput(op, data.newConstant(op.getIn(1).getSize(), offset), 1);
+                data.opSetInput(op, data.newConstant(op.getIn(1).getSize(), (ulong)offset), 1);
             else
                 data.opRemoveInput(op, 1);  // ZEXT, SEXT, or COPY has only 1 input
             return 1;

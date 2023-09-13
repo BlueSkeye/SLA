@@ -34,7 +34,7 @@ namespace Sla.DECCORE
 
             data.opSetOpcode(op, OpCode.CPUI_COPY);
             data.opRemoveInput(op, 1);
-            vn = data.newConstant(1, (op.code() == OpCode.CPUI_INT_EQUAL) ? 1 : 0);
+            vn = data.newConstant(1, (op.code() == OpCode.CPUI_INT_EQUAL) ? 1UL : 0);
             data.opSetInput(op, vn, 0);
             return 1;
         }

@@ -1,10 +1,4 @@
 ﻿using Sla.CORE;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.DECCORE
 {
@@ -15,26 +9,25 @@ namespace Sla.DECCORE
     /// only be one execution path, although there can be multiple data-flow paths.
     internal class EmulateFunction : EmulatePcodeOp
     {
-        /// The function being emulated
+        // The function being emulated
         private Funcdata fd;
-        /// Light-weight memory state based on Varnodes
+        // Light-weight memory state based on Varnodes
         private Dictionary<Varnode, ulong> varnodeMap;
-        /// Set to \b true if the emulator collects individual LOAD addresses
+        // Set to \b true if the emulator collects individual LOAD addresses
         private bool collectloads;
-        /// The set of collected LOAD records
-        private List<LoadTable> loadpoints;
+        // The set of collected LOAD records
+        private List<LoadTable> loadpoints = new List<LoadTable>();
 
         protected override void executeLoad()
         {
-            if (collectloads)
-            {
+            if (collectloads) {
                 ulong off = getVarnodeValue(currentOp.getIn(1));
-                AddrSpace* spc = currentOp.getIn(0).getSpaceFromConst();
+                AddrSpace spc = currentOp.getIn(0).getSpaceFromConst();
                 off = AddrSpace.addressToByte(off, spc.getWordSize());
                 int sz = currentOp.getOut().getSize();
-                loadpoints.Add(LoadTable(Address(spc, off), sz));
+                loadpoints.Add(new LoadTable(new Address(spc, off), sz));
             }
-            EmulatePcodeOp::executeLoad();
+            base.executeLoad();
         }
 
         protected override void executeBranch()
@@ -67,8 +60,9 @@ namespace Sla.DECCORE
 
         protected override void fallthruOp()
         {
-            lastOp = currentOp;     // Keep track of lastOp for MULTIEQUAL
-                                    // Otherwise do nothing: outer loop is controlling execution flow
+            // Keep track of lastOp for MULTIEQUAL
+            // Otherwise do nothing: outer loop is controlling execution flow
+            lastOp = currentOp;
         }
 
         /// \param f is the function to emulate within
@@ -79,18 +73,21 @@ namespace Sla.DECCORE
             collectloads = false;
         }
 
+        // Set whether we collect LOAD information
         public void setLoadCollect(bool val)
         {
             collectloads = val;
-        }   ///< Set whether we collect LOAD information
+        }
 
         public override void setExecuteAddress(Address addr)
         {
-            if (!addr.getSpace().hasPhysical())
+            if (!addr.getSpace().hasPhysical()) {
                 throw new LowlevelError("Bad execute address");
+            }
             currentOp = fd.target(addr);
-            if (currentOp == (PcodeOp)null)
+            if (currentOp == (PcodeOp)null) {
                 throw new LowlevelError("Could not set execute address");
+            }
             currentBehave = currentOp.getOpcode().getBehavior();
         }
 
@@ -99,11 +96,14 @@ namespace Sla.DECCORE
             // Get the value of a Varnode which is in a syntax tree
             // We can't just use the memory location as, within the tree,
             // this is just part of the label
-            if (vn.isConstant())
+            if (vn.isConstant()) {
                 return vn.getOffset();
+            }
             ulong value;
-            if (varnodeMap.TryGetValue(vn, out value))
-                return value;  // We have seen this varnode before
+            if (varnodeMap.TryGetValue(vn, out value)) {
+                // We have seen this varnode before
+                return value;
+            }
             return getLoadImageValue(vn.getSpace(), vn.getOffset(), vn.getSize());
         }
 
@@ -121,46 +121,52 @@ namespace Sla.DECCORE
         /// \param startop is the starting PcodeOp within the path set
         /// \param startvn is the Varnode holding the starting value
         /// \return the calculated value at the common end-point
-        public ulong emulatePath(ulong val, PathMeld pathMeld, PcodeOp startop, Varnode startvn)
+        public ulong emulatePath(ulong val, PathMeld pathMeld, PcodeOp startop,
+            Varnode startvn)
         {
-            uint i;
+            int i;
             for (i = 0; i < pathMeld.numOps(); ++i)
                 if (pathMeld.getOp(i) == startop) break;
-            if (startop.code() == OpCode.CPUI_MULTIEQUAL)
-            { // If we start on a MULTIEQUAL
+            if (startop.code() == OpCode.CPUI_MULTIEQUAL) {
+                // If we start on a MULTIEQUAL
                 int j;
-                for (j = 0; j < startop.numInput(); ++j)
-                { // Is our startvn one of the branches
+                for (j = 0; j < startop.numInput(); ++j) {
+                    // Is our startvn one of the branches
                     if (startop.getIn(j) == startvn)
                         break;
                 }
-                if ((j == startop.numInput()) || (i == 0)) // If not, we can't continue;
-                    throw new LowlevelError("Cannot start jumptable emulation with unresolved MULTIEQUAL");
-                // If the startvn was a branch of the MULTIEQUAL, emulate as if we just came from that branch
-                startvn = startop.getOut(); // So the output of the MULTIEQUAL is the new startvn (as if a COPY from old startvn)
-                i -= 1;         // Move to the next instruction to be executed
+                if ((j == startop.numInput()) || (i == 0)) {
+                    // If not, we can't continue;
+                    throw new LowlevelError(
+                        "Cannot start jumptable emulation with unresolved MULTIEQUAL");
+                }
+                // If the startvn was a branch of the MULTIEQUAL, emulate as if we just came
+                // from that branch. So the output of the MULTIEQUAL is the new startvn
+                // (as if a COPY from old startvn)
+                startvn = startop.getOut();
+                // Move to the next instruction to be executed
+                i -= 1;
                 startop = pathMeld.getOp(i);
             }
-            if (i == pathMeld.numOps())
+            if (i == pathMeld.numOps()) {
                 throw new LowlevelError("Bad jumptable emulation");
-            if (!startvn.isConstant())
+            }
+            if (!startvn.isConstant()) {
                 setVarnodeValue(startvn, val);
-            while (i > 0)
-            {
+            }
+            while (i > 0) {
                 PcodeOp curop = pathMeld.getOp(i);
                 --i;
                 setCurrentOp(curop);
-                try
-                {
+                try {
                     executeCurrentOp();
                 }
-                catch (DataUnavailError err) {
-                    ostringstream msg;
-                    msg << "Could not emulate address calculation at " << curop.getAddr();
-                    throw new LowlevelError(msg.ToString());
+                catch (DataUnavailError) {
+                    throw new LowlevelError(
+                        $"Could not emulate address calculation at {curop.getAddr()}");
                 }
             }
-            Varnode invn = pathMeld.getOp(0).getIn(0);
+            Varnode invn = pathMeld.getOp(0).getIn(0) ?? throw new ApplicationException();
             return getVarnodeValue(invn);
         }
 

@@ -18,18 +18,18 @@ namespace Sla.EXTRA
     throw new IfaceExecutionError("No function selected");
 
   Address pclow,pchigh;
-  s >> ws;
-  if (!s.eof()) {
-    pclow = parse_machaddr(s,discard,*dcp.conf.types);
-    s >> ws;
+  s.ReadSpaces();
+  if (!s.EofReached()) {
+    pclow = Grammar.parse_machaddr(s, out discard, dcp.conf.types);
+    s.ReadSpaces();
   }
   pchigh = pclow;
-  if (!s.eof()) {
-    pchigh = parse_machaddr(s,discard,*dcp.conf.types);
-    s >> ws;
+  if (!s.EofReached()) {
+    pchigh = Grammar.parse_machaddr(s, out discard, dcp.conf.types);
+    s.ReadSpaces();
   }
   uqhigh = uqlow = uint.MaxValue;
-  if (!s.eof()) {
+  if (!s.EofReached()) {
     s.unsetf(ios::dec | ios::hex | ios::oct); // Let user specify base
     s >> uqlow >> uqhigh >> ws;
   }

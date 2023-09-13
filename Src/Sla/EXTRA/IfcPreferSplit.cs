@@ -24,13 +24,13 @@ namespace Sla.EXTRA
             int size = 0;
             if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("No load image present");
-            Address addr = parse_machaddr(s, size, *dcp.conf.types); // Read storage location
+            Address addr = Grammar.parse_machaddr(s, out size, dcp.conf.types); // Read storage location
             if (size == 0)
                 throw new IfaceExecutionError("Must specify a size");
             int split = -1;
 
-            s >> ws;
-            if (s.eof())
+            s.ReadSpaces();
+            if (s.EofReached())
                 throw new IfaceParseError("Missing split offset");
             s >> dec >> split;
             if (split == -1)

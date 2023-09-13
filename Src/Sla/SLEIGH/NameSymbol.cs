@@ -36,7 +36,8 @@ namespace Sla.SLEIGH
         {
             if (!tableisfilled) {
                 long ind = patval.getValue(walker);
-                if ((ind >= nametable.size()) || (ind < 0) || ((nametable[ind].size() == 1) && (nametable[ind][0] == '\t')))
+                if (   (ind >= nametable.size()) || (ind < 0) || ((nametable[(int)ind].Length == 1)
+                    && (nametable[(int)ind][0] == '\t')))
                 {
                     TextWriter s = new StringWriter();
                     s.Write(walker.getAddr().getShortcut());

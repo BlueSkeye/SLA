@@ -120,7 +120,7 @@ namespace Sla.DECCORE
                 intersectEffects(model.effectlist);
                 intersectLikelyTrash(model.likelytrash);
                 // Take the union of the localrange and paramrange
-                IEnumerator<Range> iter;
+                IEnumerator<Sla.CORE.Range> iter;
                 for (iter = model.localrange.begin(); iter != model.localrange.end(); ++iter)
                     localrange.insertRange((*iter).getSpace(), (*iter).getFirst(), (*iter).getLast());
                 for (iter = model.paramrange.begin(); iter != model.paramrange.end(); ++iter)

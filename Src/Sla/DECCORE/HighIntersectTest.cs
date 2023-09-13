@@ -160,8 +160,10 @@ namespace Sla.DECCORE
         /// \param high2 is the variable object being eliminated
         public void moveIntersectTests(HighVariable high1, HighVariable high2)
         {
-            List<HighVariable> yesinter = new List<HighVariable>();     // Highs that high2 intersects
-            List<HighVariable> nointer = new List<HighVariable>();      // Highs that high2 does not intersect
+            // Highs that high2 intersects
+            List<HighVariable> yesinter = new List<HighVariable>();
+            // Highs that high2 does not intersect
+            List<HighVariable> nointer = new List<HighVariable>();
             Dictionary<HighEdge, bool>.Enumerator iterfirst =
                 highedgemap.lower_bound(new HighEdge(high2, (HighVariable)null));
             Dictionary<HighEdge, bool>.Enumerator iterlast =
@@ -171,10 +173,11 @@ namespace Sla.DECCORE
             while (iter.MoveNext()) {
                 HighVariable b = iter.Current.Key.b;
                 if (b == high1) continue;
-                if (iter.Current.Value)
+                if (iter.Current.Value) {
                     // Save all high2's intersections
                     // as they are still valid for the merge
                     yesinter.Add(b);
+                }
                 else {
                     nointer.Add(b);
                     // Mark that high2 did not intersect

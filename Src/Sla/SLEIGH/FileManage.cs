@@ -171,7 +171,7 @@ namespace Sla.SLEIGH
 	            res.Add(dirfinal + fullname);
 	        }
 	        else {
-	          if (0==fullname.compare(0,match.size(),match))
+	          if (0==fullname.compare(0,match.Length,match))
 	            res.Add(dirfinal + fullname);
 	        }
               }
@@ -220,7 +220,7 @@ namespace Sla.SLEIGH
           WIN32_FIND_DATAA FindFileData;
                 HANDLE hFind;
                 string dirfinal = dirname;
-          if (dirfinal[dirfinal.size() - 1] != separator)
+          if (dirfinal[dirfinal.Length - 1] != separator)
             dirfinal += separator;
           string regex = dirfinal + "*";
                 char* s = regex.c_str();
@@ -321,7 +321,7 @@ namespace Sla.SLEIGH
             bool isAbs = isAbsolutePath(cur);
 
             while(true) {
-                int sizebefore = cur.size();
+                int sizebefore = cur.Length;
                 splitPath(cur, out cur, out @base);
                 if (cur.Length == sizebefore) break;
                 if (@base == ".")

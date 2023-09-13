@@ -7,8 +7,26 @@ namespace Sla.DECCORE
         rangemap<ScopeMapper, Address, ScopeMapper.NullSubsort, Scope>
     {
         internal ScopeResolve()
-            : base(ScopeMapper.Instanciator.Instance, LinetypeComparer.Instance)
+            : base(ScopeMapperInstanciator.Instance,
+                  ScopeMapper.SubsorttypeInstanciator.Instance, LinetypeComparer.Instance,
+                  AddressLinetypeAdder.Instance)
         {
+        }
+
+        private class ScopeMapperInstanciator :
+            IRecordTypeInstanciator<ScopeMapper, Scope, Address>
+        {
+            internal static readonly ScopeMapperInstanciator Instance =
+                new ScopeMapperInstanciator();
+
+            private ScopeMapperInstanciator()
+            {
+            }
+
+            public ScopeMapper CreateRecord(Scope initdata, Address a, Address b)
+            {
+                return new ScopeMapper(initdata, a, b);
+            }
         }
 
         private class LinetypeComparer : IComparer<Address>
@@ -21,7 +39,7 @@ namespace Sla.DECCORE
 
             public int Compare(Address? x, Address? y)
             {
-                if (x == null) throw new ApplicationException();
+                if (null == x) throw new ApplicationException();
                 return x.CompareTo(y);
             }
         }

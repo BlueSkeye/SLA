@@ -79,7 +79,7 @@ namespace Sla.CORE
             uint elemId = decoder.openElement(ElementId.ELEM_NODE);
             string? name = null;
             while(true) {
-                AttributeId attribId = decoder.getNextAttributeId();
+                uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == AttributeId.ATTRIB_NAME)
                     name = decoder.readString();

@@ -1,10 +1,4 @@
 ﻿using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.EXTRA
 {
@@ -17,20 +11,19 @@ namespace Sla.EXTRA
         /// Information about the code ranges where the HighVariable is in scope is printed.
         public override void execute(TextReader s)
         {
-            HighVariable* high;
-            string name;
+            HighVariable high;
 
             if (dcp.fd == (Funcdata)null)
                 throw new IfaceExecutionError("No function selected");
 
-            s >> ws >> name;
-            if (name.size() == 0)
+            s.ReadSpaces();
+            string name = s.ReadString();
+            if (name.Length == 0)
                 throw new IfaceParseError("Missing variable name");
             high = dcp.fd.findHigh(name);
             if (high == (HighVariable)null)
                 throw new IfaceExecutionError("Unable to find variable: " + name);
-
-            high.printCover(*status.optr);
+            high.printCover(status.optr);
         }
     }
 }

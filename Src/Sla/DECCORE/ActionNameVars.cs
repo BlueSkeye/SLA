@@ -124,16 +124,23 @@ namespace Sla.DECCORE
             if (0 == recmap.Count) return;
 
             Dictionary<HighVariable, OpRecommend>.Enumerator iter;
-            for (uint i = 0; i < varlist.size(); ++i) {
+            for (int i = 0; i < varlist.size(); ++i) {
                 // Do the actual naming in the original (address based) order
                 Varnode vn = varlist[i];
-                if (vn.isFree()) continue;
-                if (vn.isInput()) continue;    // Don't override unaffected or input naming strategy
+                if (vn.isFree())
+                    continue;
+                if (vn.isInput())
+                    // Don't override unaffected or input naming strategy
+                    continue;
                 HighVariable high = vn.getHigh();
-                if (high.getNumMergeClasses() > 1) continue;   // Don't inherit a name if speculatively merged
+                if (high.getNumMergeClasses() > 1)
+                    // Don't inherit a name if speculatively merged
+                    continue;
                 Symbol? sym = high.getSymbol();
-                if (sym == (Symbol)null) continue;
-                if (!sym.isNameUndefined()) continue;
+                if (sym == (Symbol)null)
+                    continue;
+                if (!sym.isNameUndefined())
+                    continue;
                 OpRecommend recommended;
                 if (recmap.TryGetValue(high, out recommended)) {
                     sym.getScope().renameSymbol(sym, localmap.makeNameUnique(recommended.namerec));
@@ -238,7 +245,7 @@ namespace Sla.DECCORE
             lookForFuncParamNames(data, namerec);
 
             int @base = 1;
-            for (uint i = 0; i < namerec.size(); ++i) {
+            for (int i = 0; i < namerec.size(); ++i) {
                 Varnode vn = namerec[i];
                 Symbol sym = vn.getHigh().getSymbol() ?? throw new ApplicationException();
                 if (sym.isNameUndefined()) {

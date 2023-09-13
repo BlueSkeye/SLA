@@ -1,11 +1,5 @@
 ﻿using Sla.CORE;
 using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.EXTRA
 {
@@ -23,23 +17,21 @@ namespace Sla.EXTRA
         public override void execute(TextReader s)
         {
             int discard;
-            uint type;
-            string token;
 
             if (dcp.fd == (Funcdata)null)
                 throw new IfaceExecutionError("No function selected");
 
-            s >> ws;
-            Address addr = new Address(parse_machaddr(s, discard,* dcp.conf.types));
-            s >> token;
-            if (token.size() == 0)
+            s.ReadSpaces();
+            Address addr = Grammar.parse_machaddr(s, out discard, dcp.conf.types);
+            string token = s.ReadString();
+            if (token.Length == 0)
                 throw new IfaceParseError("Missing override type");
-            type = Override::stringToType(token);
+            Override.Branching type = Override.stringToType(token);
             if (type == Override.Branching.NONE)
                 throw new IfaceParseError("Bad override type");
 
             dcp.fd.getOverride().insertFlowOverride(addr, type);
-            *status.optr << "Successfully added override" << endl;
+            status.optr.WriteLine("Successfully added override");
         }
     }
 }

@@ -40,7 +40,7 @@ namespace Sla.SLEIGH
             //    delete pattern;
             //if (decisiontree != (DecisionNode)null)
             //    delete decisiontree;
-            IEnumerator<Constructor> iter = construct.begin();
+            // IEnumerator<Constructor> iter = construct.begin();
             //while (iter.MoveNext())
             //    delete* iter;
         }

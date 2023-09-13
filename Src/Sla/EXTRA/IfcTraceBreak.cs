@@ -16,7 +16,7 @@ namespace Sla.EXTRA
   if (dcp.fd == (Funcdata *)0)
     throw new IfaceExecutionError("No function selected");
 
-  s >> ws;
+  s.ReadSpaces();
   s.unsetf(ios::dec | ios::hex | ios::oct); // Let user specify base
   count = -1;
   s >> count;

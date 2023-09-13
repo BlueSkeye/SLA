@@ -7,7 +7,7 @@ namespace Sla.EXTRA
     internal class InjectPayloadSleigh : InjectPayload
     {
         // friend class PcodeInjectLibrarySleigh;
-        private ConstructTpl? tpl;
+        internal ConstructTpl? tpl;
         internal string parsestring;
         private string source;
 

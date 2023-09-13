@@ -85,7 +85,7 @@ namespace Sla.DECCORE
                 if (!negvn.getDef().getIn(1).isConstant()) return 0;
                 unnegvn = negvn.getDef().getIn(0);
                 multiplier = negvn.getDef().getIn(1).getOffset();
-                if (multiplier != Globals.calc_mask(unnegvn.getSize())) return 0;
+                if (multiplier != Globals.calc_mask((uint)unnegvn.getSize())) return 0;
             }
             if (!posvn.isHeritageKnown()) return 0;
             if (!unnegvn.isHeritageKnown()) return 0;

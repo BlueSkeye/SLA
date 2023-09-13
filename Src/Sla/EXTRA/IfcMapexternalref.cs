@@ -1,4 +1,5 @@
 ﻿using Sla.CORE;
+using Sla.DECCORE;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -21,12 +22,9 @@ namespace Sla.EXTRA
         public override void execute(TextReader s)
         {
             int size1, size2;
-            Address addr1 = parse_machaddr(s, size1, *dcp.conf.types); // Read externalref address
-            Address addr2 = parse_machaddr(s, size2, *dcp.conf.types); // Read referred to address
-            string name;
-
-            s >> name;          // Read optional name
-
+            Address addr1 = Grammar.parse_machaddr(s, out size1, dcp.conf.types); // Read externalref address
+            Address addr2 = Grammar.parse_machaddr(s, out size2, dcp.conf.types); // Read referred to address
+            string name = s.ReadString(); // Read optional name
             dcp.conf.symboltab.getGlobalScope().addExternalRef(addr1, addr2, name);
         }
     }

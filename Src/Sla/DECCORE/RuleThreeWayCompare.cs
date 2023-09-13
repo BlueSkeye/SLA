@@ -57,7 +57,7 @@ namespace Sla.DECCORE
             ulong val = tmpvn.getOffset(); // Encode const value (-1, 0, 1, 2) as highest 3 bits of form (000, 001, 010, 011)
             if (val <= 2)
                 form = (int)val + 1;
-            else if (val == Globals.calc_mask(tmpvn.getSize()))
+            else if (val == Globals.calc_mask((uint)tmpvn.getSize()))
                 form = 0;
             else
                 return 0;
@@ -187,7 +187,7 @@ namespace Sla.DECCORE
             vn2 = op.getIn(1);
             if (vn2.isConstant())
             {       // Form 1 :  (z + z) - 1
-                mask = Globals.calc_mask(vn2.getSize());
+                mask = Globals.calc_mask((uint)vn2.getSize());
                 if (mask != vn2.getOffset()) return (PcodeOp)null;       // Match the -1
                 vn1 = op.getIn(0);
                 if (!vn1.isWritten()) return (PcodeOp)null;
@@ -222,7 +222,7 @@ namespace Sla.DECCORE
                     {
                         tmpvn = addop.getIn(1);
                         if (!tmpvn.isConstant()) return (PcodeOp)null;
-                        mask = Globals.calc_mask(tmpvn.getSize());
+                        mask = Globals.calc_mask((uint)tmpvn.getSize());
                         if (mask != tmpvn.getOffset()) return (PcodeOp)null; // Match the -1
                         tmpvn = addop.getIn(0);
                         if (!tmpvn.isWritten()) return (PcodeOp)null;
@@ -239,7 +239,7 @@ namespace Sla.DECCORE
                     if (zext1.code() != OpCode.CPUI_INT_ZEXT) return (PcodeOp)null; // Match the first zext
                     tmpvn = addop.getIn(1);
                     if (!tmpvn.isConstant()) return (PcodeOp)null;
-                    mask = Globals.calc_mask(tmpvn.getSize());
+                    mask = Globals.calc_mask((uint)tmpvn.getSize());
                     if (mask != tmpvn.getOffset()) return (PcodeOp)null; // Match the -1
                     tmpvn = addop.getIn(0);
                     if (!tmpvn.isWritten()) return (PcodeOp)null;

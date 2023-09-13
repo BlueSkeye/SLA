@@ -20,42 +20,41 @@ namespace Sla.DECCORE
 
         public override int apply(Funcdata data)
         {
-            VarnodeDefSet::const_iterator iter, enditer;
-            FuncProto & proto(data.getFuncProto());
+            FuncProto proto = data.getFuncProto();
 
-            iter = data.beginDef(Varnode.varnode_flags.input);
-            enditer = data.endDef(Varnode.varnode_flags.input);
+            IEnumerator<Varnode> iter = data.beginDef(Varnode.varnode_flags.input);
+            // IEnumerator<Varnode> enditer = data.endDef(Varnode.varnode_flags.input);
 
-            while (iter != enditer)
-            {
-                Varnode vn = *iter++;
+            while (iter.MoveNext()) {
+                Varnode vn = iter.Current;
                 VarnodeData vdata;
-                if (!proto.unjustifiedInputParam(vn.getAddr(), vn.getSize(), vdata)) continue;
+                if (!proto.unjustifiedInputParam(vn.getAddr(), vn.getSize(), vdata))
+                    continue;
 
                 bool newcontainer;
-                do
-                {
+                do {
                     newcontainer = false;
-                    VarnodeDefSet::const_iterator begiter, iter2;
-                    begiter = data.beginDef(Varnode.varnode_flags.input);
-                    iter2 = iter;
+                    IEnumerator<Varnode> begiter = data.beginDef(Varnode.varnode_flags.input);
+                    IEnumerator<Varnode> iter2 = iter;
                     bool overlaps = false;
-                    while (iter2 != begiter)
-                    {
+                    while (iter2 != begiter) {
                         --iter2;
-                        vn = *iter2;
+                        vn = iter2.Current;
                         if (vn.getSpace() != vdata.space) continue;
-                        ulong offset = vn.getOffset() + vn.getSize() - 1; // Last offset in varnode
-                        if ((offset >= vdata.offset) && (vn.getOffset() < vdata.offset))
-                        { // If there is overlap that extends size
+                        // Last offset in varnode
+                        ulong offset = vn.getOffset() + vn.getSize() - 1;
+                        if ((offset >= vdata.offset) && (vn.getOffset() < vdata.offset)) {
+                            // If there is overlap that extends size
                             overlaps = true;
                             ulong endpoint = vdata.offset + vdata.size;
                             vdata.offset = vn.getOffset();
                             vdata.size = endpoint - vdata.offset;
                         }
                     }
-                    if (!overlaps) break;   // Found no additional overlaps, go with current justified container
-                                            // If there were overlaps, container may no longer be justified
+                    if (!overlaps)
+                        // Found no additional overlaps, go with current justified container
+                        break;
+                    // If there were overlaps, container may no longer be justified
                     newcontainer = proto.unjustifiedInputParam(vdata.getAddr(), vdata.size, vdata);
                 } while (newcontainer);
 

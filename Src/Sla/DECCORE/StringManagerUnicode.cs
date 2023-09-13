@@ -53,9 +53,10 @@ namespace Sla.DECCORE
             // delete[] testBuffer;
         }
 
-        public override List<byte> getStringData(Address addr, Datatype charType, bool isTrunc)
+        public override List<byte> getStringData(Address addr, Datatype charType,
+            out bool isTrunc)
         {
-            StringData data;
+            StringData? data;
             if (stringMap.TryGetValue(addr, out data)) {
                 isTrunc = data.isTruncated;
                 return data.byteData;

@@ -23,7 +23,7 @@ namespace Sla.EXTRA
             string filename;
             ifstream fs;
 
-            s >> ws >> filename;
+            s.ReadSpaces() >> filename;
             if (filename.empty())
                 throw new IfaceParseError("Missing filename");
 

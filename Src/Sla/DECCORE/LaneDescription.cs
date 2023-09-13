@@ -147,13 +147,16 @@ namespace Sla.DECCORE
         /// \param resNumLanes will hold the number of lanes in the truncation
         /// \param resSkipLanes will hold the starting lane in the truncation
         /// \return \b true if the truncation is natural
-        public bool restriction(int numLanes, int skipLanes, int bytePos, int size, int resNumLanes,
-            int resSkipLanes)
+        public bool restriction(int numLanes, int skipLanes, int bytePos, int size,
+            out int resNumLanes, out int resSkipLanes)
         {
+            resNumLanes = 0;
             resSkipLanes = getBoundary(lanePosition[skipLanes] + bytePos);
-            if (resSkipLanes < 0) return false;
+            if (resSkipLanes < 0)
+                return false;
             int finalIndex = getBoundary(lanePosition[skipLanes] + bytePos + size);
-            if (finalIndex < 0) return false;
+            if (finalIndex < 0)
+                return false;
             resNumLanes = finalIndex - resSkipLanes;
             return (resNumLanes != 0);
         }
@@ -171,8 +174,8 @@ namespace Sla.DECCORE
         /// \param resNumLanes will hold the number of lanes in the extension
         /// \param resSkipLanes will hold the starting lane in the extension
         /// \return \b true if the extension is natural
-        public bool extension(int numLanes, int skipLanes, int bytePos, int size, int resNumLanes,
-            int resSkipLanes)
+        public bool extension(int numLanes, int skipLanes, int bytePos, int size,
+            int resNumLanes, int resSkipLanes)
         {
             resSkipLanes = getBoundary(lanePosition[skipLanes] - bytePos);
             if (resSkipLanes < 0) return false;

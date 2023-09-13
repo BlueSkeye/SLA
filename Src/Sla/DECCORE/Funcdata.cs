@@ -5487,13 +5487,13 @@ namespace Sla.DECCORE
         /// \param a is the first call specification to compare
         /// \param b is the second call specification
         /// \return \b true if the first call specification should come before the second
-        public static bool compareCallspecs(FuncCallSpecs a, FuncCallSpecs b)
+        public static int compareCallspecs(FuncCallSpecs a, FuncCallSpecs b)
         {
             int ind1, ind2;
             ind1 = a.getOp().getParent().getIndex();
             ind2 = b.getOp().getParent().getIndex();
-            if (ind1 != ind2) return (ind1 < ind2);
-            return (a.getOp().getSeqNum().getOrder() < b.getOp().getSeqNum().getOrder());
+            if (ind1 != ind2) return ind1.CompareTo(ind2);
+            return a.getOp().getSeqNum().getOrder().CompareTo(b.getOp().getSeqNum().getOrder());
         }
 
 #if OPACTION_DEBUG

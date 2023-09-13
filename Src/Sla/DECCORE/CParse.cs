@@ -1,15 +1,4 @@
 ﻿using Sla.CORE;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.CompilerServices;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Sla.DECCORE
 {
@@ -37,24 +26,30 @@ namespace Sla.DECCORE
             doc_declaration,
             doc_parameter_declaration
         }
-        
+
+        // #define yylval grammarlval
+        // #define yyparse grammarparse
+        private Grammar.GRAMMARSTYPE grammarlval;
+
         private Architecture glb;
         private Dictionary<string, Flags> keywords = new Dictionary<string, Flags>();
         private GrammarLexer lexer;
         private int lineno;
         private int colno;
-        private int filenum;    // Location of last token
-        private List<TypeDeclarator> typedec_alloc;
-        private List<TypeSpecifiers> typespec_alloc;
-        private List<List<uint>> vecuint4_alloc;
-        private List<List<TypeDeclarator>> vecdec_alloc;
-        private List<string> string_alloc;
-        private List<ulong> num_alloc;
-        private List<Enumerator> enum_alloc;
-        private List<List<Enumerator>> vecenum_alloc;
+        // Location of last token
+        private int filenum;
+        private List<TypeDeclarator> typedec_alloc = new List<TypeDeclarator>();
+        private List<TypeSpecifiers> typespec_alloc = new List<TypeSpecifiers>();
+        private List<List<uint>> vecuint4_alloc = new List<List<uint>>();
+        private List<List<TypeDeclarator>> vecdec_alloc = new List<List<TypeDeclarator>>();
+        private List<string> string_alloc = new List<string>();
+        private List<ulong> num_alloc = new List<ulong>();
+        private List<Enumerator> enum_alloc = new List<Enumerator>();
+        private List<List<Enumerator>> vecenum_alloc = new List<List<Enumerator>>();
 
-        private List<TypeDeclarator> lastdecls;
-        private int firsttoken;        // Message to parser indicating desired object
+        private List<TypeDeclarator> lastdecls = new List<TypeDeclarator>();
+        // Message to parser indicating desired object
+        private Grammar.grammartokentype firsttoken;
         private string lasterror;
 
         private void setError(string msg)
@@ -68,7 +63,7 @@ namespace Sla.DECCORE
             lasterror = s.ToString();
         }
 
-        private int lookupIdentifier(string nm)
+        private Grammar.grammartokentype lookupIdentifier(string nm)
         {
             Flags result;
             if (keywords.TryGetValue(nm, out result)) {
@@ -78,31 +73,32 @@ namespace Sla.DECCORE
                     case Flags.f_static:
                     case Flags.f_auto:
                     case Flags.f_register:
-                        return STORAGE_CLASS_SPECIFIER;
+                        return Grammar.grammartokentype.STORAGE_CLASS_SPECIFIER;
                     case Flags.f_const:
                     case Flags.f_restrict:
                     case Flags.f_volatile:
-                        return TYPE_QUALIFIER;
+                        return Grammar.grammartokentype.TYPE_QUALIFIER;
                     case Flags.f_inline:
-                        return FUNCTION_SPECIFIER;
+                        return Grammar.grammartokentype.FUNCTION_SPECIFIER;
                     case Flags.f_struct:
-                        return STRUCT;
+                        return Grammar.grammartokentype.STRUCT;
                     case Flags.f_union:
-                        return UNION;
+                        return Grammar.grammartokentype.UNION;
                     case Flags.f_enum:
-                        return ENUM;
+                        return Grammar.grammartokentype.ENUM;
                     default:
                         break;
                 }
             }
-            Datatype tp = glb.types.findByName(nm);
+            Datatype? tp = glb.types.findByName(nm);
             if (tp != (Datatype)null) {
-                yylval.type = tp;
-                return TYPE_NAME;
+                grammarlval.type = tp;
+                return Grammar.grammartokentype.TYPE_NAME;
             }
             if (glb.hasModel(nm))
-                return FUNCTION_SPECIFIER;
-            return IDENTIFIER;      // Unknown identifier
+                return Grammar.grammartokentype.FUNCTION_SPECIFIER;
+            // Unknown identifier
+            return Grammar.grammartokentype.IDENTIFIER;
         }
 
         private bool runParse(DocType doctype)
@@ -110,16 +106,17 @@ namespace Sla.DECCORE
             // Assuming the stream has been setup, parse it
             switch (doctype) {
                 case DocType.doc_declaration:
-                    firsttoken = DECLARATION_RESULT;
+                    firsttoken = Grammar.grammartokentype.DECLARATION_RESULT;
                     break;
                 case DocType.doc_parameter_declaration:
-                    firsttoken = PARAM_RESULT;
+                    firsttoken = Grammar.grammartokentype.PARAM_RESULT;
                     break;
                 default:
                     throw new LowlevelError("Bad document type");
             }
-            parse = this;           // Setup global object for yyparse
-            int res = yyparse();
+            // Setup global object for yyparse
+            parse = this;
+            int res = grammarparse();
             if (res != 0) {
                 if (lasterror.Length == 0)
                     setError("Syntax error");
@@ -132,7 +129,7 @@ namespace Sla.DECCORE
         {
             lexer = new GrammarLexer(maxbuf);
             glb = g;
-            firsttoken = -1;
+            firsttoken = (Grammar.grammartokentype)(-1);
             lineno = -1;
             colno = -1;
             filenum = -1;
@@ -162,7 +159,7 @@ namespace Sla.DECCORE
             lasterror = string.Empty;
             lastdecls = (List<TypeDeclarator>)null;
             lexer.clear();
-            firsttoken = -1;
+            firsttoken = (Grammar.grammartokentype)(-1);
         }
 
         public List<TypeDeclarator> mergeSpecDecVec(TypeSpecifiers spec)
@@ -185,10 +182,9 @@ namespace Sla.DECCORE
 
         public TypeDeclarator mergeSpecDec(TypeSpecifiers spec)
         {
-            dec.basetype = spec.type_specifier;
-            dec.model = spec.function_specifier;
-            dec.flags |= spec.flags;
-            return dec;
+            TypeDeclarator dec = new TypeDeclarator();
+            typedec_alloc.Add(dec);
+            return mergeSpecDec(spec, dec);
         }
 
         public TypeDeclarator mergeSpecDec(TypeSpecifiers spec, TypeDeclarator dec)
@@ -459,45 +455,45 @@ namespace Sla.DECCORE
             vecenum_alloc.Clear();
         }
 
-        public int lex()
+        public Grammar.grammartokentype lex()
         {
             GrammarToken tok = new GrammarToken();
 
-            if (firsttoken != -1) {
-                int retval = firsttoken;
-                firsttoken = -1;
+            if (firsttoken != (Grammar.grammartokentype)(-1)) {
+                Grammar.grammartokentype retval = firsttoken;
+                firsttoken = (Grammar.grammartokentype)(-1);
                 return retval;
             }
             if (lasterror.Length != 0)
-                return BADTOKEN;
+                return Grammar.grammartokentype.BADTOKEN;
             lexer.getNextToken(tok);
             lineno = tok.getLineNo();
             colno = tok.getColNo();
             filenum = tok.getFileNum();
-            switch (tok.getType())
-            {
+            switch (tok.getType()) {
                 case GrammarToken.Token.integer:
                 case GrammarToken.Token.charconstant:
-                    yylval.i = new ulong(tok.getInteger());
-                    num_alloc.Add(yylval.i);
-                    return NUMBER;
+                    grammarlval.i = tok.getInteger();
+                    num_alloc.Add(grammarlval.i);
+                    return Grammar.grammartokentype.NUMBER;
                 case GrammarToken.Token.identifier:
-                    yylval.str = tok.getString();
-                    string_alloc.Add(yylval.str);
-                    return lookupIdentifier(*yylval.str);
+                    grammarlval.str = tok.getString();
+                    string_alloc.Add(grammarlval.str);
+                    return lookupIdentifier(grammarlval.str);
                 case GrammarToken.Token.stringval:
                     // delete tok.getString();
                     setError("Illegal string constant");
-                    return BADTOKEN;
+                    return Grammar.grammartokentype.BADTOKEN;
                 case GrammarToken.Token.dotdotdot:
-                    return DOTDOTDOT;
+                    return Grammar.grammartokentype.DOTDOTDOT;
                 case GrammarToken.Token.badtoken:
                     setError(lexer.getError()); // Error from lexer
-                    return BADTOKEN;
+                    return Grammar.grammartokentype.BADTOKEN;
                 case GrammarToken.Token.endoffile:
-                    return -1;          // No more tokens
+                    // No more tokens
+                    return (Grammar.grammartokentype)(-1);
                 default:
-                    return (int)tok.getType();
+                    return (Grammar.grammartokentype)tok.getType();
             }
         }
 
@@ -513,13 +509,14 @@ namespace Sla.DECCORE
                 throw new LowlevelError($"Unable to open file for parsing: {filename}");
             }
 
-            lexer.pushFile(filename, s);     // Inform lexer of filename and stream
+            // Inform lexer of filename and stream
+            lexer.pushFile(filename, new StreamReader(s));
             bool res = runParse(doctype);
             s.Close();
             return res;
         }
 
-        public bool parseStream(FileStream s, DocType doctype)
+        public bool parseStream(TextReader s, DocType doctype)
         {
             clear();
 

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Sla.EXTRA
 {
     internal class IfcExecuteTestCommand : IfaceDecompCommand
@@ -15,35 +9,34 @@ namespace Sla.EXTRA
         {
             if (dcp.testCollection == (FunctionTestCollection)null)
                 throw new IfaceExecutionError("No test file is loaded");
-            int first = -1;
-            int last = -1;
-            char hyphen;
+            int first;
+            int last;
 
-            s >> ws >> dec >> first;
+            s.ReadSpaces();
+            if (!int.TryParse(s.ReadString(), out first)) first = -1;
             first -= 1;
             if (first < 0 || first > dcp.testCollection.numCommands())
                 throw new IfaceExecutionError("Command index out of bounds");
-            s >> ws;
-            if (!s.eof())
-            {
-                s >> ws >> hyphen;
+            s.ReadSpaces();
+            if (!s.EofReached()) {
+                s.ReadSpaces();
+                char hyphen = s.ReadMandatoryCharacter();
                 if (hyphen != '-')
                     throw new IfaceExecutionError("Missing hyphenated command range");
-                s >> ws >> last;
+                s.ReadSpaces();
+                if (!int.TryParse(s.ReadString(), out last)) last = -1;
                 last -= 1;
                 if (last < 0 || last < first || last > dcp.testCollection.numCommands())
                     throw new IfaceExecutionError("Command index out of bounds");
             }
-            else
-            {
+            else {
                 last = first;
             }
-            ostringstream s1;
-            for (int i = first; i <= last; ++i)
-            {
-                s1 << dcp.testCollection.getCommand(i) << endl;
+            TextWriter s1 = new StringWriter();
+            for (int i = first; i <= last; ++i) {
+                s1.WriteLine(dcp.testCollection.getCommand(i));
             }
-            istringstream* s2 = new istringstream(s1.ToString());
+            TextReader s2 = new StringReader(s1.ToString());
             status.pushScript(s2, "test> ");
         }
     }

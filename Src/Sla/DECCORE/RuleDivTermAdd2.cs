@@ -37,34 +37,39 @@ namespace Sla.DECCORE
 
         public override int applyOp(PcodeOp op, Funcdata data)
         {
-            if (!op.getIn(1).isConstant()) return 0;
-            if (op.getIn(1).getOffset() != 1) return 0;
-            if (!op.getIn(0).isWritten()) return 0;
-            PcodeOp subop = op.getIn(0).getDef();
-            if (subop.code() != OpCode.CPUI_INT_ADD) return 0;
+            if (!op.getIn(1).isConstant())
+                return 0;
+            if (op.getIn(1).getOffset() != 1)
+                return 0;
+            if (!op.getIn(0).isWritten())
+                return 0;
+            PcodeOp subop = op.getIn(0).getDef() ?? throw new ApplicationException();
+            if (subop.code() != OpCode.CPUI_INT_ADD)
+                return 0;
             Varnode? x = (Varnode)null;
             Varnode compvn;
             PcodeOp compop;
-            int i;
-            for (i = 0; i < 2; ++i) {
+            int i = 0;
+            do {
                 compvn = subop.getIn(i);
                 if (compvn.isWritten()) {
                     compop = compvn.getDef();
                     if (compop.code() == OpCode.CPUI_INT_MULT) {
                         Varnode invn = compop.getIn(1);
                         if (invn.isConstant()) {
-                            if (invn.getOffset() == Globals.calc_mask(invn.getSize())) {
+                            if (invn.getOffset() == Globals.calc_mask((uint)invn.getSize())) {
                                 x = subop.getIn(1 - i);
                                 break;
                             }
                         }
                     }
                 }
-            }
-            if (i == 2) return 0;
-            Varnode z = compvn.getDef().getIn(0);
+            } while(++i < 2);
+            if (i == 2) 
+                return 0;
+            Varnode z = compvn.getDef().getIn(0) ?? throw new ApplicationException();
             if (!z.isWritten()) return 0;
-            PcodeOp subpieceop = z.getDef();
+            PcodeOp subpieceop = z.getDef() ?? throw new ApplicationException();
             if (subpieceop.code() != OpCode.CPUI_SUBPIECE) return 0;
             int n = (int)(subpieceop.getIn(1).getOffset() * 8);
             if (n != 8 * (subpieceop.getIn(0).getSize() - z.getSize())) return 0;
@@ -99,7 +104,7 @@ namespace Sla.DECCORE
                 data.opSetOpcode(newshiftop, OpCode.CPUI_INT_RIGHT);
                 Varnode newshiftvn = data.newUniqueOut(zextvn.getSize(), newshiftop);
                 data.opSetInput(newshiftop, newmultvn, 0);
-                data.opSetInput(newshiftop, data.newConstant(4, n + 1), 1);
+                data.opSetInput(newshiftop, data.newConstant(4, (ulong)(n + 1)), 1);
                 data.opInsertBefore(newshiftop, op);
 
                 data.opSetOpcode(addop, OpCode.CPUI_SUBPIECE);

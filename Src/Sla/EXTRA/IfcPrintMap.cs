@@ -1,10 +1,4 @@
 ﻿using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.EXTRA
 {
@@ -18,15 +12,15 @@ namespace Sla.EXTRA
         public override void execute(TextReader s)
         {
             string name;
-            Scope* scope;
+            Scope scope;
 
             s >> name;
 
             if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("No load image");
-            if (name.size() != 0 || dcp.fd == (Funcdata)null)
-            {
-                string fullname = name + "::a";     // Add fake variable name
+            if (name.Length != 0 || dcp.fd == (Funcdata)null) {
+                // Add fake variable name
+                string fullname = name + "::a";
                 scope = dcp.conf.symboltab.resolveScopeFromSymbolName(fullname, "::", fullname, (Scope)null);
             }
             else
@@ -35,7 +29,7 @@ namespace Sla.EXTRA
             if (scope == (Scope)null)
                 throw new IfaceExecutionError("No map named: " + name);
 
-            status.fileoptr << scope.getFullName() << endl;
+            status.fileoptr.WriteLine(scope.getFullName());
             scope.printBounds(status.fileoptr);
             scope.printEntries(status.fileoptr);
         }

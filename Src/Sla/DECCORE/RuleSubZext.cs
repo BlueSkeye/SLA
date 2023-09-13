@@ -69,7 +69,7 @@ namespace Sla.DECCORE
                 }
                 else
                     data.opSetInput(op, basevn, 0); // Otherwise, bypass the truncation entirely
-                val = Globals.calc_mask(subvn.getSize());
+                val = Globals.calc_mask((uint)subvn.getSize());
                 constvn = data.newConstant(basevn.getSize(), val);
                 data.opSetOpcode(op, OpCode.CPUI_INT_AND);
                 data.opInsertInput(op, constvn, 1);
@@ -88,7 +88,7 @@ namespace Sla.DECCORE
                 if (basevn.getSize() != op.getOut().getSize()) return 0; // Truncating then extending to same size
                 if (midvn.loneDescend() != shiftop) return 0;
                 if (subvn.loneDescend() != op) return 0;
-                val = Globals.calc_mask(midvn.getSize()); // Mask based on truncated size
+                val = Globals.calc_mask((uint)midvn.getSize()); // Mask based on truncated size
                 ulong sa = shiftop.getIn(1).getOffset(); // The shift shrinks the mask even further
                 val >>= sa;
                 sa += subop.getIn(1).getOffset() * 8; // The total shift = truncation + small shift

@@ -133,7 +133,7 @@ namespace Sla.DECCORE
                 throw new LowlevelError("Redefining userop " + name);
 
             while(true) {
-                ElementId subId = decoder.peekElement();
+                uint subId = decoder.peekElement();
                 if (subId == 0) break;
                 if (subId == ElementId.ELEM_CONSTRESOLVE) {
                     int sz;

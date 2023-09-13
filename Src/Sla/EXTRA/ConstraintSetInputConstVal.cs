@@ -57,7 +57,7 @@ namespace Sla.EXTRA
             else
                 sz = (int)sizeof(ulong);
             int slt = (int)slot.getConstant(state);
-            fd.opSetInput(op, fd.newConstant(sz, ourconst & Globals.calc_mask(sz)), slt);
+            fd.opSetInput(op, fd.newConstant(sz, ourconst & Globals.calc_mask((uint)sz)), slt);
             return true;
         }
 

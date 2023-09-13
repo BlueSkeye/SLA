@@ -243,6 +243,7 @@ namespace Sla.CORE
         internal static readonly ElementId ELEM_MULTISTAGEJUMP = new ElementId("multistagejump", 222);
         internal static readonly ElementId ELEM_OVERRIDE = new ElementId("override", 223);
         internal static readonly ElementId ELEM_PROTOOVERRIDE = new ElementId("protooverride", 224);
+        internal static readonly ElementId ELEM_PREFERSPLIT = new ElementId("prefersplit", 225);
         internal static readonly ElementId ELEM_CALLGRAPH = new ElementId("callgraph", 226);
         internal static readonly ElementId ELEM_NODE = new ElementId("node", 227);
         internal static readonly ElementId ELEM_LOCALDB = new ElementId("localdb", 228);

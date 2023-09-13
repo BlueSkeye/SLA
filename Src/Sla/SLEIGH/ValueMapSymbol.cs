@@ -50,7 +50,7 @@ namespace Sla.SLEIGH
             // The resolve routine has checked that -ind- must be a valid index
             hand.space = walker.getConstSpace();
             hand.offset_space = (AddrSpace)null; // Not a dynamic value
-            hand.offset_offset = (ulong)valuetable[ind];
+            hand.offset_offset = (ulong)valuetable[(int)ind];
             hand.size = 0;      // Cannot provide size
         }
 

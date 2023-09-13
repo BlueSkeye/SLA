@@ -25,24 +25,22 @@ namespace Sla.DECCORE
 
         public override int apply(Funcdata data)
         {
-            for (int i = 0; i < data.numJumpTables(); ++i)
-            {
-                JumpTable* jt = data.getJumpTable(i);
-                if (!jt.isLabelled())
-                {
-                    if (jt.recoverLabels(&data))
-                    { // Recover case statement labels
-                      // If this returns true, the jumptable was not fully recovered during flow analysis
-                      // So we need to issue a restart
+            for (int i = 0; i < data.numJumpTables(); ++i) {
+                JumpTable jt = data.getJumpTable(i);
+                if (!jt.isLabelled()) {
+                    if (jt.recoverLabels(data)) {
+                        // Recover case statement labels
+                        // If this returns true, the jumptable was not fully recovered during flow analysis
+                        // So we need to issue a restart
                         data.getOverride().insertMultistageJump(jt.getOpAddress());
                         data.setRestartPending(true);
                     }
-                    jt.foldInNormalization(&data);
+                    jt.foldInNormalization(data);
                     count += 1;
                 }
-                if (jt.foldInGuards(&data))
-                {
-                    data.getStructure().clear();    // Make sure we redo structure
+                if (jt.foldInGuards(data)) {
+                    // Make sure we redo structure
+                    data.getStructure().clear();
                     count += 1;
                 }
             }

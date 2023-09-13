@@ -18,9 +18,9 @@ namespace Sla.EXTRA
 
         protected override void buildLoader(DocumentStorage store)
         {
-            RawLoadImage* ldr;
+            RawLoadImage ldr;
 
-            collectSpecFiles(*errorstream);
+            collectSpecFiles(errorstream);
             ldr = new RawLoadImage(getFilename());
             ldr.open();
             if (adjustvma != 0)
@@ -30,56 +30,55 @@ namespace Sla.EXTRA
 
         protected override void resolveArchitecture()
         {
-            archid = getTarget();   // Nothing to derive from the image itself, we just copy in the passed in target
-            SleighArchitecture::resolveArchitecture();
+            archid = getTarget();
+            // Nothing to derive from the image itself, we just copy in the passed in target
+            base.resolveArchitecture();
         }
 
         protected override void postSpecFile()
         {
-            Architecture::postSpecFile();
-            ((RawLoadImage*)loader).attachToSpace(getDefaultCodeSpace());   // Attach default space to loader
+            base.postSpecFile();
+            // Attach default space to loader
+            ((RawLoadImage)loader).attachToSpace(getDefaultCodeSpace());
         }
 
         public override void encode(Sla.CORE.Encoder encoder)
         {
             encoder.openElement(ElementId.ELEM_RAW_SAVEFILE);
             encodeHeader(encoder);
-            encoder.writeUnsignedInteger(AttributeId.ATTRIB_ADJUSTVMA, adjustvma);
+            encoder.writeUnsignedInteger(AttributeId.ATTRIB_ADJUSTVMA, (ulong)adjustvma);
             types.encodeCoreTypes(encoder);
-            SleighArchitecture::encode(encoder);
+            base.encode(encoder);
             encoder.closeElement(ElementId.ELEM_RAW_SAVEFILE);
         }
 
         public override void restoreXml(DocumentStorage store)
         {
-            Element el = store.getTag("raw_savefile");
+            Element? el = store.getTag("raw_savefile");
             if (el == (Element)null)
                 throw new CORE.LowlevelError("Could not find raw_savefile tag");
 
-            restoreXmlHeader(el);
-            {
+            restoreXmlHeader(el); {
                 istringstream s = new istringstream(el.getAttributeValue("adjustvma"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> adjustvma;
             }
-            List list = el.getChildren();
-            List::const_iterator iter;
+            IEnumerator<Element> iter = el.getChildren().GetEnumerator();
+            bool eolReached = false;
 
-            iter = list.begin();
-            if (iter != list.end())
-            {
-                if ((*iter).getName() == "coretypes")
-                {
-                    store.registerTag(*iter);
-                    ++iter;
+            if (iter.MoveNext()) {
+                if (iter.Current.getName() == "coretypes") {
+                    store.registerTag(iter.Current);
+                    eolReached = !iter.MoveNext();
                 }
             }
-            init(store);            // Load the image and configure
+            else eolReached = true;
+            // Load the image and configure
+            init(store);
 
-            if (iter != list.end())
-            {
-                store.registerTag(*iter);
-                SleighArchitecture::restoreXml(store);
+            if (!eolReached) {
+                store.registerTag(iter.Current);
+                base.restoreXml(store);
             }
         }
 

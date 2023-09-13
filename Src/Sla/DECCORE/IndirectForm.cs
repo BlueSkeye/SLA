@@ -62,9 +62,9 @@ namespace Sla.DECCORE
 
             outvn.initPartial(@in.getSize(), reslo, reshi);
 
-            if (!SplitVarnode::prepareIndirectOp(@in, affector))
+            if (!SplitVarnode.prepareIndirectOp(@in, affector))
                 return false;
-            SplitVarnode::replaceIndirectOp(data, outvn, @in, affector);
+            SplitVarnode.replaceIndirectOp(data, outvn, @in, affector);
             return true;
         }
     }

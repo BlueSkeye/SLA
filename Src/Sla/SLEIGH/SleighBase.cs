@@ -164,7 +164,8 @@ namespace Sla.SLEIGH
             sym.offset = off;
             sym.size = (uint)size;
             // First point greater than offset
-            IEnumerator<KeyValuePair<VarnodeData, string>> iter = varnode_xref.upper_bound(sym);
+            IEnumerator<KeyValuePair<VarnodeData, string>> iter =
+                varnode_xref.upper_bound(sym);
             if (iter == varnode_xref.begin()) return string.Empty;
             iter--;
             VarnodeData point = iter.Current.Key;

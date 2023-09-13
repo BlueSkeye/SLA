@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.EXTRA;
 
 namespace Sla.DECCORE
 {
@@ -20,11 +16,11 @@ namespace Sla.DECCORE
         /// is "true" to enable the \e noreturn property, "false" to disable.
         public override string apply(Architecture glb, string p1, string p2, string p3)
         {
-            Funcdata* infd = glb.symboltab.getGlobalScope().queryFunction(p1);
+            Funcdata? infd = glb.symboltab.getGlobalScope().queryFunction(p1);
             if (infd == (Funcdata)null)
                 throw new RecovError("Unknown function name: " + p1);
             bool val;
-            if (p2.size() == 0)
+            if (p2.Length == 0)
                 val = true;
             else
                 val = (p2 == "true");

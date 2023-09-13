@@ -20,15 +20,14 @@ namespace Sla.EXTRA
         /// then the destination address.
         public override void execute(TextReader s)
         {
-            int discard;
-
-            if (dcp.fd == (Funcdata)null)
+            if (dcp.fd == (Funcdata)null) {
                 throw new IfaceExecutionError("No function selected");
-
-            s >> ws;
-            Address target = new Address(parse_machaddr(s, discard,* dcp.conf.types));
-            s >> ws;
-            Address dest = new Address(parse_machaddr(s, discard,* dcp.conf.types));
+            }
+            s.ReadSpaces();
+            int discard;
+            Address target = Grammar.parse_machaddr(s, out discard, dcp.conf.types);
+            s.ReadSpaces();
+            Address dest = Grammar.parse_machaddr(s, out discard, dcp.conf.types);
             dcp.fd.getOverride().insertForceGoto(target, dest);
         }
     }

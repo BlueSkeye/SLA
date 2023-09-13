@@ -20,7 +20,7 @@ namespace Sla.EXTRA
         {
             string name;
 
-            s >> ws >> name;
+            s.ReadSpaces() >> name;
             if (name.Length == 0)
                 throw new IfaceParseError("Need file name to write to");
 

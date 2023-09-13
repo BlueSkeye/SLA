@@ -59,7 +59,7 @@ namespace Sla.EXTRA
                     deprecated = decoder.readBool();
             }
             while(true) {
-                ElementId subId = decoder.peekElement();
+                uint subId = decoder.peekElement();
                 if (subId == 0) break;
                 if (subId == ElementId.ELEM_DESCRIPTION) {
                     decoder.openElement();

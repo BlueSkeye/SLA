@@ -29,9 +29,9 @@ namespace Sla.EXTRA
                 Address addr = new Address(spc, dat.offset);
                 Varnode.varnode_flags flags = 0;
                 // Check if the register location is global
-                globalscope.queryProperties(addr, dat.size, new Address(), flags);
+                globalscope.queryProperties(addr, (int)dat.size, new Address(), flags);
                 if ((flags & Varnode.varnode_flags.persist) != 0) {
-                    Datatype ct = dcp.conf.types.getBase(dat.size, type_metatype.TYPE_UINT);
+                    Datatype ct = dcp.conf.types.getBase((int)dat.size, type_metatype.TYPE_UINT);
                     globalscope.addSymbol(pair.Value, ct, addr, new Address());
                     count += 1;
                 }

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -13,7 +9,7 @@ namespace Sla.DECCORE
             : base(t, OpCode.CPUI_INT_LESS,"<", type_metatype.TYPE_BOOL, type_metatype.TYPE_UINT)
         {
             opflags = PcodeOp.Flags.binary | PcodeOp.Flags.booloutput;
-            addlflags = inherits_sign;
+            addlflags = OperationType.inherits_sign;
             behave = new OpBehaviorIntLess();
         }
 
@@ -22,19 +18,20 @@ namespace Sla.DECCORE
             lng.opIntLess(op);
         }
 
-        public override Datatype getInputCast(PcodeOp op, int slot, CastStrategy castStrategy)
+        public override Datatype? getInputCast(PcodeOp op, int slot, CastStrategy castStrategy)
         {
-            Datatype* reqtype = op.inputTypeLocal(slot);
+            Datatype reqtype = op.inputTypeLocal(slot);
             if (castStrategy.checkIntPromotionForCompare(op, slot))
                 return reqtype;
-            Datatype* curtype = op.getIn(slot).getHighTypeReadFacing(op);
+            Datatype curtype = op.getIn(slot).getHighTypeReadFacing(op);
             return castStrategy.castStandard(reqtype, curtype, true, false);
         }
 
-        public override Datatype propagateType(Datatype alttype, PcodeOp op, Varnode invn, Varnode outvn,
-            int inslot, int outslot)
+        public override Datatype propagateType(Datatype alttype, PcodeOp op, Varnode invn,
+            Varnode outvn, int inslot, int outslot)
         {
-            return TypeOpEqual::propagateAcrossCompare(alttype, tlst, invn, outvn, inslot, outslot);
+            return TypeOpEqual.propagateAcrossCompare(alttype, tlst, invn, outvn, inslot,
+                outslot);
         }
     }
 }

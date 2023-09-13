@@ -250,7 +250,9 @@ namespace Sla.DECCORE
         /// \param trans is the Translate object for floating-point formats
         public static void registerInstructions(List<TypeOp> inst, TypeFactory tlst, Translate trans)
         {
-            inst.insert(inst.end(), OpCode.CPUI_MAX, (TypeOp)null);
+            for(int index = 0; index < (int)OpCode.CPUI_MAX; index++) {
+                inst.Add(null);
+            }
 
             inst[(int)OpCode.CPUI_COPY] = new TypeOpCopy(tlst);
             inst[(int)OpCode.CPUI_LOAD] = new TypeOpLoad(tlst);

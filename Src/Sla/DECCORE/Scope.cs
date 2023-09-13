@@ -437,7 +437,7 @@ namespace Sla.DECCORE
         }
 #endif
         /// \brief Construct an empty scope, given a name and Architecture
-        public Scope(ulong id, string nm, Architecture g, Scope own)
+        public Scope(ulong id, string nm, Architecture g, Scope? own)
         {
             uniqueId = id;
             name = nm;
@@ -445,7 +445,7 @@ namespace Sla.DECCORE
             glb = g;
             parent = null;
             fd = null;
-            owner = own;
+            owner = own ?? this;
 #if OPACTION_DEBUG
             debugon = false;
 #endif
@@ -1034,7 +1034,7 @@ namespace Sla.DECCORE
         public Symbol? addMapSym(Sla.CORE.Decoder decoder)
         {
             uint elemId = decoder.openElement(ElementId.ELEM_MAPSYM);
-            ElementId subId = decoder.peekElement();
+            uint subId = decoder.peekElement();
             Symbol sym;
             if (subId == ElementId.ELEM_SYMBOL)
                 sym = new Symbol(owner);

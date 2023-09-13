@@ -862,9 +862,9 @@ namespace Sla.CORE {
         /// \param a is the first space
         /// \param b is the second space
         /// \return \b true if the first space should come before the second
-        public static bool compareByIndex(AddrSpace a, AddrSpace b)
+        public static int compareByIndex(AddrSpace a, AddrSpace b)
         {
-            return (a.index < b.index);
+            return a.index.CompareTo(b.index);
         }
     }
 }

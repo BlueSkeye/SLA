@@ -19,27 +19,24 @@ namespace Sla.EXTRA
         /// machine instruction which the comment will be attached to and is followed by
         /// the text of the comment.
         public override void execute(TextReader s)
-        { // Comment on a particular address within current function
+        {
+            // Comment on a particular address within current function
             if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("Decompile action not loaded");
-
             if (dcp.fd == (Funcdata)null)
                 throw new IfaceExecutionError("No function selected");
-
             int size;
-            Address addr = parse_machaddr(s, size, *dcp.conf.types);
-            s >> ws;
-            string comment;
+            Address addr = Grammar.parse_machaddr(s, out size, dcp.conf.types);
+            s.ReadSpaces();
+            string comment = string.Empty;
             char tok;
             s.get(tok);
-            while (!s.eof())
-            {
+            while (!s.EofReached()) {
                 comment += tok;
                 s.get(tok);
             }
-            uint type = dcp.conf.print.getInstructionComment();
-            dcp.conf.commentdb.addComment(type,
-                            dcp.fd.getAddress(), addr, comment);
+            Comment.comment_type type = dcp.conf.print.getInstructionComment();
+            dcp.conf.commentdb.addComment(type, dcp.fd.getAddress(), addr, comment);
         }
     }
 }

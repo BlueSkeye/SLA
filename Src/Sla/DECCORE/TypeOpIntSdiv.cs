@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -13,7 +9,7 @@ namespace Sla.DECCORE
             : base(t, OpCode.CPUI_INT_SDIV,"/", type_metatype.TYPE_INT, type_metatype.TYPE_INT)
         {
             opflags = PcodeOp.Flags.binary;
-            addlflags = arithmetic_op | inherits_sign;
+            addlflags = OperationType.arithmetic_op | OperationType.inherits_sign;
             behave = new OpBehaviorIntSdiv();
         }
 
@@ -22,13 +18,14 @@ namespace Sla.DECCORE
             lng.opIntSdiv(op);
         }
 
-        public override Datatype getInputCast(PcodeOp op, int slot, CastStrategy castStrategy)
+        public override Datatype? getInputCast(PcodeOp op, int slot, CastStrategy castStrategy)
         {
             Varnode vn = op.getIn(slot);
-            Datatype* reqtype = op.inputTypeLocal(slot);
-            Datatype* curtype = vn.getHighTypeReadFacing(op);
-            int promoType = castStrategy.intPromotionType(vn);
-            if (promoType != CastStrategy::NO_PROMOTION && ((promoType & CastStrategy::SIGNED_EXTENSION) == 0))
+            Datatype reqtype = op.inputTypeLocal(slot);
+            Datatype curtype = vn.getHighTypeReadFacing(op);
+            CastStrategy.IntPromotionCode promoType = castStrategy.intPromotionType(vn);
+            if (   (promoType != CastStrategy.IntPromotionCode.NO_PROMOTION)
+                && ((promoType & CastStrategy.IntPromotionCode.SIGNED_EXTENSION) == 0))
                 return reqtype;
             return castStrategy.castStandard(reqtype, curtype, true, true);
         }

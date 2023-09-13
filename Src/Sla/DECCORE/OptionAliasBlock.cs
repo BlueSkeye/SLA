@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.EXTRA;
 
 namespace Sla.DECCORE
 {
@@ -25,8 +21,8 @@ namespace Sla.DECCORE
         ///   - all - all locked data-types will block an alias
         public override string apply(Architecture glb, string p1, string p2, string p3)
         {
-            if (p1.size() == 0)
-                throw ParseError("Must specify alias block level");
+            if (p1.Length == 0)
+                throw new ParseError("Must specify alias block level");
             int oldVal = glb.alias_block_level;
             if (p1 == "none")
                 glb.alias_block_level = 0;
@@ -37,7 +33,7 @@ namespace Sla.DECCORE
             else if (p1 == "all")
                 glb.alias_block_level = 3;
             else
-                throw ParseError("Unknown alias block level: " + p1);
+                throw new ParseError("Unknown alias block level: " + p1);
             if (oldVal == glb.alias_block_level)
                 return "Alias block level unchanged";
             return "Alias block level set to " + p1;

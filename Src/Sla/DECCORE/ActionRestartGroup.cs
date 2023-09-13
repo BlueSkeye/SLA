@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
+﻿
 namespace Sla.DECCORE
 {
     /// \brief Action which checks if restart (sub)actions have been generated and restarts itself.
@@ -43,7 +35,7 @@ namespace Sla.DECCORE
         public override void reset(Funcdata data)
         {
             curstart = 0;
-            @base.reset(data);
+            base.reset(data);
         }
 
         public override int apply(Funcdata data)
@@ -55,7 +47,7 @@ namespace Sla.DECCORE
                 return 0;
             }
             while(true) {
-                res = @base.apply(data);
+                res = base.apply(data);
                 if (res != 0) {
                     return res;
                 }
@@ -73,7 +65,7 @@ namespace Sla.DECCORE
                     curstart = -1;
                     return 0;
                 }
-                data.getArch().clearAnalysis(&data);
+                data.getArch().clearAnalysis(data);
 
                 // Reset everything but ourselves
                 foreach (Action iter in list) {

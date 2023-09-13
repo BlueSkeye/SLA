@@ -1,4 +1,5 @@
 ﻿using Sla.CORE;
+using Sla.DECCORE;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -20,7 +21,7 @@ namespace Sla.EXTRA
             int size = 0;
             if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("No load image present");
-            Address addr = parse_machaddr(s, size, *dcp.conf.types); // Read required address
+            Address addr = Grammar.parse_machaddr(s, out size, dcp.conf.types); // Read required address
 
             if (size == 0)
                 throw new IfaceExecutionError("Must specify a size");

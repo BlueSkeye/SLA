@@ -39,22 +39,24 @@ namespace Sla.SLEIGH
             for (uint i = 0; i < cursize; ++i)
                 newpool[i] = poolstart[i];  // Copy old data
                                             // Update references to the old pool
-            for (uint i = 0; i < issued.size(); ++i) {
+            for (int i = 0; i < issued.size(); ++i) {
                 VarnodeData? outvar = issued[i].outvar;
+                PcodeData currentData = issued[i];
                 if (outvar != (VarnodeData)null) {
                     outvar = newpool + (outvar - poolstart);
-                    issued[i].outvar = outvar;
+                    currentData.outvar = outvar;
                 }
-                VarnodeData? invar = issued[i].invar;
+                VarnodeData? invar = currentData.invar;
                 if (invar != (VarnodeData)null) {
                     invar = newpool + (invar - poolstart);
-                    issued[i].invar = invar;
+                    currentData.invar = invar;
                 }
             }
-            IEnumerator<RelativeRecord> iter;
-            for (iter = label_refs.begin(); iter != label_refs.end(); ++iter) {
-                VarnodeData @ref = (*iter).dataptr;
-                (*iter).dataptr = newpool + (@ref -poolstart);
+            IEnumerator<RelativeRecord> iter = label_refs.GetEnumerator();
+            while (iter.MoveNext()) {
+                RelativeRecord currentRecord = iter.Current;
+                VarnodeData @ref = currentRecord.dataptr;
+                currentRecord.dataptr = newpool + (@ref -poolstart);
             }
 
             // delete[] poolstart;     // Free up old pool
@@ -123,16 +125,16 @@ namespace Sla.SLEIGH
         {
             while (labels.size() <= id)
                 labels.Add(0xbadbeef);
-            labels[id] = issued.size();
+            labels[(int)id] = issued.size();
         }
 
         /// Reset the cache so that all objects are unallocated
         public void clear()
         {
             curpool = poolstart;
-            issued.clear();
-            label_refs.clear();
-            labels.clear();
+            issued.Clear();
+            label_refs.Clear();
+            labels.Clear();
         }
 
         /// Rewrite branch target Varnodes as \e relative offsets

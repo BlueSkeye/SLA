@@ -19,8 +19,8 @@ namespace Sla.EXTRA
   if (filename.size() == 0)
     throw new IfaceParseError("Missing rule input file");
 
-  s >> ws;
-  if (!s.eof()) {
+  s.ReadSpaces();
+  if (!s.EofReached()) {
     string val;
     s >> val;
     if ((val=="true")||(val=="debug"))

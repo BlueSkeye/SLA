@@ -106,7 +106,7 @@ namespace Sla.DECCORE
                     for (int i = 0; i < stackspc.numSpacebase(); ++i) {
                         VarnodeData fullReg = new VarnodeData(stackspc.getSpacebaseFull(i));
                         VarnodeData truncReg = new VarnodeData(stackspc.getSpacebase(i));
-                        Varnode invn = data.newVarnode(truncReg.size, truncReg.getAddr());
+                        Varnode invn = data.newVarnode((int)truncReg.size, truncReg.getAddr());
                         invn = data.setInputVarnode(invn);
                         PcodeOp extop = data.newOp(1, topbl.getStart());
                         data.newVarnodeOut((int)fullReg.size, fullReg.getAddr(), extop);

@@ -52,11 +52,16 @@ namespace Sla.DECCORE
                     if (opc == OpCode.CPUI_MULTIEQUAL) {
                         PcodeOpNode tmpOp = new PcodeOpNode(op, 0);
                         for (tmpOp.slot = 0; tmpOp.slot < op.numInput(); ++tmpOp.slot) {
-                            if (op.getIn(tmpOp.slot) != vn) continue;      // Find incoming slot for current Varnode
-                                                                            // Don't count as flow if coming thru excised edge
-                            if (0 > phiNodeEdges.BinarySearch(tmpOp)) break;
+                            if (op.getIn(tmpOp.slot) != vn)
+                                // Find incoming slot for current Varnode
+                                continue;
+                            // Don't count as flow if coming thru excised edge
+                            if (0 > phiNodeEdges.BinarySearch(tmpOp))
+                                break;
                         }
-                        if (tmpOp.slot == op.numInput()) continue;     // Was the MULTIEQUAL reached
+                        if (tmpOp.slot == op.numInput())
+                            // Was the MULTIEQUAL reached
+                            continue;
                     }
                     else if (opc != OpCode.CPUI_COPY && opc != OpCode.CPUI_INDIRECT)
                         continue;
@@ -332,9 +337,11 @@ namespace Sla.DECCORE
             for (int i = 0; i < blockGraph.getSize(); ++i) {
                 FlowBlock bl = blockGraph.getBlock(i);
                 PcodeOp? cBranch = bl.lastOp();
-                if (cBranch == (PcodeOp)null || cBranch.code() != OpCode.CPUI_CBRANCH) continue;
+                if (cBranch == (PcodeOp)null || cBranch.code() != OpCode.CPUI_CBRANCH)
+                    continue;
                 Varnode boolVn = cBranch.getIn(1);
-                if (!boolVn.isWritten()) continue;
+                if (!boolVn.isWritten())
+                    continue;
                 PcodeOp compOp = boolVn.getDef();
                 OpCode opc = compOp.code();
                 bool flipEdge = cBranch.isBooleanFlip();
@@ -345,7 +352,8 @@ namespace Sla.DECCORE
                     compOp = boolVn.getDef();
                     opc = compOp.code();
                 }
-                int constEdge;         // Out edge where value is constant
+                int constEdge;
+                // Out edge where value is constant
                 if (opc == OpCode.CPUI_INT_EQUAL)
                     constEdge = 1;
                 else if (opc == OpCode.CPUI_INT_NOTEQUAL)

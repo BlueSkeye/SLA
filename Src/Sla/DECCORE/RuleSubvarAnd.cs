@@ -1,12 +1,4 @@
 ﻿using Sla.CORE;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Sla.DECCORE
 {
@@ -19,7 +11,8 @@ namespace Sla.DECCORE
 
         public override Rule? clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule)null;
+            if (!grouplist.contains(getGroup()))
+                return (Rule)null;
             return new RuleSubvarAnd(getGroup());
         }
 
@@ -34,19 +27,17 @@ namespace Sla.DECCORE
         {
             if (!op.getIn(1).isConstant()) return 0;
             Varnode vn = op.getIn(0);
-            Varnode outvn = op.getOut();
+            Varnode outvn = op.getOut() ?? throw new ApplicationException();
             //  if (vn.getSize() != 1) return 0; // Only for bitsize variables
             if (outvn.getConsume() != op.getIn(1).getOffset()) return 0;
             if ((outvn.getConsume() & 1) == 0) return 0;
             ulong cmask;
             if (outvn.getConsume() == (ulong)1)
                 cmask = (ulong)1;
-            else
-            {
-                cmask = Globals.calc_mask(vn.getSize());
+            else {
+                cmask = Globals.calc_mask((uint)vn.getSize());
                 cmask >>= 8;
-                while (cmask != 0)
-                {
+                while (cmask != 0) {
                     if (cmask == outvn.getConsume()) break;
                     cmask >>= 8;
                 }
@@ -55,8 +46,9 @@ namespace Sla.DECCORE
             //  if (vn.getConsume() == 0) return 0;
             //  if ((vn.getConsume() & 0xff)==0xff) return 0;
             //  if (op.getIn(1).getOffset() != (ulong)1) return 0;
-            if (op.getOut().hasNoDescend()) return 0;
-            SubvariableFlow subflow = new SubvariableFlow(&data,vn,cmask,false,false,false);
+            if (op.getOut().hasNoDescend())
+                return 0;
+            SubvariableFlow subflow = new SubvariableFlow(data,vn,cmask,false,false,false);
             if (!subflow.doTrace()) return 0;
             subflow.doReplacement();
             return 1;

@@ -15,8 +15,8 @@ namespace Sla.SLEIGH
 
         ~EquationOr()
         {
-            PatternEquation::release(left);
-            PatternEquation::release(right);
+            PatternEquation.release(left);
+            PatternEquation.release(right);
         }
 
         public EquationOr(PatternEquation l, PatternEquation r)

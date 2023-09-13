@@ -3,8 +3,8 @@ namespace Sla
 {
     internal interface IAddable<T>
     {
-        T IncrementBy(int incrementBy);
+        T IncrementBy(T initialValue, int incrementBy);
 
-        T DecrementBy(int decrementBy);
+        T DecrementBy(T initialValue, int decrementBy);
     }
 }

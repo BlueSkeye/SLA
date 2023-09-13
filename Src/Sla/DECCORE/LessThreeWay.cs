@@ -214,7 +214,7 @@ namespace Sla.DECCORE
                 if (hilessequalform)
                 {   // Make sure to normalize lessequal to less
                     hival += inc;
-                    hival &= Globals.calc_mask(@in.getSize());
+                    hival &= Globals.calc_mask((uint)@in.getSize());
                     hilessequalform = false;
                 }
                 hival >>= @in.getLo().getSize() * 8;
@@ -257,13 +257,13 @@ namespace Sla.DECCORE
                 midval = vnhie2.getOffset();
                 if (vnhie2.getSize() == @in.getSize()) {
                     // Convert to comparison on high part
-                    ulong lopart = midval & Globals.calc_mask(@in.getLo().getSize());
+                    ulong lopart = midval & Globals.calc_mask((uint)@in.getLo().getSize());
                     midval >>= @in.getLo().getSize() * 8;
                     if (midlessform)
                     {
                         if (midlessequal)
                         {
-                            if (lopart != Globals.calc_mask(@in.getLo().getSize())) return false;
+                            if (lopart != Globals.calc_mask((uint)@in.getLo().getSize())) return false;
                         }
                         else
                         {
@@ -277,7 +277,7 @@ namespace Sla.DECCORE
                 {   // If the mid and hi don't match
                     if (!midlessform) return false;
                     midval += (midlessequal) ? 1 : -1; // We may just be one off
-                    midval &= Globals.calc_mask(@in.getLo().getSize());
+                    midval &= Globals.calc_mask((uint)@in.getLo().getSize());
                     midlessequal = !midlessequal;
                     if (midval != hival) return false; // Last chance
                 }
@@ -336,7 +336,7 @@ namespace Sla.DECCORE
                 if (lolessequalform)
                 {
                     loval += 1;
-                    loval &= Globals.calc_mask(vnlo2.getSize());
+                    loval &= Globals.calc_mask((uint)vnlo2.getSize());
                     lolessequalform = false;
                 }
             }
@@ -445,7 +445,7 @@ namespace Sla.DECCORE
                 {
                     loflip = !loflip;
                     loval -= 1;
-                    loval &= Globals.calc_mask(lo.getSize());
+                    loval &= Globals.calc_mask((uint)lo.getSize());
                     if (vnlo1 != lo) return false;
                 }
                 hislot = 1;
@@ -544,7 +544,7 @@ namespace Sla.DECCORE
                 else
                     SplitVarnode.createBoolOp(data, hilessbool, in2, @in, finalopc);
                 // We change hieqbool so that it always goes to the original FALSE block
-                data.opSetInput(hieqbool, data.newConstant(1, equalflip ? 1 : 0), 1);
+                data.opSetInput(hieqbool, data.newConstant(1, (ulong)equalflip ? 1 : 0), 1);
                 // The lolessbool block now becomes unreachable and is eventually removed
             }
             return res;

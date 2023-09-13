@@ -1,12 +1,5 @@
-﻿using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
+﻿using Sla.CORE;
+using Sla.DECCORE;
 
 namespace Sla.EXTRA
 {
@@ -23,28 +16,31 @@ namespace Sla.EXTRA
         /// \param outname passes back the formal output parameter name, or is empty
         /// \param inname passes back an array of the formal input parameter names
         /// \param pcodestring passes back the snippet body
-        public static void readPcodeSnippet(TextReader s, string name, string outname, List<string> inname,
-            string pcodestring)
+        public static void readPcodeSnippet(TextReader s, string name, out string outname,
+            List<string> inname, string pcodestring)
         {
-            char bracket;
-            s >> outname;
+            outname = s.ReadString();
             parse_toseparator(s, name);
-            s >> bracket;
-            if (outname == "void")
-                outname = "";
-            if (bracket != '(')
+            char bracket = s.ReadMandatoryCharacter();
+            if (outname == "void") {
+                outname = string.Empty;
+            }
+            if (bracket != '(') {
                 throw new IfaceParseError("Missing '('");
-            while (bracket != ')')
-            {
+            }
+            while (bracket != ')') {
                 string param;
                 parse_toseparator(s, param);
-                s >> bracket;
-                if (param.size() != 0)
+                bracket = s.ReadMandatoryCharacter();
+                if (param.Length != 0) {
                     inname.Add(param);
+                }
             }
-            s >> ws >> bracket;
-            if (bracket != '{')
+            s.ReadSpaces();
+            bracket = s.ReadString();
+            if (bracket != '{') {
                 throw new IfaceParseError("Missing '{'");
+            }
             getline(s, pcodestring, '}');
         }
 
@@ -60,22 +56,21 @@ namespace Sla.EXTRA
         /// \endcode
         public override void execute(TextReader s)
         {
-            string name, outname, pcodestring;
-            List<string> inname;
+            string name, pcodestring;
 
-            readPcodeSnippet(s, name, outname, inname, pcodestring);
+            string outname;
+            List<string> inname = new List<string>();
+            readPcodeSnippet(s, name, out outname, inname, pcodestring);
             int id = -1;
-            try
-            {
+            try {
                 id = dcp.conf.pcodeinjectlib.manualCallFixup(name, pcodestring);
             }
-            catch (LowlevelError err)
-            {
-                *status.optr << "Error compiling pcode: " << err.ToString() << endl;
+            catch (LowlevelError err) {
+                status.optr.WriteLine($"Error compiling pcode: {err.ToString()}");
                 return;
             }
-            InjectPayload* payload = dcp.conf.pcodeinjectlib.getPayload(id);
-            payload.printTemplate(*status.optr);
+            InjectPayload payload = dcp.conf.pcodeinjectlib.getPayload(id);
+            payload.printTemplate(status.optr);
         }
     }
 }

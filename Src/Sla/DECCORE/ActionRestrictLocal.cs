@@ -38,7 +38,7 @@ namespace Sla.DECCORE
                 op = fc.getOp();
 
                 if (!fc.isInputLocked()) continue;
-                if (fc.getSpacebaseOffset() == FuncCallSpecs.Offsets.offset_unknown) continue;
+                if (fc.getSpacebaseOffset() == FuncCallSpecs.offset_unknown) continue;
                 int numparam = fc.numParams();
                 for (int j = 0; j < numparam; ++j) {
                     ProtoParameter param = fc.getParam(j);

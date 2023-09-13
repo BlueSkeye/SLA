@@ -19,36 +19,43 @@ namespace Sla.EXTRA
     internal class IfaceTerm : IfaceStatus
     {
 #if __TERMINAL__
-        private bool is_terminal;       ///< True if the input stream is a terminal
-        private int ifd;           ///< Underlying file descriptor
-        private struct termios itty;		///< Original terminal settings
+        // True if the input stream is a terminal
+        private bool is_terminal;
+        // Underlying file descriptor
+        private int ifd;
+        // Original terminal settings
+        private struct termios itty;
 #endif
-        private TextReader sptr;        ///< The base input stream for the interface
-        private List<TextReader> inputstack;    ///< Stack of nested input streams
+        // The base input stream for the interface
+        private TextReader sptr;
+        // Stack of nested input streams
+        private List<TextReader> inputstack;
 
-        ///< 'Complete' the current command line
-        /// Respond to a TAB key press and try to 'complete' any existing tokens.
-        /// The method is handed the current state of the command-line in a string, and
-        /// it updates the command-line in place.
-        ///
-        /// \param line is current command-line and will hold the final completion
-        /// \param cursor is the current position of the cursor
-        /// \return the (possibly new) position of the cursor, after completion
+        // 'Complete' the current command line
+        // Respond to a TAB key press and try to 'complete' any existing tokens.
+        // The method is handed the current state of the command-line in a string, and
+        // it updates the command-line in place.
+        //
+        // \param line is current command-line and will hold the final completion
+        // \param cursor is the current position of the cursor
+        // \return the (possibly new) position of the cursor, after completion
         private int doCompletion(string line, int cursor)
         {
             List<string> fullcommand = new List<string>();
-            istringstream s = new istringstream(line);
+            TextReader s = new StringReader(line);
             string tok;
             IEnumerator<IfaceCommand> first, last;
             int oldsize, match;
 
-            first = comlist.begin();
-            last = comlist.end();
-            match = expandCom(fullcommand, s, first, last); // Try to expand the command
+            IEnumerator<IfaceCommand> first = comlist.GetEnumerator();
+            IEnumerator<IfaceCommand> last = comlist.GetEnumerator();
+            // Try to expand the command
+            match = expandCom(fullcommand, s, first, last);
             if (match == 0) {
                 optr.WriteLine();
                 optr.WriteLine("Invalid command");
-                return cursor;      // No change to command line
+                // No change to command line
+                return cursor;
             }
 
             // At least one match
@@ -57,26 +64,35 @@ namespace Sla.EXTRA
             if (match < 0)
                 match = -match;
             else
-                line += ' ';        // Provide extra space if command word is complete
-            if (!s.eof()) {
+                // Provide extra space if command word is complete
+                line += ' ';
+            if (!s.EofReached()) {
                 // Read any additional parameters back to command line
-                s >> tok >> ws;
-                line += tok;        // Assume first space is present before extra params
-            }
-            while (!s.eof()) {
-                line += ' ';        // Provide space between extra parameters
-                s >> tok >> ws;
+                tok = s.ReadString();
+                s.ReadSpaces();
+                // Assume first space is present before extra params
                 line += tok;
             }
-            if (oldsize < line.Length)  // If we have expanded at all
-                return line.Length;     // Just display expansion
+            while (!s.EofReached()) {
+                // Provide space between extra parameters
+                line += ' ';
+                tok = s.ReadString();
+                s.ReadSpaces();
+                line += tok;
+            }
+            if (oldsize < line.Length)
+                // If we have expanded at all
+                // Just display expansion
+                return line.Length;
 
             if (match > 1) {
                 // If more than one possible command
-                string complete;        // Display all possible completions
+                // Display all possible completions
+                string complete;
                 optr.WriteLine();
-                for (; first != last; ++first) {
-                    (*first).commandString(complete); // Get possible completion
+                while (first.MoveNext()) {
+                    // Get possible completion
+                    first.Current.commandString(complete);
                     optr.WriteLine(complete);
                 }
             }
@@ -88,7 +104,7 @@ namespace Sla.EXTRA
             return line.Length;
         }
 
-        protected override void readLine(string line)
+        protected override void readLine(out string line)
         {
             char val;
             int escval;
@@ -115,7 +131,7 @@ namespace Sla.EXTRA
                             cursor -= 1;        // back up one char
                         break;
                     case 0x03:          // C-c
-                        line.erase();       // As if we cleared the line and hit return
+                        line = string.Empty;       // As if we cleared the line and hit return
                         cursor = 0;
                         val = 0x0a;
                         onecharecho = true;
@@ -181,7 +197,7 @@ namespace Sla.EXTRA
                                     cursor -= 1;
                                 break;
                             case 0x4f43:        // right arrow
-                                if (cursor < line.size())
+                                if (cursor < line.Length)
                                     cursor += 1;
                                 break;
                         }
@@ -193,7 +209,7 @@ namespace Sla.EXTRA
                         break;
                     default:
                         line.insert(cursor++, 1, val); // Insert single character
-                        if (cursor == line.size())
+                        if (cursor == line.Length)
                             onecharecho = true;
                         break;
                 }

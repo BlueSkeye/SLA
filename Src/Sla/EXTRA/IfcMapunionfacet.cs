@@ -1,11 +1,5 @@
 ﻿using Sla.CORE;
 using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.EXTRA
 {
@@ -19,7 +13,6 @@ namespace Sla.EXTRA
         /// are specified by dynamic hash.
         public override void execute(TextReader s)
         {
-            Datatype* ct;
             string unionName;
             int fieldNum;
             int size;
@@ -27,20 +20,24 @@ namespace Sla.EXTRA
 
             if (dcp.fd == (Funcdata)null)
                 throw new IfaceExecutionError("No function loaded");
-            s >> ws >> unionName;
-            ct = dcp.conf.types.findByName(unionName);
+            s.ReadSpaces();
+            unionName = s.ReadString();
+            Datatype? ct = dcp.conf.types.findByName(unionName);
             if (ct == (Datatype)null || ct.getMetatype() != type_metatype.TYPE_UNION)
                 throw new IfaceParseError("Bad union data-type: " + unionName);
-            s >> ws >> dec >> fieldNum;
+            s.ReadSpaces();
+            fieldNum = int.Parse(s.ReadString());
             if (fieldNum < -1 || fieldNum >= ct.numDepend())
                 throw new IfaceParseError("Bad field index");
-            Address addr = parse_machaddr(s, size, *dcp.conf.types); // Read pc address of hash
+            // Read pc address of hash
+            Address addr = Grammar.parse_machaddr(s, out size, dcp.conf.types);
 
-            s >> hex >> hash;       // Parse the hash value
-            ostringstream s2;
-            s2 << "unionfacet" << dec << (fieldNum + 1) << '_' << hex << addr.getOffset();
-            Symbol* sym = dcp.fd.getScopeLocal().addUnionFacetSymbol(s2.ToString(), ct, fieldNum, addr, hash);
-            dcp.fd.getScopeLocal().setAttribute(sym, Varnode.varnode_flags.typelock | Varnode.varnode_flags.namelock);
+            // Parse the hash value
+            s >> hex >> hash;
+            Symbol sym = dcp.fd.getScopeLocal().addUnionFacetSymbol(
+                $"unionfacet{(fieldNum + 1)}_{addr.getOffset():X}", ct, fieldNum, addr, hash);
+            dcp.fd.getScopeLocal().setAttribute(sym,
+                Varnode.varnode_flags.typelock | Varnode.varnode_flags.namelock);
         }
     }
 }

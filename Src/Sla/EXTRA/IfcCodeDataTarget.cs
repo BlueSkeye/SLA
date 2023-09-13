@@ -6,8 +6,8 @@ namespace Sla.EXTRA
     {
         public override void execute(TextReader s)
         {
-            s >> ws;
-            if (s.eof())
+            s.ReadSpaces();
+            if (s.EofReached())
                 throw new IfaceParseError("Missing system call name");
             string token;
             s >> token;

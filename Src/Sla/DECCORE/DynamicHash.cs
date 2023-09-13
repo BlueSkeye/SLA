@@ -164,7 +164,7 @@ namespace Sla.DECCORE
                 }
             }
 
-            for (uint i = 0; i < opedge.size(); ++i)
+            for (int i = 0; i < opedge.size(); ++i)
                 reg = opedge[i].hash(reg);
 
             // Build the final 64-bit hash
@@ -275,7 +275,7 @@ namespace Sla.DECCORE
             vnedge.Add(root);
             gatherUnmarkedVn();
             for (uint i = vnproc; i < markvn.size(); ++i)
-                buildVnUp(markvn[i]);
+                buildVnUp(markvn[(int)i]);
             for (; vnproc < markvn.size(); ++vnproc)
                 buildVnDown(markvn[(int)vnproc]);
 
@@ -406,7 +406,7 @@ namespace Sla.DECCORE
                 vnlist2.Clear();
                 gatherFirstLevelVars(vnlist, fd, tmpaddr, tmphash);
                 for (uint i = 0; i < vnlist.size(); ++i) {
-                    Varnode tmpvn = vnlist[i];
+                    Varnode tmpvn = vnlist[(int)i];
                     clear();
                     calcHash(tmpvn, method);
                     if (getComparable(hash) == getComparable(tmphash)) {
@@ -473,7 +473,7 @@ namespace Sla.DECCORE
                 tmpaddr = addrresult;
                 oplist.Clear();
                 oplist2.Clear();
-                for (uint i = 0; i < oplist.size(); ++i) {
+                for (int i = 0; i < oplist.size(); ++i) {
                     PcodeOp tmpop = oplist[i];
                     if (slot >= tmpop.numInput()) continue;
                     clear();
@@ -566,7 +566,7 @@ namespace Sla.DECCORE
             List<PcodeOp> oplist2 = new List<PcodeOp>();
             gatherOpsAtAddress(oplist, fd, addr);
             for (uint i = 0; i < oplist.size(); ++i) {
-                PcodeOp tmpop = oplist[i];
+                PcodeOp tmpop = oplist[(int)i];
                 if (slot >= tmpop.numInput()) continue;
                 clear();
                 calcHash(tmpop, slot, method);

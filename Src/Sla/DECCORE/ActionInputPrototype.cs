@@ -8,13 +8,15 @@ namespace Sla.DECCORE
     internal class ActionInputPrototype : Action
     {
         public ActionInputPrototype(string g)
-            : base(rule_onceperfunc,"inputprototype", g)
+            : base(ruleflags.rule_onceperfunc,"inputprototype", g)
         {
         }
 
         public override Action? clone(ActionGroupList grouplist)
         {
-            return (!grouplist.contains(getGroup())) ? null : new ActionInputPrototype(getGroup());
+            return (!grouplist.contains(getGroup()))
+                ? null
+                : new ActionInputPrototype(getGroup());
         }
 
         public override int apply(Funcdata data)
@@ -28,32 +30,27 @@ namespace Sla.DECCORE
             // using symbol names that we want
             data.getScopeLocal().clearUnlockedCategory(-1);
             data.getFuncProto().clearUnlockedInput();
-            if (!data.getFuncProto().isInputLocked())
-            {
-                VarnodeDefSet::const_iterator iter, enditer;
-                iter = data.beginDef(Varnode.varnode_flags.input);
-                enditer = data.endDef(Varnode.varnode_flags.input);
-                while (iter != enditer)
-                {
-                    vn = *iter;
-                    ++iter;
-                    if (data.getFuncProto().possibleInputParam(vn.getAddr(), vn.getSize()))
-                    {
+            if (!data.getFuncProto().isInputLocked()) {
+                IEnumerator<Varnode> iter = data.beginDef(Varnode.varnode_flags.input);
+                // enditer = data.endDef(Varnode.varnode_flags.input);
+                while (iter.MoveNext()) {
+                    vn = iter.Current;
+                    if (data.getFuncProto().possibleInputParam(vn.getAddr(), vn.getSize())) {
                         int slot = active.getNumTrials();
                         active.registerTrial(vn.getAddr(), vn.getSize());
                         if (!vn.hasNoDescend())
-                            active.getTrial(slot).markActive(); // Mark as active if it has descendants
+                            // Mark as active if it has descendants
+                            active.getTrial(slot).markActive();
                         triallist.Add(vn);
                     }
                 }
-                data.getFuncProto().resolveModel(&active);
-                data.getFuncProto().deriveInputMap(&active); // Derive the correct prototype from trials
-                                                             // Create any unreferenced input varnodes
-                for (int i = 0; i < active.getNumTrials(); ++i)
-                {
-                    ParamTrial & paramtrial(active.getTrial(i));
-                    if (paramtrial.isUnref() && paramtrial.isUsed())
-                    {
+                data.getFuncProto().resolveModel(active);
+                // Derive the correct prototype from trials
+                data.getFuncProto().deriveInputMap(active);
+                // Create any unreferenced input varnodes
+                for (int i = 0; i < active.getNumTrials(); ++i) {
+                    ParamTrial paramtrial = active.getTrial(i);
+                    if (paramtrial.isUnref() && paramtrial.isUsed()) {
                         vn = data.newVarnode(paramtrial.getSize(), paramtrial.getAddress());
                         vn = data.setInputVarnode(vn);
                         int slot = triallist.size();
@@ -62,9 +59,9 @@ namespace Sla.DECCORE
                     }
                 }
                 if (data.isHighOn())
-                    data.getFuncProto().updateInputTypes(data, triallist, &active);
+                    data.getFuncProto().updateInputTypes(data, triallist, active);
                 else
-                    data.getFuncProto().updateInputNoTypes(data, triallist, &active);
+                    data.getFuncProto().updateInputNoTypes(data, triallist, active);
             }
             data.clearDeadVarnodes();
 #if OPACTION_DEBUG

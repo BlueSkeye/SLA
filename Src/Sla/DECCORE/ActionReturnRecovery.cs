@@ -20,57 +20,58 @@ namespace Sla.DECCORE
         /// \param data is the function being analyzed
         private static void buildReturnOutput(ParamActive active, PcodeOp retop, Funcdata data)
         {
-            List<Varnode> newparam;
+            List<Varnode> newparam = new List<Varnode>();
 
-            newparam.Add(retop.getIn(0)); // Keep the first param (the return indirect reference)
-            for (int i = 0; i < active.getNumTrials(); ++i)
-            { // Gather all the used varnodes to this return in proper order
-                ParamTrial & curtrial(active.getTrial(i));
+            // Keep the first param (the return indirect reference)
+            newparam.Add(retop.getIn(0));
+            for (int i = 0; i < active.getNumTrials(); ++i) {
+                // Gather all the used varnodes to this return in proper order
+                ParamTrial curtrial = active.getTrial(i);
                 if (!curtrial.isUsed()) break;
                 if (curtrial.getSlot() >= retop.numInput()) break;
                 newparam.Add(retop.getIn(curtrial.getSlot()));
             }
-            if (newparam.size() <= 2)   // Easy zero or one return varnode case
+            if (newparam.size() <= 2)
+                // Easy zero or one return varnode case
                 data.opSetAllInput(retop, newparam);
-            else if (newparam.size() == 3)
-            { // Two piece concatenation case
+            else if (newparam.size() == 3) {
+                // Two piece concatenation case
                 Varnode lovn = newparam[1];
                 Varnode hivn = newparam[2];
-                ParamTrial & triallo(active.getTrial(0));
-                ParamTrial & trialhi(active.getTrial(1));
-                Address joinaddr = data.getArch().constructJoinAddress(data.getArch().translate,
-                                            trialhi.getAddress(), trialhi.getSize(),
-                                            triallo.getAddress(), triallo.getSize());
+                ParamTrial triallo = active.getTrial(0);
+                ParamTrial trialhi = active.getTrial(1);
+                Address joinaddr = data.getArch().constructJoinAddress(
+                    data.getArch().translate, trialhi.getAddress(), trialhi.getSize(),
+                    triallo.getAddress(), triallo.getSize());
                 PcodeOp newop = data.newOp(2, retop.getAddr());
                 data.opSetOpcode(newop, OpCode.CPUI_PIECE);
-                Varnode newwhole = data.newVarnodeOut(trialhi.getSize() + triallo.getSize(), joinaddr, newop);
-                newwhole.setWriteMask();       // Don't let new Varnode cause additional heritage
+                Varnode newwhole = data.newVarnodeOut(trialhi.getSize() + triallo.getSize(),
+                    joinaddr, newop);
+                // Don't let new Varnode cause additional heritage
+                newwhole.setWriteMask();
                 data.opInsertBefore(newop, retop);
                 newparam.RemoveLastItem();
-                newparam.GetLastItem() = newwhole;
+                newparam.SetLastItem(newwhole);
                 data.opSetAllInput(retop, newparam);
                 data.opSetInput(newop, hivn, 0);
                 data.opSetInput(newop, lovn, 1);
             }
-            else
-            { // We may have several varnodes from a single container
-              // Concatenate them into a single result
-                newparam.clear();
+            else {
+                // We may have several varnodes from a single container
+                // Concatenate them into a single result
+                newparam.Clear();
                 newparam.Add(retop.getIn(0));
                 int offmatch = 0;
                 Varnode preexist = (Varnode)null;
-                for (int i = 0; i < active.getNumTrials(); ++i)
-                {
-                    ParamTrial & curtrial(active.getTrial(i));
+                for (int i = 0; i < active.getNumTrials(); ++i) {
+                    ParamTrial curtrial = active.getTrial(i);
                     if (!curtrial.isUsed()) break;
                     if (curtrial.getSlot() >= retop.numInput()) break;
-                    if (preexist == (Varnode)null)
-                    {
+                    if (preexist == (Varnode)null) {
                         preexist = retop.getIn(curtrial.getSlot());
                         offmatch = curtrial.getOffset() + curtrial.getSize();
                     }
-                    else if (offmatch == curtrial.getOffset())
-                    {
+                    else if (offmatch == curtrial.getOffset()) {
                         offmatch += curtrial.getSize();
                         Varnode vn = retop.getIn(curtrial.getSlot());
                         // Concatenate the preexisting pieces with this new piece
@@ -127,7 +128,8 @@ namespace Sla.DECCORE
                         vn = op.getIn(slot);
                         if (ancestorReal.execute(op, slot, trial, false))
                             if (data.ancestorOpUse(maxancestor, vn, op, trial, 0, 0))
-                                trial.markActive(); // This varnode sees active use as a parameter
+                                // This varnode sees active use as a parameter
+                                trial.markActive();
                         count += 1;
                     }
                 }

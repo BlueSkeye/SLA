@@ -133,7 +133,8 @@ namespace Sla.DECCORE
                 throw new LowlevelError("JumpAssisted table size changed during recovery");
             if (userop.getIndex2Case() == -1) {
                 for (int i = 0; i < sizeIndices; ++i)
-                    label.Add(i);     // The index is the label
+                    // The index is the label
+                    label.Add((uint)i);
             }
             else {
                 ExecutablePcode pcodeScript = (ExecutablePcode)fd.getArch().pcodeinjectlib.getPayload(userop.getIndex2Case());

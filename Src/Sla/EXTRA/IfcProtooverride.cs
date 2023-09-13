@@ -25,8 +25,8 @@ namespace Sla.EXTRA
             if (dcp.fd == (Funcdata)null)
                 throw new IfaceExecutionError("No function selected");
 
-            s >> ws;
-            Address callpoint = new Address(parse_machaddr(s, discard,* dcp.conf.types));
+            s.ReadSpaces();
+            Address callpoint = Grammar.parse_machaddr(s, out discard, dcp.conf.types);
             int i;
             for (i = 0; dcp.fd.numCalls(); ++i)
                 if (dcp.fd.getCallSpecs(i).getOp().getAddr() == callpoint) break;

@@ -48,7 +48,7 @@ namespace Sla.DECCORE
             else
             {
                 ulong unused;
-                if (0 != Globals.power2Divide(n, d - r, out tmp, out unused))
+                if (0 != Globals.power2Divide((int)n, d - r, out tmp, out unused))
                     return (ulong)d;        // tmp is bigger than 2^64 > maxx
             }
             if (tmp <= maxx) return 0;
@@ -167,7 +167,7 @@ namespace Sla.DECCORE
             if (checkFormOverlap(op)) return 0;
             if (extOpc == OpCode.CPUI_INT_SEXT)
                 xsize -= 1;     // one less bit for signed, because of signbit
-            ulong divisor = calcDivisor(n, y, xsize);
+            ulong divisor = calcDivisor((ulong)n, y, xsize);
             if (divisor == 0) return 0;
             int outSize = op.getOut().getSize();
 
@@ -216,7 +216,7 @@ namespace Sla.DECCORE
                 data.opSetOpcode(sgnop, OpCode.CPUI_INT_SRIGHT);
                 Varnode sgnvn = data.newUniqueOut(outSize, sgnop);
                 data.opSetInput(sgnop, inVn, 0);
-                data.opSetInput(sgnop, data.newConstant(outSize, outSize * 8 - 1), 1);
+                data.opSetInput(sgnop, data.newConstant(outSize, (ulong)(outSize * 8 - 1)), 1);
                 data.opInsertBefore(sgnop, op);
                 // Add the correction into the division op
                 data.opSetInput(op, newout, 0);
@@ -247,42 +247,71 @@ namespace Sla.DECCORE
         /// \param xsize will hold the number of (non-zero) bits in the numerand
         /// \param extopc holds whether the extension is INT_ZEXT or INT_SEXT
         /// \return the extended numerand if possible, or the unextended numerand, or NULL
-        public static Varnode? findForm(PcodeOp op, out int n, out ulong y, out int xsize, out OpCode extopc)
+        public static Varnode? findForm(PcodeOp op, out int n, out ulong y, out int xsize,
+            out OpCode extopc)
         {
             PcodeOp curOp = op;
             OpCode shiftopc = curOp.code();
+            n = 0;
+            y = 0;
+            xsize = 0;
+            extopc = 0;
+            Varnode inVn;
             if (shiftopc == OpCode.CPUI_INT_RIGHT || shiftopc == OpCode.CPUI_INT_SRIGHT) {
                 Varnode vn = curOp.getIn(0) ?? throw new ApplicationException();
-                if (!vn.isWritten()) return (Varnode)null;
+                if (!vn.isWritten()) {
+                    return (Varnode)null;
+                }
                 Varnode cvn = curOp.getIn(1) ?? throw new ApplicationException();
-                if (!cvn.isConstant()) return (Varnode)null;
-                n = cvn.getOffset();
+                if (!cvn.isConstant()) {
+                    n = 0;
+                    return (Varnode)null;
+                }
+                n = (int)cvn.getOffset();
                 curOp = vn.getDef();
             }
             else {
-                n = 0;  // No initial shift
-                if (shiftopc != OpCode.CPUI_SUBPIECE) return (Varnode)null;  // In this case SUBPIECE is not optional
+                // No initial shift
+                n = 0;
+                if (shiftopc != OpCode.CPUI_SUBPIECE) {
+                    // In this case SUBPIECE is not optional
+                    n = 0;
+                    return (Varnode)null;
+                }
                 shiftopc = OpCode.CPUI_MAX;
             }
             if (curOp.code() == OpCode.CPUI_SUBPIECE) {
                 // Optional SUBPIECE
-                int c = curOp.getIn(1).getOffset();
-                Varnode inVn = curOp.getIn(0);
-                if (!inVn.isWritten()) return (Varnode)null;
-                if (curOp.getOut().getSize() + c != inVn.getSize())
-                    return (Varnode)null;         // Must keep high bits
+                int c = (int)curOp.getIn(1).getOffset();
+                inVn = curOp.getIn(0) ?? throw new ApplicationException();
+                if (!inVn.isWritten()) {
+                    n = 0;
+                    return (Varnode)null;
+                }
+                if (curOp.getOut().getSize() + c != inVn.getSize()) {
+                    // Must keep high bits
+                    n = 0;
+                    return (Varnode)null;
+                }
                 n += 8 * c;
                 curOp = inVn.getDef();
             }
-            if (curOp.code() != OpCode.CPUI_INT_MULT) return (Varnode)null; // There MUST be an INT_MULT
-            Varnode inVn = curOp.getIn(0);
-            if (!inVn.isWritten()) return (Varnode)null;
-            if (inVn.isConstantExtended(y) >= 0) {
-                inVn = curOp.getIn(1);
-                if (!inVn.isWritten()) return (Varnode)null;
+            // There MUST be an INT_MULT
+            if (curOp.code() != OpCode.CPUI_INT_MULT) {
+                n = 0;
+                return (Varnode)null;
             }
-            else if (curOp.getIn(1).isConstantExtended(y) < 0)
-                return (Varnode)null; // There MUST be a constant
+            inVn = curOp.getIn(0) ?? throw new ApplicationException();
+            if (!inVn.isWritten())
+                return (Varnode)null;
+            if (inVn.isConstantExtended(out y) >= 0) {
+                inVn = curOp.getIn(1) ?? throw new ApplicationException();
+                if (!inVn.isWritten())
+                    return (Varnode)null;
+            }
+            else if (curOp.getIn(1).isConstantExtended(out y) < 0)
+                // There MUST be a constant
+                return (Varnode)null;
 
             Varnode resVn;
             PcodeOp extOp = inVn.getDef();

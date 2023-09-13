@@ -170,7 +170,7 @@ namespace Sla.DECCORE
                     pushConsumed(outc, op.getIn(0), worklist);
                     break;
                 case OpCode.CPUI_INT_SEXT:
-                    b = Globals.calc_mask(op.getIn(0).getSize());
+                    b = Globals.calc_mask((uint)op.getIn(0).getSize());
                     a = outc & b;
                     if (outc > b)
                         a |= (b ^ (b >> 1));    // Make sure signbit is marked used
@@ -342,7 +342,7 @@ namespace Sla.DECCORE
                     consumeVal = Globals.minimalmask(vn.getNZMask());
                 int bytesConsumed = fc.getInputBytesConsumed(i);
                 if (bytesConsumed != 0)
-                    consumeVal &= Globals.calc_mask(bytesConsumed);
+                    consumeVal &= Globals.calc_mask((uint)bytesConsumed);
                 pushConsumed(consumeVal, vn, worklist);
             }
         }
@@ -536,7 +536,7 @@ namespace Sla.DECCORE
                 }
                 else {
                     for (i = 0; i < op.numInput(); ++i) {
-                        vn = op.getIn(i) ?? throw new ApplicationException();
+                        vn = op.getIn(i);
                         if (vn.isAutoLive())
                             pushConsumed(ulong.MaxValue, vn, worklist);
                     }

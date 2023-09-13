@@ -15,7 +15,7 @@ namespace Sla.EXTRA
             string name;
             string newname;
 
-            s >> ws >> name;
+            s.ReadSpaces() >> name;
             if (name.Length == 0)
                 throw new IfaceParseError("Must specify name of symbol");
             ct = parse_type(s, newname, dcp.conf);

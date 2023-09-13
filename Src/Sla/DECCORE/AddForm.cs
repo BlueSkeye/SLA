@@ -57,7 +57,7 @@ namespace Sla.DECCORE
                     // In constant forms, the <= will get converted to a <
                     // Note the lessthan to less conversion adds 1 then the 2's complement subtracts 1 and negates
                     // So all we really need to do is negate
-                    negconst = (~negconst) & Globals.calc_mask(lo1.getSize());
+                    negconst = (~negconst) & Globals.calc_mask((uint)lo1.getSize());
                     lo2 = (Varnode)null;
                     return true;
                 }
@@ -97,7 +97,7 @@ namespace Sla.DECCORE
                 if (!carryop.getIn(1).isConstant()) return false;
                 if (carryop.getIn(0) != lo1) return false;
                 if (carryop.getIn(1).getOffset() != 0) return false;
-                negconst = Globals.calc_mask(lo1.getSize()); // Original CARRY constant must have been -1
+                negconst = Globals.calc_mask((uint)lo1.getSize()); // Original CARRY constant must have been -1
                 lo2 = (Varnode)null;
                 return true;
             }

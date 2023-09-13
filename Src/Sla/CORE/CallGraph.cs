@@ -92,7 +92,7 @@ namespace Sla.CORE
             to.inedge[toi].flags |= CallGraphEdge.Flags.cycle;
             bool onlycycle = true;
             for (uint j = 0; j < to.inedge.Count; ++j) {
-                if ((to.inedge[j].flags & CallGraphEdge.Flags.cycle) == 0) {
+                if ((to.inedge[(int)j].flags & CallGraphEdge.Flags.cycle) == 0) {
                     onlycycle = false;
                     break;
                 }
@@ -361,7 +361,7 @@ namespace Sla.CORE
         {
             uint elemId = decoder.openElement(ElementId.ELEM_CALLGRAPH);
             while(true) {
-                ElementId subId = decoder.peekElement();
+                uint subId = decoder.peekElement();
                 if (subId == 0) break;
                 if (subId == ElementId.ELEM_EDGE)
                     CallGraphEdge.decode(decoder, this);

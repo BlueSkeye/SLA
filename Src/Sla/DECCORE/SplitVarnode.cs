@@ -673,7 +673,7 @@ namespace Sla.DECCORE
 
             List<Varnode> inlist = new List<Varnode>();
             inlist.Add(whole);
-            inlist.Add(data.newConstant(4, lo.getSize()));
+            inlist.Add(data.newConstant(4, (ulong)lo.getSize()));
             if (hiop.code() == OpCode.CPUI_MULTIEQUAL) {
                 // When converting the MULTIEQUAL to a SUBPIECE, we need to reinsert the op so that we don't
                 // get a break in the sequence of MULTIEQUALs at the beginning of the block
@@ -974,7 +974,7 @@ namespace Sla.DECCORE
             if (op.code() != OpCode.CPUI_INT_MULT) return false;
             Varnode in1 = op.getIn(1) ?? throw new BugException();
             if (!in1.isConstant()) return false;
-            if (in1.getOffset() != Globals.calc_mask(in1.getSize())) return false;
+            if (in1.getOffset() != Globals.calc_mask((uint)in1.getSize())) return false;
             return true;
         }
 

@@ -42,8 +42,7 @@ namespace Sla.EXTRA
     /// with every insertion or deletion of \b recordtype objects into the container, which
     /// may insert new or delete existing boundary points separating the disjoint subranges.
     internal class rangemap<_recordtype, linetype, subsorttype, inittype>
-        where _recordtype : new()
-        where linetype : IComparable<linetype>, IAddable<linetype>, IEquatable<linetype>
+        where linetype : IComparable<linetype>, IEquatable<linetype>
         where subsorttype : IComparable<subsorttype>
     {
         // Integer data-type defining the linear domain
@@ -53,155 +52,6 @@ namespace Sla.EXTRA
         // The data-type containing initialization data for records
         //typedef typename _recordtype::inittype inittype;
 
-        /// \brief The internal \e sub-range object for the interval map
-        /// It defines a disjoint range within the common refinement of all ranges
-        /// in the container. It also knows about its containing range and \b recordtype.
-        internal class AddrRange
-        {
-            //friend class rangemap<_recordtype>;
-            //friend class PartIterator;
-            // Start of the disjoint sub-range
-            internal /*mutable*/ linetype first;
-            // End of the disjoint sub-range
-            internal linetype last;
-            // Start of full range occupied by the entire \b recordtype
-            internal /*mutable*/ linetype a;
-            // End of full range occupied by the entire \b recordtype
-            internal /*mutable*/ linetype b;
-            // How \b this should be sub-sorted
-            internal /*mutable*/ subsorttype subsort;
-            // How \b this should be sub-sorted
-            internal /*mutable*/ /*typename*/ IEnumerator<_recordtype> value;
-
-            /// (Partial) constructor
-            internal AddrRange(linetype l,
-                IRangemapSubsortTypeInstantiator<subsorttype> subsorttypeInstantiator)
-            {
-                subsort = subsorttypeInstantiator.Create(false);
-                last = l;
-            }
-
-            /// (Partial) constructor given a subsort
-            internal AddrRange(linetype l, subsorttype s,
-                IRangemapSubsortTypeInstantiator<subsorttype> subsorttypeInstantiator)
-            {
-                subsort = subsorttypeInstantiator.Create(s);
-                last = l;
-            }
-
-            // Comparison method based on ending boundary point
-            public static bool operator <(AddrRange op1, AddrRange op2)
-            {
-                return (op1.last.Equals(op2.last)) 
-                    ? (0 > op1.subsort.CompareTo(op2.subsort))
-                    : (0 > op1.last.CompareTo(op2.last));
-            }
-
-            public static bool operator>(AddrRange op1, AddrRange op2)
-            {
-                throw new NotImplementedException();
-            }
-
-            /// Retrieve the \b recordtype
-            public /*typename*/ IEnumerator<_recordtype> getValue() => value; 
-        }
-
-        /// \brief An iterator into the interval map container
-        ///
-        /// This is really an iterator to the underlying multiset, but dereferencing it returns the
-        /// \b recordtype.  Iteration occurs over the disjoint sub-ranges, thus the same \b recordtype
-        /// may be visited multiple times by the iterator, depending on how much it overlaps other
-        /// \b recordtypes. The sub-ranges are sorted in linear order, then depending on the \b subsorttype.
-        public class PartIterator : IEnumerator<AddrRange>
-        {
-            /// The underlying multiset iterator
-            private /*typename*/ IEnumerator<_recordtype> iter;
-
-            public PartIterator()
-            {
-            }
-
-            /// Construct given iterator
-            public PartIterator(/*typename*/ IEnumerator<_recordtype> i)
-            {
-                iter = i;
-            }
-
-            /// Dereference to the \b recordtype object
-            public _recordtype Current => iter.Current;
-
-            object IEnumerator.Current => this.Current;
-
-            public bool MoveNext()
-            {
-                throw new NotImplementedException();
-            }
-
-            /// Pre-increment the iterator
-            public static PartIterator? operator ++(PartIterator iterator)
-            {
-                return iterator.iter.MoveNext() ? iterator : null;
-            }
-
-            ///// Post-increment the iterator
-            //public static PartIterator operator ++(int i)
-            //{
-            //    PartIterator orig = new PartIterator(iter);
-            //    ++iter;
-            //    return orig;
-            //}
-
-            /// Pre-decrement the iterator
-            public static PartIterator? operator --(PartIterator iterator)
-            {
-                throw new NotImplementedException();
-                //--iter;
-                //return iterator;
-            }
-
-            ///// Post-decrement the iterator
-            //public static PartIterator operator --(int i)
-            //{
-            //    throw new NotImplementedException();
-            //    //PartIterator orig = new PartIterator(iter);
-            //    //--iter;
-            //    //return orig;
-            //}
-
-            // Assign to the iterator
-            // TODO : Find assignment use and duplicate in a specific method.
-            //public static PartIterator operator=(PartIterator op1, PartIterator op2)
-            //{
-            //    op1.iter = op2.iter;
-            //    return op1;
-            //}
-
-            /// Test equality of iterators
-            public static bool operator ==(PartIterator op1, PartIterator op2)
-            {
-                return (op1.iter == op2.iter);
-            }
-
-            /// Test inequality of iterators
-            public static bool operator !=(PartIterator op1, PartIterator op2)
-            {
-                return (op1.iter != op2.iter);
-            }
-
-            // Get the \b recordtype iterator
-            public /*typename*/ IEnumerator<_recordtype> getValueIter()  => iter;
-
-            public void Reset()
-            {
-                throw new NotImplementedException();
-            }
-
-            public void Dispose()
-            {
-                throw new NotImplementedException();
-            }
-        }
-
         // The main sub-range iterator data-type
         // typedef PartIterator const_iterator;
 
@@ -209,21 +59,36 @@ namespace Sla.EXTRA
         private SortedList<AddrRange, AddrRange> tree = new SortedList<AddrRange, AddrRange>(); // Was std::multiset
         // Storage for the actual record objects
         private List<_recordtype> record;
+        private IAddable<linetype> linetypeAdder;
+        private IRecordTypeInstanciator<_recordtype, inittype, linetype> recordInstanciator;
         private IRangemapSubsortTypeInstantiator<subsorttype> subsortTypeInstatiator;
         private IEqualityComparer<linetype> linetypeEqualityComparer;
         private IComparer<linetype> linetypeComparer;
-
-        protected rangemap(IRangemapSubsortTypeInstantiator<subsorttype> subsortTypeInstatiator,
-            IComparer<linetype> linetypeComparer)
+        
+        protected rangemap(IRecordTypeInstanciator<_recordtype, inittype, linetype> recordInstanciator,
+            IRangemapSubsortTypeInstantiator<subsorttype> subsortTypeInstatiator,
+            IComparer<linetype> linetypeComparer, IAddable<linetype> linetypeAdder)
         {
+            this.recordInstanciator = recordInstanciator;
             this.subsortTypeInstatiator = subsortTypeInstatiator;
             this.linetypeComparer = linetypeComparer;
+            this.linetypeAdder = linetypeAdder;
         }
 
         // Added
         internal subsorttype CreateSubsortType(bool value)
         {
             return subsortTypeInstatiator.Create(value);
+        }
+
+        internal subsorttype CreateSubsortType(subsorttype value)
+        {
+            return subsortTypeInstatiator.Create(value);
+        }
+
+        internal _recordtype CreateRecord(inittype initdata, linetype a, linetype b)
+        {
+            return recordInstanciator.CreateRecord(initdata, a, b);
         }
 
         /// Remove the given partition boundary
@@ -243,7 +108,7 @@ namespace Sla.EXTRA
             foreach(AddrRange erased in toBeErased) {
                 tree.Remove(erased);
             }
-            i = i.IncrementBy(1);
+            i = linetypeAdder.IncrementBy(i, 1);
             while (0 == linetypeComparer.Compare(iter.Current.first, i)) {
                 iter.Current.first = f;
                 if (!iter.MoveNext()) break;
@@ -263,7 +128,7 @@ namespace Sla.EXTRA
                 // Can't split size 1 (i.e. split already present)
                 return;
             linetype f;
-            linetype plus1 = i.IncrementBy(1);
+            linetype plus1 = linetypeAdder.IncrementBy(i, 1);
             while (0 < linetypeComparer.Compare(iter.Current.first, i)) {
                 f = iter.Current.first;
                 iter.Current.first = plus1;
@@ -286,7 +151,7 @@ namespace Sla.EXTRA
         /// Clear all records from the container
         public void clear()
         {
-            tree.clear();
+            tree.Clear();
             record.Clear();
         }
 
@@ -297,10 +162,10 @@ namespace Sla.EXTRA
         //public /*typename*/ IEnumerator<_recordtype> end_list() => record.end();
 
         /// Beginning of sub-ranges
-        internal IEnumerator<AddrRange> begin() => new PartIterator(tree.begin());
+        internal PartIterator begin() => new PartIterator(tree.begin());
 
         /// Ending of sub-ranges
-        internal IEnumerator<AddrRange> end() => new PartIterator(tree.end());
+        internal PartIterator end() => new PartIterator(tree.end());
 
         /// \brief Find sub-ranges intersecting the given boundary point
         /// \param point is the given boundary point
@@ -379,21 +244,21 @@ namespace Sla.EXTRA
             return tree.upper_bound(addrbeyond);
         }
 
-        /// \brief Find first record overlapping given interval
-        /// \param point is the start of interval to test
-        /// \param end is the end of the interval to test
-        /// \return iterator to first sub-range of an intersecting record (or \b end)
-        public IEnumerator<AddrRange> find_overlap(linetype point, linetype end)
+        // \brief Find first record overlapping given interval
+        // \param point is the start of interval to test
+        // \param end is the end of the interval to test
+        // \return iterator to first sub-range of an intersecting record (or \b end)
+        // MODIFIED returns the range itself or a null reference.
+        public PartIterator find_overlap(linetype point, linetype end)
         {
             AddrRange addrrange = new AddrRange(point, subsortTypeInstatiator);
-            /*typename*/ IEnumerator<AddrRange> iter;
 
             // First range where right boundary is equal to or past point
-            iter = tree.lower_bound(addrrange);
+            /*typename*/ PartIterator iter = tree.lower_bound(addrrange);
             if (iter == tree.end()) return iter;
-            if (0 < linetypeComparer.Compare(iter.Current.first, end))
-                return iter;
-            return tree.end();
+            return (0 < linetypeComparer.Compare(iter.Current.first, end))
+                ? iter.Current
+                : tree.end();
         }
 
         /// \brief Insert a new record into the container
@@ -412,10 +277,10 @@ namespace Sla.EXTRA
                 if (0 > linetypeComparer.Compare(low.Current.first, f))
                     // Check if left boundary refines existing partition
                     // If so do the refinement
-                    unzip(f.DecrementBy(1), low);
+                    unzip(f = linetypeAdder.DecrementBy(f, 1), low);
             }
-
-            _recordtype newItem = new AddrRange(data, a, b);
+            
+            _recordtype newItem = CreateRecord(data, a, b);
             record.Insert(0, newItem);
             liter = record.GetEnumerator();
 
@@ -435,7 +300,7 @@ namespace Sla.EXTRA
                     if (0 > linetypeComparer.Compare(f, low.Current.first)) {
                         // Assume the hint makes this insert an O(1) op
                         addrrange.first = f;
-                        addrrange.last = low.Current.first.DecrementBy(1);
+                        addrrange.last = linetypeAdder.DecrementBy(low.Current.first, 1);
                         tree.insert(low, addrrange);
                         f = low.Current.first;
                     }
@@ -447,7 +312,7 @@ namespace Sla.EXTRA
                         if (0 == linetypeComparer.Compare(low.Current.last, b))
                             // Did we manage to insert it all
                             break;
-                        f = low.Current.last.IncrementBy(1);
+                        f = linetypeAdder.IncrementBy(low.Current.last, 1);
                     }
                     else if (0 > linetypeComparer.Compare(b, low.Current.last)) {
                         // We can insert everything left, but must refine
@@ -460,7 +325,7 @@ namespace Sla.EXTRA
             if (0 < linetypeComparer.Compare(f, b)) {
                 addrrange.first = f;
                 addrrange.last = b;
-                tree.insert(addrrange);
+                tree.Add(addrrange, addrrange);
             }
             return liter;
         }
@@ -479,7 +344,7 @@ namespace Sla.EXTRA
                 new AddrRange(a, subsortTypeInstatiator));
             IEnumerator<AddrRange> uplow = low;
 
-            linetype aminus1 = a.DecrementBy(1);
+            linetype aminus1 = linetypeAdder.DecrementBy(a, 1);
             while (uplow != tree.begin()) {
                 --uplow;
                 if (0 != linetypeComparer.Compare(uplow.Current.last, aminus1)) break;
@@ -505,21 +370,214 @@ namespace Sla.EXTRA
                 }
             } while (low.MoveNext() && (0 < linetypeComparer.Compare(low.Current.first, b)));
             if (low != tree.end()) {
-                if (low.Current.a.DecrementBy(1).Equals(b))
+                if (linetypeAdder.DecrementBy(low.Current.a, 1).Equals(b))
                     rightsew = false;
             }
             if (leftsew && leftoverlap)
-                zip(a.DecrementBy(1), tree.lower_bound(
-                    new AddrRange(a.DecrementBy(1), subsortTypeInstatiator)));
+                zip(linetypeAdder.DecrementBy(a, 1), tree.lower_bound(
+                    new AddrRange(linetypeAdder.DecrementBy(a, 1), subsortTypeInstatiator)));
             if (rightsew && rightoverlap)
                 zip(b, tree.lower_bound(new AddrRange(b, subsortTypeInstatiator)));
             record.Remove(v.Current);
         }
 
-        /// \brief Erase a record given an iterator
+        // \brief Erase a record given an iterator
         public void erase(IEnumerator<AddrRange> iter)
         {
             erase(iter.getValueIter());
+        }
+
+        /// \brief The internal \e sub-range object for the interval map
+        /// It defines a disjoint range within the common refinement of all ranges
+        /// in the container. It also knows about its containing range and \b recordtype.
+        internal class AddrRange
+        {
+            //friend class rangemap<_recordtype>;
+            //friend class PartIterator;
+            // Start of the disjoint sub-range
+            internal /*mutable*/ linetype first;
+            // End of the disjoint sub-range
+            internal linetype last;
+            // Start of full range occupied by the entire \b recordtype
+            internal /*mutable*/ linetype a;
+            // End of full range occupied by the entire \b recordtype
+            internal /*mutable*/ linetype b;
+            // How \b this should be sub-sorted
+            internal /*mutable*/ subsorttype subsort;
+            // How \b this should be sub-sorted
+            internal /*mutable*/ /*typename*/ IEnumerator<_recordtype> value;
+
+            /// (Partial) constructor
+            internal AddrRange(linetype l,
+                IRangemapSubsortTypeInstantiator<subsorttype> subsorttypeInstantiator)
+            {
+                subsort = subsorttypeInstantiator.Create(false);
+                last = l;
+            }
+
+            /// (Partial) constructor given a subsort
+            internal AddrRange(linetype l, subsorttype s,
+                IRangemapSubsortTypeInstantiator<subsorttype> subsorttypeInstantiator)
+            {
+                subsort = subsorttypeInstantiator.Create(s);
+                last = l;
+            }
+
+            // Comparison method based on ending boundary point
+            public static bool operator <(AddrRange op1, AddrRange op2)
+            {
+                return (op1.last.Equals(op2.last))
+                    ? (0 > op1.subsort.CompareTo(op2.subsort))
+                    : (0 > op1.last.CompareTo(op2.last));
+            }
+
+            public static bool operator >(AddrRange op1, AddrRange op2)
+            {
+                throw new NotImplementedException();
+            }
+
+            /// Retrieve the \b recordtype
+            public /*typename*/ IEnumerator<_recordtype> getValue() => value;
+        }
+
+        // \brief An iterator into the interval map container
+        // This is really an iterator to the underlying multiset, but dereferencing it returns
+        // the \b recordtype. Iteration occurs over the disjoint sub-ranges, thus the same
+        // \b recordtype may be visited multiple times by the iterator, depending on how much
+        // it overlaps other \b recordtypes. The sub-ranges are sorted in linear order, then
+        // depending on the \b subsorttype.
+        public class PartIterator : IEnumerator<_recordtype>
+        {
+            /// The underlying multiset iterator
+            private /*typename*/ IEnumerator<AddrRange> iter;
+
+            public PartIterator()
+            {
+            }
+
+            // Construct given iterator
+            public PartIterator(/*typename*/ IEnumerator<AddrRange> i)
+            {
+                iter = i;
+            }
+
+            // Dereference to the \b recordtype object
+            public _recordtype Current => iter.Current;
+
+            object IEnumerator.Current => this.Current;
+
+            public bool MoveNext()
+            {
+                throw new NotImplementedException();
+            }
+
+            // Pre-increment the iterator
+            public static PartIterator? operator ++(PartIterator iterator)
+            {
+                return iterator.iter.MoveNext() ? iterator : null;
+            }
+
+            ///// Post-increment the iterator
+            //public static PartIterator operator ++(int i)
+            //{
+            //    PartIterator orig = new PartIterator(iter);
+            //    ++iter;
+            //    return orig;
+            //}
+
+            // Pre-decrement the iterator
+            public static PartIterator? operator --(PartIterator iterator)
+            {
+                throw new NotImplementedException();
+                //--iter;
+                //return iterator;
+            }
+
+            ///// Post-decrement the iterator
+            //public static PartIterator operator --(int i)
+            //{
+            //    throw new NotImplementedException();
+            //    //PartIterator orig = new PartIterator(iter);
+            //    //--iter;
+            //    //return orig;
+            //}
+
+            // Assign to the iterator
+            // TODO : Find assignment use and duplicate in a specific method.
+            //public static PartIterator operator=(PartIterator op1, PartIterator op2)
+            //{
+            //    op1.iter = op2.iter;
+            //    return op1;
+            //}
+
+            // Test equality of iterators
+            public static bool operator ==(PartIterator op1, PartIterator op2)
+            {
+                return (op1.iter == op2.iter);
+            }
+
+            // Test inequality of iterators
+            public static bool operator !=(PartIterator op1, PartIterator op2)
+            {
+                return (op1.iter != op2.iter);
+            }
+
+            // Get the \b recordtype iterator
+            public /*typename*/ IEnumerator<_recordtype> getValueIter() => iter;
+
+            public void Reset()
+            {
+                throw new NotImplementedException();
+            }
+
+            public void Dispose()
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        protected class AddressLinetypeAdder : IAddable<Address>
+        {
+            internal static readonly AddressLinetypeAdder Instance =
+                new AddressLinetypeAdder();
+
+            private AddressLinetypeAdder()
+            {
+            }
+
+            public Address DecrementBy(Address initialValue, int decrementBy)
+            {
+                return (initialValue - decrementBy);
+            }
+
+            public Address IncrementBy(Address initialValue, int incrementBy)
+            {
+                return (initialValue + incrementBy);
+            }
+        }
+
+        protected class UInt64LinetypeAdder : IAddable<ulong>
+        {
+            internal static readonly UInt64LinetypeAdder Instance =
+                new UInt64LinetypeAdder();
+
+            private UInt64LinetypeAdder()
+            {
+            }
+
+            public ulong DecrementBy(ulong initialValue, int decrementBy)
+            {
+                return (0 <= decrementBy)
+                    ? initialValue - (uint)decrementBy
+                    : initialValue + (uint)(-decrementBy);
+            }
+
+            public ulong IncrementBy(ulong initialValue, int incrementBy)
+            {
+                return (0 <= incrementBy)
+                    ? initialValue + (uint)incrementBy
+                    : initialValue - (uint)(-incrementBy);
+            }
         }
     }
 }

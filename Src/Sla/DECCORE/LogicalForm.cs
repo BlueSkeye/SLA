@@ -129,11 +129,11 @@ namespace Sla.DECCORE
 
             outdoub.initPartial(@in.getSize(), loop.getOut(), hiop.getOut());
             indoub.initPartial(@in.getSize(), lo2, hi2);
-            existop = SplitVarnode::prepareBinaryOp(outdoub, @in, indoub);
+            existop = SplitVarnode.prepareBinaryOp(outdoub, @in, indoub);
             if (existop == (PcodeOp)null)
                 return false;
 
-            SplitVarnode::createBinaryOp(data, outdoub, @in, indoub, existop, loop.code());
+            SplitVarnode.createBinaryOp(data, outdoub, @in, indoub, existop, loop.code());
             return true;
         }
     }

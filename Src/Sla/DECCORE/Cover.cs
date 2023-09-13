@@ -36,23 +36,23 @@ namespace Sla.DECCORE
             int j;
             uint ustart, ustop;
 
-            CoverBlock & block(cover[bl.getIndex()]);
-            if (block.empty())
-            {
-                block.setAll();     // No cover encountered, fill in entire block
-                                    //    if (bl.InSize()==0)
-                                    //      throw new LowlevelError("Ref point is not in flow of defpoint");
-                for (j = 0; j < bl.sizeIn(); ++j)  // Recurse to all blocks that fall into bl
+            CoverBlock block = cover[bl.getIndex()];
+            if (block.empty()) {
+                // No cover encountered, fill in entire block
+                block.setAll();
+                //    if (bl.InSize()==0)
+                //      throw new LowlevelError("Ref point is not in flow of defpoint");
+                // Recurse to all blocks that fall into bl
+                for (j = 0; j < bl.sizeIn(); ++j)
                     addRefRecurse(bl.getIn(j));
             }
-            else
-            {
-                PcodeOp op = block.getStop();
-                ustart = CoverBlock::getUIndex(block.getStart());
-                ustop = CoverBlock::getUIndex(op);
+            else {
+                PcodeOp op = block.getStop() ?? throw new ApplicationException();
+                ustart = (uint)CoverBlock.getUIndex(block.getStart());
+                ustop = (uint)CoverBlock.getUIndex(op);
                 if ((ustop != uint.MaxValue) && (ustop >= ustart))
-                    block.setEnd((PcodeOp)1); // Fill in to the bottom
-
+                    // Fill in to the bottom
+                    block.setEnd((PcodeOp)1);
 
                 if ((ustop == (uint)0) && (block.getStart() == (PcodeOp)null)) {
                     if ((op != (PcodeOp)null)&& (op.code() == OpCode.CPUI_MULTIEQUAL)) {
@@ -85,24 +85,21 @@ namespace Sla.DECCORE
         {
             int a, b;
 
-            Dictionary<int, CoverBlock>.Enumerator iter;
-            iter = cover.begin();
-            if (iter == cover.end())
+            Dictionary<int, CoverBlock>.Enumerator iter = cover.GetEnumerator();
+            if (!iter.MoveNext())
                 a = 1000000;
             else
                 a = iter.Current.Key;
-            iter = op2.cover.begin();
-            if (iter == op2.cover.end())
+            iter = op2.cover.GetEnumerator();
+            if (!iter.MoveNext())
                 b = 1000000;
             else
                 b = iter.Current.Key;
 
-            if (a < b)
-            {
+            if (a < b) {
                 return -1;
             }
-            else if (a == b)
-            {
+            else if (a == b) {
                 return 0;
             }
             return 1;
@@ -118,7 +115,7 @@ namespace Sla.DECCORE
             Dictionary<int, CoverBlock>.Enumerator iter = cover.find(i);
             if (iter == cover.end())
                 return emptyBlock;
-            return (*iter).second;
+            return iter.Current.Value;
         }
 
         /// Characterize the intersection between \b this and another Cover.
@@ -131,33 +128,32 @@ namespace Sla.DECCORE
         /// \return the intersection characterization
         public int intersect(Cover op2)
         {
-            Dictionary<int, CoverBlock>.Enumerator iter, iter2;
-            int res, newres;
+            int newres;
 
-            res = 0;
-            iter = cover.begin();
-            iter2 = op2.cover.begin();
+            int res = 0;
+            Dictionary<int, CoverBlock>.Enumerator iter = cover.GetEnumerator();
+            Dictionary<int, CoverBlock>.Enumerator iter2 = op2.cover.GetEnumerator();
 
-            while(true)
-            {
-                if (iter == cover.end()) return res;
-                if (iter2 == op2.cover.end()) return res;
+            while(true) {
+                if (!iter.MoveNext()) return res;
+                if (!iter2.MoveNext()) return res;
 
-                if (iter.Current.Key < (*iter2).first)
-                    ++iter;
-                else if (iter.Current.Key > (*iter2).first)
-                    ++iter2;
-                else
-                {
-                    newres = (*iter).second.intersect((*iter2).second);
+                if (iter.Current.Key < iter2.Current.Key) {
+                    if (!iter.MoveNext()) return res;
+                }
+                else if (iter.Current.Key > iter2.Current.Key) {
+                    if (!iter2.MoveNext()) return res;
+                }
+                else {
+                    newres = iter.Current.Value.intersect(iter2.Current.Value);
                     if (newres == 2) return 2;
                     if (newres == 1)
-                        res = 1;        // At least a point intersection
-                    ++iter;
-                    ++iter2;
+                        // At least a point intersection
+                        res = 1;
+                    if (!iter.MoveNext()) return res;
+                    if (!iter2.MoveNext()) return res;
                 }
             }
-            return res;
         }
 
         /// Characterize the intersection on a specific block
@@ -171,17 +167,13 @@ namespace Sla.DECCORE
         /// \return the characterization
         public int intersectByBlock(int blk, Cover op2)
         {
-            Dictionary<int, CoverBlock>.Enumerator iter;
-
-            iter = cover.find(blk);
+            Dictionary<int, CoverBlock>.Enumerator iter = cover.find(blk);
             if (iter == cover.end()) return 0;
 
-            Dictionary<int, CoverBlock>.Enumerator iter2;
-
-            iter2 = op2.cover.find(blk);
+            Dictionary<int, CoverBlock>.Enumerator iter2 = op2.cover.find(blk);
             if (iter2 == op2.cover.end()) return 0;
 
-            return (*iter).second.intersect((*iter2).second);
+            return iter.Current.Value.intersect(iter2.Current.Value);
         }
 
         /// \brief Generate a list of blocks that intersect
@@ -194,49 +186,51 @@ namespace Sla.DECCORE
         /// \param level is the characterization threshold which must be exceeded
         public void intersectList(List<int> listout, Cover op2, int level)
         {
-            Dictionary<int, CoverBlock>.Enumerator iter, iter2;
             int val;
 
-            listout.clear();
+            listout.Clear();
 
-            iter = cover.begin();
-            iter2 = op2.cover.begin();
+            Dictionary<int, CoverBlock>.Enumerator iter = cover.GetEnumerator();
+            Dictionary<int, CoverBlock>.Enumerator iter2 = op2.cover.GetEnumerator();
+            bool iterCompleted = !iter.MoveNext();
+            bool iter2Completed = !iter2.MoveNext();
 
-            while(true)
-            {
-                if (iter == cover.end()) return;
-                if (iter2 == op2.cover.end()) return;
+            while(true) {
+                if (iterCompleted) return;
+                if (iter2Completed) return;
 
-                if (iter.Current.Key < (*iter2).first)
-                    ++iter;
-                else if (iter.Current.Key > (*iter2).first)
-                    ++iter2;
-                else
-                {
-                    val = (*iter).second.intersect((*iter2).second);
-                    if (val >= level)
+                if (iter.Current.Key < iter2.Current.Key) {
+                    iterCompleted = !iter.MoveNext();
+                }
+                else if (iter.Current.Key > iter2.Current.Key) {
+                    iter2Completed = !iter2.MoveNext();
+                }
+                else {
+                    val = iter.Current.Value.intersect(iter2.Current.Value);
+                    if (val >= level) {
                         listout.Add(iter.Current.Key);
-                    ++iter;
-                    ++iter2;
+                    }
+                    iterCompleted = !iter.MoveNext();
+                    iter2Completed = !iter2.MoveNext();
                 }
             }
         }
 
-        /// \brief Does \b this contain the given PcodeOp
-        ///
-        /// \param op is the given PcodeOp
-        /// \param max is 1 to test for any containment, 2 to force interior containment
-        /// \return true if there is containment
+        // \brief Does \b this contain the given PcodeOp
+        // \param op is the given PcodeOp
+        // \param max is 1 to test for any containment, 2 to force interior containment
+        // \return true if there is containment
         public bool contain(PcodeOp op, int max)
         {
-            Dictionary<int, CoverBlock>.Enumerator iter;
-
-            iter = cover.find(op.getParent().getIndex());
-            if (iter == cover.end()) return false;
-            if ((*iter).second.contain(op))
-            {
-                if (max == 1) return true;
-                if (0 == (*iter).second.boundary(op)) return true;
+            Dictionary<int, CoverBlock>.Enumerator iter =
+                cover.find(op.getParent().getIndex());
+            if (iter == cover.end())
+                return false;
+            if (iter.Current.Value.contain(op)) {
+                if (max == 1)
+                    return true;
+                if (0 == iter.Current.Value.boundary(op))
+                    return true;
             }
             return false;
         }
@@ -264,10 +258,12 @@ namespace Sla.DECCORE
                 op = (PcodeOp)2;
                 blk = 0;
             }
-            else
+            else {
                 blk = op.getParent().getIndex();
+            }
             CoverBlock? block;
-            if (!cover.TryGetValue(blk, out block)) return 0;
+            if (!cover.TryGetValue(blk, out block))
+                return 0;
             if (block.contain(op)) {
                 int boundtype = block.boundary(op);
                 if (boundtype == 0) return 1;
@@ -281,8 +277,9 @@ namespace Sla.DECCORE
         /// \param op2 is the other Cover
         public void merge(Cover op2)
         {
-            foreach (KeyValuePair<int, CoverBlock> pair in op2.cover)
+            foreach (KeyValuePair<int, CoverBlock> pair in op2.cover) {
                 cover[pair.Key].merge(pair.Value);
+            }
         }
 
         /// Reset \b this based on def-use of a single Varnode
@@ -293,8 +290,9 @@ namespace Sla.DECCORE
         {
             addDefPoint(vn);
             IEnumerator<PcodeOp> iter = vn.beginDescend();
-            while (iter.MoveNext())
+            while (iter.MoveNext()) {
                 addRefPoint(iter.Current, vn);
+            }
         }
 
         /// Reset to the single point where the given Varnode is defined
@@ -303,21 +301,19 @@ namespace Sla.DECCORE
         /// \param vn is the Varnode
         public void addDefPoint(Varnode vn)
         {
-            PcodeOp? def;
-
-            cover.clear();
-
-            def = vn.getDef();
+            cover.Clear();
+            PcodeOp? def = vn.getDef();
             if (def != null) {
-                CoverBlock & block(cover[def.getParent().getIndex()]);
-                block.setBegin(def);    // Set the point topology
+                CoverBlock block = cover[def.getParent().getIndex()];
+                // Set the point topology
+                block.setBegin(def);
                 block.setEnd(def);
             }
-            else if (vn.isInput())
-            {
-                CoverBlock & block(cover[0]);
-                block.setBegin((PcodeOp)2 ); // Special mark for input
-                block.setEnd((PcodeOp)2 );
+            else if (vn.isInput()) {
+                CoverBlock block = cover[0];
+                // Special mark for input
+                block.setBegin((PcodeOp)2);
+                block.setEnd((PcodeOp)2);
             }
         }
 
@@ -350,8 +346,11 @@ namespace Sla.DECCORE
                     block.setEnd(@ref);      // Otherwise update endpoint
                     ustop = (uint)CoverBlock.getUIndex(block.getStop());
                     if (ustop >= CoverBlock.getUIndex(startop)) {
-                        if ((op != (PcodeOp)null)&& (op != (PcodeOp)2)&&
-                            (op.code() == OpCode.CPUI_MULTIEQUAL) && (startop == (PcodeOp)null)) {
+                        if (   (op != (PcodeOp)null)
+                            && (op != (PcodeOp)2)
+                            && (op.code() == OpCode.CPUI_MULTIEQUAL)
+                            && (startop == (PcodeOp)null))
+                        {
                             // This block contains only an infinitesimal tip
                             // of cover through one branch of a MULTIEQUAL
                             // we still need to traverse through branches
@@ -365,13 +364,17 @@ namespace Sla.DECCORE
             //  if (bl.InSize()==0)
             //    throw new LowlevelError("Ref point is not in flow of defpoint");
             if (@ref.code() == OpCode.CPUI_MULTIEQUAL) {
-                for (j = 0; j < @ref.numInput(); ++j)
-                    if (@ref.getIn(j) == vn)
+                for (j = 0; j < @ref.numInput(); ++j) {
+                    if (@ref.getIn(j) == vn) {
                         addRefRecurse(bl.getIn(j));
+                    }
+                }
             }
-            else
-                for (j = 0; j < bl.sizeIn(); ++j)
+            else {
+                for (j = 0; j < bl.sizeIn(); ++j) {
                     addRefRecurse(bl.getIn(j));
+                }
+            }
         }
 
         //  void remove_refpoint(PcodeOp *ref,const Varnode *vn) {

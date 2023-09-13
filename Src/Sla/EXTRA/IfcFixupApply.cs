@@ -1,10 +1,4 @@
 ﻿using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.EXTRA
 {
@@ -20,30 +14,29 @@ namespace Sla.EXTRA
             if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("No load image present");
 
-            string fixupName, funcName;
-
-            s >> ws;
-            if (s.eof())
+            s.ReadSpaces();
+            if (s.EofReached())
                 throw new IfaceParseError("Missing fixup name");
-            s >> fixupName >> ws;
-            if (s.eof())
+            string fixupName = s.ReadString();
+            s.ReadSpaces();
+            if (s.EofReached())
                 throw new IfaceParseError("Missing function name");
-            s >> funcName;
+            string funcName = s.ReadString();
 
             int injectid = dcp.conf.pcodeinjectlib.getPayloadId(InjectPayload.InjectionType.CALLFIXUP_TYPE, fixupName);
             if (injectid < 0)
                 throw new IfaceExecutionError("Unknown fixup: " + fixupName);
 
             string basename;
-            Scope* funcscope = dcp.conf.symboltab.resolveScopeFromSymbolName(funcName, "::", basename, (Scope)null);
+            Scope funcscope = dcp.conf.symboltab.resolveScopeFromSymbolName(funcName, "::", basename, (Scope)null);
             if (funcscope == (Scope)null)
                 throw new IfaceExecutionError("Bad namespace: " + funcName);
-            Funcdata* fd = funcscope.queryFunction(basename); // Is function already in database
+            Funcdata fd = funcscope.queryFunction(basename); // Is function already in database
             if (fd == (Funcdata)null)
                 throw new IfaceExecutionError("Unknown function name: " + funcName);
 
             fd.getFuncProto().setInjectId(injectid);
-            *status.optr << "Successfully applied callfixup" << endl;
+            status.optr.WriteLine("Successfully applied callfixup");
         }
     }
 }

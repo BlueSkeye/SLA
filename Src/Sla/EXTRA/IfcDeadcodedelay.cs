@@ -1,11 +1,5 @@
 ﻿using Sla.CORE;
 using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.EXTRA
 {
@@ -22,26 +16,26 @@ namespace Sla.EXTRA
         {
             string name;
             int delay = -1;
-            AddrSpace* spc;
 
-            s >> name;
-            s >> ws;
-            s >> delay;
+            name = s.ReadString();
+            s.ReadSpaces();
+            int delay;
+            if (!int.TryParse(s.ReadString(), out delay)) delay = -1;
 
-            spc = dcp.conf.getSpaceByName(name);
+            AddrSpace? spc = dcp.conf.getSpaceByName(name);
             if (spc == (AddrSpace)null)
                 throw new IfaceParseError("Bad space: " + name);
             if (delay == -1)
                 throw new IfaceParseError("Need delay integer");
-            if (dcp.fd != (Funcdata)null)
-            {
+            if (dcp.fd != (Funcdata)null) {
                 dcp.fd.getOverride().insertDeadcodeDelay(spc, delay);
-                *status.optr << "Successfully overrided deadcode delay for single function" << endl;
+                status.optr.WriteLine(
+                    "Successfully overrided deadcode delay for single function");
             }
-            else
-            {
+            else {
                 dcp.conf.setDeadcodeDelay(spc, delay);
-                *status.optr << "Successfully overrided deadcode delay for all functions" << endl;
+                status.optr.WriteLine(
+                    "Successfully overrided deadcode delay for all functions");
             }
         }
     }

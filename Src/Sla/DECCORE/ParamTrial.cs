@@ -325,21 +325,18 @@ namespace Sla.DECCORE
         /// \param a trial
         /// \param b trial
         /// \return \b true if \b a should be ordered before \b b
-        public static bool fixedPositionCompare(ParamTrial a, ParamTrial b)
+        public static int fixedPositionCompare(ParamTrial a, ParamTrial b)
         {
-            if (a.fixedPosition == -1 && b.fixedPosition == -1)
-            {
-                return a < b;
+            if (a.fixedPosition == -1 && b.fixedPosition == -1) {
+                return a.CompareTo(b);
             }
-            if (a.fixedPosition == -1)
-            {
-                return false;
+            if (a.fixedPosition == -1) {
+                return 1;
             }
-            if (b.fixedPosition == -1)
-            {
-                return true;
+            if (b.fixedPosition == -1) {
+                return -1;
             }
-            return a.fixedPosition < b.fixedPosition;
+            return a.fixedPosition.CompareTo(b.fixedPosition);
         }
     }
 }

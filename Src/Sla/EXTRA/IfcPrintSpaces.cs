@@ -1,10 +1,5 @@
 ﻿using Sla.CORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Sla.DECCORE;
 
 namespace Sla.EXTRA
 {
@@ -22,28 +17,27 @@ namespace Sla.EXTRA
 
             AddrSpaceManager manage = dcp.conf;
             int num = manage.numSpaces();
-            for (int i = 0; i < num; ++i)
-            {
-                AddrSpace* spc = manage.getSpace(i);
+            for (int i = 0; i < num; ++i) {
+                AddrSpace spc = manage.getSpace(i);
                 if (spc == (AddrSpace)null) continue;
-                status.fileoptr << dec << spc.getIndex() << " : '" << spc.getShortcut() << "' " << spc.getName();
+                status.fileoptr.Write($"{spc.getIndex()} : '{spc.getShortcut()}' {spc.getName()}");
                 if (spc.getType() == spacetype.IPTR_CONSTANT)
-                    status.fileoptr << " constant ";
+                    status.fileoptr.Write(" constant ");
                 else if (spc.getType() == spacetype.IPTR_PROCESSOR)
-                    status.fileoptr << " processor";
+                    status.fileoptr.Write(" processor");
                 else if (spc.getType() == spacetype.IPTR_SPACEBASE)
-                    status.fileoptr << " spacebase";
+                    status.fileoptr.Write(" spacebase");
                 else if (spc.getType() == spacetype.IPTR_INTERNAL)
-                    status.fileoptr << " internal ";
+                    status.fileoptr.Write(" internal ");
                 else
-                    status.fileoptr << " special  ";
+                    status.fileoptr.Write(" special  ");
                 if (spc.isBigEndian())
-                    status.fileoptr << " big  ";
+                    status.fileoptr.Write(" big  ");
                 else
-                    status.fileoptr << " small";
-                status.fileoptr << " addrsize=" << spc.getAddrSize() << " wordsize=" << spc.getWordSize();
-                status.fileoptr << " delay=" << spc.getDelay();
-                status.fileoptr << endl;
+                    status.fileoptr.Write(" small");
+                status.fileoptr.Write($" addrsize={spc.getAddrSize()} wordsize={spc.getWordSize()}");
+                status.fileoptr.Write($" delay={spc.getDelay()}");
+                status.fileoptr.WriteLine();
             }
         }
     }

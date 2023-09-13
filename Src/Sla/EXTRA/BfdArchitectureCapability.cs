@@ -38,11 +38,10 @@ namespace Sla.EXTRA
 
             try { s = new StreamReader(File.OpenRead(filename)); }
             catch { return false; }
-            int val1, val2, val3;
-            s >> ws;
-            val1 = s.get();
-            val2 = s.get();
-            val3 = s.get();
+            s.ReadSpaces();
+            char val1 = s.ReadMandatoryCharacter();
+            char val2 = s.ReadMandatoryCharacter();
+            char val3 = s.ReadMandatoryCharacter();
             s.Close();
             if ((val1 == '<') && (val2 == 'b') && (val3 == 'i'))
                 return false;       // Probably XML, not BFD

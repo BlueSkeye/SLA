@@ -64,16 +64,16 @@ namespace Sla.DECCORE
         private void insertNameTree(Symbol sym)
         {
             sym.nameDedup = 0;
-            Tuple<IEnumerator<Symbol>, bool> nameres;
-            nameres = nametree.insert(sym);
-            if (!nameres.second) {
+            if (!nametree.Contains(sym)) {
+                nametree.Add(sym);
                 sym.nameDedup = 0xffffffff;
                 IEnumerator<Symbol> iter = nametree.upper_bound(sym);
                 --iter; // Last symbol with this name
-                sym.nameDedup = iter.Current.nameDedup + 1;        // increment the dedup counter
-                nameres = nametree.insert(sym);
-                if (!nameres.second)
-                    throw new LowlevelError("Could  not deduplicate symbol: " + sym.name);
+                // increment the dedup counter
+                sym.nameDedup = iter.Current.nameDedup + 1;
+                if (nametree.Contains(sym))
+                    throw new LowlevelError($"Could  not deduplicate symbol: {sym.name}");
+                nametree.Add(sym);
             }
         }
 
@@ -155,7 +155,7 @@ namespace Sla.DECCORE
             IEnumerator<SymbolEntry> iter = rangemap.insert(initdata, addr.getOffset(),
                 lastaddress.getOffset());
             // Store reference to map in symbol
-            sym.mapentry.Add(iter);
+            sym.mapentry.Add(iter.Current);
             if (sz == sym.type.getSize()) {
                 sym.wholeCount += 1;
                 if (sym.wholeCount == 2)
@@ -171,7 +171,7 @@ namespace Sla.DECCORE
             IEnumerator<SymbolEntry> iter = dynamicentry.GetReverseEnumerator();
             if (!iter.MoveNext()) throw new ApplicationException();
             // Store reference to map entry in symbol
-            sym.mapentry.Add(iter);
+            sym.mapentry.Add(iter.Current);
             if (sz == sym.type.getSize()) {
                 sym.wholeCount += 1;
                 if (sym.wholeCount == 2) {
@@ -199,10 +199,10 @@ namespace Sla.DECCORE
         /// \param nm is the name of the Scope
         /// \param g is the Architecture it belongs to
         public ScopeInternal(ulong id, string nm, Architecture g)
-            : base(id, nm, g, this)
+            : base(id, nm, g, null)
         {
             nextUniqueId = 0;
-            maptable.resize(g.numSpaces(), (EntryMap)null);
+            maptable.resize(g.numSpaces(), delegate() { return (EntryMap)null; });
         }
 
         /// Construct as a cache
@@ -210,7 +210,7 @@ namespace Sla.DECCORE
             : base(id, nm, g, own)
         {
             nextUniqueId = 0;
-            maptable.resize(g.numSpaces(), (EntryMap)null);
+            maptable.resize(g.numSpaces(), delegate () { return (EntryMap)null; });
         }
 
         public override void clear()
@@ -414,15 +414,15 @@ namespace Sla.DECCORE
             if (symbol.wholeCount > 1)
                 multiEntrySet.Remove(symbol);
             // Remove each mapping of the symbol
-            IEnumerator<IEnumerator<SymbolEntry>> iter = symbol.mapentry.GetEnumerator();
+            IEnumerator<SymbolEntry> iter = symbol.mapentry.GetEnumerator();
             while (iter.MoveNext()) {
-                AddrSpace? spc = iter.Current.Current.getAddr().getSpace();
+                AddrSpace? spc = iter.Current.getAddr().getSpace();
                 if (spc == (AddrSpace)null)
                     // A null address indicates a dynamic mapping
-                    dynamicentry.Remove(iter.Current.Current);
+                    dynamicentry.Remove(iter.Current);
                 else {
                     EntryMap rangemap = maptable[spc.getIndex()];
-                    rangemap.erase(iter.Current);
+                    rangemap.erase(iter);
                 }
             }
             symbol.wholeCount = 0;
@@ -432,13 +432,13 @@ namespace Sla.DECCORE
         public override void removeSymbol(Symbol symbol)
         {
             if (symbol.category >= 0) {
-                List<Symbol> list = category[symbol.category];
+                List<Symbol> list = category[(int)symbol.category];
                 list[symbol.catindex] = (Symbol)null;
                 while ((!list.empty()) && (list.GetLastItem() == (Symbol)null))
                     list.RemoveLastItem();
             }
             removeSymbolMappings(symbol);
-            nametree.erase(symbol);
+            nametree.Remove(symbol);
             // delete symbol;
         }
 
@@ -458,7 +458,7 @@ namespace Sla.DECCORE
         public override void retypeSymbol(Symbol sym, Datatype ct)
         {
             if (ct.hasStripped())
-                ct = ct.getStripped();
+                ct = ct.getStripped() ?? throw new ApplicationException();
             if ((sym.type.getSize() == ct.getSize()) || (sym.mapentry.empty())) {
                 // If size is the same, or no mappings nothing special to do
                 sym.type = ct;
@@ -466,13 +466,13 @@ namespace Sla.DECCORE
                 return;
             }
             else if (sym.mapentry.size() == 1) {
-                IEnumerator<SymbolEntry> iter = sym.mapentry.GetLastItem();
-                if (iter.Current.isAddrTied()) {
+                SymbolEntry iter = sym.mapentry.GetLastItem();
+                if (iter.isAddrTied()) {
                     // Save the starting address of map
-                    Address addr = iter.Current.getAddr();
+                    Address addr = iter.getAddr();
 
                     // Find the correct rangemap
-                    EntryMap rangemap = maptable[iter.Current.getAddr().getSpace().getIndex()];
+                    EntryMap rangemap = maptable[iter.getAddr().getSpace().getIndex()];
                     // Remove the map entry
                     rangemap.erase(iter);
                     sym.mapentry.RemoveLastItem();   // Remove reference to map entry
@@ -523,10 +523,10 @@ namespace Sla.DECCORE
                         rangemap.CreateSubsortType(true));
                 else
                     res = rangemap.find(addr.getOffset(), rangemap.CreateSubsortType(false),
-                        EntryMap::subsorttype(usepoint));
-                while (res.first != res.second) {
-                    --res.second;
-                    SymbolEntry entry = &(*res.second);
+                        rangemap.CreateSubsortType(usepoint));
+                while (res.Item1 != res.Item2) {
+                    --res.Item2;
+                    SymbolEntry entry = res.Item2.Current;
                     if (entry.getAddr().getOffset() == addr.getOffset()) {
                         if (entry.inUse(usepoint))
                             return entry;
@@ -547,12 +547,12 @@ namespace Sla.DECCORE
                         rangemap.CreateSubsortType(true));
                 else
                     res = rangemap.find(addr.getOffset(), rangemap.CreateSubsortType(false),
-                        EntryMap::subsorttype(usepoint));
+                        rangemap.CreateSubsortType(usepoint));
                 int oldsize = -1;
                 ulong end = addr.getOffset() + (uint)size - 1;
                 while (res.Item1 != res.Item2) {
                     --res.second;
-                    SymbolEntry entry = res.Item2;
+                    SymbolEntry entry = res.Item2.Current;
                     if (entry.getLast() >= end) {
                         // We contain the range
                         if ((entry.getSize() < oldsize) || (oldsize == -1)) {
@@ -579,13 +579,13 @@ namespace Sla.DECCORE
                         rangemap.CreateSubsortType(true));
                 else
                     res = rangemap.find(addr.getOffset(), rangemap.CreateSubsortType(false),
-                        EntryMap::subsorttype(usepoint));
+                        rangemap.CreateSubsortType(usepoint));
                 int olddiff = -10000;
                 int newdiff;
 
-                while (res.first != res.second) {
-                    --res.second;
-                    SymbolEntry entry = res.second;
+                while (res.Item1 != res.Item2) {
+                    --res.Item2;
+                    SymbolEntry entry = res.Item2.Current;
                     if (entry.getLast() >= addr.getOffset()) {
                         // We contain start
                         newdiff = entry.getSize() - size;
@@ -649,11 +649,11 @@ namespace Sla.DECCORE
             EntryMap? rangemap = maptable[addr.getSpace().getIndex()];
             if (rangemap != (EntryMap)null) {
                 Tuple<EntryMap.PartIterator, EntryMap.PartIterator> res;
-                res = rangemap.find(addr.getOffset(), EntryMap::subsorttype(false),
-                    EntryMap::subsorttype(addr));
-                while (res.first != res.second) {
-                    --res.second;
-                    SymbolEntry entry = &(*res.second);
+                res = rangemap.find(addr.getOffset(), rangemap.CreateSubsortType(false),
+                    rangemap.CreateSubsortType(addr));
+                while (res.Item1 != res.Item2) {
+                    --res.Item2;
+                    SymbolEntry entry = res.Item2.Current;
                     if (entry.getAddr().getOffset() == addr.getOffset()) {
                         if (entry.inUse(addr)) {
                             sym = entry.getSymbol() as LabSymbol;
@@ -669,8 +669,8 @@ namespace Sla.DECCORE
         {
             EntryMap? rangemap = maptable[addr.getSpace().getIndex()];
             if (rangemap != (EntryMap)null) {
-                EntryMap.PartIterator iter;
-                iter = rangemap.find_overlap(addr.getOffset(), addr.getOffset() + (uint)size - 1);
+                EntryMap.PartIterator iter = rangemap.find_overlap(addr.getOffset(),
+                    addr.getOffset() + (uint)size - 1);
                 if (iter != rangemap.end())
                     return &(*iter);
             }
@@ -693,7 +693,7 @@ namespace Sla.DECCORE
             Symbol sym = new Symbol((Scope)null,nm,(Datatype)null);
             IEnumerator<Symbol> iter = nametree.lower_bound(sym);
             if (iter != nametree.end()) {
-                if ((*iter).getName() == nm)
+                if (iter.Current.getName() == nm)
                     return true;
             }
             Scope? par = getParent();
@@ -808,11 +808,10 @@ namespace Sla.DECCORE
             // The dollar signs indicate a special name (not a legal identifier)
             // undef indicates an undefined name and the remaining
             // characters are hex digits which make the name unique
-            IEnumerator<Symbol> iter;
 
             Symbol testsym = new Symbol((Scope)null, "$$undefz", (Datatype)null);
 
-            iter = nametree.lower_bound(testsym);
+            IEnumerator<Symbol> iter = nametree.lower_bound(testsym);
             if (iter != nametree.begin())
                 --iter;
             if (iter != nametree.end()) {
@@ -840,7 +839,8 @@ namespace Sla.DECCORE
             uint uniqid;
             do {
                 uniqid = 0xffffffff;
-                --iter2;            // Last symbol whose name starts with nm
+                // Last symbol whose name starts with nm
+                --iter2;
                 if (iter == iter2) break;
                 Symbol bsym = iter2.Current;
                 string bname = bsym.getName();
@@ -924,9 +924,9 @@ namespace Sla.DECCORE
                     else if (symbolType == 2)
                         encoder.writeString(AttributeId.ATTRIB_TYPE, "equate");
                     sym.encode(encoder);
-                    IEnumerator<IEnumerator<SymbolEntry>> miter = sym.mapentry.GetEnumerator();
+                    IEnumerator<SymbolEntry> miter = sym.mapentry.GetEnumerator();
                     while (miter.MoveNext()) {
-                        SymbolEntry entry = miter.Current.Current;
+                        SymbolEntry entry = miter.Current;
                         entry.encode(encoder);
                     }
                     encoder.closeElement(ElementId.ELEM_MAPSYM);

@@ -89,7 +89,7 @@ namespace Sla.DECCORE
                 restype = range1.circleUnion(range2);
 
             if (restype == 0) {
-                OpCode opc;
+                OpCode? opc;
                 ulong resc;
                 int resslot;
                 restype = range1.translate2Op(out opc, out resc, out resslot);

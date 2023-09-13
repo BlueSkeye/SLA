@@ -277,7 +277,7 @@ namespace Sla.SLEIGH
 
         public override void setLabel(OpTpl op)
         {
-            cache.addLabel(op.getIn(0).getOffset().getReal() + getLabelBase());
+            cache.addLabel((uint)op.getIn(0).getOffset().getReal() + getLabelBase());
         }
 
         public override void appendCrossBuild(OpTpl bld, int secnum)
@@ -287,7 +287,7 @@ namespace Sla.SLEIGH
             // bld-param(1) contains the section number
             if (secnum >= 0)
                 throw new LowlevelError("CROSSBUILD directive within a named section");
-            secnum = bld.getIn(1).getOffset().getReal();
+            secnum = (int)bld.getIn(1).getOffset().getReal();
             VarnodeTpl vn = bld.getIn(0);
             AddrSpace spc = vn.getSpace().fixSpace(walker);
             ulong addr = spc.wrapOffset(vn.getOffset().fix(walker));

@@ -48,7 +48,7 @@ namespace Sla.DECCORE
                 data.opSetOpcode(op, OpCode.CPUI_COPY);
                 return 1;
             }
-            off = (-off) & Globals.calc_mask(vn2.getSize()); // Take twos-complement of constant
+            off = (-off) & Globals.calc_mask((uint)vn2.getSize()); // Take twos-complement of constant
 
             data.opSetOpcode(op, OpCode.CPUI_INT_LESSEQUAL);
             data.opSetInput(op, vn1, 1);    // Move other input to second position

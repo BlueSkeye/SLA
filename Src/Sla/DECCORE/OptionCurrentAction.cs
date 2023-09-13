@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.EXTRA;
 
 namespace Sla.DECCORE
 {
@@ -23,20 +19,18 @@ namespace Sla.DECCORE
         /// to modify. The second and third parameters give the name of the sub-group and the toggle value.
         public override string apply(Architecture glb, string p1, string p2, string p3)
         {
-            if ((p1.size() == 0) || (p2.size() == 0))
-                throw ParseError("Must specify subaction, on/off");
+            if ((p1.Length == 0) || (p2.Length == 0))
+                throw new ParseError("Must specify subaction, on/off");
             bool val;
             string res = "Toggled ";
 
-            if (p3.size() != 0)
-            {
+            if (p3.Length != 0) {
                 glb.allacts.setCurrent(p1);
                 val = onOrOff(p3);
                 glb.allacts.toggleAction(p1, p2, val);
                 res += p2 + " in action " + p1;
             }
-            else
-            {
+            else {
                 val = onOrOff(p2);
                 glb.allacts.toggleAction(glb.allacts.getCurrentName(), p1, val);
                 res += p1 + " in action " + glb.allacts.getCurrentName();

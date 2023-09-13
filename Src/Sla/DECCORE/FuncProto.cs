@@ -1534,7 +1534,7 @@ namespace Sla.DECCORE
                 // If explicitly set
                 extrapop = readextrapop;
 
-            ElementId subId = decoder.peekElement();
+            uint subId = decoder.peekElement();
             if (subId != 0) {
                 ParameterPieces outpieces = new ParameterPieces();
                 bool outputlock = false;

@@ -1,9 +1,5 @@
 ﻿using Sla.CORE;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 namespace Sla.EXTRA
 {
@@ -21,7 +17,7 @@ namespace Sla.EXTRA
         // Name of the test, to be printed in test summaries
         private string name;
         // Regular expression to match against a line of output
-        private std::regex pattern;
+        private Regex pattern;
         // Number of times regular expression has been seen
         private /*mutable*/ uint count;
 
@@ -37,7 +33,8 @@ namespace Sla.EXTRA
         /// Search thru \e line, update state if match found
         public void processLine(string line)
         {
-            if (std::regex_search(line, pattern))
+            if (pattern == null) throw new ApplicationException();
+            if (pattern.Match(line).Success)
                 count += 1;
         }
 
@@ -50,7 +47,7 @@ namespace Sla.EXTRA
             name = el.getAttributeValue("name");
             minimumMatch = int.Parse(el.getAttributeValue("min"));
             maximumMatch = int.Parse(el.getAttributeValue("max"));
-            pattern = std::regex(el.getContent());
+            pattern = new Regex(el.getContent());
         }
     }
 }

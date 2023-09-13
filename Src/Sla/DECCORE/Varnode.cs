@@ -405,7 +405,9 @@ namespace Sla.DECCORE
         public short getMergeGroup() => mergegroup;
 
         /// Get the defining PcodeOp of this Varnode
-        public PcodeOp? getDef() => def;
+        public PcodeOp getDef() => def ?? throw new ApplicationException();
+
+        public PcodeOp? getDefAllowNull() => def;
 
         /// Get the high-level variable associated with this Varnode
         /// During the course of analysis Varnodes are merged into high-level variables that are intended
@@ -1144,28 +1146,32 @@ namespace Sla.DECCORE
         ///   - 2 for a sign extension (INT_SEXT) of a normal constant
         /// \param val is a reference to the constant value that is passed back
         /// \return the extension code (or -1 if \b this cannot be interpreted as a constant)
-        public int isConstantExtended(ulong val)
+        public int isConstantExtended(out ulong val)
         {
             if (isConstant()) {
                 val = getOffset();
                 return 0;
             }
-            if (!isWritten()) return -1;
+            if (!isWritten()) {
+                val = 0;
+                return -1;
+            }
             OpCode opc = def.code();
             if (opc == OpCode.CPUI_INT_ZEXT) {
-                Varnode vn0 = def.getIn(0);
+                Varnode vn0 = def.getIn(0) ?? throw new ApplicationException();
                 if (vn0.isConstant()) {
                     val = vn0.getOffset();
                     return 1;
                 }
             }
             else if (opc == OpCode.CPUI_INT_SEXT) {
-                Varnode vn0 = def.getIn(0);
+                Varnode vn0 = def.getIn(0) ?? throw new ApplicationException();
                 if (vn0.isConstant()) {
                     val = vn0.getOffset();
                     return 2;
                 }
             }
+            val = 0;
             return -1;
         }
 

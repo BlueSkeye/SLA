@@ -74,7 +74,7 @@ namespace Sla.DECCORE
                 List<Varnode> paramlist = new List<Varnode>();
                 paramlist.Add(invn);
                 int sz = invn.getSize();
-                paramlist.Add(data.newConstant(sz, soln & Globals.calc_mask(sz)));
+                paramlist.Add(data.newConstant(sz, soln & Globals.calc_mask((uint)sz)));
                 data.opSetOpcode(op, OpCode.CPUI_INT_ADD);
                 data.opSetAllInput(op, paramlist);
             }
@@ -214,7 +214,7 @@ namespace Sla.DECCORE
             Address spacebase = new Address(spacebasedata.space, spacebasedata.offset);
             int clogcount = 0;
 
-            IEnumerator<Varnode> begiter = data.beginLoc(spacebasedata.size, spacebase);
+            IEnumerator<Varnode> begiter = data.beginLoc((int)spacebasedata.size, spacebase);
             // IEnumerator<Varnode> enditer = data.endLoc(spacebasedata.size, spacebase);
 
             if (!begiter.MoveNext()) {

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -13,7 +9,7 @@ namespace Sla.DECCORE
             : base(t, OpCode.CPUI_INT_EQUAL, "==", type_metatype.TYPE_BOOL, type_metatype.TYPE_INT)
         {
             opflags = PcodeOp.Flags.binary | PcodeOp.Flags.booloutput | PcodeOp.Flags.commutative;
-            addlflags = inherits_sign;
+            addlflags = OperationType.inherits_sign;
             behave = new OpBehaviorEqual();
         }
 
@@ -22,11 +18,12 @@ namespace Sla.DECCORE
             lng.opIntEqual(op);
         }
 
-        public override Datatype getInputCast(PcodeOp op, int slot, CastStrategy castStrategy)
+        public override Datatype? getInputCast(PcodeOp op, int slot, CastStrategy castStrategy)
         {
-            Datatype* reqtype = op.getIn(0).getHighTypeReadFacing(op);    // Input arguments should be the same type
-            Datatype* othertype = op.getIn(1).getHighTypeReadFacing(op);
-            if (0 > othertype.typeOrder(*reqtype))
+            // Input arguments should be the same type
+            Datatype reqtype = op.getIn(0).getHighTypeReadFacing(op);
+            Datatype othertype = op.getIn(1).getHighTypeReadFacing(op);
+            if (0 > othertype.typeOrder(reqtype))
                 reqtype = othertype;
             if (castStrategy.checkIntPromotionForCompare(op, slot))
                 return reqtype;
@@ -34,10 +31,11 @@ namespace Sla.DECCORE
             return castStrategy.castStandard(reqtype, othertype, false, false);
         }
 
-        public override Datatype propagateType(Datatype alttype, PcodeOp op, Varnode invn, Varnode outvn,
-            int inslot, int outslot)
+        public override Datatype propagateType(Datatype alttype, PcodeOp op, Varnode invn,
+            Varnode outvn, int inslot, int outslot)
         {
-            return TypeOpEqual::propagateAcrossCompare(alttype, tlst, invn, outvn, inslot, outslot);
+            return TypeOpEqual.propagateAcrossCompare(alttype, tlst, invn, outvn, inslot,
+                outslot);
         }
 
         /// \brief Propagate a given data-type across a \e comparison PcodeOp
@@ -56,16 +54,15 @@ namespace Sla.DECCORE
             Varnode outvn, int inslot, int outslot)
         {
             if (inslot == -1 || outslot == -1) return (Datatype)null;
-            Datatype* newtype;
-            if (invn.isSpacebase())
-            {
-                AddrSpace* spc = typegrp.getArch().getDefaultDataSpace();
+            Datatype newtype;
+            if (invn.isSpacebase()) {
+                AddrSpace spc = typegrp.getArch().getDefaultDataSpace();
                 newtype = typegrp.getTypePointer(alttype.getSize(), typegrp.getBase(1, type_metatype.TYPE_UNKNOWN), spc.getWordSize());
             }
-            else if (alttype.isPointerRel() && !outvn.isConstant())
-            {
-                TypePointerRel* relPtr = (TypePointerRel*)alttype;
-                if (relPtr.getParent().getMetatype() == type_metatype.TYPE_STRUCT && relPtr.getPointerOffset() >= 0)
+            else if (alttype.isPointerRel() && !outvn.isConstant()) {
+                TypePointerRel relPtr = (TypePointerRel)alttype;
+                if (   (relPtr.getParent().getMetatype() == type_metatype.TYPE_STRUCT)
+                    && (relPtr.getPointerOffset() >= 0))
                 {
                     // If we know the pointer is in the middle of a structure, don't propagate across comparison operators
                     // as the two sides of the operator are likely to be different types , and the other side can also

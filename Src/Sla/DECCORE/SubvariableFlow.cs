@@ -540,12 +540,12 @@ namespace Sla.DECCORE
                         }
                         if (!op.getIn(1).isConstant()) return false; // Dynamic shift
                         sa = (int)op.getIn(1).getOffset();
-                        newmask = (rvn.mask << sa) & Globals.calc_mask(outvn.getSize());
+                        newmask = (rvn.mask << sa) & Globals.calc_mask((uint)outvn.getSize());
                         if (newmask == 0) break;    // Subvar is cleared, truncate flow
                         if (rvn.mask != (newmask >> sa)) return false; // subvar is clipped
                                                                         // Is the small variable getting zero padded into something that is fully consumed
                         if (((rvn.mask & 1) != 0) && (sa + bitsize == 8 * outvn.getSize())
-                            && (Globals.calc_mask(outvn.getSize()) == outvn.getConsume()))
+                            && (Globals.calc_mask((uint)outvn.getSize()) == outvn.getConsume()))
                         {
                             addSuggestedPatch(rvn, op, sa);
                             hcount += 1;
@@ -947,7 +947,7 @@ namespace Sla.DECCORE
                         if (!op.getIn(1).isConstant()) return false; // Right now we only deal with constant shifts
                         rop = createOpDown(OpCode.CPUI_INT_SRIGHT, 2, op, rvn, 0);
                         if (!createLink(rop, rvn.mask, -1, outvn)) return false; // Keep the same mask size
-                        addConstant(rop, Globals.calc_mask(op.getIn(1).getSize()), 1, op.getIn(1)); // Preserve the shift amount
+                        addConstant(rop, Globals.calc_mask((uint)op.getIn(1).getSize()), 1, op.getIn(1)); // Preserve the shift amount
                         hcount += 1;
                         break;
                     case OpCode.CPUI_SUBPIECE:

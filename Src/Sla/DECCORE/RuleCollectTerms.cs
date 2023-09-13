@@ -81,7 +81,8 @@ namespace Sla.DECCORE
                             return data.distributeIntMultAdd(order[i - 1].getMultiplier()) ? 1 : 0;
                         if (order[i].getMultiplier() != (PcodeOp)null)
                             return data.distributeIntMultAdd(order[i].getMultiplier()) ? 1 : 0;
-                        coef1 = (coef1 + coef2) & Globals.calc_mask(vn1.getSize()); // The new coefficient
+                        // The new coefficient
+                        coef1 = (coef1 + coef2) & Globals.calc_mask((uint)vn1.getSize());
                         Varnode newcoeff = data.newConstant(vn1.getSize(), coef1);
                         Varnode zerocoeff = data.newConstant(vn1.getSize(), 0);
                         data.opSetInput(order[i - 1].getOp(), zerocoeff, order[i - 1].getSlot());

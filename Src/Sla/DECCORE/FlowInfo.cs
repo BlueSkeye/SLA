@@ -998,7 +998,7 @@ namespace Sla.DECCORE
         private void injectUserOp(PcodeOp op)
         {
             InjectedUserOp userop = (InjectedUserOp)glb.userops.getOp((int)op.getIn(0).getOffset());
-            InjectPayload payload = glb.pcodeinjectlib.getPayload(userop.getInjectId());
+            InjectPayload payload = glb.pcodeinjectlib.getPayload((int)userop.getInjectId());
             InjectContext icontext = glb.pcodeinjectlib.getCachedContext();
             icontext.clear();
             icontext.baseaddr = op.getAddr();

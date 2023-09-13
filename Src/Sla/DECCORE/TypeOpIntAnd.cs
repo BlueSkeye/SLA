@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -10,10 +6,11 @@ namespace Sla.DECCORE
     internal class TypeOpIntAnd : TypeOpBinary
     {
         public TypeOpIntAnd(TypeFactory t)
-            : base(t, OpCode.CPUI_INT_AND,"&", type_metatype.TYPE_UINT, type_metatype.TYPE_UINT)
+            : base(t, OpCode.CPUI_INT_AND, "&", type_metatype.TYPE_UINT,
+                  type_metatype.TYPE_UINT)
         {
             opflags = PcodeOp.Flags.binary | PcodeOp.Flags.commutative;
-            addlflags = logical_op | inherits_sign;
+            addlflags = OperationType.logical_op | OperationType.inherits_sign;
             behave = new OpBehaviorIntAnd();
         }
 
@@ -25,12 +22,14 @@ namespace Sla.DECCORE
         public override Datatype propagateType(Datatype alttype, PcodeOp op, Varnode invn, Varnode outvn,
             int inslot, int outslot)
         {
-            if (!alttype.isPowerOfTwo()) return (Datatype)null; // Only propagate flag enums
-            Datatype* newtype;
-            if (invn.isSpacebase())
-            {
-                AddrSpace* spc = tlst.getArch().getDefaultDataSpace();
-                newtype = tlst.getTypePointer(alttype.getSize(), tlst.getBase(1, type_metatype.TYPE_UNKNOWN), spc.getWordSize());
+            if (!alttype.isPowerOfTwo())
+                // Only propagate flag enums
+                return (Datatype)null;
+            Datatype newtype;
+            if (invn.isSpacebase()) {
+                AddrSpace spc = tlst.getArch().getDefaultDataSpace();
+                newtype = tlst.getTypePointer(alttype.getSize(), tlst.getBase(1,
+                    type_metatype.TYPE_UNKNOWN), spc.getWordSize());
             }
             else
                 newtype = alttype;

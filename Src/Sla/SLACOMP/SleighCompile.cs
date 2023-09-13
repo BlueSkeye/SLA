@@ -1320,7 +1320,7 @@ namespace Sla.SLACOMP
         {
             for (int i = 0; i < names.Count; ++i) {
                 UserOpSymbol sym = new UserOpSymbol(names[i]);
-                sym.setIndex(userop_count++);
+                sym.setIndex((uint)userop_count++);
                 addSymbol(sym);
             }
             // delete names;
@@ -1591,7 +1591,7 @@ namespace Sla.SLACOMP
         {
             List<PatternValue> vallist =new List<PatternValue>();
             pe.listValues(vallist);
-            for (uint i = 0; i < vallist.size(); ++i) {
+            for (int i = 0; i < vallist.size(); ++i) {
                 if ((vallist[i] as EndInstructionValue) != (EndInstructionValue)null)
                     return false;
                 if ((vallist[i] as Next2InstructionValue) != (Next2InstructionValue)null)
@@ -1652,7 +1652,7 @@ namespace Sla.SLACOMP
         /// \param param is the list of expressions passed to the macro
         public void compareMacroParams(MacroSymbol sym, List<ExprTree> param)
         {
-            for (uint i = 0; i < param.size(); ++i) {
+            for (int i = 0; i < param.size(); ++i) {
                 VarnodeTpl outvn = param[i].getOut();
                 if (outvn == (VarnodeTpl)null) continue;
                 // Check if an OperandSymbol was passed into this macro

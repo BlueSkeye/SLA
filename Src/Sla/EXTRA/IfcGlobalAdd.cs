@@ -1,10 +1,5 @@
 ﻿using Sla.CORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Sla.DECCORE;
 
 namespace Sla.EXTRA
 {
@@ -17,15 +12,15 @@ namespace Sla.EXTRA
         /// global variables.
         public override void execute(TextReader s)
         {
-            if (dcp.conf == (Architecture)null)
+            if (dcp.conf == (Architecture)null) {
                 throw new IfaceExecutionError("No image loaded");
+            }
 
             int size;
-            Address addr = parse_machaddr(s, size, *dcp.conf.types);
+            Address addr = Grammar.parse_machaddr(s, out size, dcp.conf.types);
             ulong first = addr.getOffset();
-            ulong last = first + (size - 1);
-
-            Scope* scope = dcp.conf.symboltab.getGlobalScope();
+            ulong last = first + (uint)(size - 1);
+            Scope scope = dcp.conf.symboltab.getGlobalScope() ?? throw new ApplicationException();
             dcp.conf.symboltab.addRange(scope, addr.getSpace(), first, last);
         }
     }

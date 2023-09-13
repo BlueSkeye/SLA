@@ -51,7 +51,7 @@ namespace Sla.DECCORE
         {
             base.markUnstructured(); // Recurse
             if ((gototarget != null) && (gototype == block_flags.f_goto_goto)) {
-                markCopyBlock(gototarget, edge_flags.f_unstructured_targ);
+                markCopyBlock(gototarget, block_flags.f_unstructured_targ);
             }
         }
         public override void scopeBreak(int curexit, int curloopexit)

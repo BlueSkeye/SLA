@@ -23,7 +23,7 @@ namespace Sla.DECCORE
             ParameterPieces pieces;
             pieces.type = voidtype;
             pieces.flags = 0;
-            ProtoStoreInternal::setOutput(pieces);
+            setOutput(pieces);
         }
 
         ~ProtoStoreInternal()
@@ -243,7 +243,7 @@ namespace Sla.DECCORE
                 curparam = setOutput(pieces[0]);
                 curparam.setTypeLock((pieces[0].flags & ParameterPieces.Flags.typelock) != 0);
             }
-            uint j = 1;
+            int j = 1;
             for (int i = 1; i < pieces.size(); ++i) {
                 if ((pieces[i].flags & ParameterPieces.Flags.hiddenretparm) != 0) {
                     curparam = setInput(i - 1, "rethidden", pieces[i]);

@@ -11,7 +11,7 @@ namespace Sla.DECCORE
     internal class ActionMapGlobals : Action
     {
         public ActionMapGlobals(string g)
-            : base(rule_onceperfunc, "mapglobals", g)
+            : base(ruleflags.rule_onceperfunc, "mapglobals", g)
         {
         }
 
