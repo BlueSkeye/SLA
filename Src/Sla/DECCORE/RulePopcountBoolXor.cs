@@ -94,7 +94,7 @@ namespace Sla.DECCORE
             int sa;
             while(true) {
                 if (vn.isConstant()) {
-                    constRes = (vn.getOffset() >> bitPos) & 1;
+                    constRes = (int)(vn.getOffset() >> bitPos) & 1;
                     return (Varnode)null;
                 }
                 if (!vn.isWritten()) return (Varnode)null;

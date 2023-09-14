@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -22,17 +17,15 @@ namespace Sla.DECCORE
 
         public override int apply(Funcdata data)
         {
-            int i;
             BlockGraph graph = data.getBasicBlocks();
-            BlockBasic bb;
-            PcodeOp cbranch;
 
-            for (i = 0; i < graph.getSize(); ++i)
-            {
-                bb = (BlockBasic)graph.getBlock(i);
-                cbranch = bb.lastOp();
-                if ((cbranch == (PcodeOp)null) || (cbranch.code() != OpCode.CPUI_CBRANCH)) continue;
-                if (!cbranch.getIn(1).isConstant()) continue;
+            for (int i = 0; i < graph.getSize(); ++i) {
+                BlockBasic bb = (BlockBasic)graph.getBlock(i);
+                PcodeOp? cbranch = bb.lastOp();
+                if ((cbranch == (PcodeOp)null) || (cbranch.code() != OpCode.CPUI_CBRANCH))
+                    continue;
+                if (!cbranch.getIn(1).isConstant())
+                    continue;
                 ulong val = cbranch.getIn(1).getOffset();
                 int num = ((val != 0) != cbranch.isBooleanFlip()) ? 0 : 1;
                 data.removeBranch(bb, num);

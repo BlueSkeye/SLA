@@ -47,7 +47,7 @@ namespace Sla.DECCORE
                 ++iter;
                 if ((iterbegin.Current.getType() & tp) != 0) {
                     // delete(iterbegin.Current);
-                    commentset.Remove(iterbegin);
+                    commentset.Remove(iterbegin.Current);
                 }
                 iterbegin = iter;
             }

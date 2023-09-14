@@ -47,7 +47,7 @@ namespace Sla.DECCORE
             size = 0;
             uint elemId = decoder.openElement();
             while(true) {
-                AttributeId attribId = decoder.getNextAttributeId();
+                uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == AttributeId.ATTRIB_NAME)
                     name = decoder.readString();
@@ -83,7 +83,7 @@ namespace Sla.DECCORE
             paramshift = 0;
             dynamic = false;
             while(true) {
-                AttributeId attribId = decoder.getNextAttributeId();
+                uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == AttributeId.ATTRIB_PARAMSHIFT) {
                     paramshift = (int)decoder.readSignedInteger();

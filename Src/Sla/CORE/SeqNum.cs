@@ -123,7 +123,7 @@ namespace Sla.CORE
             uint elemId = decoder.openElement(ElementId.ELEM_SEQNUM);
             Address pc = Address.decode(decoder); // Recover address
             while(true) {
-                AttributeId attribId = decoder.getNextAttributeId();
+                uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == AttributeId.ATTRIB_UNIQ) {
                     uniq = (uint)decoder.readUnsignedInteger();

@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
+﻿
 namespace Sla.DECCORE
 {
-    /// \brief Make \e required Varnode merges as dictated by OpCode.CPUI_MULTIEQUAL, OpCode.CPUI_INDIRECT, and \e addrtied property
+    // \brief Make \e required Varnode merges as dictated by OpCode.CPUI_MULTIEQUAL,
+    // OpCode.CPUI_INDIRECT, and \e addrtied property
     internal class ActionMergeRequired : Action
     {
         public ActionMergeRequired(string g)
-            : base(rule_onceperfunc, "mergerequired", g)
+            : base(ruleflags.rule_onceperfunc, "mergerequired", g)
         {
         }
 

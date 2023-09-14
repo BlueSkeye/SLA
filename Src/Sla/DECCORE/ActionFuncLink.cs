@@ -65,20 +65,23 @@ namespace Sla.DECCORE
         /// If the prototype is unknown set-up the ParamActive, so that outputs will be "gathered"
         /// \param fc is the given sub-function
         /// \param data is the function being analyzed
-        private static void funcLinkOutput(FuncCallSpecs fc, Funcdata data)
+        internal static void funcLinkOutput(FuncCallSpecs fc, Funcdata data)
         {
             PcodeOp callop = fc.getOp();
             if (callop.getOut() != (Varnode)null) {
-                // CALL ops are expected to have no output, but its possible an override has produced one
+                // CALL ops are expected to have no output, but its possible an override has
+                // produced one
                 if (callop.getOut().getSpace().getType() == spacetype.IPTR_INTERNAL) {
-                    // Removing a varnode in the unique space will likely produce an input varnode in the unique space
+                    // Removing a varnode in the unique space will likely produce an input varnode
+                    // in the unique space
                     TextWriter s = new StringWriter();
                     s.Write("CALL op at ");
                     callop.getAddr().printRaw(s);
                     s.Write(" has an unexpected output varnode");
                     throw new LowlevelError(s.ToString());
                 }
-                // Otherwise just remove the Varnode and assume return recovery will reintroduce it if necessary
+                // Otherwise just remove the Varnode and assume return recovery will reintroduce it
+                // if necessary
                 data.opUnsetOutput(callop);
             }
             if (fc.isOutputLocked()) {
@@ -86,7 +89,8 @@ namespace Sla.DECCORE
                 Datatype outtype = outparam.getType();
                 if (outtype.getMetatype() != type_metatype.TYPE_VOID) {
                     int sz = outparam.getSize();
-                    if (sz == 1 && outtype.getMetatype() == type_metatype.TYPE_BOOL
+                    if (   (sz == 1)
+                        && (outtype.getMetatype() == type_metatype.TYPE_BOOL)
                         && data.isTypeRecoveryOn())
                     {
                         data.opMarkCalculatedBool(callop);
@@ -94,7 +98,7 @@ namespace Sla.DECCORE
                     Address addr = outparam.getAddress();
                     data.newVarnodeOut(sz, addr, callop);
                     VarnodeData vdata = new VarnodeData();
-                    OpCode res = fc.assumedOutputExtension(addr, sz, vdata);
+                    OpCode res = fc.assumedOutputExtension(addr, sz, out vdata);
                     if (res == OpCode.CPUI_PIECE) {
                         // Pick an extension based on type
                         if (outtype.getMetatype() == type_metatype.TYPE_INT)
@@ -110,12 +114,14 @@ namespace Sla.DECCORE
                         Varnode invn = data.newVarnode(sz, addr);
                         data.opSetInput(op, invn, 0);
                         data.opSetOpcode(op, res);
-                        data.opInsertAfter(op, callop); // Insert immediately after the call
+                        // Insert immediately after the call
+                        data.opInsertAfter(op, callop);
                     }
                 }
             }
-            else
+            else {
                 fc.initActiveOutput();
+            }
         }
 
         public ActionFuncLink(string g)
@@ -130,10 +136,8 @@ namespace Sla.DECCORE
 
         public override int apply(Funcdata data)
         {
-            int i, size;
-
-            size = data.numCalls();
-            for (i = 0; i < size; ++i) {
+            int size = data.numCalls();
+            for (int i = 0; i < size; ++i) {
                 funcLinkInput(data.getCallSpecs(i), data);
                 funcLinkOutput(data.getCallSpecs(i), data);
             }

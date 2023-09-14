@@ -10,22 +10,32 @@ namespace Sla.SLEIGH
         private PatternEquation pateq;
         private List<OperandSymbol> operands = new List<OperandSymbol>();
         private List<string> printpiece = new List<string>();
-        private List<ContextChange> context = new List<ContextChange>(); // Context commands
-        private ConstructTpl templ;        // The main p-code section
-        private List<ConstructTpl> namedtempl = new List<ConstructTpl>(); // Other named p-code sections
-        private int minimumlength;     // Minimum length taken up by this constructor in bytes
-        private uint id;           // Unique id of constructor within subtable
-        private int firstwhitespace;       // Index of first whitespace piece in -printpiece-
-        private int flowthruindex;     // if >=0 then print only a single operand no markup
+        // Context commands
+        private List<ContextChange> context = new List<ContextChange>();
+        // The main p-code section
+        private ConstructTpl templ;
+        // Other named p-code sections
+        private List<ConstructTpl> namedtempl = new List<ConstructTpl>();
+        // Minimum length taken up by this constructor in bytes
+        private int minimumlength;
+        // Unique id of constructor within subtable
+        private uint id;
+        // Index of first whitespace piece in -printpiece-
+        private int firstwhitespace;
+        // if >=0 then print only a single operand no markup
+        private int flowthruindex;
         private int lineno;
-        private int src_index;           //source file index
-        private /*mutable*/ bool inerror;                 // An error is associated with this Constructor
+        //source file index
+        private int src_index;
+        // An error is associated with this Constructor
+        private /*mutable*/ bool inerror;
 
         private void orderOperands()
         {
             OperandSymbol sym;
             List<OperandSymbol> patternorder = new List<OperandSymbol>();
-            List<OperandSymbol> newops = new List<OperandSymbol>(); // New order of the operands
+            // New order of the operands
+            List<OperandSymbol> newops = new List<OperandSymbol>();
             int lastsize;
 
             pateq.operandOrder(this, patternorder);
@@ -34,15 +44,20 @@ namespace Sla.SLEIGH
                 sym = operands[i];
                 if (!sym.isMarked()) {
                     patternorder.Add(sym);
-                    sym.setMark();     // Make sure all operands are marked
+                    // Make sure all operands are marked
+                    sym.setMark();
                 }
             }
             do {
                 lastsize = newops.size();
                 for (int i = 0; i < patternorder.size(); ++i) {
                     sym = patternorder[i];
-                    if (!sym.isMarked()) continue; // "unmarked" means it is already in newops
-                    if (sym.isOffsetIrrelevant()) continue; // expression Operands come last
+                    if (!sym.isMarked())
+                        // "unmarked" means it is already in newops
+                        continue;
+                    if (sym.isOffsetIrrelevant())
+                        // expression Operands come last
+                        continue;
                     if ((sym.offsetbase == -1) || (!operands[(int)sym.offsetbase].isMarked())) {
                         newops.Add(sym);
                         sym.clearMark();
@@ -66,7 +81,8 @@ namespace Sla.SLEIGH
                 newops[i].hand = i;
                 newops[i].localexp.changeIndex(i);
             }
-            List<int> handmap = new List<int>();       // Create index translation map
+            // Create index translation map
+            List<int> handmap = new List<int>();
             for (int i = 0; i < operands.size(); ++i)
                 handmap.Add(operands[i].hand);
 
@@ -77,7 +93,8 @@ namespace Sla.SLEIGH
                 sym.offsetbase = handmap[sym.offsetbase];
             }
 
-            if (templ != (ConstructTpl)null) // Fix up templates
+            if (templ != (ConstructTpl)null)
+                // Fix up templates
                 templ.changeHandleIndex(handmap);
             for (int i = 0; i < namedtempl.size(); ++i) {
                 ConstructTpl? ntempl = namedtempl[i];
@@ -137,7 +154,9 @@ namespace Sla.SLEIGH
 
         public TokenPattern buildPattern(TextWriter s)
         {
-            if (pattern != (TokenPattern)null) return pattern; // Already built
+            if (pattern != (TokenPattern)null)
+                // Already built
+                return pattern;
 
             pattern = new TokenPattern();
             List<TokenPattern> oppattern = new List<TokenPattern>();
@@ -186,7 +205,8 @@ namespace Sla.SLEIGH
                 throw new SleighError("Impossible pattern");
             if (recursion)
                 pattern.setRightEllipsis(true);
-            minimumlength = pattern.getMinimumLength(); // Get length of the pattern in bytes
+            // Get length of the pattern in bytes
+            minimumlength = pattern.getMinimumLength();
 
             // Resolve offsets of the operands
             OperandResolve resolve = new OperandResolve(operands);
@@ -207,7 +227,9 @@ namespace Sla.SLEIGH
                 offset = (int)sym.reloffset;
                 while (@base >= 0) {
                     sym = operands[@base];
-                    if (sym.isVariableLength()) break; // Cannot resolve to absolute
+                    if (sym.isVariableLength())
+                        // Cannot resolve to absolute
+                        break;
                     @base = sym.offsetbase;
                     offset += sym.getMinimumLength();
                     offset += (int)sym.reloffset;
@@ -222,7 +244,8 @@ namespace Sla.SLEIGH
             for (int i = 0; i < context.size(); ++i)
                 context[i].validate();
 
-            orderOperands();        // Order the operands based on offset dependency
+            // Order the operands based on offset dependency
+            orderOperands();
             return pattern;
         }
 
@@ -265,9 +288,11 @@ namespace Sla.SLEIGH
         {
             // Indicater character for operand
             string operstring = "\n ";
-            operstring[1] = ('A' + operands.size()); // Encode index of operand
+            // Encode index of operand
+            operstring[1] = ('A' + operands.size());
             operands.Add(sym);
-            printpiece.Add(operstring); // Placeholder for operand's string
+            // Placeholder for operand's string
+            printpiece.Add(operstring);
         }
 
         public void addInvisibleOperand(OperandSymbol sym)
@@ -279,7 +304,8 @@ namespace Sla.SLEIGH
         {
             string syntrim;
 
-            if (syn.Length == 0) return;
+            if (syn.Length == 0)
+                return;
             bool hasNonSpace = false;
             for (int i = 0; i < syn.Length; ++i) {
                 if (syn[i] != ' ') {
@@ -316,9 +342,11 @@ namespace Sla.SLEIGH
         }
 
         public void setNamedSection(ConstructTpl tpl, int id)
-        {               // Add a named section to the constructor
-            while (namedtempl.size() <= id)
+        {
+            // Add a named section to the constructor
+            while (namedtempl.size() <= id) {
                 namedtempl.Add((ConstructTpl)null);
+            }
             namedtempl[id] = tpl;
         }
 
@@ -334,28 +362,27 @@ namespace Sla.SLEIGH
 
         public ConstructTpl getNamedTempl(int secnum)
         {
-            if (secnum < namedtempl.size())
-                return namedtempl[secnum];
-            return (ConstructTpl)null;
+            return (secnum < namedtempl.size()) ? namedtempl[secnum] : (ConstructTpl)null;
         }
 
         public int getNumSections() => namedtempl.size();
 
         public void printInfo(TextWriter s)
-        {               // Print identifying information about constructor
-                        // for use in error messages
+        {
+            // Print identifying information about constructor for use in error messages
             s.Write($"table \"{parent.getName()}\" constructor starting at line {lineno}");
         }
 
-        public void print(TextWriter s, ParserWalker pos)
+        public void print(TextWriter s, ParserWalker walker)
         {
             foreach (string piece in printpiece) {
                 if (piece[0] == '\n') {
-                    int index = (*piter)[1] - 'A';
+                    int index = piece[1] - 'A';
                     operands[index].print(s, walker);
                 }
-                else
+                else {
                     s.Write(piece);
+                }
             }
         }
 
@@ -491,7 +518,7 @@ namespace Sla.SLEIGH
                 }
                 else {
                     s.Write("<print piece=\"");
-                    Xml.xml_escape(s, printpiece[i].c_str());
+                    Xml.xml_escape(s, printpiece[i]);
                     s.WriteLine("\"/>");
                 }
             }
@@ -516,9 +543,9 @@ namespace Sla.SLEIGH
             minimumlength = int.Parse(el.getAttributeValue("length"));
             string src_and_line = el.getAttributeValue("line");
             int pos = src_and_line.IndexOf(":");
-            src_index = stoi(src_and_line.Substring(0, pos), null, 10);
-            lineno = stoi(src_and_line.Substring(pos + 1, src_and_line.length()), null, 10);
-            IEnumerator<Element> iter = el.getChildren().begin();
+            src_index = int.Parse(src_and_line.Substring(0, pos));
+            lineno = int.Parse(src_and_line.Substring(pos + 1, src_and_line.Length));
+            IEnumerator<Element> iter = el.getChildren().GetEnumerator();
             while (iter.MoveNext()) {
                 if (iter.Current.getName() == "oper") {
                     id = uint.Parse(iter.Current.getAttributeValue("id"));

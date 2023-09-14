@@ -46,7 +46,7 @@ namespace Sla.DECCORE
         public void registerPcodeCallback(string name, BreakCallBack func)
         {
             func.setEmulate(emulate);
-            List<string> userops;
+            List<string> userops = new List<string>();
             trans.getUserOpNames(userops);
             for (int i = 0; i < userops.size(); ++i) {
                 if (userops[i] == name) {

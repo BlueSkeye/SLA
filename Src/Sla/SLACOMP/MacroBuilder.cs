@@ -13,13 +13,16 @@ namespace Sla.SLACOMP
     /// of OpTpls.
     internal class MacroBuilder : PcodeBuilder
     {
-        private SleighCompile slgh;        ///< The SLEIGH parsing object
-        private bool haserror;      ///< Set to \b true by the build() method if there was an error
-        private List<OpTpl> outvec; ///< The partial list of op templates to expand the macro into
-        private List<HandleTpl> @params;    ///< List of parameters to substitute into the macro
+        // The SLEIGH parsing object
+        private SleighCompile slgh;
+        // Set to \b true by the build() method if there was an error
+        private bool haserror;
+        // The partial list of op templates to expand the macro into
+        private List<OpTpl> outvec;
+        // List of parameters to substitute into the macro
+        private List<HandleTpl> @params;
 
         /// \brief Given a cloned OpTpl, substitute parameters and add to the output list
-        ///
         /// VarnodesTpls used by the op are examined to see if they are derived from
         /// parameters of the macro. If so, details of the parameters actively passed
         /// as part of the specific macro invocation are substituted into the VarnodeTpl.
@@ -30,9 +33,10 @@ namespace Sla.SLACOMP
         /// \param params is the set of parameters specific to the macro invocation
         /// \return \b true if there are no illegal truncations
         private bool transferOp(OpTpl op, List<HandleTpl> @params)
-        { // Fix handle details of a macro generated OpTpl relative to its specific invocation
-          // and transfer it into the output stream
-            VarnodeTpl outvn = op.getOut();
+        {
+            // Fix handle details of a macro generated OpTpl relative to its specific invocation
+            // and transfer it into the output stream
+            VarnodeTpl? outvn = op.getOut();
             int handleIndex = 0;
             int plus;
             bool hasrealsize = false;
@@ -59,7 +63,8 @@ namespace Sla.SLACOMP
                         reportError((Location)null, "Problem with bit range operator in macro");
                         return false;
                     }
-                    ulong newtemp = slgh.getUniqueAddr(); // Generate a new temporary location
+                    // Generate a new temporary location
+                    ulong newtemp = slgh.getUniqueAddr();
 
                     // Generate a SUBPIECE op that implements the offset_plus
                     OpTpl subpieceop = new OpTpl(OpCode.CPUI_SUBPIECE);
@@ -68,7 +73,8 @@ namespace Sla.SLACOMP
                         new ConstTpl(ConstTpl.const_type.real, realsize));
                     subpieceop.setOutput(newvn);
                     HandleTpl hand = @params[handleIndex];
-                    VarnodeTpl origvn = new VarnodeTpl(hand.getSpace(), hand.getPtrOffset(), hand.getSize());
+                    VarnodeTpl origvn = new VarnodeTpl(hand.getSpace(), hand.getPtrOffset(),
+                        hand.getSize());
                     subpieceop.addInput(origvn);
                     VarnodeTpl plusvn = new VarnodeTpl(new ConstTpl(slgh.getConstantSpace()),
                         new ConstTpl(ConstTpl.const_type.real, (ulong)plus),
@@ -76,8 +82,10 @@ namespace Sla.SLACOMP
                     subpieceop.addInput(plusvn);
                     outvec.Add(subpieceop);
 
-                    // delete vn;        // Replace original varnode
-                    op.setInput(new VarnodeTpl(newvn), i); // with output of subpiece
+                    // Replace original varnode
+                    // delete vn;
+                    // with output of subpiece
+                    op.setInput(new VarnodeTpl(newvn), i);
                 }
             }
             outvec.Add(op);

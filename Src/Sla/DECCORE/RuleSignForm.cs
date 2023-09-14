@@ -37,7 +37,7 @@ namespace Sla.DECCORE
             if (sextop.code() != OpCode.CPUI_INT_SEXT)
                 return 0;
             Varnode a = sextop.getIn(0);
-            int c = op.getIn(1).getOffset();
+            int c = (int)op.getIn(1).getOffset();
             if (c < a.getSize()) return 0;
             if (a.isFree()) return 0;
 

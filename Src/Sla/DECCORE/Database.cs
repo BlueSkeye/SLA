@@ -490,7 +490,7 @@ namespace Sla.DECCORE
             uint elemId = decoder.openElement(ElementId.ELEM_DB);
             idByNameHash = false;       // Default
             while(true) {
-                AttributeId attribId = decoder.getNextAttributeId();
+                uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == AttributeId.ATTRIB_SCOPEIDBYNAME)
                     idByNameHash = decoder.readBool();
@@ -515,7 +515,7 @@ namespace Sla.DECCORE
                 ulong id = 0;
                 bool seenId = false;
                 while(true) {
-                    AttributeId attribId = decoder.getNextAttributeId();
+                    uint attribId = decoder.getNextAttributeId();
                     if (attribId == 0) break;
                     if (attribId == AttributeId.ATTRIB_NAME)
                         name = decoder.readString();
@@ -529,7 +529,7 @@ namespace Sla.DECCORE
                 if (name.empty() || !seenId)
                     throw new DecoderError("Missing name and id attributes in scope");
                 Scope? parentScope = (Scope)null;
-                ElementId parentId = decoder.peekElement();
+                uint parentId = decoder.peekElement();
                 if (parentId == ElementId.ELEM_PARENT) {
                     parentScope = parseParentTag(decoder);
                 }
@@ -585,7 +585,7 @@ namespace Sla.DECCORE
                 string displayName = string.Empty;
                 ulong scopeId = 0;
                 while(true) {
-                    AttributeId attribId = decoder.getNextAttributeId();
+                    uint attribId = decoder.getNextAttributeId();
                     if (attribId == 0) break;
                     if (attribId == AttributeId.ATTRIB_ID)
                         scopeId = decoder.readUnsignedInteger();

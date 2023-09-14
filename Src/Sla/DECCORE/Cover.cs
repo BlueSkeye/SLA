@@ -112,10 +112,9 @@ namespace Sla.DECCORE
         /// \return a reference to the corresponding CoverBlock
         public CoverBlock getCoverBlock(int i)
         {
-            Dictionary<int, CoverBlock>.Enumerator iter = cover.find(i);
-            if (iter == cover.end())
-                return emptyBlock;
-            return iter.Current.Value;
+            CoverBlock? result;
+
+            return cover.TryGetValue(i, out result) ? result : emptyBlock;
         }
 
         /// Characterize the intersection between \b this and another Cover.
@@ -167,13 +166,11 @@ namespace Sla.DECCORE
         /// \return the characterization
         public int intersectByBlock(int blk, Cover op2)
         {
-            Dictionary<int, CoverBlock>.Enumerator iter = cover.find(blk);
-            if (iter == cover.end()) return 0;
-
-            Dictionary<int, CoverBlock>.Enumerator iter2 = op2.cover.find(blk);
-            if (iter2 == op2.cover.end()) return 0;
-
-            return iter.Current.Value.intersect(iter2.Current.Value);
+            CoverBlock iter;
+            if (!cover.TryGetValue(blk, out iter)) return 0;
+            CoverBlock iter2;
+            if (!op2.cover.TryGetValue(blk, out iter2)) return 0;
+            return iter.intersect(iter2);
         }
 
         /// \brief Generate a list of blocks that intersect
@@ -222,25 +219,23 @@ namespace Sla.DECCORE
         // \return true if there is containment
         public bool contain(PcodeOp op, int max)
         {
-            Dictionary<int, CoverBlock>.Enumerator iter =
-                cover.find(op.getParent().getIndex());
-            if (iter == cover.end())
+            CoverBlock? iter;
+            if (!cover.TryGetValue(op.getParent().getIndex(), out iter))
                 return false;
-            if (iter.Current.Value.contain(op)) {
+
+            if (iter.contain(op)) {
                 if (max == 1)
                     return true;
-                if (0 == iter.Current.Value.boundary(op))
+                if (0 == iter.boundary(op))
                     return true;
             }
             return false;
         }
 
         /// \brief Check the definition of a Varnode for containment
-        ///
         /// If the given Varnode has a defining PcodeOp this is
         /// checked for containment.  If the Varnode is an input,
         /// check if \b this covers the start of the function.
-        ///
         /// Return:
         ///   - 0 if cover does not contain varnode definition
         ///   - 1 if there if it is contained in interior

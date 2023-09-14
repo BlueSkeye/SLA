@@ -482,7 +482,7 @@ namespace Sla.SLEIGH
             if (vn.getSize().getType() == ConstTpl.const_type.real) {
                 // If we know the size of the input varnode, we can
                 // do some immediate checks, and possibly simplify things
-                uint insize = vn.getSize().getReal();
+                uint insize = (uint)vn.getSize().getReal();
                 if (insize > 0) {
                     truncneeded = (finalsize < insize);
                     insize *= 8;        // Convert to number of bits

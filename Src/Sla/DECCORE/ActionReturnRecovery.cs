@@ -115,7 +115,7 @@ namespace Sla.DECCORE
                 int i;
 
                 int maxancestor = data.getArch().trim_recurse_max;
-                AncestorRealistic ancestorReal;
+                AncestorRealistic ancestorReal = new AncestorRealistic();
                 IEnumerator<PcodeOp> iter = data.beginOp(OpCode.CPUI_RETURN);
                 while (iter.MoveNext()) {
                     op = iter.Current;

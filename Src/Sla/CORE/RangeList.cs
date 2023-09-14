@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +11,7 @@ namespace Sla.CORE
     /// This is a container for addresses. It maintains a disjoint list of Ranges
     /// that cover all the addresses in the container.  Ranges can be inserted
     /// and removed, but overlapping/adjacent ranges will get merged.
-    public class RangeList
+    public class RangeList : IEnumerable<Range>
     {
         /// The sorted list of Range objects
         private SortedSet<Range> tree;
@@ -366,5 +367,12 @@ namespace Sla.CORE
             }
             decoder.closeElement(elemId);
         }
+
+        public IEnumerator<Range> GetEnumerator()
+        {
+            return begin();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
     }
 }

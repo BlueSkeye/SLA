@@ -73,14 +73,16 @@ namespace Sla.DECCORE
                     for (int j = 1; j < max; ++j) {
                         Varnode vn1 = op.getIn(j);
                         Varnode vn2 = op.getIn(j + 1);
-                        SplitVarnode whole;
+                        SplitVarnode whole = new SplitVarnode();
                         bool isslothi;
                         if (whole.inHandHi(vn1)) {
-                            if (whole.getLo() != vn2) continue;
+                            if (whole.getLo() != vn2)
+                                continue;
                             isslothi = true;
                         }
                         else if (whole.inHandLo(vn1)) {
-                            if (whole.getHi() != vn2) continue;
+                            if (whole.getHi() != vn2)
+                                continue;
                             isslothi = false;
                         }
                         else
@@ -102,29 +104,39 @@ namespace Sla.DECCORE
                 // Search for locked parameters that are being split into hi and lo components
                 List<Varnode> lovec = new List<Varnode>();
                 List<Varnode> hivec = new List<Varnode>();
-                int minDoubleSize = data.getArch().getDefaultSize();  // Minimum size to consider
+                // Minimum size to consider
+                int minDoubleSize = (int)data.getArch().getDefaultSize();
                 int numparams = fp.numParams();
                 for (int i = 0; i < numparams; ++i) {
                     ProtoParameter param = fp.getParam(i);
                     Datatype tp = param.getType();
                     type_metatype mt = tp.getMetatype();
-                    if ((mt == type_metatype.TYPE_ARRAY) || (mt == type_metatype.TYPE_STRUCT)) continue; // Not double precision objects
+                    if ((mt == type_metatype.TYPE_ARRAY) || (mt == type_metatype.TYPE_STRUCT))
+                        // Not double precision objects
+                        continue;
                     Varnode vn = data.findVarnodeInput(tp.getSize(), param.getAddress());
-                    if (vn == (Varnode)null) continue;
-                    if (vn.getSize() < minDoubleSize) continue;
+                    if (vn == (Varnode)null)
+                        continue;
+                    if (vn.getSize() < minDoubleSize)
+                        continue;
                     int halfSize = vn.getSize() / 2;
                     lovec.Clear();
                     hivec.Clear();
-                    bool otherUse = false;      // Have we seen use other than splitting into hi and lo
+                    // Have we seen use other than splitting into hi and lo
+                    bool otherUse = false;
                     IEnumerator<PcodeOp> iter = vn.beginDescend();
                     while (iter.MoveNext()) {
                         PcodeOp subop = iter.Current;
-                        if (subop.code() != OpCode.CPUI_SUBPIECE) continue;
+                        if (subop.code() != OpCode.CPUI_SUBPIECE)
+                            continue;
                         Varnode outvn = subop.getOut();
-                        if (outvn.getSize() != halfSize) continue;
-                        if (subop.getIn(1).getOffset() == 0)  // Possible lo precision piece
+                        if (outvn.getSize() != halfSize)
+                            continue;
+                        if (subop.getIn(1).getOffset() == 0)
+                            // Possible lo precision piece
                             lovec.Add(outvn);
-                        else if (subop.getIn(1).getOffset() == halfSize)  // Possible hi precision piece
+                        else if (subop.getIn(1).getOffset() == (uint)halfSize)
+                            // Possible hi precision piece
                             hivec.Add(outvn);
                         else {
                             otherUse = true;
@@ -137,7 +149,8 @@ namespace Sla.DECCORE
                             Varnode piecevn = lovec[j];
                             if (!piecevn.isPrecisLo()) {
                                 piecevn.setPrecisLo();
-                                count += 1;     // Indicate we made change
+                                // Indicate we made change
+                                count += 1;
                             }
                         }
                         for (int j = 0; j < hivec.size(); ++j) {

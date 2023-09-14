@@ -146,7 +146,7 @@ namespace Sla.SLEIGH
             IEnumerator<RelativeRecord> iter = label_refs.GetEnumerator();
             while (iter.MoveNext()) {
                 VarnodeData ptr = iter.Current.dataptr;
-                int id = ptr.offset;
+                int id = (int)ptr.offset;
                 if ((id >= labels.size()) || (labels[id] == 0xbadbeef))
                     throw new LowlevelError("Reference to non-existant sleigh label");
                 // Calculate the relative index given the two absolute indices

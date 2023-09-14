@@ -1,4 +1,5 @@
-﻿
+﻿using Sla.CORE;
+
 namespace Sla.DECCORE
 {
     /// \brief Adjust improperly justified parameters
@@ -21,13 +22,12 @@ namespace Sla.DECCORE
         public override int apply(Funcdata data)
         {
             FuncProto proto = data.getFuncProto();
-
             IEnumerator<Varnode> iter = data.beginDef(Varnode.varnode_flags.input);
             // IEnumerator<Varnode> enditer = data.endDef(Varnode.varnode_flags.input);
 
             while (iter.MoveNext()) {
                 Varnode vn = iter.Current;
-                VarnodeData vdata;
+                VarnodeData vdata = new VarnodeData();
                 if (!proto.unjustifiedInputParam(vn.getAddr(), vn.getSize(), vdata))
                     continue;
 
@@ -42,23 +42,23 @@ namespace Sla.DECCORE
                         vn = iter2.Current;
                         if (vn.getSpace() != vdata.space) continue;
                         // Last offset in varnode
-                        ulong offset = vn.getOffset() + vn.getSize() - 1;
+                        ulong offset = vn.getOffset() + (uint)vn.getSize() - 1;
                         if ((offset >= vdata.offset) && (vn.getOffset() < vdata.offset)) {
                             // If there is overlap that extends size
                             overlaps = true;
                             ulong endpoint = vdata.offset + vdata.size;
                             vdata.offset = vn.getOffset();
-                            vdata.size = endpoint - vdata.offset;
+                            vdata.size = (uint)(endpoint - vdata.offset);
                         }
                     }
                     if (!overlaps)
                         // Found no additional overlaps, go with current justified container
                         break;
                     // If there were overlaps, container may no longer be justified
-                    newcontainer = proto.unjustifiedInputParam(vdata.getAddr(), vdata.size, vdata);
+                    newcontainer = proto.unjustifiedInputParam(vdata.getAddr(), (int)vdata.size, vdata);
                 } while (newcontainer);
 
-                data.adjustInputVarnodes(vdata.getAddr(), vdata.size);
+                data.adjustInputVarnodes(vdata.getAddr(), (int)vdata.size);
                 // Reset iterator because of additions and deletions
                 iter = data.beginDef(Varnode.varnode_flags.input, vdata.getAddr());
                 enditer = data.endDef(Varnode.varnode_flags.input);

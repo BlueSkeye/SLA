@@ -1402,7 +1402,7 @@ namespace Sla.SLACOMP
                     VarnodeSymbol? vsym = (VarnodeSymbol)(varlist)[j];
                     if (vsym != (VarnodeSymbol)null) {
                         if (sz == 0)
-                            sz = vsym.getFixedVarnode().size;
+                            sz = (int)vsym.getFixedVarnode().size;
                         else if (sz != vsym.getFixedVarnode().size) {
                             reportError(getCurrentLocation(),
                                 $"Attach statement contains varnodes of different sizes -- {sz} != {vsym.getFixedVarnode().size}");

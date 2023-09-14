@@ -1,17 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
+﻿
 namespace Sla.DECCORE
 {
     /// \brief Remove blocks that do nothing
     internal class ActionDoNothing : Action
     {
         public ActionDoNothing(string g)
-            : base(rule_repeatapply,"donothing", g)
+            : base(ruleflags.rule_repeatapply,"donothing", g)
         {
         }
 
@@ -21,26 +15,21 @@ namespace Sla.DECCORE
         }
     
         public override int apply(Funcdata data)
-        {               // Remove blocks that do nothing
-            int i;
+        {
+            // Remove blocks that do nothing
             BlockGraph graph = data.getBasicBlocks();
-            BlockBasic bb;
 
-            for (i = 0; i < graph.getSize(); ++i)
-            {
-                bb = (BlockBasic)graph.getBlock(i);
-                if (bb.isDoNothing())
-                {
-                    if ((bb.sizeOut() == 1) && (bb.getOut(0) == bb))
-                    { // Infinite loop
-                        if (!bb.isDonothingLoop())
-                        {
+            for (int i = 0; i < graph.getSize(); ++i) {
+                BlockBasic bb = (BlockBasic)graph.getBlock(i);
+                if (bb.isDoNothing()) {
+                    if ((bb.sizeOut() == 1) && (bb.getOut(0) == bb)) {
+                        // Infinite loop
+                        if (!bb.isDonothingLoop()) {
                             bb.setDonothingLoop();
                             data.warning("Do nothing block with infinite loop", bb.getStart());
                         }
                     }
-                    else if (bb.unblockedMulti(0))
-                    {
+                    else if (bb.unblockedMulti(0)) {
                         data.removeDoNothingBlock(bb);
                         count += 1;
                         return 0;

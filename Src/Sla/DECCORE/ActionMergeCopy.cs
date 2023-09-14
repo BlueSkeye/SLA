@@ -1,17 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
+﻿
 namespace Sla.DECCORE
 {
-    /// \brief Try to merge the input and output Varnodes of a OpCode.CPUI_COPY op
+    // \brief Try to merge the input and output Varnodes of a OpCode.CPUI_COPY op
     internal class ActionMergeCopy : Action
     {
         public ActionMergeCopy(string g)
-            : base(rule_onceperfunc, "mergecopy", g)
+            : base(ruleflags.rule_onceperfunc, "mergecopy", g)
         {
         }
 
@@ -22,7 +16,7 @@ namespace Sla.DECCORE
 
         public override int apply(Funcdata data)
         {
-            data.getMerge().mergeOpcode(CPUI_COPY);
+            data.getMerge().mergeOpcode(CORE.OpCode.CPUI_COPY);
             return 0;
         }
     }

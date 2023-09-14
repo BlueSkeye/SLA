@@ -26,16 +26,9 @@ namespace Sla.DECCORE
 
         public override int apply(Funcdata data)
         {
-            FuncCallSpecs fc;
-            IEnumerator<PcodeOp> iter;
-            PcodeOp op;
-            Varnode vn;
-            int i;
-            IEnumerator<EffectRecord> eiter, endeiter;
-
-            for (i = 0; i < data.numCalls(); ++i) {
-                fc = data.getCallSpecs(i);
-                op = fc.getOp();
+            for (int i = 0; i < data.numCalls(); ++i) {
+                FuncCallSpecs fc = data.getCallSpecs(i);
+                PcodeOp op = fc.getOp();
 
                 if (!fc.isInputLocked()) continue;
                 if (fc.getSpacebaseOffset() == FuncCallSpecs.offset_unknown) continue;
@@ -49,23 +42,26 @@ namespace Sla.DECCORE
                 }
             }
 
-            eiter = data.getFuncProto().effectBegin();
-            endeiter = data.getFuncProto().effectEnd();
+            IEnumerator<EffectRecord> eiter = data.getFuncProto().effectBegin();
             while (eiter.MoveNext()) {
                 // Iterate through saved registers
-                if (eiter.Current.getType() == EffectRecord.EffectType.killedbycall) continue;  // Not saved
-                vn = data.findVarnodeInput(eiter.Current.getSize(), eiter.Current.getAddress());
+                if (eiter.Current.getType() == EffectRecord.EffectType.killedbycall)
+                    // Not saved
+                    continue;
+                Varnode vn = data.findVarnodeInput(eiter.Current.getSize(), eiter.Current.getAddress());
                 if ((vn != (Varnode)null) && (vn.isUnaffected())) {
                     // Mark storage locations for saved registers as not mapped
                     // This should pickup unaffected, reload, and return_address effecttypes
-                    iter = vn.beginDescend();
+                    IEnumerator<PcodeOp> iter = vn.beginDescend();
                     while (iter.MoveNext()) {
-                        op = iter.Current;
+                        PcodeOp op = iter.Current;
                         if (op.code() != OpCode.CPUI_COPY) continue;
                         Varnode outvn = op.getOut();
-                        if (!data.getScopeLocal().isUnaffectedStorage(outvn))  // Is this where unaffected values get saved
+                        if (!data.getScopeLocal().isUnaffectedStorage(outvn))
+                            // Is this where unaffected values get saved
                             continue;
-                        data.getScopeLocal().markNotMapped(outvn.getSpace(), outvn.getOffset(), outvn.getSize(), false);
+                        data.getScopeLocal().markNotMapped(outvn.getSpace(), outvn.getOffset(),
+                            outvn.getSize(), false);
                     }
                 }
             }

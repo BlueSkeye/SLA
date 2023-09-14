@@ -595,7 +595,7 @@ namespace Sla.DECCORE
             likelytrash.Clear();
             uint elemId = decoder.openElement(ElementId.ELEM_PROTOTYPE);
             while(true) {
-                AttributeId attribId = decoder.getNextAttributeId();
+                uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == AttributeId.ATTRIB_NAME)
                     name = decoder.readString();

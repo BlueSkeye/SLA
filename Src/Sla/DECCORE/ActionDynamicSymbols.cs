@@ -1,17 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
+﻿
 namespace Sla.DECCORE
 {
     /// \brief Make final attachments of \e dynamically mapped symbols to Varnodes
     internal class ActionDynamicSymbols : Action
     {
         public ActionDynamicSymbols(string g)
-            : base(rule_onceperfunc,"dynamicsymbols", g)
+            : base(ruleflags.rule_onceperfunc,"dynamicsymbols", g)
         {
         }
 

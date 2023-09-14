@@ -544,7 +544,7 @@ namespace Sla.DECCORE
 
             uint elemId = decoder.openElement(ElementId.ELEM_PENTRY);
             while(true) {
-                AttributeId attribId = decoder.getNextAttributeId();
+                uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == AttributeId.ATTRIB_MINSIZE) {
                     minsize = (int)decoder.readSignedInteger();

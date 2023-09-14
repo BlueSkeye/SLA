@@ -169,7 +169,7 @@ namespace Sla.DECCORE
             flags = 0;
             uint elemId = decoder.openElement(ElementId.ELEM_CPOOLREC);
             while(true) {
-                AttributeId attribId = decoder.getNextAttributeId();
+                uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == AttributeId.ATTRIB_TAG) {
                     string tagstring = decoder.readString();

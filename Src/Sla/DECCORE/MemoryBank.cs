@@ -100,10 +100,10 @@ namespace Sla.DECCORE
             byte* ptr;
             do {
                 ptr = (byte*)&curval;
-                int sz = wordsize;
+                int sz = (int)wordsize;
                 if (startalign < addr) {
                     ptr += (addr - startalign);
-                    sz = wordsize - (addr - startalign);
+                    sz = (int)(wordsize - (addr - startalign));
                 }
                 if (startalign + wordsize > endaddr)
                     sz -= (startalign + wordsize - endaddr);
@@ -244,7 +244,7 @@ namespace Sla.DECCORE
 
             ulong alignmask = (ulong)(wordsize - 1);
             ulong ind = offset & (~alignmask);
-            int skip = offset & alignmask;
+            int skip = (int)(offset & alignmask);
             int size1 = wordsize - skip;
             int size2;
             int gap;
@@ -299,11 +299,11 @@ namespace Sla.DECCORE
 
             count = 0;
             while (count < size) {
-                cursize = pagesize;
+                cursize = (int)pagesize;
                 offalign = offset & ~pagemask;
                 skip = 0;
                 if (offalign != offset) {
-                    skip = offset - offalign;
+                    skip = (int)(offset - offalign);
                     cursize -= skip;
                 }
                 if (size - count < cursize) {
@@ -332,11 +332,11 @@ namespace Sla.DECCORE
 
             count = 0;
             while (count < size) {
-                cursize = pagesize;
+                cursize = (int)pagesize;
                 offalign = offset & ~pagemask;
                 skip = 0;
                 if (offalign != offset) {
-                    skip = offset - offalign;
+                    skip = (int)(offset - offalign);
                     cursize -= skip;
                 }
                 if (size - count < cursize)

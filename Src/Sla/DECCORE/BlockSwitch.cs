@@ -282,7 +282,7 @@ namespace Sla.DECCORE
                 }
             }
             // Do actual sort of the cases based on label
-            stable_sort(caseblocks.begin(), caseblocks.end(), CaseOrder::compare);
+            caseblocks.stable_sort(CaseOrder.compare);
         }
     }
 }

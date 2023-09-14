@@ -73,7 +73,7 @@ namespace Sla.DECCORE
                             if (!fc.isInputLocked()) {
                                 // We use isInputLocked as a test of whether the
                                 // function pointer prototype has been applied before
-                                fc.forceSet(data, *fp);
+                                fc.forceSet(data, fp);
                                 count += 1;
                             }
                         }

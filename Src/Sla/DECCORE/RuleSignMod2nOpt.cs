@@ -25,7 +25,7 @@ namespace Sla.DECCORE
         public override int applyOp(PcodeOp op, Funcdata data)
         {
             if (!op.getIn(1).isConstant()) return 0;
-            int shiftAmt = op.getIn(1).getOffset();
+            int shiftAmt = (int)op.getIn(1).getOffset();
             Varnode? a = checkSignExtraction(op.getIn(0));
             if (a == (Varnode)null || a.isFree()) return 0;
             Varnode correctVn = op.getOut();
@@ -86,7 +86,7 @@ namespace Sla.DECCORE
                 if (shiftOp.code() != OpCode.CPUI_INT_RIGHT) continue;
                 constVn = shiftOp.getIn(1) ?? throw new ApplicationException(); ;
                 if (!constVn.isConstant()) continue;
-                int shiftval = (ulong)constVn.getOffset();
+                int shiftval = (int)constVn.getOffset();
                 if (truncSize >= 0)
                     shiftval += (a.getSize() - truncSize) * 8;
                 if (shiftval != shiftAmt) continue;

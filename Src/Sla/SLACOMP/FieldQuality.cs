@@ -25,17 +25,17 @@ namespace Sla.SLACOMP
         /// \param nm is the parsed name for the field
         /// \param l is the parsed lower bound of the bit range
         /// \param h is the parse upper bound of the bit range
-        internal FieldQuality(string nm, ulong l, ulong h)
+        internal FieldQuality(string nm, uint l, uint h)
         {
-            name = *nm;
-            low = *l;
-            high = *h;
+            name = nm;
+            low = l;
+            high = h;
             signext = false;
             flow = true;
             hex = true;
-            delete nm;
-            delete l;
-            delete h;
+            //delete nm;
+            //delete l;
+            //delete h;
         }
     }
 }

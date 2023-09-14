@@ -42,7 +42,7 @@ namespace Sla.SLEIGH
             hand.size = fix.size;
         }
 
-        public override int getSize() => fix.size;
+        public override int getSize() => (int)fix.size;
 
         public override void print(TextWriter s, ParserWalker walker)
         {

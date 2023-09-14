@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
     /// \brief A helper class for describing the similarity of the boolean condition between 2 CBRANCH operations
-    ///
     /// This class determines if two CBRANCHs share the same condition.  It also determines if the conditions
     /// are complements of each other, and/or they are shared along only one path.
-    ///
     /// The expression computing the root boolean value for one CBRANCH is marked out
     /// by setupInitOp(). For the other CBRANCH, findMatch() tries to find common Varnode
     /// in its boolean expression and then maps a critical path from the Varnode to the final boolean.
@@ -109,10 +103,10 @@ namespace Sla.DECCORE
         /// state holds the path from the boolean value to the common Varnode.
         /// \param op is the given CBRANCH op to compare
         /// \return the Varnode in common with the root expression or NULL
-        private Varnode findMatch(PcodeOp op)
+        private Varnode? findMatch(PcodeOp op)
         {
             PcodeOp curop;
-            //  FlowBlock *bl = op.getParent();
+            // FlowBlock *bl = op.getParent();
             state = 0;
             Varnode curvn = op.getIn(1);
             multion = false;
@@ -225,7 +219,7 @@ namespace Sla.DECCORE
                 if (opcode == OpCode.CPUI_INT_SLESS) {
                     // Corner case for signed
                     int sz = bin1op.getIn(constslot).getSize();
-                    if (signbit_negative(val2, sz) && (!signbit_negative(val1, sz))){
+                    if (Globals.signbit_negative(val2, sz) && (!Globals.signbit_negative(val1, sz))){
                         return false;
                     }
                 }
@@ -234,10 +228,11 @@ namespace Sla.DECCORE
             return false;
         }
 
-        /// \brief Check if given p-code ops are complements where one is an BOOL_AND and the other is an BOOL_OR
-        /// \param bin1op is the first PcodeOp
-        /// \param bin2op is the second
-        /// \return \b true if the p-code ops produce complementary values
+        // \brief Check if given p-code ops are complements where one is an BOOL_AND and the other
+        // is an BOOL_OR
+        // \param bin1op is the first PcodeOp
+        // \param bin2op is the second
+        // \return \b true if the p-code ops produce complementary values
         private bool andOrComplement(PcodeOp bin1op, PcodeOp bin2op)
         {
             if (bin1op.code() == OpCode.CPUI_BOOL_AND) {
@@ -268,29 +263,29 @@ namespace Sla.DECCORE
             return false;
         }
 
-        /// \brief Determine if the two boolean expressions always produce the same or complementary values
-        /// A common Varnode in the two expressions is given.  If the boolean expressions are
-        /// uncorrelated, \b false is returned, otherwise \b true is returned.  If the expressions
-        /// are correlated but always hold opposite values, the field \b matchflip is set to \b true.
-        /// \param vn is the common Varnode
-        /// \return \b true if the expressions are correlated
+        // \brief Determine if the two boolean expressions always produce the same or complementary
+        // values. A common Varnode in the two expressions is given. If the boolean expressions are
+        // uncorrelated, \b false is returned, otherwise \b true is returned.  If the expressions
+        // are correlated but always hold opposite values, the field \b matchflip is set to \b true.
+        // \param vn is the common Varnode
+        // \return \b true if the expressions are correlated
         private bool finalJudgement(Varnode vn)
         {
             if (initop.isBooleanFlip()) {
                 matchflip = !matchflip;
             }
-            if ((vn == basevn) && (!binon)) {
+            if ((vn == basevn) && !binon) {
                 // No binary operation involved
                 return true;
             }
             if (boolvn != null) {
                 matchflip = !matchflip;
             }
-            if ((vn == boolvn) && (!binon)) {
+            if ((vn == boolvn) && !binon) {
                 // Negations involved
                 return true;
             }
-            if ((binaryop == null) || (!binon)) {
+            if ((binaryop == null) || !binon) {
                 // Conditions don't match
                 return false;
             }
@@ -325,7 +320,7 @@ namespace Sla.DECCORE
             int slot1 = 0;
             int slot2 = 0;
             bool reorder;
-            if (binaryop.code() != Globals.get_booleanflip(binary2op.code(), reorder)) {
+            if (binaryop.code() != Globals.get_booleanflip(binary2op.code(), out reorder)) {
                 return false;
             }
             if (reorder) {

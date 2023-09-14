@@ -26,7 +26,7 @@ namespace Sla.SLEIGH
             //    delete* iter;
         }
 
-        public VarnodeTpl getOut() => output;
+        public VarnodeTpl? getOut() => output;
 
         public int numInput() => input.size();
 

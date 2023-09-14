@@ -29,7 +29,8 @@ namespace Sla.EXTRA
         public override Architecture buildArchitecture(string filename, string target,
             TextWriter estream)
         {
-            return new BfdArchitecture(filename, target, estream);
+            throw new NotImplementedException();
+            // return new BfdArchitecture(filename, target, estream);
         }
 
         public override bool isFileMatch(string filename)

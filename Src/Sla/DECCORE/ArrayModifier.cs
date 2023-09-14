@@ -18,13 +18,13 @@ namespace Sla.DECCORE
             arraysize = @as;
         }
         
-        public override TypeModifier.Modifier getType() => array_mod;
+        public override Modifier getType() => Modifier.array_mod;
     
         public override bool isValid() => (arraysize>0);
 
-        public override Datatype modType(Datatype @base, TypeDeclarator decl, Architecture glb)
+        public override Datatype modType(Datatype? @base, TypeDeclarator decl, Architecture glb)
         {
-            Datatype* restype = glb.types.getTypeArray(arraysize, base);
+            Datatype restype = glb.types.getTypeArray(arraysize, @base);
             return restype;
         }
     }

@@ -53,7 +53,7 @@ namespace Sla.EXTRA
             id = decoder.readString(AttributeId.ATTRIB_ID);
             deprecated = false;
             while(true) {
-                AttributeId attribId = decoder.getNextAttributeId();
+                uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == AttributeId.ATTRIB_DEPRECATED)
                     deprecated = decoder.readBool();

@@ -77,14 +77,16 @@ namespace Sla.SLEIGH
                 plus = (int)offset.getReal();
                 doesOffsetPlus = true;
             }
-            space.transfer (@params);
-            offset.transfer (@params);
-            size.transfer (@params);
+            space.transfer(@params);
+            offset.transfer(@params);
+            size.transfer(@params);
             if (doesOffsetPlus) {
                 if (isLocalTemp())
-                    return plus;        // A positive number indicates truncation of a local temp
+                    // A positive number indicates truncation of a local temp
+                    return plus;
                 if (@params[handleIndex].getSize().isZero())
-                    return plus;      //    or a zerosize object
+                    // or a zerosize object
+                    return plus;
             }
             return -1;
         }

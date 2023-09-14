@@ -334,7 +334,7 @@ namespace Sla.DECCORE
         /// \param naddr is the address where the normalized switch variable is defined
         /// \param h is a hash identifying the normalized switch variable (or 0)
         /// \param sv is the starting value for the range of possible normalized switch variable values (usually 0)
-        private void setOverride(List<Address> addrtable, Address naddr, ulong h, ulong sv)
+        internal void setOverride(List<Address> addrtable, Address naddr, ulong h, ulong sv)
         {
             //if (jmodel != (JumpModel)null)
             //    delete jmodel;
@@ -722,7 +722,7 @@ namespace Sla.DECCORE
                     decoder.openElement();
                     bool foundlabel = false;
                     while(true) {
-                        AttributeId attribId = decoder.getNextAttributeId();
+                        uint attribId = decoder.getNextAttributeId();
                         if (attribId == 0) break;
                         if (attribId == AttributeId.ATTRIB_LABEL) {
                             if (missedlabel)

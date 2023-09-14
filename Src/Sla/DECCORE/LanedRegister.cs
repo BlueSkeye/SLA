@@ -142,7 +142,7 @@ namespace Sla.DECCORE
             uint elemId = decoder.openElement(ElementId.ELEM_REGISTER);
             string laneSizes = string.Empty;
             while(true) {
-                AttributeId attribId = decoder.getNextAttributeId();
+                uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == AttributeId.ATTRIB_VECTOR_LANE_SIZES) {
                     laneSizes = decoder.readString();

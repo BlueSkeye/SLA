@@ -52,6 +52,13 @@ namespace Sla
             from.RemoveAt(lastItemIndex);
         }
 
+        internal static void reserve<T>(this List<T> list, int newSize)
+        {
+            if (list.Count < newSize) {
+                list.Capacity = newSize;
+            }
+        }
+
         internal static void resize<T>(this List<T> list, int newSize,
             ResizeInstantiatorDelegate<T>? instantiator = null)
         {
@@ -81,6 +88,13 @@ namespace Sla
         internal static int size<T>(this List<T> from) => from.Count;
 
         internal static void stable_sort<T>(this List<T> container)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal delegate bool EqualityComparerDelegate<T>(T a, T b);
+
+        internal static void stable_sort<T>(this List<T> container, EqualityComparerDelegate<T> comparer)
         {
             throw new NotImplementedException();
         }

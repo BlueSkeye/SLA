@@ -38,13 +38,14 @@ namespace Sla.SLEIGH
             nextfree = 0;
             hashtable = new ParserContext[hashsize];
             for (int i = 0; i < minimumreuse; ++i) {
-                ParserContext pos = new ParserContext(contextcache, translate);
-                pos.initialize(75, 20, constspace);
-                list[i] = pos;
+                ParserContext position = new ParserContext(contextcache, translate);
+                position.initialize(75, 20, constspace);
+                list[i] = position;
             }
             ParserContext pos = list[0];
             for (int i = 0; i < hashsize; ++i)
-                hashtable[i] = pos;     // Make sure all hashtable positions point to a real ParserContext
+                // Make sure all hashtable positions point to a real ParserContext
+                hashtable[i] = pos;
         }
 
         /// Free the hash-table of ParserContexts

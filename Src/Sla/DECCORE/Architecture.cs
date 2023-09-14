@@ -444,7 +444,7 @@ namespace Sla.DECCORE
         /// \param behave is the list to be populated
         public void collectBehaviors(List<OpBehavior> behave)
         {
-            behave.Resize(inst.Count, null);
+            behave.resize(inst.Count, null);
             for (int i = 0; i < inst.size(); ++i) {
                 TypeOp? op = inst[i];
                 if (null == op) {
@@ -1488,7 +1488,7 @@ namespace Sla.DECCORE
         protected void decodeStackPointer(Decoder decoder)
         {
             uint elemId = decoder.openElement(ElementId.ELEM_STACKPOINTER);
-            string registerName;
+            string registerName = string.Empty;
             // Default stack growth is in negative direction
             bool stackGrowth = true;
             bool isreversejustify = false;
@@ -1634,7 +1634,7 @@ namespace Sla.DECCORE
                 PreferSplitRecord record = new PreferSplitRecord();
                 splitrecords.Add(record);
                 record.storage = VarnodeData.decode(decoder);
-                record.splitoffset = record.storage.size() / 2;
+                record.splitoffset = (int)record.storage.size / 2;
             }
             decoder.closeElement(elemId);
         }

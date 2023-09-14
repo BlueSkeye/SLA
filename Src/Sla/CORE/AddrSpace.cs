@@ -119,9 +119,79 @@ namespace Sla.CORE {
         internal int delay;
         /// Delay before deadcode removal is allowed on this space
         internal int deadcodedelay;
+        private static ulong NextUniqueIdentifier = 1;
+        private ulong _uniqueIdentifier;
 
-        /// <summary>For exclusive use of MaxAddressSpace instanciation</summary>
+        // ADDED : Unique identifier management.
+        // For exclusive use of MaxAddressSpace instanciation</summary>
         private AddrSpace()
+        {
+            _uniqueIdentifier = Interlocked.Increment(ref _uniqueIdentifier);
+        }
+
+        /// Initialize an address space with its basic attributes
+        /// \param m is the space manager associated with the new space
+        /// \param t is the processor translator associated with the new space
+        /// \param tp is the type of the new space (PROCESSOR, CONSTANT, INTERNAL,...)
+        /// \param nm is the name of the new space
+        /// \param size is the (offset encoding) size of the new space
+        /// \param ws is the number of bytes in an addressable unit
+        /// \param ind is the integer identifier for the new space
+        /// \param fl can be 0 or AddrSpace.Properties.hasphysical
+        /// \param dl is the number of rounds to delay heritage for the new space
+        public AddrSpace(AddrSpaceManager m, Translate t, spacetype tp, string nm, uint size,
+            uint ws, int ind, Properties fl, int dl)
+            : base()
+        {
+            // No references to this space yet
+            refcount = 0;
+            manage = m;
+            trans = t;
+            type = tp;
+            name = nm;
+            addressSize = size;
+            wordsize = ws;
+            index = ind;
+            delay = dl;
+            // Deadcode delay initially starts the same as heritage delay
+            deadcodedelay = dl;
+            // (initially) assume pointers must match the space size exactly
+            minimumPointerSize = 0;
+            // Placeholder meaning shortcut is unassigned
+            shortcut = ' ';
+
+            // These are the flags we allow to be set from constructor
+            flags = (fl & Properties.hasphysical);
+            if (t.isBigEndian()) {
+                flags |= Properties.big_endian;
+            }
+            // Always on unless explicitly turned off in derived constructor
+            flags |= (Properties.heritaged | Properties.does_deadcode);
+            calcScaleMask();
+        }
+
+        ///< For use with decode
+        /// This is a partial constructor, for initializing a space via XML
+        /// \param m the associated address space manager
+        /// \param t is the processor translator
+        /// \param tp the basic type of the space
+        public AddrSpace(AddrSpaceManager m, Translate t, spacetype tp)
+            : base()
+        {
+            refcount = 0;
+            manage = m;
+            trans = t;
+            type = tp;
+            // Always on unless explicitly turned off in derived constructor
+            flags = (Properties.heritaged | Properties.does_deadcode);
+            wordsize = 1;
+            minimumPointerSize = 0;
+            shortcut = ' ';
+            // We let big_endian get set by attribute
+        }
+
+        ///< The address space destructor
+        ~AddrSpace()
         {
         }
 
@@ -136,6 +206,12 @@ namespace Sla.CORE {
                 GC.SuppressFinalize(this);
             }
         }
+
+        public static bool operator >(AddrSpace a, AddrSpace b)
+            => a._uniqueIdentifier > b._uniqueIdentifier;
+
+        public static bool operator <(AddrSpace a, AddrSpace b)
+            => a._uniqueIdentifier > b._uniqueIdentifier;
 
         internal bool IsMaxAddressSpace => object.ReferenceEquals(this, MaxAddressSpace);
 
@@ -200,7 +276,7 @@ namespace Sla.CORE {
         {
             deadcodedelay = -1;
             while(true) {
-                AttributeId attribId = decoder.getNextAttributeId();
+                uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == AttributeId.ATTRIB_NAME) {
                     name = decoder.readString();
@@ -247,71 +323,6 @@ namespace Sla.CORE {
             addressSize = newsize;
             minimumPointerSize = (int)newsize;
             calcScaleMask();
-        }
-
-        /// Initialize an address space with its basic attributes
-        /// \param m is the space manager associated with the new space
-        /// \param t is the processor translator associated with the new space
-        /// \param tp is the type of the new space (PROCESSOR, CONSTANT, INTERNAL,...)
-        /// \param nm is the name of the new space
-        /// \param size is the (offset encoding) size of the new space
-        /// \param ws is the number of bytes in an addressable unit
-        /// \param ind is the integer identifier for the new space
-        /// \param fl can be 0 or AddrSpace.Properties.hasphysical
-        /// \param dl is the number of rounds to delay heritage for the new space
-        public AddrSpace(AddrSpaceManager m, Translate t, spacetype tp, string nm, uint size,
-            uint ws, int ind, Properties fl, int dl)
-        {
-            // No references to this space yet
-            refcount = 0;
-            manage = m;
-            trans = t;
-            type = tp;
-            name = nm;
-            addressSize = size;
-            wordsize = ws;
-            index = ind;
-            delay = dl;
-            // Deadcode delay initially starts the same as heritage delay
-            deadcodedelay = dl;
-            // (initially) assume pointers must match the space size exactly
-            minimumPointerSize = 0;
-            // Placeholder meaning shortcut is unassigned
-            shortcut = ' ';
-
-            // These are the flags we allow to be set from constructor
-            flags = (fl & Properties.hasphysical);
-            if (t.isBigEndian()) {
-                flags |= Properties.big_endian;
-            }
-            // Always on unless explicitly turned off in derived constructor
-            flags |= (Properties.heritaged | Properties.does_deadcode);
-            calcScaleMask();
-        }
-
-        ///< For use with decode
-        /// This is a partial constructor, for initializing a space
-        /// via XML
-        /// \param m the associated address space manager
-        /// \param t is the processor translator
-        /// \param tp the basic type of the space
-        public AddrSpace(AddrSpaceManager m, Translate t, spacetype tp)
-        {
-            refcount = 0;
-            manage = m;
-            trans = t;
-            type = tp;
-            // Always on unless explicitly turned off in derived constructor
-            flags = (Properties.heritaged | Properties.does_deadcode);
-            wordsize = 1;
-            minimumPointerSize = 0;
-            shortcut = ' ';
-            // We let big_endian get set by attribute
-        }
-
-        ///< The address space destructor
-        ~AddrSpace()
-        {
         }
 
         ///< Get the name
@@ -595,9 +606,9 @@ namespace Sla.CORE {
         /// extent of the original register
         /// \param i is the index of the base register
         /// \return the original register before truncation
-        public ref VarnodeData getSpacebaseFull(int i)
+        public VarnodeData getSpacebaseFull(int i)
         {
-            throw new LowlevelError(name + " has no truncated registers");
+            throw new LowlevelError($"{name} has no truncated registers");
         }
 
         ///< Return \b true if a stack in this space grows negative
@@ -685,7 +696,7 @@ namespace Sla.CORE {
             bool foundoffset = false;
             size = 0;
             while (true) {
-                AttributeId attribId = decoder.getNextAttributeId();
+                uint attribId = decoder.getNextAttributeId();
                 if (0 == attribId) {
                     break;
                 }

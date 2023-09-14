@@ -54,7 +54,7 @@ namespace Sla.SLEIGH
 
         public override TokenPattern genPattern(long val)
         {
-            return TokenPattern(val, startbit, endbit);
+            return new TokenPattern(val, startbit, endbit);
         }
 
         public override long minValue() => 0;

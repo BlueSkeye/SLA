@@ -518,9 +518,11 @@ namespace Sla.DECCORE
                 miter = visited.upper_bound(retop.getAddr());
                 if (miter != visited.begin()) {
                     --miter;
-                    res = miter.Current.first + miter.Current.second.size;
-                    if (op.getAddr() < res)
-                        return (PcodeOp)null; // Indicate that res has the fallthru address
+                    res = miter.Current.first + miter.Current.Value.size;
+                    if (op.getAddr() < res) {
+                        // Indicate that res has the fallthru address
+                        return (PcodeOp)null;
+                    }
                 }
             }
             StringWriter errmsg = new StringWriter();

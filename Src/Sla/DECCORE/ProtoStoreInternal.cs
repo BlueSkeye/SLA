@@ -181,7 +181,7 @@ namespace Sla.DECCORE
                 string name = string.Empty;
                 ParameterPieces.Flags flags = 0;
                 while(true) {
-                    AttributeId attribId = decoder.getNextAttributeId();
+                    uint attribId = decoder.getNextAttributeId();
                     if (attribId == 0) break;
                     if (attribId == AttributeId.ATTRIB_NAME)
                         name = decoder.readString();

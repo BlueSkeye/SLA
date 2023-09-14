@@ -55,19 +55,23 @@ namespace Sla.DECCORE
         /// \param in is the specific input Varnode
         private static PcodeOp? findMatch(BlockBasic bl, PcodeOp target, Varnode @in)
         {
-            IEnumerator<PcodeOp> iter = bl.beginOp();
+            LinkedListNode<PcodeOp>? iter = bl.beginOp();
 
-            while (iter.MoveNext()) {
-                PcodeOp op = iter.Current;
-                if (op == target)       // Caught up with target, nothing else before it
+            while (iter != null) {
+                PcodeOp op = iter.Value;
+                iter = iter.Next;
+                if (op == target)
+                    // Caught up with target, nothing else before it
                     break;
                 int i, numinput;
                 numinput = op.numInput();
                 for (i = 0; i < numinput; ++i) {
                     Varnode vn = op.getIn(i);
                     if (vn.isWritten() && (vn.getDef().code() == OpCode.CPUI_COPY))
-                        vn = vn.getDef().getIn(0);        // Allow for differences in copy propagation
-                    if (vn == @in) break;
+                        // Allow for differences in copy propagation
+                        vn = vn.getDef().getIn(0);
+                    if (vn == @in)
+                        break;
                 }
                 if (i < numinput) {
                     int j;
@@ -84,7 +88,8 @@ namespace Sla.DECCORE
                         if (0 != PcodeOpBank.functionalEqualityLevel(in1, in2, buf1, buf2))
                             break;
                     }
-                    if (j == numinput)      // We have found a redundancy
+                    if (j == numinput)
+                        // We have found a redundancy
                         return op;
                 }
             }
@@ -101,10 +106,11 @@ namespace Sla.DECCORE
         {
             List<Varnode> vnlist = new List<Varnode>();
             PcodeOp? targetop = (PcodeOp)null;
-            PcodeOp? pairop;
-            IEnumerator<PcodeOp> iter = bl.beginOp();
-            while (iter.MoveNext()) {
-                PcodeOp op = iter.Current;
+            PcodeOp? pairop = null;
+            LinkedListNode<PcodeOp>? iter = bl.beginOp();
+            while (iter != null) {
+                PcodeOp op = iter.Value;
+                iter = iter.Next;
                 OpCode opc = op.code();
                 if (opc == OpCode.CPUI_COPY) continue;
                 if (opc != OpCode.CPUI_MULTIEQUAL) break;
@@ -113,8 +119,10 @@ namespace Sla.DECCORE
                 int numinput = op.numInput();
                 for (i = 0; i < numinput; ++i) {
                     Varnode vn = op.getIn(i);
-                    if (vn.isWritten() && (vn.getDef().code() == OpCode.CPUI_COPY)) // Some copies may not propagate into MULTIEQUAL
-                        vn = vn.getDef().getIn(0);                    // Allow for differences in copy propagation
+                    if (vn.isWritten() && (vn.getDef().code() == OpCode.CPUI_COPY))
+                        // Some copies may not propagate into MULTIEQUAL
+                        // Allow for differences in copy propagation
+                        vn = vn.getDef().getIn(0);
                     vnlist.Add(vn);
                     if (vn.isMark()) {
                         // If we've seen this varnode before
@@ -127,26 +135,31 @@ namespace Sla.DECCORE
                     targetop = op;
                     break;
                 }
-                for (i = vnpos; i < vnlist.Count; ++i)
-                    vnlist[i].setMark();       // Mark that we have seen this varnode
+                for (i = vnpos; i < vnlist.Count; ++i) {
+                    // Mark that we have seen this varnode
+                    vnlist[i].setMark();
+                }
             }
 
             // Clear out any of the marks we put down
-            for (int i = 0; i < vnlist.Count; ++i)
+            for (int i = 0; i < vnlist.Count; ++i) {
                 vnlist[i].clearMark();
+            }
 
             if (targetop != (PcodeOp)null) {
                 Varnode out1 = pairop.getOut();
                 Varnode out2 = targetop.getOut();
                 if (preferredOutput(out1, out2)) {
-                    data.totalReplace(out1, out2);  // Replace pairop and out1 in favor of targetop and out2
+                    // Replace pairop and out1 in favor of targetop and out2
+                    data.totalReplace(out1, out2);
                     data.opDestroy(pairop);
                 }
                 else {
                     data.totalReplace(out2, out1);
                     data.opDestroy(targetop);
                 }
-                count += 1;     // Indicate that a change has taken place
+                // Indicate that a change has taken place
+                count += 1;
                 return true;
             }
             return false;
@@ -167,12 +180,9 @@ namespace Sla.DECCORE
         {
             BlockGraph bblocks = data.getBasicBlocks();
             int sz = bblocks.getSize();
-            for (int i = 0; i < sz; ++i)
-            {
+            for (int i = 0; i < sz; ++i) {
                 BlockBasic bl = (BlockBasic)bblocks.getBlock(i);
-                while (processBlock(data, bl))
-                {
-                }
+                while (processBlock(data, bl)) { }
             }
             return 0;
         }

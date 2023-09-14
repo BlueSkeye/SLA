@@ -54,7 +54,7 @@ namespace Sla.DECCORE
                 if (!@base.isWritten() || !otherBase.isWritten()) return 0;
                 PcodeOp subOp = @base.getDef() ?? throw new ApplicationException();
                 if (subOp.code() != OpCode.CPUI_SUBPIECE) return 0;
-                int truncAmt = subOp.getIn(1).getOffset();
+                int truncAmt = (int)subOp.getIn(1).getOffset();
                 if (truncAmt + @base.getSize() != subOp.getIn(0).getSize()) return 0; // Must truncate all but high part
                 @base = subOp.getIn(0);
                 subOp = otherBase.getDef() ?? throw new ApplicationException();

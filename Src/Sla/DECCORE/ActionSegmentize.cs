@@ -50,13 +50,13 @@ namespace Sla.DECCORE
                 AddrSpace spc = segdef.getSpace();
 
                 int uindex = segdef.getIndex();
-                IEnumerator<PcodeOp> iter = data.beginOp(CPUI_CALLOTHER);
+                IEnumerator<PcodeOp> iter = data.beginOp(OpCode.CPUI_CALLOTHER);
                 while (iter.MoveNext()) {
                     PcodeOp segroot = iter.Current;
                     if (segroot.isDead()) {
                         continue;
                     }
-                    if (segroot.getIn(0).getOffset() != uindex) {
+                    if (segroot.getIn(0).getOffset() != (uint)uindex) {
                         continue;
                     }
                     if (!segdef.unify(data, segroot, bindlist)) {

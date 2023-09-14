@@ -218,7 +218,9 @@ namespace Sla.DECCORE
                         varstack.RemoveLastItem();
                     }
                     else {
-                        Varnode? outvn = (varstack.GetLastItem().desciter++).getOut();
+                        DescTreeElement treeElement = varstack.GetLastItem();
+                        Varnode? outvn = (treeElement.desciter.Current).getOut();
+                        treeElement.desciter.MoveNext();
                         if (outvn != (Varnode)null) {
                             if ((!outvn.isExplicit()) && (!outvn.isImplied()))
                                 varstack.Add(new DescTreeElement(outvn));

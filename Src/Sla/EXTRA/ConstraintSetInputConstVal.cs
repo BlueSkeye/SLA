@@ -1,12 +1,4 @@
 ﻿using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.EXTRA
 {
@@ -28,15 +20,15 @@ namespace Sla.EXTRA
         
         ~ConstraintSetInputConstVal()
         {
-            delete val;
-            delete slot;
-            if (exprsz != (RHSConstant)null)
-                delete exprsz;
+            //delete val;
+            //delete slot;
+            //if (exprsz != (RHSConstant)null)
+            //    delete exprsz;
         }
 
         public override UnifyConstraint clone()
         {
-            RHSConstant newexprsz = (RHSConstant)null;
+            RHSConstant? newexprsz = (RHSConstant)null;
             if (exprsz != (RHSConstant)null)
                 newexprsz = exprsz.clone();
             UnifyConstraint res;

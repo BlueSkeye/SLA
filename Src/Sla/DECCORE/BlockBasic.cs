@@ -19,7 +19,8 @@ namespace Sla.DECCORE
     /// PcodeOps my migrate away from this original range.
     internal class BlockBasic : FlowBlock
     {
-        // friend class Funcdata;              // Only uses private functions
+        // Only uses private functions
+        // friend class Funcdata;
         /// The sequence of p-code operations
         internal LinkedList<PcodeOp> op = new LinkedList<PcodeOp>();
         /// The function of which this block is a part
@@ -446,15 +447,17 @@ namespace Sla.DECCORE
         /// Return an iterator to the beginning of the PcodeOps
         public LinkedListNode<PcodeOp>? beginOp() => (0 == op.Count) ? null : op.First;
 
-        public IBiDirEnumerator<PcodeOp> GetBiDirectionalEnumerator(bool reverseOrder = false)
-            => op.GetBiDirectionalEnumerator(reverseOrder); 
+        //public IBiDirEnumerator<PcodeOp> GetBiDirectionalEnumerator(bool reverseOrder = false)
+        //    => op.GetBiDirectionalEnumerator(reverseOrder); 
 
-        /// <summary>Return an enumerator in reverse order</summary>
-        public IEnumerator<PcodeOp> reverseEnumerator() => op.GetBiDirectionalEnumerator(true);
+        // Return an enumerator in reverse order</summary>
+        public LinkedListNode<PcodeOp>? reverseEnumerator() => op.Last;
 
         // list<PcodeOp>::iterator endOp(void) { return op.end(); }       ///< Return an iterator to the end of the PcodeOps
         // IEnumerator<PcodeOp> beginOp(void) { return op.begin(); }	///< Return an iterator to the beginning of the PcodeOps
-        // IEnumerator<PcodeOp> endOp(void) { return op.end(); }	///< Return an iterator to the end of the PcodeOps
+
+        // Return an iterator to the end of the PcodeOps
+        public LinkedListNode<PcodeOp>? endOp() => (0 == op.Count) ? null : op.Last;
 
         /// Return \b true if \b block contains no operations
         public bool emptyOp() => (0 == op.Count);

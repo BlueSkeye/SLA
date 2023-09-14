@@ -122,28 +122,28 @@ namespace Sla.DECCORE
             no_indirect_collapse = 0x200
         }
 
-        /// Pointer to class providing behavioral details of the operation
+        // Pointer to class providing behavioral details of the operation
         internal TypeOp opcode;
-        /// Collection of boolean attributes on this op
+        // Collection of boolean attributes on this op
         internal /*mutable*/ Flags flags;
-        /// Additional boolean attributes for this op
+        // Additional boolean attributes for this op
         private /*mutable*/ AdditionalFlags addlflags;
-        /// What instruction address is this attached to
+        // What instruction address is this attached to
         private SeqNum start;
-        /// Basic block in which this op is contained
+        // Basic block in which this op is contained
         private BlockBasic? parent;
-        /// Iterator within basic block
+        // Iterator within basic block
         //private IEnumerator<PcodeOp> basiciter;
         internal LinkedListNode<PcodeOp>? _basicBlockNode;
-        /// Position in alive/dead list
+        // Position in alive/dead list
         // internal IEnumerator<PcodeOp> insertiter;
         internal LinkedListNode<PcodeOp> _deadAliveNode;
-        /// Position in opcode list
+        // Position in opcode list
         // internal IEnumerator<PcodeOp> codeiter;
         internal int _codePosition;
-        /// The one possible output Varnode of this op
+        // The one possible output Varnode of this op
         internal Varnode? output;
-        /// The ordered list of input Varnodes for this op
+        // The ordered list of input Varnodes for this op
         private List<Varnode?> inrefs = new List<Varnode?>();
 
         internal void AssertIsIndirectBranching()

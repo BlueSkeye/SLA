@@ -29,7 +29,7 @@ namespace Sla.DECCORE
             ident = -1;
             offset = -1;
             while(true) {
-                AttributeId attrib = decoder.getNextAttributeId();
+                uint attrib = decoder.getNextAttributeId();
                 if (attrib == 0) break;
                 if (attrib == AttributeId.ATTRIB_NAME)
                     name = decoder.readString();

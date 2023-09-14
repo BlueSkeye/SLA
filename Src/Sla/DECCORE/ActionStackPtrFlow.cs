@@ -26,7 +26,7 @@ namespace Sla.DECCORE
                 return;
             }
 
-            StackSolver solver;
+            StackSolver solver = new StackSolver();
             try {
                 solver.build(data, stackspace, spcbase);
             }
@@ -74,7 +74,7 @@ namespace Sla.DECCORE
                 List<Varnode> paramlist = new List<Varnode>();
                 paramlist.Add(invn);
                 int sz = invn.getSize();
-                paramlist.Add(data.newConstant(sz, soln & Globals.calc_mask((uint)sz)));
+                paramlist.Add(data.newConstant(sz, (ulong)soln & Globals.calc_mask((uint)sz)));
                 data.opSetOpcode(op, OpCode.CPUI_INT_ADD);
                 data.opSetAllInput(op, paramlist);
             }
@@ -148,22 +148,20 @@ namespace Sla.DECCORE
         {
             int loadsize = loadop.getOut().getSize();
             BlockBasic curblock = loadop.getParent();
-            LinkedListNode<PcodeOp>? begiter = curblock.beginOp();
+            // LinkedListNode<PcodeOp>? begiter = curblock.beginOp();
             LinkedListNode<PcodeOp>? iter = loadop.getBasicIter();
             while(true) {
-                if (iter == begiter) {
+                if (null == iter.Previous) {
                     if (curblock.sizeIn() != 1) {
                         // Can trace back to next basic block if only one path
                         return 0;
                     }
                     curblock = (BlockBasic)curblock.getIn(0);
-                    begiter = curblock.beginOp();
+                    // begiter = curblock.beginOp();
                     iter = curblock.endOp();
                     continue;
                 }
-                else {
-                    iter = iter.Previous;
-                }
+                iter = iter.Previous ?? throw new ApplicationException();
                 PcodeOp curop = iter.Value;
                 if (curop.isCall()) {
                     // Don't try to trace aliasing through a call

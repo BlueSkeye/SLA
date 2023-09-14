@@ -34,40 +34,35 @@ namespace Sla.EXTRA
                 throw new IfaceExecutionError("No function selected");
 
             s.ReadSpaces();
-            Address jmpaddr = new Address(
-                Grammar.parse_machaddr(s, out discard, dcp.conf.types));
+            Address jmpaddr = Grammar.parse_machaddr(s, out discard, dcp.conf.types);
             JumpTable jt = dcp.fd.installJumpTable(jmpaddr);
-            List<Address> adtable;
+            List<Address> adtable = new List<Address>();
             Address naddr;
             ulong h = 0;
             ulong sv = 0;
-            string token;
-            s >> token;
+            string token = s.ReadString();
             //   if (token == "norm") {
             //     naddr = parse_machaddr(s,discard,*dcp.conf.types);
             //     s.ReadSpaces();
             //     s >> h;
             //     s >> token;
             //   }
-            if (token == "startval")
-            {
-                s.unsetf(ios::dec | ios::hex | ios::oct); // Let user specify base
+            if (token == "startval") {
+                // s.unsetf(ios::dec | ios::hex | ios::oct); // Let user specify base
                 s >> sv;
                 s >> token;
             }
-            if (token == "table")
-            {
+            if (token == "table") {
                 s.ReadSpaces();
                 while (!s.EofReached()) {
-                    Address addr = new Address(
-                        Grammar.parse_machaddr(s, out discard, dcp.conf.types));
+                    Address addr = Grammar.parse_machaddr(s, out discard, dcp.conf.types);
                     adtable.Add(addr);
                 }
             }
             if (adtable.empty())
                 throw new IfaceExecutionError("Missing jumptable address entries");
             jt.setOverride(adtable, naddr, h, sv);
-            *status.optr << "Successfully installed jumptable override" << endl;
+            status.optr.WriteLine("Successfully installed jumptable override");
         }
     }
 }

@@ -112,7 +112,7 @@ namespace Sla.DECCORE
                 decoder.openElement();
                 symbolId = 0;
                 while(true) {
-                    AttributeId attribId = decoder.getNextAttributeId();
+                    uint attribId = decoder.getNextAttributeId();
                     if (attribId == 0) break;
                     if (attribId == AttributeId.ATTRIB_NAME)
                         name = decoder.readString();

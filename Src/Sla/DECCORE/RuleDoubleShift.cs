@@ -64,7 +64,7 @@ namespace Sla.DECCORE
                 opc1 = OpCode.CPUI_INT_LEFT;
             }
             else
-                sa1 = op.getIn(1).getOffset();
+                sa1 = (int)op.getIn(1).getOffset();
             if (opc2 == OpCode.CPUI_INT_MULT) {
                 ulong val = secop.getIn(1).getOffset();
                 sa2 = Globals.leastsigbit_set(val);
@@ -72,7 +72,7 @@ namespace Sla.DECCORE
                 opc2 = OpCode.CPUI_INT_LEFT;
             }
             else
-                sa2 = secop.getIn(1).getOffset();
+                sa2 = (int)secop.getIn(1).getOffset();
             if (opc1 == opc2) {
                 if (sa1 + sa2 < 8 * size) {
                     newvn = data.newConstant(4, (ulong)(sa1 + sa2));

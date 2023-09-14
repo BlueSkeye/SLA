@@ -24,7 +24,7 @@ namespace Sla.DECCORE
             decodeBasic(decoder); ;
             decoder.rewindAttributes();
             while(true) {
-                AttributeId attrib = decoder.getNextAttributeId();
+                uint attrib = decoder.getNextAttributeId();
                 if (attrib == 0) break;
                 if (attrib == AttributeId.ATTRIB_WORDSIZE) {
                     wordsize = (uint)decoder.readUnsignedInteger();

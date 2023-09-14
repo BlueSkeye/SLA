@@ -36,7 +36,7 @@ namespace Sla.DECCORE
             PcodeOp shiftop = shiftout.getDef() ?? throw new BugException();
             if (shiftop.code() != OpCode.CPUI_INT_SRIGHT) return 0;
             if (!shiftop.getIn(1).isConstant()) return 0;
-            int n = shiftop.getIn(1).getOffset();
+            int n = (int)shiftop.getIn(1).getOffset();
             x = shiftop.getIn(0);
             if (x != op.getIn(1)) return 0;
             if (n != 8 * x.getSize() - 1) return 0;

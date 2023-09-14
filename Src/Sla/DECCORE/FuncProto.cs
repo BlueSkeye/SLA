@@ -1475,7 +1475,7 @@ namespace Sla.DECCORE
             injectid = -1;
             uint elemId = decoder.openElement(ElementId.ELEM_PROTOTYPE);
             while(true) {
-                AttributeId attribId = decoder.getNextAttributeId();
+                uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == AttributeId.ATTRIB_MODEL) {
                     string modelname = decoder.readString();
@@ -1542,7 +1542,7 @@ namespace Sla.DECCORE
                 if (subId == ElementId.ELEM_RETURNSYM) {
                     decoder.openElement();
                     while(true) {
-                        AttributeId attribId = decoder.getNextAttributeId();
+                        uint attribId = decoder.getNextAttributeId();
                         if (attribId == 0) break;
                         if (attribId == AttributeId.ATTRIB_TYPELOCK)
                             outputlock = decoder.readBool();

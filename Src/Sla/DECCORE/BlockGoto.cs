@@ -96,11 +96,11 @@ namespace Sla.DECCORE
         {
             base.encodeBody(encoder);
             encoder.openElement(ElementId.ELEM_TARGET);
-            FlowBlock leaf = gototarget.getFrontLeaf();
+            FlowBlock? leaf = gototarget.getFrontLeaf();
             int depth = gototarget.calcDepth(leaf);
             encoder.writeSignedInteger(AttributeId.ATTRIB_INDEX, leaf.getIndex());
             encoder.writeSignedInteger(AttributeId.ATTRIB_DEPTH, depth);
-            encoder.writeUnsignedInteger(AttributeId.ATTRIB_TYPE, gototype);
+            encoder.writeUnsignedInteger(AttributeId.ATTRIB_TYPE, (ulong)gototype);
             encoder.closeElement(ElementId.ELEM_TARGET);
         }
     }

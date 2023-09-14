@@ -181,7 +181,7 @@ namespace Sla.DECCORE
             if (list.Count == 0) {
                 return;
             }
-            List<FlowBlock> rpostorder;
+            List<FlowBlock> rpostorder = new List<FlowBlock>();
             List<FlowBlock> state = new List<FlowBlock>();
             List<int> istate = new List<int>();
             FlowBlock tmpbl;
@@ -632,7 +632,7 @@ namespace Sla.DECCORE
 
         public override void decodeBody(Sla.CORE.Decoder decoder)
         {
-            BlockMap newresolver;
+            BlockMap newresolver = new BlockMap();
             List<FlowBlock> tmplist = new List<FlowBlock>();
 
             while (true) {

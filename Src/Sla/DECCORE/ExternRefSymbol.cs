@@ -71,7 +71,7 @@ namespace Sla.DECCORE
             name = string.Empty;           // Name is empty
             displayName = string.Empty;
             while(true) {
-                AttributeId attribId = decoder.getNextAttributeId();
+                uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == AttributeId.ATTRIB_NAME) // Unless we see it explicitly
                     name = decoder.readString();

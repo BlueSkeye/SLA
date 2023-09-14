@@ -177,8 +177,9 @@ namespace Sla.DECCORE
                 Globals.sign_extend(ref sval, vn.getSize() * 8 - 1);
                 long rem = (size == 0) ? sval : sval % size;
                 if (rem != 0) {
-                    if ((val > size) && (size != 0)) {
-                        valid = false; // Size is too big: pointer type must be wrong
+                    if ((val > (uint)size) && (size != 0)) {
+                        // Size is too big: pointer type must be wrong
+                        valid = false;
                         return false;
                     }
                     if (!preventDistribution) {
@@ -277,7 +278,7 @@ namespace Sla.DECCORE
             if (!valid) return false;
 
             if (pRelType != (TypePointerRel)null) {
-                if (multsum != 0 || nonmultsum >= size || !multiple.empty()) {
+                if (multsum != 0 || nonmultsum >= (uint)size || !multiple.empty()) {
                     valid = false;
                     return false;
                 }
@@ -349,16 +350,17 @@ namespace Sla.DECCORE
                 uint arrayHint = findArrayHint();
                 // Get offset into field in structure
                 if (!hasMatchingSubType(nonmultbytes, arrayHint, out extra)) {
-                    if (nonmultbytes >= baseType.getSize()) {
+                    if (nonmultbytes >= (uint)baseType.getSize()) {
                         // Compare as bytes! not address units
                         valid = false; // Out of structure's bounds
                         return;
                     }
                     extra = 0;  // No field, but pretend there is something there
                 }
-                extra = AddrSpace.byteToAddress(extra, ct.getWordSize()); // Convert back to address units
+                // Convert back to address units
+                extra = AddrSpace.byteToAddress(extra, ct.getWordSize());
                 offset = (nonmultsum - extra) & ptrmask;
-                if (pRelType != (TypePointerRel)null && offset == pRelType.getPointerOffset()) {
+                if (pRelType != (TypePointerRel)null && offset == (uint)pRelType.getPointerOffset()) {
                     // offset falls within basic ptrto
                     if (!pRelType.evaluateThruParent(0)) {
                         // If we are not representing offset 0 through parent

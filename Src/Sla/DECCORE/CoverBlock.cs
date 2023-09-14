@@ -113,26 +113,25 @@ namespace Sla.DECCORE
             if (empty()) return 0;
             if (op2.empty()) return 0;
 
-            ustart = getUIndex(start);
-            ustop = getUIndex(stop);
-            u2start = getUIndex(op2.start);
-            u2stop = getUIndex(op2.stop);
-            if (ustart <= ustop)
-            {
-                if (u2start <= u2stop)
-                { // We are both one piece
-                    if ((ustop <= u2start) || (u2stop <= ustart))
-                    {
+            ustart = (uint)getUIndex(start);
+            ustop = (uint)getUIndex(stop);
+            u2start = (uint)getUIndex(op2.start);
+            u2stop = (uint)getUIndex(op2.stop);
+            if (ustart <= ustop) {
+                if (u2start <= u2stop) {
+                    // We are both one piece
+                    if ((ustop <= u2start) || (u2stop <= ustart)) {
                         if ((ustart == u2stop) || (ustop == u2start))
-                            return 1;       // Boundary intersection
+                            // Boundary intersection
+                            return 1;
                         else
-                            return 0;       // No intersection
+                            // No intersection
+                            return 0;
                     }
                 }
-                else
-                {           // They are two-piece, we are one-piece
-                    if ((ustart >= u2stop) && (ustop <= u2start))
-                    {
+                else {
+                    // They are two-piece, we are one-piece
+                    if ((ustart >= u2stop) && (ustop <= u2start)) {
                         if ((ustart == u2stop) || (ustop == u2start))
                             return 1;
                         else
@@ -140,12 +139,10 @@ namespace Sla.DECCORE
                     }
                 }
             }
-            else
-            {
-                if (u2start <= u2stop)
-                { // They are one piece, we are two-piece
-                    if ((u2start >= ustop) && (u2stop <= ustart))
-                    {
+            else {
+                if (u2start <= u2stop) {
+                    // They are one piece, we are two-piece
+                    if ((u2start >= ustop) && (u2stop <= ustart)) {
                         if ((u2start == ustop) || (u2stop == ustart))
                             return 1;
                         else
@@ -154,7 +151,8 @@ namespace Sla.DECCORE
                 }
                 // If both are two-pieces, then the intersection must be an interval
             }
-            return 2;           // Interval intersection
+            // Interval intersection
+            return 2;
         }
 
         /// Return \b true if \b this is empty/uncovered
@@ -172,9 +170,9 @@ namespace Sla.DECCORE
             uint ustart, ustop, upoint;
 
             if (empty()) return false;
-            upoint = getUIndex(point);
-            ustart = getUIndex(start);
-            ustop = getUIndex(stop);
+            upoint = (uint)getUIndex(point);
+            ustart = (uint)getUIndex(start);
+            ustop = (uint)getUIndex(stop);
 
             if (ustart <= ustop)
                 return ((upoint >= ustart) && (upoint <= ustop));
@@ -194,9 +192,8 @@ namespace Sla.DECCORE
             uint val;
 
             if (empty()) return 0;
-            val = getUIndex(point);
-            if (getUIndex(start) == val)
-            {
+            val = (uint)getUIndex(point);
+            if (getUIndex(start) == val) {
                 if (start != null)
                     return 2;
             }
@@ -213,15 +210,15 @@ namespace Sla.DECCORE
             bool internal1, internal2, internal3, internal4;
             uint ustart, u2start;
 
-            if (op2.empty()) return;    // Nothing to merge in
-            if (empty())
-            {
+            // Nothing to merge in
+            if (op2.empty()) return;
+            if (empty()) {
                 start = op2.start;
                 stop = op2.stop;
                 return;
             }
-            ustart = getUIndex(start);
-            u2start = getUIndex(op2.start);
+            ustart = (uint)getUIndex(start);
+            u2start = (uint)getUIndex(op2.start);
             // Is start contained in op2
             internal4 = ((ustart == (uint)0) && (op2.stop == (PcodeOp)1));
             internal1 = internal4 || op2.contain(start);
@@ -230,22 +227,26 @@ namespace Sla.DECCORE
             internal2 = internal3 || contain(op2.start);
 
             if (internal1 && internal2)
-                if ((ustart != u2start) || internal3 || internal4)
-                { // Covered entire block
+                if ((ustart != u2start) || internal3 || internal4) {
+                    // Covered entire block
                     setAll();
                     return;
                 }
             if (internal1)
-                start = op2.start;      // Pick non-internal start
-            else if ((!internal1) && (!internal2))
-            { // Disjoint intervals
-                if (ustart < u2start)   // Pick earliest start
-                    stop = op2.stop;        // then take other stop
+                // Pick non-internal start
+                start = op2.start;
+            else if ((!internal1) && (!internal2)) {
+                // Disjoint intervals
+                // Pick earliest start
+                if (ustart < u2start)
+                    // then take other stop
+                    stop = op2.stop;
                 else
                     start = op2.start;
                 return;
             }
-            if (internal3 || op2.contain(stop)) // Pick non-internal stop
+            // Pick non-internal stop
+            if (internal3 || op2.contain(stop))
                 stop = op2.stop;
         }
 

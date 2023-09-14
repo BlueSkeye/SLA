@@ -61,8 +61,10 @@ namespace Sla.DECCORE
         /// \return \b true if the block can be split
         private static bool isSplittable(BlockBasic b)
         {
-            foreach (PcodeOp iter in b) {
-                PcodeOp op = iter;
+            LinkedListNode<PcodeOp>? scannedNode = b.beginOp();
+            while (null != scannedNode) {
+                PcodeOp op = scannedNode.Value;
+                scannedNode = scannedNode.Next;
                 OpCode opc = op.code();
                 if (opc == OpCode.CPUI_MULTIEQUAL) {
                     continue;

@@ -112,9 +112,9 @@ namespace Sla.DECCORE
         /// Used to test if all the links out of the iblock have been calculated.
         private void buildHeritageArray()
         {
-            heritageyes.clear();
+            heritageyes.Clear();
             Architecture glb = fd.getArch();
-            heritageyes.resize(glb.numSpaces(), false);
+            heritageyes.resize(glb.numSpaces(), null);
             for (int i = 0; i < glb.numSpaces(); ++i) {
                 AddrSpace spc = glb.getSpace(i);
                 if (spc == null) {
@@ -193,7 +193,7 @@ namespace Sla.DECCORE
             if (init_cbranch.code() != OpCode.CPUI_CBRANCH) {
                 return false;
             }
-            ConditionMarker tester;
+            ConditionMarker tester = new ConditionMarker();
             if (!tester.verifyCondition(cbranch, init_cbranch)){
                 return false;
             }
@@ -355,8 +355,10 @@ namespace Sla.DECCORE
         private void adjustDirectMulti()
         {
             int inslot = iblock.getOutRevIndex(posta_outslot);
-            foreach (PcodeOp iter in posta_block) {
-                PcodeOp op;
+            LinkedListNode<PcodeOp>? iter = posta_block.beginOp();
+            while (iter != null) {
+                PcodeOp op = iter.Value;
+                iter = iter.Next;
                 if (op.code() != OpCode.CPUI_MULTIEQUAL) {
                     continue;
                 }
@@ -550,14 +552,14 @@ namespace Sla.DECCORE
             postb_block = (BlockBasic)iblock.getOut(1 - posta_outslot);
 
             returnop.Clear();
-            IEnumerator<PcodeOp> iter = iblock.reverseEnumerator();
+            LinkedListNode<PcodeOp>? iter = iblock.reverseEnumerator();
 
             // Skip branch
-            iter.MoveNext();
-            while (iter.MoveNext()) {
-                if (!testRemovability(iter.Current)) {
+            while (iter != null) {
+                if (!testRemovability(iter.Value)) {
                     return false;
                 }
+                iter = iter.Previous;
             }
             return true;
         }
@@ -645,9 +647,10 @@ namespace Sla.DECCORE
             // Patch any data-flow thru to OpCode.CPUI_RETURN
             fixReturnOp();
             if (!directsplit) {
-                IEnumerator<PcodeOp> iter = iblock.beginOp();
-                while (iter.MoveNext()) {
-                    op = iter.Current;
+                LinkedListNode<PcodeOp>? iter = iblock.beginOp();
+                while (iter != null) {
+                    op = iter.Value;
+                    iter = iter.Next;
                     if (!op.isBranch()) {
                         // Remove all read refs of op
                         doReplacement(op);
@@ -659,9 +662,10 @@ namespace Sla.DECCORE
             }
             else {
                 adjustDirectMulti();
-                IEnumerator<PcodeOp> iter = iblock.beginOp();
-                while (iter.MoveNext()) {
-                    op = iter.Current;
+                LinkedListNode<PcodeOp>? iter = iblock.beginOp();
+                while (iter != null) {
+                    op = iter.Value;
+                    iter = iter.Next;
                     if (op.code() == OpCode.CPUI_MULTIEQUAL) {
                         // Only adjust MULTIEQUALs
                         doReplacement(op);

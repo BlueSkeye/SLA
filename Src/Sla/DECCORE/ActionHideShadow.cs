@@ -33,7 +33,7 @@ namespace Sla.DECCORE
             }
             iter = data.beginDef();
             while (iter.MoveNext()) {
-                high = iter.Current.getHigh();
+                HighVariable high = iter.Current.getHigh();
                 high.clearMark();
             }
             return 0;

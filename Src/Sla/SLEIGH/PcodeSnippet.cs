@@ -181,7 +181,7 @@ namespace Sla.SLEIGH
                 return (int)sleightokentype.STRING;
             }
             if (tok == (int)sleightokentype.INTEGER) {
-                Parsing.yylval.i = lexer.getNumber();
+                Parsing.yylval.i = (int)lexer.getNumber();
                 return (int)sleightokentype.INTEGER;
             }
             return tok;

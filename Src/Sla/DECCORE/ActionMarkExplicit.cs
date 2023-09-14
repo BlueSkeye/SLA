@@ -70,12 +70,14 @@ namespace Sla.DECCORE
                 if (def.code() == OpCode.CPUI_SUBPIECE) {
                     Varnode vin = def.getIn(0);
                     if (vin.isAddrTied()) {
-                        if (vn.overlapJoin(vin) == def.getIn(1).getOffset())
-                            return -1;      // Should be explicit, will be a copymarker and not printed
+                        if (vn.overlapJoin(vin) == (int)def.getIn(1).getOffset())
+                            // Should be explicit, will be a copymarker and not printed
+                            return -1;
                     }
                 }
                 PcodeOp? useOp = vn.loneDescend();
-                if (useOp == (PcodeOp)null) return -1;
+                if (useOp == (PcodeOp)null)
+                    return -1;
                 if (useOp.code() == OpCode.CPUI_INT_ZEXT) {
                     Varnode vnout = useOp.getOut();
                     if ((!vnout.isAddrTied()) || (0 != vnout.contains(vn)))
@@ -85,19 +87,23 @@ namespace Sla.DECCORE
                     Varnode rootVn = PieceNode.findRoot(vn);
                     if (vn == rootVn) return -1;
                     if (rootVn.getDef().isPartialRoot()) {
-                        // Getting PIECEd into a structured thing.  Unless vn is a leaf, it should be implicit
-                        if (def.code() != OpCode.CPUI_PIECE) return -1;
-                        if (vn.loneDescend() == (PcodeOp)null) return -1;
+                        // Getting PIECEd into a structured thing. Unless vn is a leaf, it should be implicit
+                        if (def.code() != OpCode.CPUI_PIECE)
+                            return -1;
+                        if (vn.loneDescend() == (PcodeOp)null)
+                            return -1;
                         Varnode vn0 = def.getIn(0);
                         Varnode vn1 = def.getIn(1);
                         Address addr = vn.getAddr();
                         if (!addr.getSpace().isBigEndian())
                             addr = addr + vn1.getSize();
-                        if (addr != vn0.getAddr()) return -1;
+                        if (addr != vn0.getAddr())
+                            return -1;
                         addr = vn.getAddr();
                         if (addr.getSpace().isBigEndian())
                             addr = addr + vn0.getSize();
-                        if (addr != vn1.getAddr()) return -1;
+                        if (addr != vn1.getAddr())
+                            return -1;
                         // If we reach here vn is a non-leaf in a CONCAT tree and should be implicit
                     }
                 }
@@ -151,45 +157,47 @@ namespace Sla.DECCORE
         /// \return the number Varnodes that were marked as explicit
         private static int multipleInteraction(List<Varnode> multlist)
         {
-            List<Varnode> purgelist;
+            List<Varnode> purgelist = new List<Varnode>();
 
-            for (int i = 0; i < multlist.size(); ++i)
-            {
-                Varnode vn = multlist[i];  // All elements in this list should have a defining op
+            for (int i = 0; i < multlist.size(); ++i) {
+                // All elements in this list should have a defining op
+                Varnode vn = multlist[i];
                 PcodeOp op = vn.getDef();
                 OpCode opc = op.code();
-                if (op.isBoolOutput() || (opc == OpCode.CPUI_INT_ZEXT) || (opc == OpCode.CPUI_INT_SEXT) || (opc == OpCode.CPUI_PTRADD))
+                if (   op.isBoolOutput()
+                    || (opc == OpCode.CPUI_INT_ZEXT)
+                    || (opc == OpCode.CPUI_INT_SEXT)
+                    || (opc == OpCode.CPUI_PTRADD))
                 {
                     int maxparam = 2;
-                    if (op.numInput() < maxparam)
+                    if (op.numInput() < maxparam) {
                         maxparam = op.numInput();
+                    }
                     Varnode topvn = (Varnode)null;
-                    for (int j = 0; j < maxparam; ++j)
-                    {
+                    for (int j = 0; j < maxparam; ++j) {
                         topvn = op.getIn(j);
-                        if (topvn.isMark())
-                        {   // We have a "multiple" interaction between -topvn- and -vn-
+                        if (topvn.isMark()) {
+                            // We have a "multiple" interaction between -topvn- and -vn-
                             OpCode topopc = OpCode.CPUI_COPY;
-                            if (topvn.isWritten())
-                            {
+                            if (topvn.isWritten()) {
                                 if (topvn.getDef().isBoolOutput())
-                                    continue;       // Try not to make boolean outputs explicit
+                                    // Try not to make boolean outputs explicit
+                                    continue;
                                 topopc = topvn.getDef().code();
                             }
-                            if (opc == OpCode.CPUI_PTRADD)
-                            {
+                            if (opc == OpCode.CPUI_PTRADD) {
                                 if (topopc == OpCode.CPUI_PTRADD)
                                     purgelist.Add(topvn);
                             }
-                            else
+                            else {
                                 purgelist.Add(topvn);
+                            }
                         }
                     }
                 }
             }
 
-            for (int i = 0; i < purgelist.size(); ++i)
-            {
+            for (int i = 0; i < purgelist.size(); ++i) {
                 Varnode vn = purgelist[i];
                 vn.setExplicit();
                 vn.clearImplied();
@@ -208,40 +216,41 @@ namespace Sla.DECCORE
         /// \param max is the maximum number of terms to allow
         private static void processMultiplier(Varnode vn, int max)
         {
-            List<OpStackElement> opstack;
+            List<OpStackElement> opstack = new List<OpStackElement>();
             Varnode vncur;
             int finalcount = 0;
 
-            opstack.Add(vn);
-            do
-            {
+            opstack.Add(new OpStackElement() { vn = vn });
+            do {
                 vncur = opstack.GetLastItem().vn;
                 bool isaterm = vncur.isExplicit() || (!vncur.isWritten());
-                if (isaterm || (opstack.GetLastItem().slotback <= opstack.GetLastItem().slot))
-                { // Trimming condition
-                    if (isaterm)
-                    {
-                        if (!vncur.isSpacebase()) // Don't count space base
+                if (isaterm || (opstack.GetLastItem().slotback <= opstack.GetLastItem().slot)) {
+                    // Trimming condition
+                    if (isaterm) {
+                        if (!vncur.isSpacebase()) {
+                            // Don't count space base
                             finalcount += 1;
+                        }
                     }
-                    if (finalcount > max)
-                    {
-                        vn.setExplicit();  // Make this variable explicit
+                    if (finalcount > max) {
+                        // Make this variable explicit
+                        vn.setExplicit();
                         vn.clearImplied();
                         return;
                     }
                     opstack.RemoveLastItem();
                 }
-                else
-                {
+                else {
                     PcodeOp op = vncur.getDef();
-                    Varnode newvn = op.getIn(opstack.GetLastItem().slot++);
-                    if (newvn.isMark())
-                    {   // If an ancestor is marked(also possible implied with multiple descendants)
-                        vn.setExplicit();  // then automatically consider this to be explicit
+                    OpStackElement currentElement = opstack.GetLastItem();
+                    Varnode newvn = op.getIn(currentElement.slot++);
+                    if (newvn.isMark()) {
+                        // If an ancestor is marked(also possible implied with multiple descendants)
+                        // then automatically consider this to be explicit
+                        vn.setExplicit();
                         vn.clearImplied();
                     }
-                    opstack.Add(newvn);
+                    opstack.Add(new OpStackElement() { vn = newvn });
                 }
             } while (!opstack.empty());
         }
@@ -259,7 +268,8 @@ namespace Sla.DECCORE
             IEnumerator<PcodeOp> iter = vn.beginDescend();
             while (iter.MoveNext()) {
                 PcodeOp curop = iter.Current;
-                if (curop.getParent() != bb) continue;
+                if (curop.getParent() != bb)
+                    continue;
                 if (firstuse == (PcodeOp)null)
                     firstuse = curop;
                 else if (curop.getSeqNum().getOrder() < firstuse.getSeqNum().getOrder())
@@ -272,10 +282,13 @@ namespace Sla.DECCORE
                     }
                 }
             }
-            if (firstuse == (PcodeOp)null) return;
+            if (firstuse == (PcodeOp)null)
+                return;
 
-            if (!firstuse.isCall()) return;
-            if (firstuse.getOut() != (Varnode)null) return;
+            if (!firstuse.isCall())
+                return;
+            if (firstuse.getOut() != (Varnode)null)
+                return;
             if (firstuse.numInput() < 2) return;       // Must have at least 1 parameter (plus destination varnode)
             if (firstuse.getIn(1) != vn) return;       // First parameter must result of new
                                                         //  if (!fc.isConstructor()) return;		// Function must be a constructor
@@ -295,26 +308,25 @@ namespace Sla.DECCORE
     
         public override int apply(Funcdata data)
         {
-            VarnodeDefSet::const_iterator viter, enditer;
-            List<Varnode> multlist;      // implied varnodes with >1 descendants
-            int maxref;
-
-            maxref = data.getArch().max_implied_ref;
-            enditer = data.beginDef(0); // Cut out free varnodes
-            for (viter = data.beginDef(); viter != enditer; ++viter)
-            {
-                Varnode vn = *viter;
-
+            // implied varnodes with >1 descendants
+            List<Varnode> multlist = new List<Varnode>();
+            int maxref = data.getArch().max_implied_ref;
+            // Cut out free varnodes
+            IEnumerator<Varnode> enditer = data.beginDef(0);
+            if (!enditer.MoveNext()) throw new ApplicationException();
+            Varnode firstExcludedNode = enditer.Current;
+            IEnumerator<Varnode> viter = data.beginDef();
+            while (viter.MoveNext() && !object.ReferenceEquals(viter.Current, firstExcludedNode)) {
+                Varnode vn = viter.Current;
                 int desccount = baseExplicit(vn, maxref);
-                if (desccount < 0)
-                {
+                if (desccount < 0) {
                     vn.setExplicit();
                     count += 1;
                     if (desccount < -1)
                         checkNewToConstructor(data, vn);
                 }
-                else if (desccount > 1)
-                {   // Keep track of possible implieds with more than one descendant
+                else if (desccount > 1) {
+                    // Keep track of possible implieds with more than one descendant
                     vn.setMark();
                     multlist.Add(vn);
                 }
@@ -322,14 +334,15 @@ namespace Sla.DECCORE
 
             count += multipleInteraction(multlist);
             int maxdup = data.getArch().max_term_duplication;
-            for (int i = 0; i < multlist.size(); ++i)
-            {
+            for (int i = 0; i < multlist.size(); ++i) {
                 Varnode vn = multlist[i];
-                if (vn.isMark())       // Mark may have been cleared by multipleInteraction
+                if (vn.isMark())
+                    // Mark may have been cleared by multipleInteraction
                     processMultiplier(vn, maxdup);
             }
-            for (int i = 0; i < multlist.size(); ++i)
+            for (int i = 0; i < multlist.size(); ++i) {
                 multlist[i].clearMark();
+            }
             return 0;
         }
     }

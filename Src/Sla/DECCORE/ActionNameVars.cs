@@ -36,20 +36,27 @@ namespace Sla.DECCORE
                 PcodeOp castop = vn.getDef() ?? throw new ApplicationException();
                 if (castop.code() == OpCode.CPUI_CAST) {
                     vn = castop.getIn(0) ?? throw new ApplicationException();
-                    ct = (Datatype)null;  // Indicate that this is a less preferred name
+                    // Indicate that this is a less preferred name
+                    ct = (Datatype)null;
                 }
             }
             HighVariable high = vn.getHigh();
-            if (high.isAddrTied()) return; // Don't propagate parameter name to address tied variable
-            if (param.getName().StartsWith("param_") == 0) return;
+            if (high.isAddrTied())
+                // Don't propagate parameter name to address tied variable
+                return;
+            if (!param.getName().StartsWith("param_")) return;
 
             OpRecommend recommended;
             if (recmap.TryGetValue(high, out recommended)) {
                 // We have seen this varnode before
-                if (ct == (Datatype)null) return; // Cannot override with null (casted) type
+                if (ct == (Datatype)null)
+                    // Cannot override with null (casted) type
+                    return;
                 Datatype? oldtype = recommended.ct;
                 if (oldtype != (Datatype)null) {
-                    if (oldtype.typeOrder(ct) <= 0) return; // oldtype is more specified
+                    if (oldtype.typeOrder(ct) <= 0)
+                        // oldtype is more specified
+                        return;
                 }
                 recommended.ct = ct;
                 recommended.namerec = param.getName();
@@ -83,9 +90,14 @@ namespace Sla.DECCORE
                     }
                     if (vn.isFree()) continue;
                     Symbol sym = vn.getHigh().getSymbol();
-                    if (sym == (Symbol)null) continue;
-                    if (sym.isNameLocked()) continue; // Override any unlocked name
-                    if (sym.getScope() != localmap) continue; // Only name this in the local scope
+                    if (sym == (Symbol)null)
+                        continue;
+                    if (sym.isNameLocked())
+                        // Override any unlocked name
+                        continue;
+                    if (sym.getScope() != localmap)
+                        // Only name this in the local scope
+                        continue;
                     string newname = "UNRECOVERED_JUMPTABLE";
                     sym.getScope().renameSymbol(sym, localmap.makeNameUnique(newname));
                 }
@@ -103,12 +115,11 @@ namespace Sla.DECCORE
         {
             int numfunc = data.numCalls();
             if (numfunc == 0) return;
-
             Dictionary<HighVariable, OpRecommend> recmap = new Dictionary<HighVariable, OpRecommend>();
 
             ScopeLocal localmap = data.getScopeLocal();
-            for (int i = 0; i < numfunc; ++i)
-            {   // Run through all calls to functions
+            for (int i = 0; i < numfunc; ++i) {
+                // Run through all calls to functions
                 FuncCallSpecs fc = data.getCallSpecs(i);
                 if (!fc.isInputLocked()) continue;
                 PcodeOp op = fc.getOp();
@@ -116,7 +127,8 @@ namespace Sla.DECCORE
                 if (numparam >= op.numInput())
                     numparam = op.numInput() - 1;
                 for (int j = 0; j < numparam; ++j) {
-                    ProtoParameter param = fc.getParam(j); // Looking for a parameter
+                    // Looking for a parameter
+                    ProtoParameter param = fc.getParam(j);
                     Varnode vn = op.getIn(j + 1);
                     makeRec(param, vn, recmap);
                 }
@@ -187,7 +199,8 @@ namespace Sla.DECCORE
             while (iter.MoveNext()) {
                 Varnode curvn = iter.Current;
                 if (curvn.getSymbolEntry() != (SymbolEntry)null)
-                    data.linkSymbol(curvn);     // Special equate symbol
+                    // Special equate symbol
+                    data.linkSymbol(curvn);
                 else if (curvn.isSpacebase())
                     linkSpacebaseSymbol(curvn, data, namerec);
             }
@@ -240,7 +253,8 @@ namespace Sla.DECCORE
             List<Varnode> namerec = new List<Varnode>();
 
             linkSymbols(data, namerec);
-            data.getScopeLocal().recoverNameRecommendationsForSymbols(); // Make sure recommended names hit before subfunc
+            // Make sure recommended names hit before subfunc
+            data.getScopeLocal().recoverNameRecommendationsForSymbols();
             lookForBadJumpTables(data);
             lookForFuncParamNames(data, namerec);
 

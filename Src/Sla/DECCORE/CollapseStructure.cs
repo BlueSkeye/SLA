@@ -19,12 +19,14 @@ namespace Sla.DECCORE
         private bool likelylistfull;
         /// The current \e likely \e goto list
         private List<FloatingEdge> likelygoto;
-        /// Iterator to the next most \e likely \e goto edge
+        // Iterator to the next most \e likely \e goto edge
         private IEnumerator<FloatingEdge> likelyiter;
+        private bool likelyiterCompleted = true;
         /// The list of loop bodies for this control-flow graph
         private List<LoopBody> loopbody;
         /// Current (innermost) loop being structured
         private IEnumerator<LoopBody> loopbodyiter;
+        private bool loopbodyiterCompleted = true;
         /// The control-flow graph
         private BlockGraph graph;
         /// Number of data-flow changes made during structuring
@@ -216,7 +218,7 @@ namespace Sla.DECCORE
                     iter = loopbody.GetEnumerator();
                     List<LoopBody> deletedItems = new List<LoopBody>();
                     while (iter.MoveNext()) {
-                        if (iter.getHead() == null) {
+                        if (iter.Current.getHead() == null) {
                             // Delete the subsumed loopbody
                             deletedItems.Add(iter.Current);
                         }
@@ -245,6 +247,7 @@ namespace Sla.DECCORE
             }
             likelylistfull = false;
             loopbodyiter = loopbody.GetEnumerator();
+            loopbodyiterCompleted = false;
         }
 
         /// Find likely \e unstructured edges within the innermost loop body
@@ -257,19 +260,19 @@ namespace Sla.DECCORE
             FlowBlock? looptop = null;
             if (finaltrace) {
                 // If we've already performed the final trace
-                return (likelyiter == likelygoto.end());
+                return likelyiterCompleted;
             }
-            while (loopbodyiter != loopbody.end()) {
+            while (!loopbodyiterCompleted) {
                 // Last innermost loop
                 loopbottom = loopbodyiter.Current.getCurrentBounds(out looptop, graph);
                 if (loopbottom != null) {
-                    if ((!likelylistfull) || (likelyiter != likelygoto.end())) {
+                    if (!likelylistfull || !likelyiterCompleted) {
                         // Reaching here means, we removed edges but loop still didn't collapse
                         // Loop still exists
                         break;
                     }
                 }
-                ++loopbodyiter;
+                loopbodyiterCompleted = !loopbodyiter.MoveNext();
                 // Need to generate likely list for new loopbody (or no loopbody)
                 likelylistfull = false;
                 loopbottom = null;
@@ -305,6 +308,7 @@ namespace Sla.DECCORE
             }
             likelylistfull = true;
             likelyiter = likelygoto.GetEnumerator();
+            likelyiterCompleted = false;
             return true;
         }
 
@@ -317,10 +321,10 @@ namespace Sla.DECCORE
         private FlowBlock? selectGoto()
         {
             while (updateLoopBody()) {
-                while (likelyiter != likelygoto.end()) {
+                while (!likelyiterCompleted) {
                     int outedge;
                     FlowBlock startbl = likelyiter.Current.getCurrentEdge(out outedge, graph);
-                    ++likelyiter;
+                    likelyiterCompleted = !likelyiter.MoveNext();
                     if (startbl != null) {
                         // Mark the selected branch as goto
                         startbl.setGotoBranch(outedge);

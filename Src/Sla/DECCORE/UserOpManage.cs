@@ -185,7 +185,7 @@ namespace Sla.DECCORE
             string writeOpName = string.Empty;
             bool functionalDisplay = false;
             while (true) {
-                AttributeId attribId = decoder.getNextAttributeId();
+                uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == AttributeId.ATTRIB_INPUTOP) {
                     readOpName = decoder.readString();

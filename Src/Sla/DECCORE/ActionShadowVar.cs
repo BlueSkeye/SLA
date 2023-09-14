@@ -29,7 +29,7 @@ namespace Sla.DECCORE
             PcodeOp op;
             Varnode vn;
             List<Varnode> vnlist = new List<Varnode>();
-            List<PcodeOp> oplist;
+            List<PcodeOp> oplist = new List<PcodeOp>();
             ulong startoffset;
             for (int i = 0; i < bblocks.getSize(); ++i) {
                 vnlist.Clear();
@@ -39,14 +39,16 @@ namespace Sla.DECCORE
                 // We cannot stop at first non-MULTIEQUAL because
                 // other ops creep in because of multi_collapse
                 startoffset = bl.getStart().getOffset();
-                IEnumerator<PcodeOp> iter = bl.beginOp();
-                while (iter.MoveNext()) {
-                    op = iter.Current;
+                LinkedListNode<PcodeOp>? iter = bl.beginOp();
+                while (iter != null) {
+                    op = iter.Value;
+                    iter = iter.Next;
                     if (op.getAddr().getOffset() != startoffset) break;
                     if (op.code() != OpCode.CPUI_MULTIEQUAL) continue;
                     vn = op.getIn(0);
-                    if (vn.isMark())
+                    if (vn.isMark()) {
                         oplist.Add(op);
+                    }
                     else {
                         vn.setMark();
                         vnlist.Add(vn);
@@ -55,16 +57,21 @@ namespace Sla.DECCORE
                 for (int j = 0; j < vnlist.size(); ++j)
                     vnlist[j].clearMark();
             }
-            IEnumerator<PcodeOp> oiter;
-            for (oiter = oplist.begin(); oiter != oplist.end(); ++oiter) {
-                op = *oiter;
+            IEnumerator<PcodeOp> oiter = oplist.GetEnumerator();
+            while (oiter.MoveNext()) {
+                op = oiter.Current;
                 PcodeOp op2;
                 for (op2 = op.previousOp(); op2 != (PcodeOp)null; op2 = op2.previousOp()) {
-                    if (op2.code() != OpCode.CPUI_MULTIEQUAL) continue;
+                    if (op2.code() != OpCode.CPUI_MULTIEQUAL)
+                        continue;
                     int i;
-                    for (i = 0; i < op.numInput(); ++i) // Check for match in each branch
-                        if (op.getIn(i) != op2.getIn(i)) break;
-                    if (i != op.numInput()) continue; // All branches did not match
+                    for (i = 0; i < op.numInput(); ++i)
+                        // Check for match in each branch
+                        if (op.getIn(i) != op2.getIn(i))
+                            break;
+                    if (i != op.numInput())
+                        // All branches did not match
+                        continue;
 
                     List<Varnode> plist = new List<Varnode>();
                     plist.Add(op2.getOut());
@@ -73,7 +80,6 @@ namespace Sla.DECCORE
                     count += 1;
                 }
             }
-
             return 0;
         }
     }

@@ -160,7 +160,7 @@ namespace Sla.DECCORE
             if (opiter != fd.beginOpAll()) {
                 // If there is a previous op
                 --opiter;
-                PcodeOp op = (*opiter).second;
+                PcodeOp op = opiter.Current.Value;
                 BlockBasic? block = op.getParent();
                 if (block == null) {
                     throw new LowlevelError("Dead op reaching CommentSorter");

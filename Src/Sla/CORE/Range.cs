@@ -192,7 +192,7 @@ namespace Sla.CORE
             first = 0;
             last = 0;
             while(true) {
-                AttributeId attribId = decoder.getNextAttributeId();
+                uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) {
                     break;
                 }

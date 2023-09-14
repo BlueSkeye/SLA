@@ -49,7 +49,7 @@ namespace Sla.EXTRA
             // Last before or equal
             --iter;
             CodeUnit cu = iter.Current.Value;
-            if (iter.Current.Key.getOffset() + cu.size - 1 < addr.getOffset())
+            if (iter.Current.Key.getOffset() + (uint)cu.size - 1 < addr.getOffset())
                 return;
             if ((cu.flags & CodeUnit.Flags.notcode) != 0) {
                 // Already visited
@@ -88,15 +88,15 @@ namespace Sla.EXTRA
             ftiter = tofrom_crossref.lower_bound(new AddrLink(startaddr));
             enditer = tofrom_crossref.lower_bound(new AddrLink(endaddr));
             while (ftiter != enditer) {
-                pushTaintAddress((*ftiter).first.b);
-                Dictionary<AddrLink, uint>.Enumerator diter = ftiter;
+                AddrLink taintedLink = ftiter.Current.Key;
+                pushTaintAddress(taintedLink.b);
                 ++ftiter;
-                tofrom_crossref.erase(diter);
+                tofrom_crossref.Remove(taintedLink);
             }
         }
 
         public Address commitCodeVec(Address addr, List<CodeUnit> codevec,
-            Dictionary<AddrLink, uint> fromto_vec)
+            Dictionary<AddrLink, CodeUnit.Flags> fromto_vec)
         {
             // Commit all the code units in the List, build all the crossrefs
             Address curaddr = addr;
@@ -104,7 +104,7 @@ namespace Sla.EXTRA
                 codeunit[curaddr] = codevec[i];
                 curaddr = curaddr + codevec[i].size;
             }
-            Dictionary<AddrLink, uint>.Enumerator citer = fromto_vec.GetEnumerator();
+            Dictionary<AddrLink, CodeUnit.Flags>.Enumerator citer = fromto_vec.GetEnumerator();
             while (citer.MoveNext()) {
                 AddrLink fromto = citer.Current.Key;
                 fromto_crossref[fromto] = citer.Current.Value;
@@ -170,7 +170,7 @@ namespace Sla.EXTRA
         public Address disassembleBlock(Address addr, Address endaddr)
         {
             List<CodeUnit> codevec = new List<CodeUnit>();
-            Dictionary<AddrLink, uint> fromto_vec = new Dictionary<AddrLink, uint>();
+            Dictionary<AddrLink, CodeUnit.Flags> fromto_vec = new Dictionary<AddrLink, CodeUnit.Flags>();
             bool flowin = false;
             bool hardend = false;
 
@@ -253,7 +253,7 @@ namespace Sla.EXTRA
             cu.flags = CodeUnit.Flags.notcode;
             if (hardend && (lastaddr < curaddr))
                 curaddr = lastaddr;
-            int wholesize = curaddr.getOffset() - addr.getOffset();
+            int wholesize = (int)(curaddr.getOffset() - addr.getOffset());
             if ((!flowin) && (wholesize < 10)) {
                 wholesize = 1;
             }
@@ -350,10 +350,10 @@ namespace Sla.EXTRA
             // Code unit make indirect jump to target
             // Assume the address of the jump is another level of thunk
             // Look for direct calls to it and include those as TargetHits
-            Dictionary<AddrLink, uint>.Enumerator iter =
+            Dictionary<AddrLink, CodeUnit.Flags>.Enumerator iter =
                 tofrom_crossref.lower_bound(new AddrLink(codeaddr));
             Address endaddr = codeaddr + 1;
-            Dictionary<AddrLink, uint>.Enumerator enditer =
+            Dictionary<AddrLink, CodeUnit.Flags>.Enumerator enditer =
                 tofrom_crossref.lower_bound(new AddrLink(endaddr));
             while (iter != enditer) {
                 CodeUnit.Flags flags = iter.Current.Value;
@@ -390,16 +390,17 @@ namespace Sla.EXTRA
         {
             int count = 0;
 
-            while (count < 1000)
-            {
+            while (count < 1000) {
                 CodeUnit cu = iter.Current.Value;
                 if ((cu.flags & (CodeUnit.Flags.hit_by_jump | CodeUnit.Flags.hit_by_call)) != 0)
-                    return false;       // Something else jumped in
+                    // Something else jumped in
+                    return false;
                 if ((cu.flags & CodeUnit.Flags.hit_by_fallthru) == 0) {
                     cu.flags |= CodeUnit.Flags.errantstart;
                     return true;
                 }
-                if (iter == codeunit.begin()) return false;
+                if (iter == codeunit.begin())
+                    return false;
                 --iter;
                 count += 1;
             }
@@ -411,9 +412,9 @@ namespace Sla.EXTRA
             // Assume -addr- is a correct instruction start. Try to repair
             // disassembly for up to -max- instructions following it,
             // trying to get back on cut
-            DisassemblyResult disresult;
+            DisassemblyResult disresult = new DisassemblyResult();
             List<CodeUnit> codevec = new List<CodeUnit>();
-            Dictionary<AddrLink, uint> fromto_vec = new Dictionary<AddrLink, uint>();
+            Dictionary<AddrLink, CodeUnit.Flags> fromto_vec = new Dictionary<AddrLink, CodeUnit.Flags>();
             Address curaddr = addr;
             int count = 0;
 
@@ -477,7 +478,8 @@ namespace Sla.EXTRA
                 --citer;
                 if (citer.Current.Key == addr) {
                     iterationCompleted = !iter.MoveNext();
-                    continue; // on cut
+                    // on cut
+                    continue;
                 }
                 Address endaddr = citer.Current.Key + citer.Current.Value.size;
                 if (endaddr <= addr) {
@@ -498,15 +500,16 @@ namespace Sla.EXTRA
         public Address findFunctionStart(Address addr)
         {
             // Find the starting address of a function containing the address addr
-            Dictionary<AddrLink, uint>.Enumerator iter;
+            Dictionary<AddrLink, CodeUnit.Flags>.Enumerator iter;
 
-            iter = tofrom_crossref.lower_bound(AddrLink(addr));
+            iter = tofrom_crossref.lower_bound(new AddrLink(addr));
             while (iter != tofrom_crossref.begin()) {
                 --iter;
                 if ((iter.Current.Value & CodeUnit.Flags.call) != 0)
                     return iter.Current.Key.a;
             }
-            return new Address();       // Return invalid address
+            // Return invalid address
+            return new Address();
         }
 
         public List<TargetHit> getTargetHits() => targethits;
@@ -586,10 +589,10 @@ namespace Sla.EXTRA
         public void runModel()
         {
             LoadImage loadimage = glb.loader ?? throw new ApplicationException();
-            LoadImageSection secinfo;
+            LoadImageSection secinfo = new LoadImageSection();
             bool moresections;
             loadimage.openSectionInfo();
-            Address lastaddr;
+            Address lastaddr = new Address();
             do {
                 moresections = loadimage.getNextSection(secinfo);
                 Address endaddr = secinfo.address + (int)secinfo.size;

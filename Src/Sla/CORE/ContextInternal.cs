@@ -336,7 +336,7 @@ namespace Sla.CORE
                     break;
                 }
                 if (subId == ElementId.ELEM_CONTEXT_POINTSET) {
-                    AttributeId attribId = decoder.getNextAttributeId();
+                    uint attribId = decoder.getNextAttributeId();
                     decoder.rewindAttributes();
                     if (attribId == 0) {
                         // Restore the default value

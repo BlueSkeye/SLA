@@ -56,7 +56,7 @@ namespace Sla.DECCORE
             metatype = type_metatype.TYPE_PTR;        // Don't use type_metatype.TYPE_PTRREL internally
             decoder.rewindAttributes();
             while(true) {
-                AttributeId attrib = decoder.getNextAttributeId();
+                uint attrib = decoder.getNextAttributeId();
                 if (attrib == 0) break;
                 if (attrib == AttributeId.ATTRIB_WORDSIZE) {
                     wordsize = (uint)decoder.readUnsignedInteger();

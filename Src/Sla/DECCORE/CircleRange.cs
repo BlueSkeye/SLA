@@ -247,8 +247,8 @@ namespace Sla.DECCORE
         {
             mask = 0xff;
             step = 1;
-            left = val ? 1 : 0;
-            right = val + 1;
+            left = val ? 1UL : 0;
+            right = val ? 2UL : 1;
             isempty = false;
         }
 
@@ -276,7 +276,7 @@ namespace Sla.DECCORE
             mask = Globals.calc_mask((uint)size);
             left = lft;
             right = rgt;
-            step = stp;
+            this.step = step;
             isempty = false;
         }
 
@@ -634,12 +634,13 @@ namespace Sla.DECCORE
         public int circleUnion(CircleRange op2)
         {
             if (op2.isempty) return 0;
-            if (isempty)
-            {
+            if (isempty) {
                 *this = op2;
                 return 0;
             }
-            if (mask != op2.mask) return 2; // Cannot do proper union with different domains
+            if (mask != op2.mask)
+                // Cannot do proper union with different domains
+                return 2;
             ulong aRight = right;
             ulong bRight = op2.right;
             int newStep = step;
@@ -745,7 +746,7 @@ namespace Sla.DECCORE
                 }
                 ulong diff = max - min;
                 if (diff > 0 && diff <= (uint)maxStep) {
-                    if (leastsigbit_set(diff) == Globals.mostsigbit_set(diff)) {
+                    if (Globals.leastsigbit_set(diff) == Globals.mostsigbit_set(diff)) {
                         step = (int)diff;
                         left = min;
                         right = (max + (uint)step) & mask;
@@ -870,34 +871,41 @@ namespace Sla.DECCORE
                     left = (~right + (uint)step) & mask;
                     right = val;
                     break;
-                case OpCode.CPUI_INT_ZEXT:
-                    {
-                        val = Globals.calc_mask((uint)inSize); // (smaller) input mask
+                case OpCode.CPUI_INT_ZEXT: {
+                        // (smaller) input mask
+                        val = Globals.calc_mask((uint)inSize);
                         ulong rem = left % (uint)step;
-                        CircleRange zextrange;
-                        zextrange.left = rem;
-                        zextrange.right = val + 1 + rem;    // Biggest possible range of ZEXT
-                        zextrange.mask = mask;
-                        zextrange.step = step;  // Keep the same stride
-                        zextrange.isempty = false;
+                        CircleRange zextrange = new CircleRange() {
+                            left = rem,
+                            // Biggest possible range of ZEXT
+                            right = val + 1 + rem,
+                            mask = mask,
+                            // Keep the same stride
+                            step = step,
+                            isempty = false
+                        };
                         if (0 != intersect(zextrange))
                             return false;
                         left &= val;
                         right &= val;
-                        mask &= val;        // Preserve the stride
+                        // Preserve the stride
+                        mask &= val;
                         break;
                     }
-                case OpCode.CPUI_INT_SEXT:
-                    {
-                        val = Globals.calc_mask((uint)inSize); // (smaller) input mask
+                case OpCode.CPUI_INT_SEXT: {
+                        // (smaller) input mask
+                        val = Globals.calc_mask((uint)inSize);
                         ulong rem = left & (uint)step;
-                        CircleRange sextrange;
-                        sextrange.left = val ^ (val >> 1); // High order bit for (small) input space
-                        sextrange.left += rem;
-                        sextrange.right = Globals.sign_extend(sextrange.left, inSize, outSize);
-                        sextrange.mask = mask;
-                        sextrange.step = step;  // Keep the same stride
-                        sextrange.isempty = false;
+                        ulong leftValue = (val ^ (val >> 1)) + rem;
+                        CircleRange sextrange = new CircleRange() {
+                            // High order bit for (small) input space
+                            left = leftValue,
+                            right = Globals.sign_extend(leftValue, inSize, outSize),
+                            mask = mask,
+                            // Keep the same stride
+                            step = step,
+                            isempty = false
+                        };
                         if (sextrange.intersect(this) != 0)
                             return false;
                         else {
@@ -1232,10 +1240,12 @@ namespace Sla.DECCORE
                     }
                     else {
                         left = in1.left;
-                        right = (in1.right - in1.step) & in1.mask;
+                        right = (in1.right - (uint)in1.step) & in1.mask;
                         if (right < left)
-                            return false;   // Extending causes 2 pieces
-                        right += step;  // Impossible for it to wrap with bigger mask
+                            // Extending causes 2 pieces
+                            return false;
+                        // Impossible for it to wrap with bigger mask
+                        right += (uint)step;
                     }
                     break;
                 case OpCode.CPUI_INT_SEXT:
@@ -1249,10 +1259,12 @@ namespace Sla.DECCORE
                         right = right + 1 + rem;
                     }
                     else {
-                        left = Globals.sign_extend(in1.left, inSize, outSize);
-                        right = Globals.sign_extend((in1.right - (uint)in1.step) & in1.mask, inSize, outSize);
+                        left = Globals.sign_extend(in1.left, inSize, (int)outSize);
+                        right = Globals.sign_extend((in1.right - (uint)in1.step) & in1.mask,
+                            inSize, (int)outSize);
                         if ((long)right < (long)left)
-                            return false;   // Extending causes 2 pieces
+                            // Extending causes 2 pieces
+                            return false;
                         right = (right + (uint)step) & mask;
                     }
                     break;
@@ -1327,13 +1339,17 @@ namespace Sla.DECCORE
                     }
                     else {
                         step = (in1.step < in2.step) ? in1.step : in2.step; // Smaller step
-                        ulong size1 = (in1.left < in1.right) ? (in1.right - in1.left) : (in1.mask - (in1.left - in1.right) + in1.step);
+                        ulong size1 = (in1.left < in1.right)
+                            ? (in1.right - in1.left)
+                            : (in1.mask - (in1.left - in1.right) + (uint)in1.step);
                         left = (in1.left + in2.left) & mask;
-                        right = (in1.right - in1.step + in2.right - in2.step + step) & mask;
-                        ulong sizenew = (left < right) ? (right - left) : (mask - (left - right) + step);
-                        if (sizenew < size1)
-                        {
-                            right = left;   // Over-flow, we covered everything
+                        right = (in1.right - (uint)in1.step + in2.right - (uint)in2.step + (uint)step) & mask;
+                        ulong sizenew = (left < right)
+                            ? (right - left)
+                            : (mask - (left - right) + (uint)step);
+                        if (sizenew < size1) {
+                            // Over-flow, we covered everything
+                            right = left;
                         }
                         normalize();
                     }
@@ -1369,12 +1385,12 @@ namespace Sla.DECCORE
                         }
                         if ((constVal & (mask ^ (mask >> 1))) != 0) {
                             // Multiplying by negative number
-                            left = ((in1.right - in1.step) * (in2.right - in2.step)) & mask;
-                            right = ((in1.left * in2.left) + step) & mask;
+                            left = ((in1.right - (uint)in1.step) * (in2.right - (uint)in2.step)) & mask;
+                            right = ((in1.left * in2.left) + (uint)step) & mask;
                         }
                         else {
                             left = (in1.left * in2.left) & mask;
-                            right = ((in1.right - in1.step) * (in2.right - in2.step) + step) & mask;
+                            right = ((in1.right - (uint)in1.step) * (in2.right - (uint)in2.step) + (uint)step) & mask;
                         }
                         break;
                     }
@@ -1390,8 +1406,8 @@ namespace Sla.DECCORE
                             step <<= 1;
                             sa -= 1;
                         }
-                        left = (in1.left << sa) & mask;
-                        right = (in1.right << sa) & mask;
+                        left = (in1.left << (int)sa) & mask;
+                        right = (in1.right << (int)sa) & mask;
                         int wholeSize = 8 * sizeof(ulong) - Globals.count_leading_zeros(mask);
                         if (in1.getMaxInfo() + sa > wholeSize) {
                             right = left;   // Covered everything
@@ -1429,7 +1445,7 @@ namespace Sla.DECCORE
                         step = 1;           // Lose any step
                         if (in1.left < in1.right) {
                             left = in1.left >> sa;
-                            right = ((in1.right - in1.step) >> sa) + 1;
+                            right = ((in1.right - (uint)in1.step) >> sa) + 1;
                         }
                         else {
                             left = 0;
@@ -1445,20 +1461,24 @@ namespace Sla.DECCORE
                         isempty = false;
                         int sa = (int)in2.left;
                         mask = Globals.calc_mask((uint)outSize);
-                        step = 1;           // Lose any step
-                        long valLeft = in1.left;
-                        long valRight = in1.right;
+                        // Lose any step
+                        step = 1;
+                        long valLeft = (long)in1.left;
+                        long valRight = (long)in1.right;
                         int bitPos = 8 * inSize - 1;
-                        Globals.sign_extend(valLeft, bitPos);
-                        Globals.sign_extend(valRight, bitPos);
+                        Globals.sign_extend(ref valLeft, bitPos);
+                        Globals.sign_extend(ref valRight, bitPos);
                         if (valLeft >= valRight) {
-                            valRight = (long)(mask >> 1);   // Max positive
-                            valLeft = valRight + 1;     // Min negative
-                            Globals.sign_extend(valLeft, bitPos);
+                            // Max positive
+                            valRight = (long)(mask >> 1);
+                            // Min negative
+                            valLeft = valRight + 1;
+                            Globals.sign_extend(ref valLeft, bitPos);
                         }
-                        left = (valLeft >> sa) & mask;
-                        right = (valRight >> sa) & mask;
-                        if (left == right)  // Don't truncate accidentally to everything
+                        left = (ulong)(valLeft >> sa) & mask;
+                        right = (ulong)(valRight >> sa) & mask;
+                        if (left == right)
+                            // Don't truncate accidentally to everything
                             right = (left + 1) & mask;
                         break;
                     }

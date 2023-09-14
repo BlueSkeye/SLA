@@ -26,7 +26,7 @@ namespace Sla.DECCORE
                 return IntPromotionCode.UNKNOWN_PROMOTION;
             }
             if (vn.isConstant()) {
-                if (!signbit_negative(vn.getOffset(), vn.getSize())) {
+                if (!Globals.signbit_negative(vn.getOffset(), vn.getSize())) {
                     // If the high-bit is zero
                     // Can be viewed as either extension
                     return IntPromotionCode.EITHER_EXTENSION;
@@ -431,7 +431,7 @@ namespace Sla.DECCORE
         {
             uint tmpoff = offset;
             if (isbigend) {
-                tmpoff = intype.getSize() - 1 - offset;
+                tmpoff = (uint)(intype.getSize() - 1 - offset);
             }
             return isSubpieceCast(outtype, intype, tmpoff);
         }
@@ -445,7 +445,7 @@ namespace Sla.DECCORE
             type_metatype metain = intype.getMetatype();
             // Casting to larger storage always extends based on signedness of the input data-type
             // So the input must be SIGNED in order to treat SEXT as a cast
-            return ((metain == type_metatype.TYPE_INT) || (metain = type_metatype.TYPE_BOOL));
+            return ((metain == type_metatype.TYPE_INT) || (metain == type_metatype.TYPE_BOOL));
         }
 
         public override bool isZextCast(Datatype outtype, Datatype intype)

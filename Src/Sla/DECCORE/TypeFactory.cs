@@ -135,7 +135,7 @@ namespace Sla.DECCORE
             uint format = 0;       // No forced display format by default
                                     //  uint elemId = decoder.openElement();
             while (true) {
-                AttributeId attribId = decoder.getNextAttributeId();
+                uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == AttributeId.ATTRIB_ID) {
                     id = decoder.readUnsignedInteger();
@@ -352,7 +352,7 @@ namespace Sla.DECCORE
                     break;
                 default:
                     while (true) {
-                        AttributeId attribId = decoder.getNextAttributeId();
+                        uint attribId = decoder.getNextAttributeId();
                         if (attribId == 0) break;
                         if (attribId == AttributeId.ATTRIB_CHAR && decoder.readBool()) {
                             TypeChar tc = new TypeChar(decoder.readString(AttributeId.ATTRIB_NAME));
@@ -837,7 +837,7 @@ namespace Sla.DECCORE
                 ulong newid = 0;
                 int size = -1;
                 while(true) {
-                    AttributeId attribId = decoder.getNextAttributeId();
+                    uint attribId = decoder.getNextAttributeId();
                     if (attribId == 0) break;
                     if (attribId == AttributeId.ATTRIB_ID) {
                         newid = decoder.readUnsignedInteger();
@@ -876,7 +876,7 @@ namespace Sla.DECCORE
             if (tp.getMetatype() != type_metatype.TYPE_PTR)
                 throw new LowlevelError("Special type decode does not see pointer");
             while(true) {
-                AttributeId attribId = decoder.getNextAttributeId();
+                uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == AttributeId.ATTRIB_WORDSIZE) {
                     tp.wordsize = (uint)decoder.readUnsignedInteger();

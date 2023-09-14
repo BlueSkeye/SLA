@@ -4124,13 +4124,12 @@ namespace Sla.DECCORE
         /// \param bl is the basic block to insert into
         public void opInsertEnd(PcodeOp op, BlockBasic bl)
         {
-            IBiDirEnumerator<PcodeOp>? iter = bl.GetBiDirectionalEnumerator(true);
+            LinkedListNode<PcodeOp>? iter = bl.reverseEnumerator();
 
-            if (!iter.MoveNext()) throw new BugException();
-            if (!iter.IsBeforeFirst) {
-                if (!iter.MoveNext()) throw new BugException();
-                if (!iter.Current.isFlowBreak())
-                    if (!iter.MoveNext()) throw new BugException();
+            if ((null != iter) && (null != iter.Previous)) {
+                iter = iter.Previous;
+                if (!iter.Value.isFlowBreak())
+                    iter = iter.Next;
             }
             opInsert(op, bl, iter);
         }

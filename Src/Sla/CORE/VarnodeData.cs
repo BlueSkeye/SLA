@@ -130,7 +130,7 @@ namespace Sla.CORE
                 size = 0
             };
             while (true) {
-                AttributeId attribId = decoder.getNextAttributeId();
+                uint attribId = decoder.getNextAttributeId();
                 if (0 == attribId) {
                     // Its possible to have no attributes in an <addr/> tag
                     return result;

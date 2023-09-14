@@ -59,11 +59,13 @@ namespace Sla.SLEIGH
         {
             if (ot.getOpcode() == OpCode.DELAY_SLOT) {
                 if (delayslot != 0)
-                    return false;       // Cannot have multiple delay slots
-                delayslot = ot.getIn(0).getOffset().getReal();
+                    // Cannot have multiple delay slots
+                    return false;
+                delayslot = (uint)ot.getIn(0).getOffset().getReal();
             }
             else if (ot.getOpcode() == OpCode.LABELBUILD)
-                numlabels += 1;     // Count labels
+                // Count labels
+                numlabels += 1;
             vec.Add(ot);
             return true;
         }
@@ -85,12 +87,11 @@ namespace Sla.SLEIGH
         { // Make sure there is a build statement for all subtable params
           // Return 0 upon success, 1 if there is a duplicate BUILD, 2 if there is a build for a non-subtable
             IEnumerator<OpTpl> iter;
-            OpTpl op;
             VarnodeTpl indvn;
 
             foreach (OpTpl op in vec) {
                 if (op.getOpcode() == OpCode.BUILD) {
-                    int index = op.getIn(0).getOffset().getReal();
+                    int index = (int)op.getIn(0).getOffset().getReal();
                     if (check[index] != 0)
                         return check[index];    // Duplicate BUILD statement or non-subtable
                     check[index] = 1;       // Mark to avoid future duplicate build
@@ -99,8 +100,9 @@ namespace Sla.SLEIGH
             for (int i = 0; i < check.size(); ++i) {
                 if (check[i] == 0) {
                     // Didn't see a BUILD statement
-                    op = new OpTpl(OpCode.BUILD);
-                    indvn = new VarnodeTpl(new ConstTpl(const_space), new ConstTpl(ConstTpl.const_type.real, (uint)i),
+                    OpTpl op = new OpTpl(OpCode.BUILD);
+                    indvn = new VarnodeTpl(new ConstTpl(const_space),
+                        new ConstTpl(ConstTpl.const_type.real, (uint)i),
                         new ConstTpl(ConstTpl.const_type.real, 4));
                     op.addInput(indvn);
                     vec.Insert(0, op);

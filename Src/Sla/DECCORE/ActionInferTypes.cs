@@ -80,9 +80,9 @@ namespace Sla.DECCORE
         /// \param data is the function being analyzed
         private static void buildLocaltypes(Funcdata data)
         {
-            Datatype ct;
+            Datatype? ct;
             Varnode vn;
-            TypeFactory typegrp = data.getArch().types;
+            TypeFactory typegrp = data.getArch().types ?? throw new ApplicationException();
             IEnumerator<Varnode> iter = data.beginLoc();
 
             while (iter.MoveNext()) {
@@ -95,7 +95,7 @@ namespace Sla.DECCORE
                     && !vn.isTypeLock()
                     && entry.getSymbol().isTypeLocked())
                 {
-                    int curOff = (vn.getAddr().getOffset() - entry.getAddr().getOffset()) + (uint)entry.getOffset();
+                    int curOff = (int)((vn.getAddr().getOffset() - entry.getAddr().getOffset()) + (uint)entry.getOffset());
                     ct = typegrp.getExactPiece(entry.getSymbol().getType(), curOff, vn.getSize());
                     if (ct == (Datatype)null || ct.getMetatype() == type_metatype.TYPE_UNKNOWN)    // If we can't resolve, or resolve to UNKNOWN
                         ct = vn.getLocalType(needsBlock);      // Let data-type float, even though parent symbol is type-locked
@@ -239,15 +239,14 @@ namespace Sla.DECCORE
             ct = ((TypePointer)ct).getPtrTo();
             if (ct.getMetatype() == type_metatype.TYPE_SPACEBASE) return;
             if (ct.getMetatype() == type_metatype.TYPE_UNKNOWN) return; // Don't bother propagating this
-            IEnumerator<Varnode> iter, enditer;
             ulong off = addr.getOffset();
             TypeFactory typegrp = data.getArch().types;
             Address endaddr = addr + ct.getSize();
-            if (endaddr.getOffset() < off) // If the address wrapped
-                enditer = data.endLoc(addr.getSpace()); // Go to end of space
-            else
-                enditer = data.endLoc(endaddr);
-            iter = data.beginLoc(addr);
+            IEnumerator<Varnode> enditer = (endaddr.getOffset() < off)
+                // If the address wrapped. Go to end of space
+                ? data.endLoc(addr.getSpace())
+                : data.endLoc(endaddr);
+            IEnumerator<Varnode> iter = data.beginLoc(addr);
             ulong lastoff = 0;
             int lastsize = ct.getSize();
             Datatype lastct = ct;

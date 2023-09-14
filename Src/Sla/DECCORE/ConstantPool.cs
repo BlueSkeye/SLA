@@ -35,7 +35,8 @@ namespace Sla.DECCORE
         /// \param tag is the type of record to create
         /// \param tok is the name associated with the object
         /// \param ct is the data-type associated with the object
-        public void putRecord(List<ulong> refs, uint tag, string tok, Datatype ct)
+        public void putRecord(List<ulong> refs, CPoolRecord.ConstantPoolTagTypes tag, string tok,
+            Datatype ct)
         {
             CPoolRecord newrec = createRecord(refs);
             newrec.tag = tag;

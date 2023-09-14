@@ -86,13 +86,13 @@ namespace Sla.SLEIGH
                 // The export is unstarred, but this doesn't mean the varnode
                 // being exported isn't dynamic
                 space.fillinSpace(hand, walker);
-                hand.size = size.fix(walker);
+                hand.size = (int?)size.fix(walker);
                 ptroffset.fillinOffset(hand, walker);
             }
             else
             {
                 hand.space = space.fixSpace(walker);
-                hand.size = size.fix(walker);
+                hand.size = (uint)size.fix(walker);
                 hand.offset_offset = ptroffset.fix(walker);
                 hand.offset_space = ptrspace.fixSpace(walker);
                 if (hand.offset_space.getType() == spacetype.IPTR_CONSTANT)
@@ -104,7 +104,7 @@ namespace Sla.SLEIGH
                 }
                 else
                 {
-                    hand.offset_size = ptrsize.fix(walker);
+                    hand.offset_size = (uint)ptrsize.fix(walker);
                     hand.temp_space = temp_space.fixSpace(walker);
                     hand.temp_offset = temp_offset.fix(walker);
                 }

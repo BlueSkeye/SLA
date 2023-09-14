@@ -112,7 +112,7 @@ namespace Sla.DECCORE
             supportsfarpointer = false;
             name = "segment";       // Default name, might be overridden by userop attribute
             while(true) {
-                AttributeId attribId = decoder.getNextAttributeId();
+                uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == AttributeId.ATTRIB_SPACE)
                     spc = decoder.readSpace();

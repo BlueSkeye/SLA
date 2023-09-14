@@ -21,7 +21,7 @@ namespace Sla.DECCORE
     internal class ActionNormalizeSetup : Action
     {
         public ActionNormalizeSetup(string g)
-            : base(rule_onceperfunc,"normalizesetup", g)
+            : base(ruleflags.rule_onceperfunc,"normalizesetup", g)
         {
         }
 

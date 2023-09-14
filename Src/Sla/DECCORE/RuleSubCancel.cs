@@ -52,7 +52,7 @@ namespace Sla.DECCORE
             opc = extop.code();
             if ((opc != OpCode.CPUI_INT_ZEXT) && (opc != OpCode.CPUI_INT_SEXT))
                 return 0;
-            offset = op.getIn(1).getOffset();
+            offset = (int)op.getIn(1).getOffset();
             outsize = op.getOut().getSize();
             insize = @base.getSize();
             farinsize = extop.getIn(0).getSize();

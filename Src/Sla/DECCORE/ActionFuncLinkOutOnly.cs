@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
+﻿
 namespace Sla.DECCORE
 {
     /// \brief Prepare for data-flow analysis of function parameters, when recovery isn't required.
@@ -18,7 +12,7 @@ namespace Sla.DECCORE
     internal class ActionFuncLinkOutOnly : Action
     {
         public ActionFuncLinkOutOnly(string g)
-            : base(rule_onceperfunc,"funclink_outonly", g)
+            : base(ruleflags.rule_onceperfunc,"funclink_outonly", g)
         {
         }
 
@@ -31,7 +25,7 @@ namespace Sla.DECCORE
         {
             int size = data.numCalls();
             for (int i = 0; i < size; ++i)
-                ActionFuncLink::funcLinkOutput(data.getCallSpecs(i), data);
+                ActionFuncLink.funcLinkOutput(data.getCallSpecs(i), data);
             return 0;
         }
     }

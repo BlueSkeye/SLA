@@ -22,7 +22,7 @@ namespace Sla.DECCORE
             arraysize = -1;
             decoder.rewindAttributes();
             while(true) {
-                AttributeId attrib = decoder.getNextAttributeId();
+                uint attrib = decoder.getNextAttributeId();
                 if (attrib == 0) break;
                 if (attrib == AttributeId.ATTRIB_ARRAYSIZE) {
                     arraysize = (int)decoder.readSignedInteger();

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -28,12 +24,12 @@ namespace Sla.DECCORE
         ///
         /// \param val is the option string
         /// \return the corresponding configuration bit
-        public static uint getOptionBit(string val)
+        public static Options getOptionBit(string val)
         {
-            if (val.size() == 0) return 0;
-            if (val == "struct") return option_struct;
-            if (val == "array") return option_array;
-            if (val == "pointer") return option_pointer;
+            if (val.Length == 0) return 0;
+            if (val == "struct") return Options.option_struct;
+            if (val == "array") return Options.option_array;
+            if (val == "pointer") return Options.option_pointer;
             throw new LowlevelError("Unknown data-type split option: " + val);
         }
 

@@ -858,7 +858,7 @@ namespace Sla.DECCORE
             bool autokilledbycall = false;
             uint elemId = decoder.openElement();
             for (; ; ) {
-                AttributeId attribId = decoder.getNextAttributeId();
+                uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == AttributeId.ATTRIB_POINTERMAX) {
                     pointermax = (int)decoder.readSignedInteger();
