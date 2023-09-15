@@ -20,8 +20,9 @@ namespace Sla.EXTRA
             if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("No image loaded");
 
-            string basename;
-            Scope? funcscope = dcp.conf.symboltab.resolveScopeFromSymbolName(funcname, "::", basename, (Scope)null);
+            string? basename;
+            Scope? funcscope = dcp.conf.symboltab.resolveScopeFromSymbolName(funcname, "::",
+                out basename, (Scope)null);
             if (funcscope == (Scope)null)
                 throw new IfaceExecutionError("Bad namespace: " + funcname);
             dcp.fd = funcscope.queryFunction(basename); // Is function already in database

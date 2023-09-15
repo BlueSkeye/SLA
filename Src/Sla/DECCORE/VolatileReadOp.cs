@@ -16,7 +16,7 @@ namespace Sla.DECCORE
         public VolatileReadOp(Architecture g, string nm,int ind,bool functional)
             : base(g, nm, ind)
         {
-            flags = functional ? 0 : no_operator;
+            flags = functional ? 0 : userop_flags.no_operator;
         }
 
         public override string getOperatorName(PcodeOp op)

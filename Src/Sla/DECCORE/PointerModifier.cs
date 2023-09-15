@@ -10,7 +10,7 @@ namespace Sla.DECCORE
             flags = fl;
         }
         
-        public override Modifier getType() => pointer_mod;
+        public override Modifier getType() => Modifier.pointer_mod;
 
         public override bool isValid() => true;
 

@@ -50,28 +50,29 @@ namespace Sla.DECCORE
         /// \param parentMap will hold the new index map
         private void internalIntersect(List<int> parentMap)
         {
-            List<Varnode> newVn;
+            List<Varnode> newVn = new List<Varnode>();
             int lastIntersect = -1;
-            for (int i = 0; i < commonVn.size(); ++i)
-            {
+            for (int i = 0; i < commonVn.size(); ++i) {
                 Varnode vn = commonVn[i];
-                if (vn.isMark())
-                {       // Look for previously marked varnode, so we know it is in both lists
+                if (vn.isMark()) {
+                    // Look for previously marked varnode, so we know it is in both lists
                     lastIntersect = newVn.size();
                     parentMap.Add(lastIntersect);
                     newVn.Add(vn);
                     vn.clearMark();
                 }
-                else
+                else {
                     parentMap.Add(-1);
+                }
             }
             commonVn = newVn;
             lastIntersect = -1;
-            for (int i = parentMap.size() - 1; i >= 0; --i)
-            {
+            for (int i = parentMap.size() - 1; i >= 0; --i) {
                 int val = parentMap[i];
-                if (val == -1)          // Fill in varnodes that are cut out of intersection
-                    parentMap[i] = lastIntersect;   // with next earliest varnode that is in intersection
+                if (val == -1)
+                    // Fill in varnodes that are cut out of intersection
+                    // with next earliest varnode that is in intersection
+                    parentMap[i] = lastIntersect;
                 else
                     lastIntersect = val;
             }
@@ -91,70 +92,71 @@ namespace Sla.DECCORE
         private int meldOps(List<PcodeOpNode> path,int cutOff, List<int> parentMap)
         {
             // First update opMeld.rootVn with new intersection information
-            for (int i = 0; i < opMeld.size(); ++i)
-            {
+            for (int i = 0; i < opMeld.size(); ++i) {
                 int pos = parentMap[opMeld[i].rootVn];
-                if (pos == -1)
-                {
-                    opMeld[i].op = (PcodeOp)null;     // Op split but did not rejoin
+                if (pos == -1) {
+                    // Op split but did not rejoin
+                    opMeld[i].op = (PcodeOp)null;
                 }
-                else
-                    opMeld[i].rootVn = pos;         // New index
+                else {
+                    // New index
+                    opMeld[i].rootVn = pos;
+                }
             }
 
             // Do a merge sort, keeping ops in execution order
-            List<RootedOp> newMeld;
+            List<RootedOp> newMeld = new List<RootedOp>();
             int curRoot = -1;
-            int meldPos = 0;               // Ops moved from old opMeld into newMeld
+            // Ops moved from old opMeld into newMeld
+            int meldPos = 0;
             BlockBasic lastBlock = (BlockBasic)null;
-            for (int i = 0; i < cutOff; ++i)
-            {
-                PcodeOp op = path[i].op;           // Current op in the new path
+            for (int i = 0; i < cutOff; ++i) {
+                // Current op in the new path
+                PcodeOp op = path[i].op;
                 PcodeOp curOp = (PcodeOp)null;
-                while (meldPos < opMeld.size())
-                {
-                    PcodeOp trialOp = opMeld[meldPos].op;  // Current op in the old opMeld
-                    if (trialOp == (PcodeOp)null)
-                    {
+                while (meldPos < opMeld.size()) {
+                    // Current op in the old opMeld
+                    PcodeOp trialOp = opMeld[meldPos].op;
+                    if (trialOp == (PcodeOp)null) {
                         meldPos += 1;
                         continue;
                     }
-                    if (trialOp.getParent() != op.getParent())
-                    {
-                        if (op.getParent() == lastBlock)
-                        {
-                            curOp = (PcodeOp)null;        // op comes AFTER trialOp
+                    if (trialOp.getParent() != op.getParent()) {
+                        if (op.getParent() == lastBlock) {
+                            // op comes AFTER trialOp
+                            curOp = (PcodeOp)null;
                             break;
                         }
-                        else if (trialOp.getParent() != lastBlock)
-                        {
+                        else if (trialOp.getParent() != lastBlock) {
                             // Both trialOp and op come from different blocks that are not the lastBlock
-                            int res = opMeld[meldPos].rootVn;      // Force truncatePath at (and above) this op
+                            // Force truncatePath at (and above) this op
+                            int res = opMeld[meldPos].rootVn;
 
                             // Found a new cut point
-                            opMeld = newMeld;               // Take what we've melded so far
-                            return res;                 // return the new cutpoint
+                            // Take what we've melded so far
+                            opMeld = newMeld;
+                            // return the new cutpoint
+                            return res;
                         }
                     }
-                    else if (trialOp.getSeqNum().getOrder() <= op.getSeqNum().getOrder())
-                    {
-                        curOp = trialOp;        // op is equal to or comes later than trialOp
+                    else if (trialOp.getSeqNum().getOrder() <= op.getSeqNum().getOrder()) {
+                        // op is equal to or comes later than trialOp
+                        curOp = trialOp;
                         break;
                     }
                     lastBlock = trialOp.getParent();
-                    newMeld.Add(opMeld[meldPos]); // Current old op moved into newMeld
-                    curRoot = opMeld[meldPos].rootVn;
-                    meldPos += 1;
-                }
-                if (curOp == op)
-                {
+                    // Current old op moved into newMeld
                     newMeld.Add(opMeld[meldPos]);
                     curRoot = opMeld[meldPos].rootVn;
                     meldPos += 1;
                 }
-                else
-                {
-                    newMeld.Add(RootedOp(op, curRoot));
+                if (curOp == op) {
+                    newMeld.Add(opMeld[meldPos]);
+                    curRoot = opMeld[meldPos].rootVn;
+                    meldPos += 1;
+                }
+                else {
+                    newMeld.Add(new RootedOp(op, curRoot));
                 }
                 lastBlock = op.getParent();
             }
@@ -240,31 +242,36 @@ namespace Sla.DECCORE
         /// \param path is the new path of PcodeOpNode edges to meld, in reverse execution order
         public void meld(List<PcodeOpNode> path)
         {
-            List<int> parentMap;
+            List<int> parentMap = new List<int>();
 
-            for (int i = 0; i < path.size(); ++i)
-            {
-                PcodeOpNode & node(path[i]);
-                node.op.getIn(node.slot).setMark();   // Mark varnodes in the new path, so its easy to see intersection
+            for (int i = 0; i < path.size(); ++i) {
+                PcodeOpNode node = path[i];
+                // Mark varnodes in the new path, so its easy to see intersection
+                node.op.getIn(node.slot).setMark();
             }
-            internalIntersect(parentMap);   // Calculate varnode intersection, and map from old intersection . new
+            // Calculate varnode intersection, and map from old intersection . new
+            internalIntersect(parentMap);
             int cutOff = -1;
 
             // Calculate where the cutoff point is in the new path
-            for (int i = 0; i < path.size(); ++i)
-            {
-                PcodeOpNode & node(path[i]);
+            for (int i = 0; i < path.size(); ++i) {
+                PcodeOpNode node = path[i];
                 Varnode vn = node.op.getIn(node.slot);
-                if (!vn.isMark())
-                {   // If mark already cleared, we know it is in intersection
-                    cutOff = i + 1;     // Cut-off must at least be past this -vn-
+                if (!vn.isMark()) {
+                    // If mark already cleared, we know it is in intersection
+                    // Cut-off must at least be past this -vn-
+                    cutOff = i + 1;
                 }
-                else
+                else {
                     vn.clearMark();
+                }
             }
-            int newCutoff = meldOps(path, cutOff, parentMap);  // Given cutoff point, meld in new ops
-            if (newCutoff >= 0)                 // If not all ops could be ordered
-                truncatePaths(newCutoff);               // Cut off at the point where we couldn't order
+            // Given cutoff point, meld in new ops
+            int newCutoff = meldOps(path, cutOff, parentMap);
+            if (newCutoff >= 0)
+                // If not all ops could be ordered
+                // Cut off at the point where we couldn't order
+                truncatePaths(newCutoff);
             path.resize(cutOff);
         }
 
@@ -276,19 +283,16 @@ namespace Sla.DECCORE
         public void markPaths(bool val, int startVarnode)
         {
             int startOp;
-            for (startOp = opMeld.size() - 1; startOp >= 0; --startOp)
-            {
+            for (startOp = opMeld.size() - 1; startOp >= 0; --startOp) {
                 if (opMeld[startOp].rootVn == startVarnode)
                     break;
             }
             if (startOp < 0) return;
-            if (val)
-            {
+            if (val) {
                 for (int i = 0; i <= startOp; ++i)
                     opMeld[i].op.setMark();
             }
-            else
-            {
+            else {
                 for (int i = 0; i <= startOp; ++i)
                     opMeld[i].op.clearMark();
             }
@@ -316,8 +320,7 @@ namespace Sla.DECCORE
         /// \return the earliest PcodeOp using the Varnode
         public PcodeOp getEarliestOp(int pos)
         {
-            for (int i = opMeld.size() - 1; i >= 0; --i)
-            {
+            for (int i = opMeld.size() - 1; i >= 0; --i) {
                 if (opMeld[i].rootVn == pos)
                     return opMeld[i].op;
             }

@@ -18,21 +18,26 @@ namespace Sla.EXTRA
         public override void execute(TextReader s)
         {
             Varnode vn = dcp.readVarnode(s);
-            if (!vn.isConstant())
+            if (!vn.isConstant()) {
                 throw new IfaceExecutionError("Can only force format on a constant");
+            }
             type_metatype mt = vn.getType().getMetatype();
-            if ((mt != type_metatype.TYPE_INT) && (mt != type_metatype.TYPE_UINT) && (mt != type_metatype.TYPE_UNKNOWN))
+            if (   (mt != type_metatype.TYPE_INT)
+                && (mt != type_metatype.TYPE_UINT)
+                && (mt != type_metatype.TYPE_UNKNOWN))
+            {
                 throw new IfaceExecutionError("Can only force format on integer type constant");
+            }
             dcp.fd.buildDynamicSymbol(vn);
-            Symbol* sym = vn.getHigh().getSymbol();
+            Symbol? sym = vn.getHigh().getSymbol();
             if (sym == (Symbol)null)
                 throw new IfaceExecutionError("Unable to create symbol");
-            string formatString;
-            s.ReadSpaces() >> formatString;
+            s.ReadSpaces();
+            string formatString = s.ReadString();
             uint format = Datatype.encodeIntegerFormat(formatString);
             sym.getScope().setDisplayFormat(sym, format);
             sym.getScope().setAttribute(sym, Varnode.varnode_flags.typelock);
-            *status.optr << "Successfully forced format display" << endl;
+            status.optr.WriteLine("Successfully forced format display");
         }
     }
 }

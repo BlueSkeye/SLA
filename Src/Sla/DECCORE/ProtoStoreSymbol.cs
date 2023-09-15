@@ -73,7 +73,7 @@ namespace Sla.DECCORE
             ParameterSymbol res = getSymbolBacked(i);
             res.sym = scope.getCategorySymbol(Symbol.SymbolCategory.function_parameter, i);
             SymbolEntry entry;
-            Address usepoint;
+            Address usepoint = new Address();
 
             bool isindirect = (pieces.flags & ParameterPieces.Flags.indirectstorage) != 0;
             bool ishidden = (pieces.flags & ParameterPieces.Flags.hiddenretparm) != 0;

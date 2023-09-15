@@ -39,16 +39,15 @@ namespace Sla.EXTRA
             TraverseCountState traverse = (TraverseCountState)state.getTraverse(uniqid);
             if (!traverse.step()) return false;
             ulong ourconst = expr.getConstant(state);
-            if (istrue)
-                return (ourconst != 0);
-            return (ourconst == 0);
+            return (istrue) ? (ourconst != 0) : (ourconst == 0);
         }
 
         public virtual void buildTraverseState(UnifyState state)
         {
             // Build the default boolean traversal state
-            if (uniqid != state.numTraverse())
+            if (uniqid != state.numTraverse()) {
                 throw new LowlevelError("Traverse id does not match index");
+            }
             TraverseConstraint newt = new TraverseCountState(uniqid);
             state.registerTraverseConstraint(newt);
         }

@@ -15,9 +15,8 @@ namespace Sla.EXTRA
         {
             if (dcp.testCollection == (FunctionTestCollection)null)
                 throw new IfaceExecutionError("No test file is loaded");
-            for (int i = 0; i < dcp.testCollection.numCommands(); ++i)
-            {
-                *status.optr << ' ' << dec << i + 1 << ": " << dcp.testCollection.getCommand(i) << endl;
+            for (int i = 0; i < dcp.testCollection.numCommands(); ++i) {
+                status.optr.WriteLine($" {i + 1}: {dcp.testCollection.getCommand(i)}");
             }
         }
     }

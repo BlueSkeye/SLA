@@ -76,16 +76,18 @@ namespace Sla.DECCORE
         public bool subset(int lsbOffset, int size)
         {
             if (lsbOffset == 0 && size == wholeSize)
-                return true;            // subrange is the whole range
+                // subrange is the whole range
+                return true;
             int firstLane = getBoundary(lsbOffset);
-            if (firstLane < 0) return false;
+            if (firstLane < 0)
+                return false;
             int lastLane = getBoundary(lsbOffset + size);
-            if (lastLane < 0) return false;
-            List<int> newLaneSize;
-            lanePosition.clear();
+            if (lastLane < 0)
+                return false;
+            List<int> newLaneSize = new List<int>();
+            lanePosition.Clear();
             int newPosition = 0;
-            for (int i = firstLane; i < lastLane; ++i)
-            {
+            for (int i = firstLane; i < lastLane; ++i) {
                 int sz = laneSize[i];
                 lanePosition.Add(newPosition);
                 newLaneSize.Add(sz);
@@ -175,12 +177,15 @@ namespace Sla.DECCORE
         /// \param resSkipLanes will hold the starting lane in the extension
         /// \return \b true if the extension is natural
         public bool extension(int numLanes, int skipLanes, int bytePos, int size,
-            int resNumLanes, int resSkipLanes)
+            out int resNumLanes, out int resSkipLanes)
         {
+            resNumLanes = 0;
             resSkipLanes = getBoundary(lanePosition[skipLanes] - bytePos);
-            if (resSkipLanes < 0) return false;
+            if (resSkipLanes < 0)
+                return false;
             int finalIndex = getBoundary(lanePosition[skipLanes] - bytePos + size);
-            if (finalIndex < 0) return false;
+            if (finalIndex < 0)
+                return false;
             resNumLanes = finalIndex - resSkipLanes;
             return (resNumLanes != 0);
         }

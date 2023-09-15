@@ -42,23 +42,29 @@ namespace Sla.DECCORE
         /// \return the associated space or NULL
         private static AddrSpace? vnSpacebase(Architecture glb, Varnode vn, out ulong val, AddrSpace spc)
         {
-            Varnode vn1, vn2;
             AddrSpace? retspace = correctSpacebase(glb, vn, spc);
             if (retspace != (AddrSpace)null) {
                 val = 0;
                 return retspace;
             }
-            if (!vn.isWritten()) return (AddrSpace)null;
+            if (!vn.isWritten()) {
+                val = 0;
+                return (AddrSpace)null;
+            }
             PcodeOp op = vn.getDef() ?? throw new BugException();
-            if (op.code() != OpCode.CPUI_INT_ADD) return (AddrSpace)null;
-            vn1 = op.getIn(0);
-            vn2 = op.getIn(1);
+            if (op.code() != OpCode.CPUI_INT_ADD) {
+                val = 0;
+                return (AddrSpace)null;
+            }
+            Varnode vn1 = op.getIn(0);
+            Varnode vn2 = op.getIn(1);
             retspace = correctSpacebase(glb, vn1, spc);
             if (retspace != (AddrSpace)null) {
                 if (vn2.isConstant()) {
                     val = vn2.getOffset();
                     return retspace;
                 }
+                val = 0;
                 return (AddrSpace)null;
             }
             retspace = correctSpacebase(glb, vn2, spc);
@@ -68,6 +74,7 @@ namespace Sla.DECCORE
                     return retspace;
                 }
             }
+            val = 0;
             return (AddrSpace)null;
         }
 
@@ -94,8 +101,10 @@ namespace Sla.DECCORE
                 // base is also constant, we let RuleSegmentOp reduce
                 // the whole segmentop to a constant.  If the base
                 // is not constant, we are not ready for a fixed address.
-                if (offvn.isConstant())
+                if (offvn.isConstant()) {
+                    offoff = 0;
                     return (AddrSpace)null;
+                }
             }
             else if (offvn.isConstant()) {
                 // Check for constant

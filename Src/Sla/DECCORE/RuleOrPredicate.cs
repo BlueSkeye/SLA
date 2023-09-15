@@ -276,8 +276,8 @@ namespace Sla.DECCORE
 
         public override int applyOp(PcodeOp op, Funcdata data)
         {
-            MultiPredicate branch0;
-            MultiPredicate branch1;
+            MultiPredicate branch0 = new MultiPredicate();
+            MultiPredicate branch1 = new MultiPredicate();
             bool test0 = branch0.discoverZeroSlot(op.getIn(0));
             bool test1 = branch1.discoverZeroSlot(op.getIn(1));
             if ((test0 == false) && (test1 == false)) {
@@ -305,7 +305,7 @@ namespace Sla.DECCORE
             }
             else {
                 // Make sure cbranches have shared condition and the different zero sets have complementary paths
-                ConditionMarker condmarker;
+                ConditionMarker condmarker = new ConditionMarker();
                 if (!condmarker.verifyCondition(branch0.cbranch, branch1.cbranch)) {
                     return 0;
                 }

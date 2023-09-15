@@ -137,21 +137,25 @@ namespace Sla.DECCORE
                     label.Add((uint)i);
             }
             else {
-                ExecutablePcode pcodeScript = (ExecutablePcode)fd.getArch().pcodeinjectlib.getPayload(userop.getIndex2Case());
-                List<ulong> inputs;
-                int numInputs = assistOp.numInput() - 1;  // How many remaining varnodes after useropid
+                ExecutablePcode pcodeScript =
+                    (ExecutablePcode)fd.getArch().pcodeinjectlib.getPayload(userop.getIndex2Case());
+                List<ulong> inputs = new List<ulong>();
+                // How many remaining varnodes after useropid
+                int numInputs = assistOp.numInput() - 1;
                 if (numInputs != pcodeScript.sizeInput())
-                    throw new LowlevelError(userop.getName() + ": <case_pcode> has wrong number of parameters");
+                    throw new LowlevelError(
+                        $"{userop.getName()}: <case_pcode> has wrong number of parameters");
                 for (int i = 0; i < numInputs; ++i)
                     inputs.Add(assistOp.getIn(i + 1).getOffset());
 
                 for (int index = 0; index < sizeIndices; ++index) {
-                    inputs[0] = index;
+                    inputs[0] = (ulong)index;
                     ulong output = pcodeScript.evaluate(inputs);
                     label.Add(output);
                 }
             }
-            label.Add(0xBAD1ABE1);        // Add fake label to match the defaultAddress
+            // Add fake label to match the defaultAddress
+            label.Add(0xBAD1ABE1);
         }
 
         public override Varnode foldInNormalization(Funcdata fd, PcodeOp indop)

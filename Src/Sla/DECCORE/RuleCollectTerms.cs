@@ -20,7 +20,7 @@ namespace Sla.DECCORE
         /// \param vn is the given Varnode
         /// \param coef is the reference for passing back the coefficient
         /// \return the underlying Varnode of the term
-        private static Varnode getMultCoeff(Varnode vn, ulong coef)
+        private static Varnode getMultCoeff(Varnode vn, out ulong coef)
         {
             PcodeOp testop;
             if (!vn.isWritten()) {
@@ -72,9 +72,10 @@ namespace Sla.DECCORE
                 for (i = 1; i < order.size(); ++i) {
                     vn1 = order[i - 1].getVarnode();
                     vn2 = order[i].getVarnode();
-                    if (vn2.isConstant()) break;
-                    vn1 = getMultCoeff(vn1, coef1);
-                    vn2 = getMultCoeff(vn2, coef2);
+                    if (vn2.isConstant())
+                        break;
+                    vn1 = getMultCoeff(vn1, out coef1);
+                    vn2 = getMultCoeff(vn2, out coef2);
                     if (vn1 == vn2) {
                         // Terms that can be combined
                         if (order[i - 1].getMultiplier() != (PcodeOp)null)

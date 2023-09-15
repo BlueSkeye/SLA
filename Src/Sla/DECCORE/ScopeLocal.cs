@@ -446,21 +446,23 @@ namespace Sla.DECCORE
                     Globals.sign_extend(ref start, addr.getAddrSize() * 8 - 1);
                     if (stackGrowsNegative)
                         start = -start;
-                    TextWriter s;
+                    TextWriter s = new StringWriter();
                     if (ct != (Datatype)null)
                         ct.printNameBase(s);
                     string spacename =  addr.getSpace().getName();
                     spacename = spacename.Capitalize();
                     s.Write(spacename);
                     if (start <= 0) {
-                        s.Write('X');       // Indicate local stack space allocated by caller
+                        // Indicate local stack space allocated by caller
+                        s.Write('X');
                         start = -start;
                     }
                     else {
                         if ((minParamOffset < maxParamOffset) &&
                             (stackGrowsNegative ? (addr.getOffset() < minParamOffset) : (addr.getOffset() > maxParamOffset)))
                         {
-                            s.Write('Y');       // Indicate unusual region of stack
+                            // Indicate unusual region of stack
+                            s.Write('Y');
                         }
                     }
                     s.Write($"_{start:X}");

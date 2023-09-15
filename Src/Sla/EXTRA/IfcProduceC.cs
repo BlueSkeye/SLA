@@ -18,9 +18,8 @@ namespace Sla.EXTRA
         /// performed and output is appended to the file.
         public override void execute(TextReader s)
         {
-            string name;
-
-            s.ReadSpaces() >> name;
+            s.ReadSpaces();
+            string name = s.ReadString();
             if (name.Length == 0)
                 throw new IfaceParseError("Need file name to write to");
 

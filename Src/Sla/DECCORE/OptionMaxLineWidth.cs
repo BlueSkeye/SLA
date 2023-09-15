@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.EXTRA;
 
 namespace Sla.DECCORE
 {
@@ -20,12 +16,11 @@ namespace Sla.DECCORE
         /// number of characters to emit in a single line before wrapping.
         public override string apply(Architecture glb, string p1, string p2, string p3)
         {
-            istringstream s = new istringstream(p1);
-            s.unsetf(ios::dec | ios::hex | ios::oct);
+            TextReader s = new StringReader(p1);
+            // s.unsetf(ios::dec | ios::hex | ios::oct);
             int val = -1;
-            s >> val;
-            if (val == -1)
-                throw ParseError("Must specify integer linewidth");
+            if (!int.TryParse(s.ReadString(), out val))
+                throw new ParseError("Must specify integer linewidth");
             glb.print.setMaxLineSize(val);
             return "Maximum line width set to " + p1;
         }

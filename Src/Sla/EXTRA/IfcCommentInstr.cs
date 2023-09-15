@@ -29,11 +29,10 @@ namespace Sla.EXTRA
             Address addr = Grammar.parse_machaddr(s, out size, dcp.conf.types);
             s.ReadSpaces();
             string comment = string.Empty;
-            char tok;
-            s.get(tok);
+            char? tok = s.ReadCharacter();
             while (!s.EofReached()) {
                 comment += tok;
-                s.get(tok);
+                tok = s.ReadCharacter();
             }
             Comment.comment_type type = dcp.conf.print.getInstructionComment();
             dcp.conf.commentdb.addComment(type, dcp.fd.getAddress(), addr, comment);

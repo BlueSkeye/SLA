@@ -177,6 +177,7 @@ namespace Sla.DECCORE
         private ReplaceVarnode? setReplacement(Varnode vn, ulong mask, out bool inworklist)
         {
             ReplaceVarnode res = new ReplaceVarnode();
+            inworklist = false;
             if (vn.isMark()) {
                 // Already seen before
                 ReplaceVarnode replacer;

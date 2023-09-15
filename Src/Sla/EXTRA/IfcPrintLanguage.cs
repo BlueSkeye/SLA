@@ -22,8 +22,7 @@ namespace Sla.EXTRA
             s.ReadSpaces();
             if (s.EofReached())
                 throw new IfaceParseError("No print language specified");
-            string langroot;
-            s >> langroot;
+            string langroot = s.ReadString();
             langroot = langroot + "-language";
 
             string curlangname = dcp.conf.print.getName();

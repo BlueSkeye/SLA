@@ -28,7 +28,7 @@ namespace Sla.EXTRA
             while (iter.MoveNext()) {
                 count += 1;
             }
-            *status.optr << "Count - pcode = " << dec << count << endl;
+            status.optr.WriteLine($"Count - pcode = {count}");
         }
     }
 }

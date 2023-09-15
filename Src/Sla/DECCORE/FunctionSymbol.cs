@@ -1,9 +1,5 @@
 ﻿using Sla.CORE;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Formats.Asn1.AsnWriter;
+using Sla.EXTRA;
 
 namespace Sla.DECCORE
 {
@@ -19,8 +15,8 @@ namespace Sla.DECCORE
         
         ~FunctionSymbol()
         {
-            if (fd != (Funcdata)null)
-                delete fd;
+            //if (fd != (Funcdata)null)
+            //    delete fd;
         }
 
 

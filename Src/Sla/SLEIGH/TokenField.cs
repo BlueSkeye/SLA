@@ -1,11 +1,4 @@
 ﻿using Sla.CORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.SLEIGH
 {
@@ -48,7 +41,7 @@ namespace Sla.SLEIGH
         public override long getValue(ParserWalker walker)
         {
             // Construct value given specific instruction stream
-            long res = getInstructionBytes(walker, bytestart, byteend, bigendian);
+            long res = Globals.getInstructionBytes(walker, bytestart, byteend, bigendian);
 
             res >>= shift;
             if (signbit)

@@ -43,11 +43,11 @@ namespace Sla.DECCORE
 
             while (iter.MoveNext()) {
                 Sla.CORE.Range rng = iter.Current;
-                Tuple<ScopeResolve.PartIterator, ScopeResolve.PartIterator> res;
-                res = resolvemap.find(rng.getFirstAddr());
-                while (res.first != res.second) {
-                    if ((*res.first).scope == scope) {
-                        resolvemap.erase(res.first);
+                Tuple<ScopeResolve.PartIterator, ScopeResolve.PartIterator> res =
+                    resolvemap.find(rng.getFirstAddr());
+                while (res.Item1 != res.Item2) {
+                    if (res.Item1.Current.scope == scope) {
+                        resolvemap.erase(res.Item1);
                         break;
                     }
                 }
@@ -267,7 +267,7 @@ namespace Sla.DECCORE
         /// \param basename will hold the passed back base Symbol name
         /// \param start is the Scope to start drilling down from, or NULL for the global scope
         /// \return the Scope being referred to by the name
-        public Scope? resolveScopeFromSymbolName(string fullname, string delim, out string basename,
+        public Scope? resolveScopeFromSymbolName(string fullname, string delim, out string? basename,
             Scope? start)
         {
             if (start == (Scope)null)
@@ -280,14 +280,15 @@ namespace Sla.DECCORE
                 if (-1 == endmark) break;
                 if (endmark == 0) {
                     // Path is "absolute"
-                    start = globalscope;    // Start from the global scope
+                    // Start from the global scope
+                    start = globalscope;
                 }
                 else {
                     string scopename = fullname.Substring(mark, endmark - mark);
                     start = start.resolveScope(scopename, idByNameHash);
                     if (start == (Scope)null) {
                         // Was the scope name bad
-                        basename = string.Empty;
+                        basename = null;
                         return (Scope)null;
                     }
                 }
@@ -368,8 +369,8 @@ namespace Sla.DECCORE
                 return qpoint;
             Tuple<ScopeResolve.PartIterator, ScopeResolve.PartIterator> res;
             res = resolvemap.find(addr);
-            if (res.first != res.second)
-                return (*res.first).getScope();
+            if (res.Item1 != res.Item2)
+                return res.Item1.Current.getScope();
             return qpoint;
         }
 

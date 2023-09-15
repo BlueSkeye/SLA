@@ -20,7 +20,7 @@ namespace Sla.EXTRA
 
             ParamIDAnalysis pidanalysis = new ParamIDAnalysis(dcp.fd, false);
             pidanalysis.savePretty(status.fileoptr, true);
-            status.fileoptr << "\n";
+            status.fileoptr.Write("\n");
         }
     }
 }

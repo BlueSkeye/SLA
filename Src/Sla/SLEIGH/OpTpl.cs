@@ -75,26 +75,31 @@ namespace Sla.SLEIGH
         {
             // Remove the indicated input
             // delete input[index];
-            for (int i = index; i < input.size() - 1; ++i)
+            for (int i = index; i < input.size() - 1; ++i) {
                 input[i] = input[i + 1];
+            }
             input.RemoveLastItem();
         }
 
         public void changeHandleIndex(List<int> handmap)
         {
-            if (output != (VarnodeTpl)null)
+            if (output != (VarnodeTpl)null) {
                 output.changeHandleIndex(handmap);
-            foreach (VarnodeTpl template in input)
+            }
+            foreach (VarnodeTpl template in input) {
                 template.changeHandleIndex(handmap);
+            }
         }
 
         public void saveXml(TextWriter s)
         {
             s.Write($"<op_tpl code=\"{Globals.get_opname(opc)}\">");
-            if (output == (VarnodeTpl)null)
+            if (output == (VarnodeTpl)null) {
                 s.WriteLine("<null/>");
-            else
+            }
+            else {
                 output.saveXml(s);
+            }
             for (int i = 0; i < input.size(); ++i)
                 input[i].saveXml(s);
             s.WriteLine("</op_tpl>");
@@ -105,8 +110,9 @@ namespace Sla.SLEIGH
             opc = get_opcode(el.getAttributeValue("code"));
             IEnumerator<Element> iter = el.getChildren().GetEnumerator();
             if (!iter.MoveNext()) throw new ApplicationException();
-            if (iter.Current.getName() == "null")
+            if (iter.Current.getName() == "null") {
                 output = (VarnodeTpl)null;
+            }
             else {
                 output = new VarnodeTpl();
                 output.restoreXml(iter.Current, manage);

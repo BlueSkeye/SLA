@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Sla.DECCORE
 {
     /// \brief Node for a forward traversal of a Varnode expression
@@ -44,17 +39,23 @@ namespace Sla.DECCORE
         /// \return \b true if the alternate path is preferred
         internal static bool isAlternatePathValid(Varnode vn, Flags flags)
         {
-            if ((flags & (indirect | indirectalt)) == indirect)
+            if ((flags & (Flags.indirect | Flags.indirectalt)) == Flags.indirect)
                 // If main path traversed an INDIRECT but the alternate did not
-                return true;    // Main path traversed INDIRECT, alternate did not
-            if ((flags & (indirect | indirectalt)) == indirectalt)
-                return false;   // Alternate path traversed INDIRECT, main did not
-            if ((flags & actionalt) != 0)
-                return true;    // Alternate path traversed a dedicated COPY
-            if (vn.loneDescend() == (PcodeOp)null) return false;
+                // Main path traversed INDIRECT, alternate did not
+                return true;
+            if ((flags & (Flags.indirect | Flags.indirectalt)) == Flags.indirectalt)
+                // Alternate path traversed INDIRECT, main did not
+                return false;
+            if ((flags & Flags.actionalt) != 0)
+                // Alternate path traversed a dedicated COPY
+                return true;
+            if (vn.loneDescend() == (PcodeOp)null)
+                return false;
             PcodeOp op = vn.getDef();
-            if (op == (PcodeOp)null) return true;
-            return !op.isMarker(); // MULTIEQUAL or INDIRECT indicates multiple values
+            if (op == (PcodeOp)null)
+                return true;
+            // MULTIEQUAL or INDIRECT indicates multiple values
+            return !op.isMarker();
         }
     }
 }

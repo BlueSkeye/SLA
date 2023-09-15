@@ -70,7 +70,7 @@ namespace Sla.DECCORE
                     return 0;
             }
 
-            ulong newc;
+            ulong newc = 0;
             if (n < 64 || (extvn.getSize() <= 8)) {
                 ulong pow = 1;
                 // Calculate 2^n

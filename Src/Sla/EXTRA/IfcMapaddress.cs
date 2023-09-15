@@ -22,16 +22,18 @@ namespace Sla.EXTRA
         /// Otherwise the symbol is created relative to the global scope.
         public override void execute(TextReader s)
         {
-            Datatype ct;
             string name;
             int size;
-            Address addr = Grammar.parse_machaddr(s, out size, dcp.conf.types); // Read required address;
+            // Read required address;
+            Address addr = Grammar.parse_machaddr(s, out size, dcp.conf.types);
 
             s.ReadSpaces();
-            ct = parse_type(s, name, dcp.conf); // Parse the required type
+            // Parse the required type
+            Datatype ct = Grammar.parse_type(s, out name, dcp.conf);
             if (dcp.fd != (Funcdata)null) {
                 Symbol sym = dcp.fd.getScopeLocal().addSymbol(name, ct, addr, new Address()).getSymbol();
-                sym.getScope().setAttribute(sym, Varnode.varnode_flags.namelock | Varnode.varnode_flags.typelock);
+                sym.getScope().setAttribute(sym,
+                    Varnode.varnode_flags.namelock | Varnode.varnode_flags.typelock);
             }
             else {
                 Symbol sym;
@@ -39,7 +41,8 @@ namespace Sla.EXTRA
                     Varnode.varnode_flags.namelock | Varnode.varnode_flags.typelock;
                 flags |= dcp.conf.symboltab.getProperty(addr); // Inherit existing properties
                 string basename;
-                Scope scope = dcp.conf.symboltab.findCreateScopeFromSymbolName(name, "::", basename, (Scope)null);
+                Scope scope = dcp.conf.symboltab.findCreateScopeFromSymbolName(name, "::",
+                    out basename, (Scope)null);
                 sym = scope.addSymbol(basename, ct, addr, new Address()).getSymbol();
                 sym.getScope().setAttribute(sym, flags);
                 if (scope.getParent() != (Scope)null) {

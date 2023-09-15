@@ -33,7 +33,7 @@ namespace Sla.DECCORE
         public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode orvn;
-            Varnode othervn;
+            Varnode? othervn = null;
             Varnode newvn1;
             Varnode newvn2;
             PcodeOp? orop = (PcodeOp)null;
@@ -46,32 +46,50 @@ namespace Sla.DECCORE
             fullmask = Globals.calc_mask((uint)size);
             for (i = 0; i < 2; ++i) {
                 othervn = op.getIn(1 - i);
-                if (!othervn.isHeritageKnown()) continue;
+                if (!othervn.isHeritageKnown())
+                    continue;
                 orvn = op.getIn(i);
                 orop = orvn.getDef();
-                if (orop == (PcodeOp)null) continue;
-                if (orop.code() != OpCode.CPUI_INT_OR) continue;
-                if (!orop.getIn(0).isHeritageKnown()) continue;
-                if (!orop.getIn(1).isHeritageKnown()) continue;
+                if (orop == (PcodeOp)null)
+                    continue;
+                if (orop.code() != OpCode.CPUI_INT_OR)
+                    continue;
+                if (!orop.getIn(0).isHeritageKnown())
+                    continue;
+                if (!orop.getIn(1).isHeritageKnown())
+                    continue;
                 othermask = othervn.getNZMask();
-                if (othermask == 0) continue; // This case picked up by andmask
-                if (othermask == fullmask) continue; // Nothing useful from distributing
+                if (othermask == 0)
+                    // This case picked up by andmask
+                    continue;
+                if (othermask == fullmask)
+                    // Nothing useful from distributing
+                    continue;
                 ormask1 = orop.getIn(0).getNZMask();
-                if ((ormask1 & othermask) == 0) break; // AND would cancel if distributed
+                if ((ormask1 & othermask) == 0)
+                    // AND would cancel if distributed
+                    break;
                 ormask2 = orop.getIn(1).getNZMask();
-                if ((ormask2 & othermask) == 0) break; // AND would cancel if distributed
+                if ((ormask2 & othermask) == 0)
+                    // AND would cancel if distributed
+                    break;
                 if (othervn.isConstant()) {
-                    if ((ormask1 & othermask) == ormask1) break; // AND is trivial if distributed
-                    if ((ormask2 & othermask) == ormask2) break;
+                    if ((ormask1 & othermask) == ormask1)
+                        // AND is trivial if distributed
+                        break;
+                    if ((ormask2 & othermask) == ormask2)
+                        break;
                 }
             }
             if (i == 2) return 0;
             // Do distribution
-            newop1 = data.newOp(2, op.getAddr()); // Distribute AND
+            // Distribute AND
+            newop1 = data.newOp(2, op.getAddr());
             newvn1 = data.newUniqueOut(size, newop1);
             data.opSetOpcode(newop1, OpCode.CPUI_INT_AND);
-            data.opSetInput(newop1, orop.getIn(0), 0); // To first input of original OR
-            data.opSetInput(newop1, othervn, 1);
+            // To first input of original OR
+            data.opSetInput(newop1, orop.getIn(0), 0);
+            data.opSetInput(newop1, othervn ?? throw new ApplicationException(), 1);
             data.opInsertBefore(newop1, op);
 
             newop2 = data.newOp(2, op.getAddr()); // Distribute AND

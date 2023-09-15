@@ -819,14 +819,15 @@ namespace Sla.DECCORE
             return false;
         }
 
-        public override OpCode assumedExtension(Address addr, int size, out VarnodeData res)
+        public override OpCode assumedExtension(Address addr, int size, VarnodeData res)
         {
             IEnumerator<ParamEntry> iter = entry.GetEnumerator();
             while (iter.MoveNext()) {
                 if (iter.Current.getMinSize() > size) continue;
                 OpCode ext = iter.Current.assumedExtension(addr, size, res);
-                if (ext != OpCode.CPUI_COPY)
+                if (ext != OpCode.CPUI_COPY) {
                     return ext;
+                }
             }
             return OpCode.CPUI_COPY;
         }

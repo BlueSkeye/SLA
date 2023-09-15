@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -25,33 +20,35 @@ namespace Sla.DECCORE
         /// \brief Collapse constant expressions
         public override int applyOp(PcodeOp op, Funcdata data)
         {
-            int i;
-            Varnode vn;
-
-            if (!op.isCollapsible()) return 0; // Expression must be collapsible
-
-            Address newval;
-            bool markedInput = false;
-            try
-            {
-                newval = data.getArch().getConstant(op.collapse(markedInput));
-            }
-            catch (LowlevelError err)
-            {
-                data.opMarkNoCollapse(op); // Dont know how or dont want to collapse further
+            if (!op.isCollapsible()) {
+                // Expression must be collapsible
                 return 0;
             }
 
-            vn = data.newVarnode(op.getOut().getSize(), newval); // Create new collapsed constant
-            if (markedInput)
-            {
+            Address newval;
+            bool markedInput = false;
+            try {
+                newval = data.getArch().getConstant(op.collapse(markedInput));
+            }
+            catch (LowlevelError) {
+                // Dont know how or dont want to collapse further
+                data.opMarkNoCollapse(op);
+                return 0;
+            }
+
+            // Create new collapsed constant
+            Varnode vn = data.newVarnode(op.getOut().getSize(), newval);
+            if (markedInput) {
                 op.collapseConstantSymbol(vn);
             }
-            for (i = op.numInput() - 1; i > 0; --i)
-                data.opRemoveInput(op, i);  // unlink old constants
-            data.opSetInput(op, vn, 0); // Link in new collapsed constant
-            data.opSetOpcode(op, OpCode.CPUI_COPY); // Change ourselves to a copy
-
+            for (int i = op.numInput() - 1; i > 0; --i) {
+                // unlink old constants
+                data.opRemoveInput(op, i);
+            }
+            // Link in new collapsed constant
+            data.opSetInput(op, vn, 0);
+            // Change ourselves to a copy
+            data.opSetOpcode(op, OpCode.CPUI_COPY);
             return 1;
         }
     }

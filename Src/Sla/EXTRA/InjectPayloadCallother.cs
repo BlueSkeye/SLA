@@ -15,7 +15,7 @@ namespace Sla.EXTRA
             uint elemId = decoder.openElement(ElementId.ELEM_CALLOTHERFIXUP);
             name = decoder.readString(AttributeId.ATTRIB_TARGETOP);
             uint subId = decoder.openElement();
-            if (subId != ELEM_PCODE)
+            if (subId != ElementId.ELEM_PCODE)
                 throw new CORE.LowlevelError("<callotherfixup> does not contain a <pcode> tag");
             decodePayloadAttributes(decoder);
             decodePayloadParams(decoder);

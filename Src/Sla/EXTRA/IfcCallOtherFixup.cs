@@ -22,12 +22,12 @@ namespace Sla.EXTRA
         public override void execute(TextReader s)
         {
             string useropname, outname, pcodestring;
-            List<string> inname;
+            List<string> inname = new List<string>();
 
-            IfcCallFixup::readPcodeSnippet(s, useropname, outname, inname, pcodestring);
+            IfcCallFixup.readPcodeSnippet(s, out useropname, out outname, inname, out pcodestring);
             dcp.conf.userops.manualCallOtherFixup(useropname, outname, inname, pcodestring, dcp.conf);
 
-            *status.optr << "Successfully registered callotherfixup" << endl;
+            status.optr.WriteLine("Successfully registered callotherfixup");
         }
     }
 }

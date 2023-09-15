@@ -45,8 +45,8 @@ namespace Sla.EXTRA
             if (addr2 <= addr1)
                 throw new IfaceParseError("Bad address range");
 
-            TrackedSet & track(dcp.conf.context.createSet(addr1, addr2));
-            TrackedSet & def(dcp.conf.context.getTrackedDefault());
+            TrackedSet track = dcp.conf.context.createSet(addr1, addr2);
+            TrackedSet def = dcp.conf.context.getTrackedDefault();
             track = def;            // Start with default as base
             track.Add(TrackedContext());
             track.GetLastItem().loc = dcp.conf.translate.getRegister(name);

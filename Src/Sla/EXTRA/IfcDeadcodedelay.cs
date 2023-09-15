@@ -14,13 +14,11 @@ namespace Sla.EXTRA
         /// that function, otherwise the delay is set globally for all functions.
         public override void execute(TextReader s)
         {
-            string name;
-            int delay = -1;
-
-            name = s.ReadString();
+            string name = s.ReadString();
             s.ReadSpaces();
-            int delay;
-            if (!int.TryParse(s.ReadString(), out delay)) delay = -1;
+            int delay = -1;
+            if (!int.TryParse(s.ReadString(), out delay))
+                delay = -1;
 
             AddrSpace? spc = dcp.conf.getSpaceByName(name);
             if (spc == (AddrSpace)null)

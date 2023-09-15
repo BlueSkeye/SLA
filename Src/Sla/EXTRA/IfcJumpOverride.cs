@@ -37,7 +37,6 @@ namespace Sla.EXTRA
             Address jmpaddr = Grammar.parse_machaddr(s, out discard, dcp.conf.types);
             JumpTable jt = dcp.fd.installJumpTable(jmpaddr);
             List<Address> adtable = new List<Address>();
-            Address naddr;
             ulong h = 0;
             ulong sv = 0;
             string token = s.ReadString();
@@ -49,8 +48,8 @@ namespace Sla.EXTRA
             //   }
             if (token == "startval") {
                 // s.unsetf(ios::dec | ios::hex | ios::oct); // Let user specify base
-                s >> sv;
-                s >> token;
+                sv = ulong.Parse(s.ReadString());
+                token = s.ReadString();
             }
             if (token == "table") {
                 s.ReadSpaces();
@@ -61,6 +60,7 @@ namespace Sla.EXTRA
             }
             if (adtable.empty())
                 throw new IfaceExecutionError("Missing jumptable address entries");
+            Address naddr = new Address();
             jt.setOverride(adtable, naddr, h, sv);
             status.optr.WriteLine("Successfully installed jumptable override");
         }

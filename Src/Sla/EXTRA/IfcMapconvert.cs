@@ -1,11 +1,6 @@
 ﻿using Sla.CORE;
 using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Globalization;
 
 namespace Sla.EXTRA
 {
@@ -43,11 +38,11 @@ namespace Sla.EXTRA
                 throw new IfaceParseError("Bad convert format");
 
             s.ReadSpaces();
-            s >> hex >> value;
+            value = ulong.Parse(s.ReadString(), NumberStyles.HexNumber | NumberStyles.AllowHexSpecifier);
             // Read pc address of hash
             Address addr = Grammar.parse_machaddr(s, out size, dcp.conf.types);
             // Parse the hash value
-            s >> hex >> hash;
+            hash = ulong.Parse(s.ReadString(), NumberStyles.HexNumber | NumberStyles.AllowHexSpecifier);
             dcp.fd.getScopeLocal().addEquateSymbol("", format, value, addr, hash);
         }
     }

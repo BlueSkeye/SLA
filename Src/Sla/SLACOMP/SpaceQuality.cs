@@ -38,7 +38,7 @@ namespace Sla.SLACOMP
         internal SpaceQuality(string nm)
         {
             name = nm;
-            type = ramtype;
+            type = Type.ramtype;
             size = 0;
             wordsize = 1;
             isdefault = false;

@@ -1,4 +1,5 @@
 ﻿using Sla.CORE;
+using System.Collections.Generic;
 
 /// Container holding the stack system for the renaming algorithm.  Every disjoint address
 /// range (indexed by its initial address) maps to its own Varnode stack.
@@ -680,7 +681,8 @@ namespace Sla.DECCORE
                 Address pieceaddr = addr.isBigEndian() ? addr + (size - overlap) : addr;
                 if (op.isCall() && callOpIndirectEffect(pieceaddr, overlap, op)) {
                     // Unless CALL definitely has no effect on piece
-                    newop = fd.newIndirectCreation(op, pieceaddr, overlap, false);     // Don't create a new big read if write is from a CALL
+                    // Don't create a new big read if write is from a CALL
+                    newop = fd.newIndirectCreation(op, pieceaddr, overlap, false);
                     leastvn = newop.getOut();
                 }
                 else {
@@ -796,7 +798,7 @@ namespace Sla.DECCORE
             LinkedListNode<PcodeOp>? insertiter;
 
             isbigendian = addr.isBigEndian();
-            baseoff = (isbigendian) ? addr.getOffset() + size : addr.getOffset();
+            baseoff = (isbigendian) ? addr.getOffset() + (uint)size : addr.getOffset();
             if (insertop == (PcodeOp)null) {
                 bl = (BlockBasic)fd.getBasicBlocks().getStartBlock();
                 insertiter = bl.beginOp() ?? throw new ApplicationException();
@@ -848,15 +850,24 @@ namespace Sla.DECCORE
             int pos = 0;
             while (pos < copySinks.size()) {
                 PcodeOp op = copySinks[pos];
-                Address addr = op.getOut().getAddr(); // Address being flowed to
+                // Address being flowed to
+                Address addr = op.getOut().getAddr();
                 pos += 1;
                 int maxIn = op.numInput();
                 for (int i = 0; i < maxIn; ++i) {
                     Varnode vn = op.getIn(i);
-                    if (!vn.isWritten()) continue;
-                    if (vn.isAddrForce()) continue;        // Already marked address forced
+                    if (!vn.isWritten()) {
+                        continue;
+                    }
+                    if (vn.isAddrForce()) {
+                        // Already marked address forced
+                        continue;
+                    }
                     PcodeOp newOp = vn.getDef() ?? throw new BugException();
-                    if (newOp.isMark()) continue;      // Already visited this op
+                    if (newOp.isMark()) {
+                        // Already visited this op
+                        continue;
+                    }
                     newOp.setMark();
                     OpCode opc = newOp.code();
                     bool isArtificial = false;
@@ -874,13 +885,16 @@ namespace Sla.DECCORE
                     else if (opc == OpCode.CPUI_INDIRECT && newOp.isIndirectStore()) {
                         // An INDIRECT can be considered artificial if it is caused by a STORE
                         Varnode inVn = newOp.getIn(0);
-                        if (addr == inVn.getAddr())
+                        if (addr == inVn.getAddr()) {
                             isArtificial = true;
+                        }
                     }
-                    if (isArtificial)
+                    if (isArtificial) {
                         copySinks.Add(newOp);
-                    else
+                    }
+                    else {
                         forces.Add(newOp);
+                    }
                 }
             }
         }
@@ -894,12 +908,14 @@ namespace Sla.DECCORE
         private void propagateCopyAway(PcodeOp op)
         {
             Varnode inVn = op.getIn(0);
-            while (inVn.isWritten())
-            {       // Follow any COPY chain to earliest input
+            while (inVn.isWritten()) {
+                // Follow any COPY chain to earliest input
                 PcodeOp nextOp = inVn.getDef() ?? throw new BugException();
-                if (nextOp.code() != OpCode.CPUI_COPY) break;
+                if (nextOp.code() != OpCode.CPUI_COPY)
+                    break;
                 Varnode nextIn = nextOp.getIn(0);
-                if (nextIn.getAddr() != inVn.getAddr()) break;
+                if (nextIn.getAddr() != inVn.getAddr())
+                    break;
                 inVn = nextIn;
             }
             fd.totalReplace(op.getOut(), inVn);
@@ -928,8 +944,11 @@ namespace Sla.DECCORE
                 for (int i = 0; i < forces.size(); ++i) {
                     PcodeOp op = forces[i];
                     Varnode vn = op.getOut();
-                    if (loadRanges.inRange(vn.getAddr(), 1))   // If we are within one of the guarded ranges
-                        vn.setAddrForce();         // then consider the output address forced
+                    if (loadRanges.inRange(vn.getAddr(), 1)) {
+                        // If we are within one of the guarded ranges
+                        // then consider the output address forced
+                        vn.setAddrForce();
+                    }
                     op.clearMark();
                 }
             }
@@ -937,14 +956,16 @@ namespace Sla.DECCORE
             // Eliminate or propagate away original COPY sinks
             for (int i = 0; i < copySinkSize; ++i) {
                 PcodeOp op = loadCopyOps[i];
-                propagateCopyAway(op);  // Make sure load guard COPYs no longer exist
+                // Make sure load guard COPYs no longer exist
+                propagateCopyAway(op);
             }
             // Clear marks on remaining artificial COPYs
             for (int i = copySinkSize; i < loadCopyOps.size(); ++i) {
                 PcodeOp op = loadCopyOps[i];
                 op.clearMark();
             }
-            loadCopyOps.Clear();        // We have handled all the load guard COPY ops
+            // We have handled all the load guard COPY ops
+            loadCopyOps.Clear();
         }
 
         /// \brief Make final determination of what range new LoadGuards are protecting
@@ -958,28 +979,33 @@ namespace Sla.DECCORE
         {
             bool nothingToDo = true;
             if (!loadGuard.empty()) {
-                if (loadGuard.GetLastItem().analysisState == 0)    // Check if unanalyzed
+                if (loadGuard.GetLastItem().analysisState == 0) {
+                    // Check if unanalyzed
                     nothingToDo = false;
+                }
             }
             if (!storeGuard.empty()) {
-                if (storeGuard.GetLastItem().analysisState == 0)
+                if (storeGuard.GetLastItem().analysisState == 0) {
                     nothingToDo = false;
+                }
             }
             if (nothingToDo) return;
 
             List<Varnode> sinks = new List<Varnode>();
             List<PcodeOp> reads = new List<PcodeOp>();
-            for(int index = loadGuard.Count - 1; 0 <= index; index--) {
+            for (int index = loadGuard.Count - 1; 0 <= index; index--) {
                 LoadGuard guard = loadGuard[index];
                 if (guard.analysisState != 0) break;
                 reads.Add(guard.op);
-                sinks.Add(guard.op.getIn(1));    // The OpCode.CPUI_LOAD pointer
+                // The OpCode.CPUI_LOAD pointer
+                sinks.Add(guard.op.getIn(1));
             }
             for (int index = storeGuard.Count - 1; 0 <= index; index--) {
                 LoadGuard guard = storeGuard[index];
                 if (guard.analysisState != 0) break;
                 reads.Add(guard.op);
-                sinks.Add(guard.op.getIn(1));    // The OpCode.CPUI_STORE pointer
+                // The OpCode.CPUI_STORE pointer
+                sinks.Add(guard.op.getIn(1));
             }
             AddrSpace stackSpc = fd.getArch().getStackSpace();
             Varnode? stackReg = (Varnode)null;
@@ -990,26 +1016,31 @@ namespace Sla.DECCORE
             WidenerNone widener = new WidenerNone();
             vsSolver.solve(10000, widener);
             bool runFullAnalysis = false;
-            while(loadIter.MoveNext()) {
+            IEnumerator<LoadGuard> loadIter = loadGuard.GetEnumerator();
+            while (loadIter.MoveNext()) {
                 LoadGuard guard = loadIter.Current;
                 guard.establishRange(vsSolver.getValueSetRead(guard.op.getSeqNum()));
-                if (guard.analysisState == 0)
+                if (guard.analysisState == 0) {
                     runFullAnalysis = true;
+                }
             }
-            for (iter = storeIter; iter != storeGuard.end(); ++iter) {
+            IEnumerator<LoadGuard> iter = storeGuard.GetEnumerator();
+            while (iter.MoveNext()) {
                 LoadGuard guard = iter.Current;
                 guard.establishRange(vsSolver.getValueSetRead(guard.op.getSeqNum()));
                 if (guard.analysisState == 0)
                     runFullAnalysis = true;
             }
             if (runFullAnalysis) {
-                WidenerFull fullWidener;
+                WidenerFull fullWidener = new WidenerFull();
                 vsSolver.solve(10000, fullWidener);
-                for (iter = loadIter; iter != loadGuard.end(); ++iter) {
+                iter = loadGuard.GetEnumerator();
+                while (iter.MoveNext()) {
                     LoadGuard guard = iter.Current;
                     guard.finalizeRange(vsSolver.getValueSetRead(guard.op.getSeqNum()));
                 }
-                for (iter = storeIter; iter != storeGuard.end(); ++iter) {
+                iter = storeGuard.GetEnumerator();
+                while (iter.MoveNext()) {
                     LoadGuard guard = iter.Current;
                     guard.finalizeRange(vsSolver.getValueSetRead(guard.op.getSeqNum()));
                 }
@@ -1386,7 +1417,7 @@ namespace Sla.DECCORE
         private void guardCallOverlappingInput(FuncCallSpecs fc, Address addr, Address transAddr,
             int size)
         {
-            VarnodeData vData;
+            VarnodeData vData = new VarnodeData();
 
             if (fc.getBiggestContainedInputParam(transAddr, size, vData)) {
                 ParamActive active = fc.getActiveInput();
@@ -1495,12 +1526,14 @@ namespace Sla.DECCORE
                 bool possibleoutput = false;
                 if (fc.isOutputActive()) {
                     ParamActive active = fc.getActiveOutput();
-                    int outputCharacter = fc.characterizeAsOutput(addr, size);
-                    if (outputCharacter != ParamEntryParamEntry.Containment.no_containment) {
-                        effecttype = EffectRecord.EffectType.killedbycall; // A potential output is always killed by call
+                    ParamEntry.Containment outputCharacter = fc.characterizeAsOutput(addr, size);
+                    if (outputCharacter != ParamEntry.Containment.no_containment) {
+                        // A potential output is always killed by call
+                        effecttype = EffectRecord.EffectType.killedbycall;
                         if (outputCharacter == ParamEntry.Containment.contained_by) {
                             if (guardCallOverlappingOutput(fc, addr, size, write))
-                                effecttype = EffectRecord.EffectType.unaffected;  // Range is handled, don't do additional guarding
+                                // Range is handled, don't do additional guarding
+                                effecttype = EffectRecord.EffectType.unaffected;
                         }
                         else {
                             if (active.whichTrial(addr, size) < 0) {
@@ -1519,11 +1552,14 @@ namespace Sla.DECCORE
                         if (fc.getSpacebaseOffset() != FuncCallSpecs.offset_unknown)
                             off = spc.wrapOffset(off - fc.getSpacebaseOffset());
                         else
-                            tryregister = false; // Do not attempt to register this stack loc as a trial
+                            // Do not attempt to register this stack loc as a trial
+                            tryregister = false;
                     }
-                    Address transAddr = new Address(spc, off);    // Address relative to callee's stack
+                    // Address relative to callee's stack
+                    Address transAddr = new Address(spc, off);
                     if (tryregister) {
-                        int inputCharacter = fc.characterizeAsInputParam(transAddr, size);
+                        ParamEntry.Containment inputCharacter =
+                            fc.characterizeAsInputParam(transAddr, size);
                         if (inputCharacter == ParamEntry.Containment.contains_justified) {
                             // Call could be using this range as an input parameter
                             ParamActive active = fc.getActiveInput();
@@ -1536,8 +1572,10 @@ namespace Sla.DECCORE
                                 fd.opInsertInput(op, vn, op.numInput());
                             }
                         }
-                        else if (inputCharacter == ParamEntry.Containment.contained_by)    // Call may be using part of this range as an input parameter
+                        else if (inputCharacter == ParamEntry.Containment.contained_by) {
+                            // Call may be using part of this range as an input parameter
                             guardCallOverlappingInput(fc, addr, transAddr, size);
+                        }
                     }
                 }
                 // We do not guard the call if the effect is "unaffected" or "reload"
@@ -1548,13 +1586,14 @@ namespace Sla.DECCORE
                     indop.getIn(0).setActiveHeritage();
                     indop.getOut().setActiveHeritage();
                     write.Add(indop.getOut());
-                    if (holdind)
+                    if (holdind) {
                         indop.getOut().setAddrForce();
-                    if (effecttype == EffectRecord.EffectType.return_address)
+                    }
+                    if (effecttype == EffectRecord.EffectType.return_address) {
                         indop.getOut().setReturnAddress();
+                    }
                 }
-                else if (effecttype == EffectRecord.EffectType.killedbycall)
-                {
+                else if (effecttype == EffectRecord.EffectType.killedbycall) {
                     indop = fd.newIndirectCreation(fc.getOp(), addr, size, possibleoutput);
                     indop.getOut().setActiveHeritage();
                     write.Add(indop.getOut());
@@ -2220,7 +2259,7 @@ namespace Sla.DECCORE
         /// Phi-node placement must already have happened.
         private void rename()
         {
-            VariableStack varstack;
+            VariableStack varstack = new VariableStack();
             renameRecurse((BlockBasic)fd.getBasicBlocks().getBlock(0), varstack);
             disjoint.clear();
         }

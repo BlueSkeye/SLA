@@ -46,7 +46,8 @@ namespace Sla.DECCORE
             Varnode constvn;
             PcodeOp andop;
             PcodeOp subop;
-            ulong andconst, baseconst;
+            ulong andconst = 0;
+            ulong baseconst;
 
             andvn = op.getIn(0);
             if (!andvn.isWritten()) return 0;
@@ -56,12 +57,11 @@ namespace Sla.DECCORE
             subvn = andop.getIn(0);
             if (!subvn.isWritten()) return 0;
             subop = subvn.getDef();
-            switch (subop.code())
-            {
+            switch (subop.code()) {
                 case OpCode.CPUI_SUBPIECE:
                     basevn = subop.getIn(0);
                     baseconst = andop.getIn(1).getOffset();
-                    andconst = baseconst << subop.getIn(1).getOffset() * 8;
+                    andconst = baseconst << (int)(subop.getIn(1).getOffset() * 8);
                     break;
                 case OpCode.CPUI_INT_ZEXT:
                     basevn = subop.getIn(0);
@@ -71,13 +71,18 @@ namespace Sla.DECCORE
                     return 0;
             }
 
-            if (baseconst == Globals.calc_mask((uint)andvn.getSize())) return 0; // Degenerate AND
-            if (basevn.isFree()) return 0;
+            if (baseconst == Globals.calc_mask((uint)andvn.getSize()))
+                // Degenerate AND
+                return 0;
+            if (basevn.isFree())
+                return 0;
 
             constvn = data.newConstant(basevn.getSize(), andconst);
-            if (baseconst == andconst)          // If no effective change in constant (except varnode size)
-                constvn.copySymbol(andop.getIn(1));   // Keep any old symbol
-                                                        // New version of and with bigger inputs
+            if (baseconst == andconst)
+                // If no effective change in constant (except varnode size)
+                // Keep any old symbol
+                constvn.copySymbol(andop.getIn(1));
+            // New version of and with bigger inputs
             PcodeOp newop = data.newOp(2, andop.getAddr());
             data.opSetOpcode(newop, OpCode.CPUI_INT_AND);
             Varnode newout = data.newUniqueOut(basevn.getSize(), newop);

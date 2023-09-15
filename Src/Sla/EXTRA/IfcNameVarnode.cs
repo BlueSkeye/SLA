@@ -14,7 +14,6 @@ namespace Sla.EXTRA
         /// name, but the data-type of the symbol is allowed to float.
         public override void execute(TextReader s)
         {
-            string token;
             int size;
             uint uq;
 
@@ -27,17 +26,17 @@ namespace Sla.EXTRA
 
             s.ReadSpaces();
             // Get the new name of the varnode
-            s >> token;
+            string token = s.ReadString();
             if (token.Length == 0)
                 throw new IfaceParseError("Must specify name");
 
             Datatype ct = dcp.conf.types.getBase(size, type_metatype.TYPE_UNKNOWN);
-
             dcp.conf.clearAnalysis(dcp.fd); // Make sure varnodes are cleared
-
-            Scope scope = dcp.fd.getScopeLocal().discoverScope(loc, size, pc);
-            if (scope == (Scope)null) // Variable does not have natural scope
-                scope = dcp.fd.getScopeLocal();   // force it to be in function scope
+            Scope? scope = dcp.fd.getScopeLocal().discoverScope(loc, size, pc);
+            if (scope == (Scope)null)
+                // Variable does not have natural scope
+                // force it to be in function scope
+                scope = dcp.fd.getScopeLocal();
             Symbol sym = scope.addSymbol(token, ct, loc, pc).getSymbol();
             scope.setAttribute(sym, Varnode.varnode_flags.namelock);
 

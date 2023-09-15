@@ -19,7 +19,7 @@ namespace Sla.SLEIGH
         
         ~TokenSymbol()
         {
-            delete tok;
+            // delete tok;
         }
     
         public Token getToken() => tok;

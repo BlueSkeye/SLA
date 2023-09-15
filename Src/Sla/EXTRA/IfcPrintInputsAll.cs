@@ -1,10 +1,5 @@
-﻿using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
+using Sla.DECCORE;
 
 namespace Sla.EXTRA
 {
@@ -24,21 +19,18 @@ namespace Sla.EXTRA
 
         public void iterationCallback(Funcdata fd)
         {
-            if (fd.hasNoCode())
-            {
-                *status.optr << "No code for " << fd.getName() << endl;
+            if (fd.hasNoCode()) {
+                status.optr.WriteLine($"No code for {fd.getName()}");
                 return;
             }
-            try
-            {
+            try {
                 dcp.conf.clearAnalysis(fd); // Clear any old analysis
-                dcp.conf.allacts.getCurrent().reset(*fd);
-                dcp.conf.allacts.getCurrent().perform(*fd);
+                dcp.conf.allacts.getCurrent().reset(fd);
+                dcp.conf.allacts.getCurrent().perform(fd);
                 IfcPrintInputs::print(fd, status.fileoptr);
             }
-            catch (LowlevelError err)
-            {
-                *status.optr << "Skipping " << fd.getName() << ": " << err.ToString() << endl;
+            catch (LowlevelError err) {
+                status.optr.WriteLine($"Skipping {fd.getName()}: {err.ToString()}");
             }
             dcp.conf.clearAnalysis(fd);
         }

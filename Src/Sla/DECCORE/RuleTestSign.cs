@@ -60,11 +60,10 @@ namespace Sla.DECCORE
             Varnode outVn = op.getOut();
 
             if (inVn.isFree()) return 0;
-            List<PcodeOp> compareOps;
+            List<PcodeOp> compareOps = new List<PcodeOp>();
             findComparisons(outVn, compareOps);
             int resultCode = 0;
-            for (int i = 0; i < compareOps.size(); ++i)
-            {
+            for (int i = 0; i < compareOps.size(); ++i) {
                 PcodeOp compareOp = compareOps[i];
                 Varnode compVn = compareOp.getIn(0);
                 int compSize = compVn.getSize();

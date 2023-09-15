@@ -13,11 +13,9 @@ namespace Sla.EXTRA
         /// \brief Open file command to redirect bulk output to a specific file stream
         public override void execute(TextReader s)
         {
-            string filename;
-
             if (status.optr != status.fileoptr)
                 throw new IfaceExecutionError("Output file already opened");
-            s >> filename;
+            string filename = s.ReadString();
             if (filename.empty())
                 throw new IfaceParseError("No filename specified");
 

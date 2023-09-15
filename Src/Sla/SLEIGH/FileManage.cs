@@ -58,9 +58,12 @@ namespace Sla.SLEIGH
             return (testpaths2.size() == 1);
         }
 
-        private static bool testInstallPath(List<string> pathels,int level,string root)
+        private static bool testInstallPath(List<string> pathels, int level, out string root)
         {
-            if (level + 1 >= pathels.size()) return false;
+            if (level + 1 >= pathels.size()) {
+                root = string.Empty;
+                return false;
+            }
             root = buildPath(pathels, level + 1);
             List<string> testpaths1 = new List<string>();
             List<string> testpaths2 = new List<string>();
@@ -348,9 +351,9 @@ namespace Sla.SLEIGH
             for (int i = 0; i < pathels.size(); ++i) {
                 if (pathels[i] != "Ghidra") continue;
                 string root;
-                if (testDevelopmentPath(pathels, i, root))
+                if (testDevelopmentPath(pathels, i, out root))
                     return root;
-                if (testInstallPath(pathels, i, root))
+                if (testInstallPath(pathels, i, out root))
                     return root;
             }
             return "";

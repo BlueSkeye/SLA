@@ -20,9 +20,10 @@ namespace Sla.DECCORE
         {
             voidtype = vt;
             outparam = (ProtoParameter)null;
-            ParameterPieces pieces;
-            pieces.type = voidtype;
-            pieces.flags = 0;
+            ParameterPieces pieces = new ParameterPieces() {
+                type = voidtype,
+                flags = 0
+            };
             setOutput(pieces);
         }
 

@@ -59,7 +59,8 @@ namespace Sla.EXTRA
             bool iserror = false;
             try {
                 dcp.conf.init(docStorage);
-                dcp.conf.readLoaderSymbols("::"); // Read in loader symbols
+                // Read in loader symbols
+                dcp.conf.readLoaderSymbols("::");
             }
             catch (DecoderError err) {
                 errmsg = err.ToString();

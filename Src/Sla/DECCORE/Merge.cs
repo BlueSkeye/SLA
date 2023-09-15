@@ -927,7 +927,7 @@ namespace Sla.DECCORE
                 data.opInsertEnd(domCopy, domBl);
             }
             // Cover created by removing all the COPYs from rootVn
-            Cover bCover;
+            Cover bCover = new Cover();
             for (int i = 0; i < high.numInstances(); ++i) {
                 Varnode vn = high.getInstance(i);
                 if (vn.isWritten()) {
@@ -936,7 +936,7 @@ namespace Sla.DECCORE
                         if (op.getIn(0).copyShadow(rootVn)) continue;
                     }
                 }
-                bCover.merge(vn.getCover());
+                bCover.merge(vn.getCover() ?? throw new ApplicationException());
             }
 
             int count = size;
@@ -1075,7 +1075,6 @@ namespace Sla.DECCORE
         {
             HighVariable high = vn.getHigh();
             if (high.numInstances() != 1) return;
-            List<PieceNode> pieces;
 
             int baseOffset = 0;
             SymbolEntry entry = vn.getSymbolEntry();
@@ -1083,6 +1082,7 @@ namespace Sla.DECCORE
                 baseOffset = entry.getOffset();
             }
 
+            List<PieceNode> pieces = new List<PieceNode>();
             PieceNode.gatherPieces(pieces, vn, vn.getDef(), baseOffset);
             bool throwOut = false;
             for (int i = 0; i < pieces.size(); ++i) {

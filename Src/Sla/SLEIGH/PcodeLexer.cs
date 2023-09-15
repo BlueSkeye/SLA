@@ -450,7 +450,8 @@ namespace Sla.SLEIGH
                 //curtoken[tokpos] = '\0';    // Append null terminator
                 curidentifier = curtoken.ToString();
                 int num = findIdentifier(curidentifier);
-                if (num < 0)            // Not a keyword
+                if (num < 0)
+                    // Not a keyword
                     return (int)sleightokentype.STRING;
                 return (int)idents[num].id;
             }
@@ -464,9 +465,11 @@ namespace Sla.SLEIGH
             else if (tok == State.endstream) {
                 if (!endofstreamsent) {
                     endofstreamsent = true;
-                    return ENDOFSTREAM; // Send 'official' end of stream token
+                    // Send 'official' end of stream token
+                    return ENDOFSTREAM;
                 }
-                return 0;           // 0 means end of file to parser
+                // 0 means end of file to parser
+                return 0;
             }
             else if (tok == State.illegal)
                 return 0;

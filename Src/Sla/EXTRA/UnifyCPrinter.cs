@@ -110,13 +110,12 @@ namespace Sla.EXTRA
 
         public string getName(int id) => namemap[id];
 
-        public void initializeRuleAction(ConstraintGroup g, int opparam, List<OpCode> olist)
+        public void initializeRuleAction(ConstraintGroup g, int opparam, List<OpCode> oplist)
         {
             initializeBase(g);
             printingtype = 0;
             classname = "DummyRule";
-
-            opparam = opp;
+            this.opparam = opparam;
             opcodelist = oplist;
         }
 

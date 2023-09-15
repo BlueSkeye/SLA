@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.DECCORE;
 
 namespace Sla.EXTRA
 {
@@ -18,10 +13,10 @@ namespace Sla.EXTRA
         /// the Action/Rule would have executed.
         public override void execute(TextReader s)
         {
-            bool res;
-            string specify;
+            string specify = s.ReadString();
 
-            s >> specify >> ws;     // Which action or rule to put breakpoint on
+            // Which action or rule to put breakpoint on
+            s.ReadSpaces();
 
             if (specify.empty())
                 throw new IfaceExecutionError("No action/rule specified");
@@ -29,7 +24,7 @@ namespace Sla.EXTRA
             if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("Decompile action not loaded");
 
-            res = dcp.conf.allacts.getCurrent().setBreakPoint(Action::break_start, specify);
+            bool res = dcp.conf.allacts.getCurrent().setBreakPoint(Action::break_start, specify);
             if (!res)
                 throw new IfaceExecutionError("Bad action/rule specifier: " + specify);
         }

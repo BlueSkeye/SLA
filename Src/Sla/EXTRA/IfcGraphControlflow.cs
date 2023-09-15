@@ -11,12 +11,10 @@ namespace Sla.EXTRA
         /// is written to the indicated file.
         public override void execute(TextReader s)
         {
-            string filename;
 
             if (dcp.fd == (Funcdata)null)
                 throw new IfaceExecutionError("No function selected");
-
-            s >> filename;
+            string filename = s.ReadString();
             if (filename.Length == 0)
                 throw new IfaceParseError("Missing output file");
             if (dcp.fd.getBasicBlocks().getSize() == 0)
@@ -39,7 +37,7 @@ namespace Sla.EXTRA
             Graph.dump_block_properties(s);
             Graph.dump_block_attributes(s);
             Graph.dump_block_vertex(graph, s, false);
-            dump_block_edges(graph, s);
+            Graph.dump_block_edges(graph, s);
         }
     }
 }

@@ -23,7 +23,7 @@ namespace Sla.EXTRA
             if (dcp.fd == (Funcdata)null)
                 throw new IfaceExecutionError("No function selected");
 
-            *status.optr << "Function: " << dcp.fd.getName() << endl;
+            status.optr.WriteLine($"No code for {dcp.fd.getName()}");
             dcp.fd.getOverride().printRaw(*status.optr, dcp.conf);
         }
     }

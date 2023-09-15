@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.EXTRA;
 
 namespace Sla.DECCORE
 {
@@ -20,8 +16,8 @@ namespace Sla.DECCORE
         /// constants that can be propagated.
         public override string apply(Architecture glb, string p1, string p2, string p3)
         {
-            if (p1.size() == 0)
-                throw ParseError("Read-only option must be set \"on\" or \"off\"");
+            if (p1.Length == 0)
+                throw new ParseError("Read-only option must be set \"on\" or \"off\"");
             glb.readonlypropagate = onOrOff(p1);
             if (glb.readonlypropagate)
                 return "Read-only memory locations now propagate as constants";

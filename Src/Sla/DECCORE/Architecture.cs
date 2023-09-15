@@ -476,7 +476,7 @@ namespace Sla.DECCORE
         /// \param pieces holds the raw prototype information and the symbol name
         public void setPrototype(PrototypePieces pieces)
         {
-            string basename;
+            string? basename;
             Scope? scope = symboltab.resolveScopeFromSymbolName(pieces.name, "::",
                 out basename, null);
             if (null == scope)

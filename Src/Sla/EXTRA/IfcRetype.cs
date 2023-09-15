@@ -11,25 +11,22 @@ namespace Sla.EXTRA
         /// variable is renamed as well.
         public override void execute(TextReader s)
         {
-            Datatype ct;
-            string name;
-            string newname;
 
-            s.ReadSpaces() >> name;
-            if (name.Length == 0)
+            s.ReadSpaces();
+            string name = s.ReadString();
+            if (string.IsNullOrEmpty(name))
                 throw new IfaceParseError("Must specify name of symbol");
-            ct = parse_type(s, newname, dcp.conf);
+            string newname;
+            Datatype ct = Grammar.parse_type(s, out newname, dcp.conf);
 
-            Symbol sym;
-            List<Symbol> symList;
+            List<Symbol> symList = new List<Symbol>();
             dcp.readSymbol(name, symList);
 
             if (symList.empty())
                 throw new IfaceExecutionError("No symbol named: " + name);
             if (symList.size() > 1)
                 throw new IfaceExecutionError("More than one symbol named : " + name);
-            else
-                sym = symList[0];
+            Symbol sym = symList[0];
 
             if (sym.getCategory() == Symbol.SymbolCategory.function_parameter)
                 dcp.fd.getFuncProto().setInputLock(true);

@@ -1,4 +1,5 @@
 ﻿using Sla.CORE;
+using Sla.EXTRA;
 
 namespace Sla.DECCORE
 {
@@ -349,7 +350,7 @@ namespace Sla.DECCORE
             bool emptyflag;
             bool isfallthru = true;
             //  JumpTable *jt;
-            IEnumerator<PcodeOp> oiter;
+            IEnumerator<PcodeOp>? oiter = null;
             int step;
             Override.Branching flowoverride;
 
@@ -407,31 +408,35 @@ namespace Sla.DECCORE
             }
             catch (BadDataError err) {
                 if ((flags & FlowFlag.error_unimplemented) != 0)
-                    throw err;      // rethrow
-                else {
-                    // Add infinite loop instruction
-                    step = 1;           // Pretend size 1
-                    artificialHalt(curaddr, PcodeOp.Flags.badinstruction);
-                    data.warning("Bad instruction - Truncating control flow here", curaddr);
-                    if (!hasBadData()) {
-                        flags |= FlowFlag.baddata_present;
-                        data.warningHeader("Control flow encountered bad instruction data");
-                    }
+                    // rethrow
+                    throw err;
+                // Add infinite loop instruction
+                // Pretend size 1
+                step = 1;
+                artificialHalt(curaddr, PcodeOp.Flags.badinstruction);
+                data.warning("Bad instruction - Truncating control flow here", curaddr);
+                if (!hasBadData()) {
+                    flags |= FlowFlag.baddata_present;
+                    data.warningHeader("Control flow encountered bad instruction data");
                 }
             }
-            VisitStat stat = visited[curaddr]; // Mark that we visited this instruction
-            stat.size = step;       // Record size of instruction
+            // Mark that we visited this instruction
+            VisitStat stat = visited[curaddr];
+            // Record size of instruction
+            stat.size = step;
 
-            if (curaddr < minaddr)  // Update minimum and maximum address
+            if (curaddr < minaddr)
+                // Update minimum and maximum address
                 minaddr = curaddr;
-            if (maxaddr < curaddr + step)   // Keep track of biggest and smallest address
+            if (maxaddr < curaddr + step)
+                // Keep track of biggest and smallest address
                 maxaddr = curaddr + step;
 
             if (emptyflag)
                 // Make sure oiter points at first new op
                 oiter = obank.beginDead();
             else
-                ++oiter;
+                (oiter ?? throw new ApplicationException()).MoveNext();
 
             if (oiter != obank.endDead()) {
                 stat.seqnum = oiter.Current.getSeqNum();

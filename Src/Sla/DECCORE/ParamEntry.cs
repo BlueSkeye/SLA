@@ -419,10 +419,14 @@ namespace Sla.DECCORE
                 if (sz >= alignment)
                     return OpCode.CPUI_COPY;
             }
-            else if (sz >= size)
+            else if (sz >= size) {
                 return OpCode.CPUI_COPY;
-            if (joinrec != (JoinRecord)null) return OpCode.CPUI_COPY;
-            if (justifiedContain(addr, sz) != 0) return OpCode.CPUI_COPY; // (addr,sz) is not justified properly to allow an extension
+            }
+            if (joinrec != (JoinRecord)null)
+                return OpCode.CPUI_COPY;
+            if (justifiedContain(addr, sz) != 0)
+                // (addr,sz) is not justified properly to allow an extension
+                return OpCode.CPUI_COPY;
             if (alignment == 0) {
                 // If exclusion, take up the whole entry
                 res.space = spaceid;

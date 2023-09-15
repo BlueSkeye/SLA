@@ -11,20 +11,20 @@ namespace Sla.EXTRA
         /// and prints a description of every symbol in the scope.
         public override void execute(TextReader s)
         {
-            string name;
-            Scope scope;
-
-            s >> name;
+            Scope? scope;
+            string name = s.ReadString();
 
             if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("No load image");
             if (name.Length != 0 || dcp.fd == (Funcdata)null) {
                 // Add fake variable name
-                string fullname = name + "::a";
-                scope = dcp.conf.symboltab.resolveScopeFromSymbolName(fullname, "::", fullname, (Scope)null);
+                string? fullname;
+                scope = dcp.conf.symboltab.resolveScopeFromSymbolName(name + "::a", "::",
+                    out fullname, (Scope)null);
             }
-            else
+            else {
                 scope = dcp.fd.getScopeLocal();
+            }
 
             if (scope == (Scope)null)
                 throw new IfaceExecutionError("No map named: " + name);

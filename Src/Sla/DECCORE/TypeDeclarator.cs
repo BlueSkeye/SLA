@@ -50,7 +50,7 @@ namespace Sla.DECCORE
             return protomodel;
         }
 
-        private bool getPrototype(PrototypePieces pieces, Architecture glb)
+        internal bool getPrototype(PrototypePieces pieces, Architecture glb)
         {
             TypeModifier? mod = (TypeModifier)null;
             if (mods.size() > 0)
@@ -79,7 +79,7 @@ namespace Sla.DECCORE
             return true;
         }
 
-        private bool hasProperty(CParse.Flags mask) => ((flags & mask) != 0);
+        internal bool hasProperty(CParse.Flags mask) => ((flags & mask) != 0);
 
         internal Datatype? buildType(Architecture glb)
         {

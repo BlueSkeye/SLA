@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.EXTRA;
 
 namespace Sla.DECCORE
 {
@@ -22,12 +18,11 @@ namespace Sla.DECCORE
         /// to follow from a single indirect jump.
         public override string apply(Architecture glb, string p1, string p2, string p3)
         {
-            istringstream s = new istringstream(p1);
-            s.unsetf(ios::dec | ios::hex | ios::oct);
+            TextReader s = new StringReader(p1);
+            /// s.unsetf(ios::dec | ios::hex | ios::oct);
             uint val = 0;
-            s >> val;
-            if (val == 0)
-                throw ParseError("Must specify integer maximum");
+            if (!uint.TryParse(s.ReadString(), out val))
+                throw new ParseError("Must specify integer maximum");
             glb.max_jumptable_size = val;
             return "Maximum jumptable size set to " + p1;
         }

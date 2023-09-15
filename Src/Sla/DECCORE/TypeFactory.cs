@@ -1202,7 +1202,8 @@ namespace Sla.DECCORE
         public TypePointerRel getTypePointerRel(TypePointer parentPtr, Datatype ptrTo,
             int off)
         {
-            TypePointerRel tp = new TypePointerRel(parentPtr.size, ptrTo, parentPtr.wordsize, parentPtr.ptrto, off);
+            TypePointerRel tp = new TypePointerRel(parentPtr.size, ptrTo, parentPtr.wordsize,
+                parentPtr.ptrto, off);
             // Mark as ephemeral
             tp.markEphemeral(this);
             TypePointerRel res = (TypePointerRel)findAdd(tp);

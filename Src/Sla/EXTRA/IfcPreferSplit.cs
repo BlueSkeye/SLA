@@ -32,8 +32,7 @@ namespace Sla.EXTRA
             s.ReadSpaces();
             if (s.EofReached())
                 throw new IfaceParseError("Missing split offset");
-            s >> dec >> split;
-            if (split == -1)
+            if (!int.TryParse(s.ReadString(), out split))
                 throw new IfaceParseError("Bad split offset");
             PreferSplitRecord rec = new PreferSplitRecord();
             dcp.conf.splitrecords.Add(rec);

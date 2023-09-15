@@ -3160,78 +3160,71 @@ namespace Sla.DECCORE
             return decl.buildType(glb);
         }
 
-        //void parse_protopieces(PrototypePieces &pieces,
-        //               istream &s, Architecture* glb)
-        //{
-        //    CParse parser(glb,1000);
+        internal static void parse_protopieces(PrototypePieces pieces, TextReader s, Architecture glb)
+        {
+            CParse parser = new CParse(glb,1000);
 
-        //if (!parser.parseStream(s, CParse::doc_declaration))
-        //    throw ParseError(parser.getError());
-        //vector<TypeDeclarator*>* decls = parser.getResultDeclarations();
-        //if ((decls == (vector<TypeDeclarator*>*)0) || (decls->size() == 0))
-        //    throw ParseError("Did not parse a datatype");
-        //if (decls->size() > 1)
-        //    throw ParseError("Parsed multiple declarations");
-        //TypeDeclarator* decl = (*decls)[0];
-        //if (!decl->isValid())
-        //    throw ParseError("Parsed type is invalid");
+            if (!parser.parseStream(s, CParse.DocType.doc_declaration)) {
+                throw new ParseError(parser.getError());
+            }
+            List<TypeDeclarator>? decls = parser.getResultDeclarations();
+            if ((decls == (List<TypeDeclarator>)null) || (decls.size() == 0))
+                throw new ParseError("Did not parse a datatype");
+            if (decls.size() > 1)
+                throw new ParseError("Parsed multiple declarations");
+            TypeDeclarator decl = decls[0];
+            if (!decl.isValid())
+                throw new ParseError("Parsed type is invalid");
 
-        //if (!decl->getPrototype(pieces, glb))
-        //    throw ParseError("Did not parse a prototype");
-        //}
+            if (!decl.getPrototype(pieces, glb))
+                throw new ParseError("Did not parse a prototype");
+        }
 
-        //void parse_C(Architecture* glb, istream &s)
+        internal static void parse_C(Architecture glb, TextReader s)
+        {
+            // Load type data straight into datastructures
+            CParse parser = new CParse(glb,1000);
 
-        //{ // Load type data straight into datastructures
-        //    CParse parser(glb,1000);
+            if (!parser.parseStream(s, CParse.DocType.doc_declaration))
+                throw new ParseError(parser.getError());
+            List<TypeDeclarator>? decls = parser.getResultDeclarations();
+            if ((decls == (List<TypeDeclarator>)null) || (decls.size() == 0))
+                throw new ParseError("Did not parse a datatype");
+            if (decls.size() > 1)
+                throw new ParseError("Parsed multiple declarations");
+            TypeDeclarator decl = decls[0];
+            if (!decl.isValid())
+                throw new ParseError("Parsed type is invalid");
 
-        //if (!parser.parseStream(s, CParse::doc_declaration))
-        //    throw ParseError(parser.getError());
-        //vector<TypeDeclarator*>* decls = parser.getResultDeclarations();
-        //if ((decls == (vector<TypeDeclarator*>*)0) || (decls->size() == 0))
-        //    throw ParseError("Did not parse a datatype");
-        //if (decls->size() > 1)
-        //    throw ParseError("Parsed multiple declarations");
-        //TypeDeclarator* decl = (*decls)[0];
-        //if (!decl->isValid())
-        //    throw ParseError("Parsed type is invalid");
-
-        //if (decl->hasProperty(CParse::f_extern))
-        //{
-        //    PrototypePieces pieces;
-        //    if (!decl->getPrototype(pieces, glb))
-        //        throw ParseError("Did not parse prototype as expected");
-        //    glb->setPrototype(pieces);
-        //}
-        //else if (decl->hasProperty(CParse::f_typedef))
-        //{
-        //    Datatype* ct = decl->buildType(glb);
-        //    if (decl->getIdentifier().size() == 0)
-        //        throw ParseError("Missing identifier for typedef");
-        //    if (ct->getMetatype() == TYPE_STRUCT)
-        //    {
-        //        glb->types->setName(ct, decl->getIdentifier());
-        //    }
-        //    else
-        //    {
-        //        glb->types->getTypedef(ct, decl->getIdentifier(), 0, 0);
-        //    }
-        //}
-        //else if (decl->getBaseType()->getMetatype() == TYPE_STRUCT)
-        //{
-        //    // We parsed a struct, treat as a typedef
-        //}
-        //else if (decl->getBaseType()->getMetatype() == TYPE_UNION)
-        //{
-        //    // We parsed a union, treat as a typedef
-        //}
-        //else if (decl->getBaseType()->isEnumType())
-        //{
-        //    // We parsed an enum, treat as a typedef
-        //}
-        //else
-        //    throw LowlevelError("Not sure what to do with this type");
-        //}
+            if (decl.hasProperty(CParse.Flags.f_extern)) {
+                PrototypePieces pieces = new PrototypePieces();
+                if (!decl.getPrototype(pieces, glb))
+                    throw new ParseError("Did not parse prototype as expected");
+                glb.setPrototype(pieces);
+            }
+            else if (decl.hasProperty(CParse.Flags.f_typedef)) {
+                Datatype? ct = decl.buildType(glb);
+                if (decl.getIdentifier().Length == 0)
+                    throw new ParseError("Missing identifier for typedef");
+                if (ct.getMetatype() == type_metatype.TYPE_STRUCT) {
+                    glb.types.setName(ct, decl.getIdentifier());
+                }
+                else {
+                    glb.types.getTypedef(ct, decl.getIdentifier(), 0, 0);
+                }
+            }
+            else if (decl.getBaseType().getMetatype() == type_metatype.TYPE_STRUCT) {
+                // We parsed a struct, treat as a typedef
+            }
+            else if (decl.getBaseType().getMetatype() == type_metatype.TYPE_UNION) {
+                // We parsed a union, treat as a typedef
+            }
+            else if (decl.getBaseType().isEnumType()) {
+                // We parsed an enum, treat as a typedef
+            }
+            else
+                throw new LowlevelError("Not sure what to do with this type");
+        }
 
         internal static void parse_toseparator(TextReader s, out string name)
         {

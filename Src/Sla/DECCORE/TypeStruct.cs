@@ -143,10 +143,12 @@ namespace Sla.DECCORE
             out int newoff)
         {
             int i = getFieldIter(off);
+            newoff = 0;
             if (i < 0) return (TypeField)null;
             TypeField curfield  = field[i];
             int noff = off - curfield.offset;
-            if (noff + sz > curfield.type.getSize()) // Requested piece spans more than one field
+            if (noff + sz > curfield.type.getSize())
+                // Requested piece spans more than one field
                 return (TypeField)null;
             newoff = noff;
             return curfield;
@@ -241,7 +243,7 @@ namespace Sla.DECCORE
         // For tree structure
         public override int compare(Datatype op, int level)
         {
-            int res = Datatype.compare(op, level);
+            int res = base.compare(op, level);
             if (res != 0) return res;
             TypeStruct ts = (TypeStruct)op;
 

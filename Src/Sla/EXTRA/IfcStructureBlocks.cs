@@ -23,9 +23,8 @@ namespace Sla.EXTRA
             if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("No load image present");
 
-            string infile, outfile;
-            s >> infile;
-            s >> outfile;
+            string infile = s.ReadString();
+            string outfile = s.ReadString();
 
             if (infile.empty())
                 throw new IfaceParseError("Missing input file");

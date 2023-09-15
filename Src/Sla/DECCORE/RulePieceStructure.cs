@@ -22,7 +22,7 @@ namespace Sla.DECCORE
         /// \param vn is the given Varnode
         /// \param baseOffset is used to pass back the starting offset
         /// \return the structure or array data-type, or null otherwise
-        private static Datatype? determineDatatype(Varnode vn, int baseOffset)
+        private static Datatype? determineDatatype(Varnode vn, out int baseOffset)
         {
             Datatype? ct = vn.getStructuredType();
             if (ct == (Datatype)null)
@@ -175,16 +175,17 @@ namespace Sla.DECCORE
 
         public override int applyOp(PcodeOp op, Funcdata data)
         {
-            if (op.isPartialRoot()) return 0;      // Check if CONCAT tree already been visited
+            if (op.isPartialRoot())
+                // Check if CONCAT tree already been visited
+                return 0;
             Varnode outvn = op.getOut();
             int baseOffset;
-            Datatype? ct = determineDatatype(outvn, baseOffset);
-            if (ct == (Datatype)null) return 0;
+            Datatype? ct = determineDatatype(outvn, out baseOffset);
+            if (ct == (Datatype)null)
+                return 0;
 
             if (op.code() == OpCode.CPUI_INT_ZEXT) {
-                if (convertZextToPiece(op, outvn.getType(), 0, data))
-                    return 1;
-                return 0;
+                return (convertZextToPiece(op, outvn.getType(), 0, data)) ? 1 : 0;
             }
             // Check if outvn is really the root of the tree
             PcodeOp? zext = outvn.loneDescend();

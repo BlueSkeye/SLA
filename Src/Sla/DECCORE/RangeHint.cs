@@ -125,8 +125,9 @@ namespace Sla.DECCORE
         public bool preferred(RangeHint b, bool reconcile)
         {
             if (start != b.start)
-                return true;        // Something must occupy a.start to b.start
-                                    // Prefer the locked type
+                return true;
+            // Something must occupy a.start to b.start
+            // Prefer the locked type
             if ((b.flags & Varnode.varnode_flags.typelock) != 0) {
                 if ((flags & Varnode.varnode_flags.typelock) == 0)
                     return false;
@@ -136,13 +137,15 @@ namespace Sla.DECCORE
 
             if (!reconcile) {
                 // If the ranges don't reconcile
-                if (rangeType == open && b.rangeType != open) // Throw out the open range
+                if (rangeType == RangeType.open && b.rangeType != RangeType.open)
+                    // Throw out the open range
                     return false;
-                if (b.rangeType == open && rangeType != open)
+                if (b.rangeType == RangeType.open && rangeType != RangeType.open)
                     return true;
             }
 
-            return (0 > type.typeOrder(*b.type)); // Prefer the more specific
+            // Prefer the more specific
+            return (0 > type.typeOrder(b.type));
         }
 
         /// Try to concatenate another RangeHint onto \b this
@@ -159,11 +162,17 @@ namespace Sla.DECCORE
         /// \return \b true if the other RangeHint was successfully absorbed
         public bool attemptJoin(RangeHint b)
         {
-            if (rangeType != open) return false;
-            if (highind < 0) return false;
-            if (b.rangeType == endpoint) return false;         // Don't merge with bounding range
-            Datatype settype = type;                   // Assume we will keep this data-type
-            if (settype.getSize() != b.type.getSize()) return false;
+            if (rangeType != RangeType.open)
+                return false;
+            if (highind < 0)
+                return false;
+            if (b.rangeType == RangeType.endpoint)
+                // Don't merge with bounding range
+                return false;
+            // Assume we will keep this data-type
+            Datatype settype = type;
+            if (settype.getSize() != b.type.getSize())
+                return false;
             if (settype != b.type) {
                 Datatype aTestType = type;
                 Datatype bTestType = b.type;

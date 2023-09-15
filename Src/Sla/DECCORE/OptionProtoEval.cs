@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.EXTRA;
 
 namespace Sla.DECCORE
 {
@@ -22,18 +18,18 @@ namespace Sla.DECCORE
         /// model used to evaluate sub-functions.
         public override string apply(Architecture glb, string p1, string p2, string p3)
         {
-            ProtoModel* model = (ProtoModel)null;
+            ProtoModel? model = (ProtoModel)null;
 
-            if (p1.size() == 0)
-                throw ParseError("Must specify prototype model");
+            if (p1.Length == 0)
+                throw new ParseError("Must specify prototype model");
 
-            if (p1 == "default")
+            if (p1 == "default") {
                 model = glb.defaultfp;
-            else
-            {
+            }
+            else {
                 model = glb.getModel(p1);
                 if (model == (ProtoModel)null)
-                    throw ParseError("Unknown prototype model: " + p1);
+                    throw new ParseError("Unknown prototype model: " + p1);
             }
             string res = "Set current evaluation to " + p1;
             glb.evalfp_current = model;

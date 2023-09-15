@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -13,7 +9,7 @@ namespace Sla.DECCORE
             : base(t, OpCode.CPUI_BOOL_OR,"||", type_metatype.TYPE_BOOL, type_metatype.TYPE_BOOL)
         {
             opflags = PcodeOp.Flags.binary | PcodeOp.Flags.commutative | PcodeOp.Flags.booloutput;
-            addlflags = logical_op;
+            addlflags = OperationType.logical_op;
             behave = new OpBehaviorBoolOr();
         }
 

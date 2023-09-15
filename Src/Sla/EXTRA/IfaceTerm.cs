@@ -44,7 +44,6 @@ namespace Sla.EXTRA
             List<string> fullcommand = new List<string>();
             TextReader s = new StringReader(line);
             string tok;
-            IEnumerator<IfaceCommand> first, last;
             int oldsize, match;
 
             IEnumerator<IfaceCommand> first = comlist.GetEnumerator();
@@ -92,7 +91,7 @@ namespace Sla.EXTRA
                 optr.WriteLine();
                 while (first.MoveNext()) {
                     // Get possible completion
-                    first.Current.commandString(complete);
+                    first.Current.commandString(out complete);
                     optr.WriteLine(complete);
                 }
             }
@@ -111,7 +110,7 @@ namespace Sla.EXTRA
             int cursor, lastlen, i;
             bool onecharecho;
             int hist;
-            string saveline;
+            string saveline = string.Empty;
 
             line = string.Empty;
             cursor = 0;
@@ -122,7 +121,7 @@ namespace Sla.EXTRA
                 val = sptr.get();
                 if (sptr.eof())
                     val = '\n';
-                switch (val) {
+                switch ((int)val) {
                     case 0x01:          // C-a
                         cursor = 0;     // Jump to beginning
                         break;
@@ -151,21 +150,21 @@ namespace Sla.EXTRA
                     case 0x09:          // TAB
                         cursor = doCompletion(line, cursor);
                         break;
-                    case 0x0a:          // Newline
-                    case 0x0d:          // Carriage return
+                    case 0x0A:          // Newline
+                    case 0x0D:          // Carriage return
                         cursor = line.Length;
                         onecharecho = true;
                         break;
-                    case 0x0b:          // C-k
+                    case 0x0B:          // C-k
                         line.erase(cursor);
                         break;
-                    case 0x0c:          // C-l
+                    case 0x0C:          // C-l
                         break;
-                    case 0x0e:          // C-n
+                    case 0x0E:          // C-n
                         if (hist > 0) {
                             hist -= 1;      // Get more recent history
                             if (hist > 0)
-                                getHistory(line, hist - 1);
+                                getHistory(out line, hist - 1);
                             else
                                 line = saveline;
                             cursor = line.Length;
@@ -177,7 +176,7 @@ namespace Sla.EXTRA
                             hist += 1;      // Get more ancient history
                             if (hist == 1)
                                 saveline = line;
-                            getHistory(line, hist - 1);
+                            getHistory(out line, hist - 1);
                             cursor = line.Length;
                         }
                         break;
@@ -203,26 +202,36 @@ namespace Sla.EXTRA
                         }
                         break;
                     case 0x08:
-                    case 0x7f:          // delete
+                    case 0x7f:
+                        // delete
                         if (cursor != 0)
-                            line.erase(--cursor, 1);
+                            line = line.Remove(cursor - 1, 1);
                         break;
                     default:
-                        line.insert(cursor++, 1, val); // Insert single character
+                        // Insert single character
+                        line = line.Insert(cursor + 1, val.ToString());
                         if (cursor == line.Length)
                             onecharecho = true;
                         break;
                 }
-                if (onecharecho)
-                    optr.put(val);     // Echo most characters
+                if (onecharecho) {
+                    // Echo most characters
+                    optr.put(val);
+                }
                 else {
-                    optr.put('\r');        // Ontop of old line
+                    // Ontop of old line
+                    optr.Write('\r');
                     writePrompt();
-                    optr << line;      // print new line
-                    for (i = line.Length; i < lastlen; ++i)
-                        optr.put(' ');     // Erase any old characters
-                    for (i = i - cursor; i > 0; --i)
-                        optr.put('\b');    // Put cursor in the right place
+                    // print new line
+                    optr.Write(line);
+                    for (i = line.Length; i < lastlen; ++i) {
+                        // Erase any old characters
+                        optr.Write(' ');
+                    }
+                    for (i = i - cursor; i > 0; --i) {
+                        // Put cursor in the right place
+                        optr.Write('\b');
+                    }
                 }
             } while (val != '\n');
         }

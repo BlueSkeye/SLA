@@ -20,8 +20,8 @@ namespace Sla.SLEIGH
             long lhsmin = lhs.minValue();
             long lhsmax = lhs.maxValue();
             List<PatternValue> semval = new List<PatternValue>();
-            List<long> min;
-            List<long> max;
+            List<long> min = new List<long>();
+            List<long> max =  new List<long>();
             List<long> cur;
             int count = 0;
 
@@ -35,9 +35,9 @@ namespace Sla.SLEIGH
                 if ((val >= lhsmin) && (val <= lhsmax))
                 {
                     if (count == 0)
-                        resultpattern = buildPattern(lhs, val, semval, cur);
+                        resultpattern = Globals.buildPattern(lhs, val, semval, cur);
                     else
-                        resultpattern = resultpattern.doOr(buildPattern(lhs, val, semval, cur));
+                        resultpattern = resultpattern.doOr(Globals.buildPattern(lhs, val, semval, cur));
                     count += 1;
                 }
             } while (advance_combo(cur, min, max));

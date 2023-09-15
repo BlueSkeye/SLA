@@ -25,7 +25,7 @@ namespace Sla.EXTRA
             if (vn.getHigh() != (HighVariable)null)
                 vn.getHigh().printCover(*status.optr);
             else
-                *status.optr << "Unmerged" << endl;
+                status.optr.WriteLine("Unmerged");
         }
     }
 }

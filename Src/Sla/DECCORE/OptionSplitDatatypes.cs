@@ -40,19 +40,17 @@ namespace Sla.DECCORE
 
         public override string apply(Architecture glb, string p1, string p2, string p3)
         {
-            uint oldConfig = glb.split_datatype_config;
+            Options oldConfig = glb.split_datatype_config;
             glb.split_datatype_config = getOptionBit(p1);
             glb.split_datatype_config |= getOptionBit(p2);
             glb.split_datatype_config |= getOptionBit(p3);
 
-            if ((glb.split_datatype_config & (option_struct | option_array)) == 0)
-            {
+            if ((glb.split_datatype_config & (Options.option_struct | Options.option_array)) == 0) {
                 glb.allacts.toggleAction(glb.allacts.getCurrentName(), "splitcopy", false);
                 glb.allacts.toggleAction(glb.allacts.getCurrentName(), "splitpointer", false);
             }
-            else
-            {
-                bool pointers = (glb.split_datatype_config & option_pointer) != 0;
+            else {
+                bool pointers = (glb.split_datatype_config & Options.option_pointer) != 0;
                 glb.allacts.toggleAction(glb.allacts.getCurrentName(), "splitcopy", true);
                 glb.allacts.toggleAction(glb.allacts.getCurrentName(), "splitpointer", pointers);
             }

@@ -2,6 +2,7 @@
 using Sla.DECCORE;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,20 +23,21 @@ namespace Sla.EXTRA
             if (dcp.fd == (Funcdata)null) {
                 throw new IfaceExecutionError("No function loaded");
             }
-            Datatype ct;
             string name;
-            ulong hash;
             int size;
             // Read pc address of hash
             Address addr = Grammar.parse_machaddr(s, out size, dcp.conf.types);
 
             // Parse the hash value
-            s >> hex >> hash;
+            ulong hash = ulong.Parse(s.ReadString(),
+                NumberStyles.HexNumber | NumberStyles.AllowHexSpecifier);
             s.ReadSpaces();
-            ct = parse_type(s, name, dcp.conf); // Parse the required type and name
+            // Parse the required type and name
+            Datatype ct = Grammar.parse_type(s, out name, dcp.conf);
 
             Symbol sym = dcp.fd.getScopeLocal().addDynamicSymbol(name, ct, addr, hash);
-            sym.getScope().setAttribute(sym, Varnode.varnode_flags.namelock | Varnode.varnode_flags.typelock);
+            sym.getScope().setAttribute(sym,
+                Varnode.varnode_flags.namelock | Varnode.varnode_flags.typelock);
         }
     }
 }

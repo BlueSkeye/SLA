@@ -33,8 +33,9 @@ namespace Sla.EXTRA
             if (i == dcp.fd.numCalls())
                 throw new IfaceExecutionError("No call is made at this address");
 
-            PrototypePieces pieces;
-            parse_protopieces(pieces, s, dcp.conf); // Parse the prototype from stream
+            PrototypePieces pieces = new PrototypePieces();
+            // Parse the prototype from stream
+            Grammar.parse_protopieces(pieces, s, dcp.conf);
 
             FuncProto newproto = new FuncProto();
 

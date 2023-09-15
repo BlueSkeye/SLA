@@ -23,32 +23,29 @@ namespace Sla.EXTRA
             if (dcp.fd == (Funcdata)null)
                 throw new IfaceExecutionError("No function selected");
 
-            if (dcp.fd.hasNoCode())
-            {
-                *status.optr << "No code for " << dcp.fd.getName() << endl;
+            if (dcp.fd.hasNoCode()) {
+                status.optr.WriteLine($"No code for {dcp.fd.getName()}");
                 return;
             }
-            if (dcp.fd.isProcStarted())
-            { // Free up old decompile
-                *status.optr << "Clearing old decompilation" << endl;
+            if (dcp.fd.isProcStarted()) {
+                // Free up old decompile
+                status.optr.WriteLine("Clearing old decompilation");
                 dcp.conf.clearAnalysis(dcp.fd);
             }
 
-            *status.optr << "Decompiling " << dcp.fd.getName() << endl;
-            dcp.conf.allacts.getCurrent().reset(*dcp.fd);
-            res = dcp.conf.allacts.getCurrent().perform(*dcp.fd);
-            if (res < 0)
-            {
-                *status.optr << "Break at ";
-                dcp.conf.allacts.getCurrent().printState(*status.optr);
+            status.optr.WriteLine($"No code for {dcp.fd.getName()}");
+            dcp.conf.allacts.getCurrent().reset(dcp.fd);
+            res = dcp.conf.allacts.getCurrent().perform(dcp.fd);
+            if (res < 0) {
+                status.optr.Write("Break at ");
+                dcp.conf.allacts.getCurrent().printState(status.optr);
             }
-            else
-            {
-                *status.optr << "Decompilation complete";
+            else {
+                status.optr.Write("Decompilation complete");
                 if (res == 0)
-                    *status.optr << " (no change)";
+                    status.optr.Write(" (no change)");
             }
-            *status.optr << endl;
+            status.optr.WriteLine();
         }
     }
 }

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.EXTRA;
 
 namespace Sla.DECCORE
 {
@@ -22,11 +18,10 @@ namespace Sla.DECCORE
         /// set to the new copy, which can then by modified
         public override string apply(Architecture glb, string p1, string p2, string p3)
         {
-            if (p1.size() == 0)
-                throw ParseError("Must specify preexisting action");
+            if (p1.Length == 0)
+                throw new ParseError("Must specify preexisting action");
 
-            if (p2.size() != 0)
-            {
+            if (p2.Length != 0) {
                 glb.allacts.cloneGroup(p1, p2);
                 glb.allacts.setCurrent(p2);
                 return "Created " + p2 + " by cloning " + p1 + " and made it current";

@@ -87,7 +87,7 @@ namespace Sla.SLEIGH
         /// \return the ParserContext associated with the address
         public ParserContext getParserContext(Address addr)
         {
-            int hashindex = ((int)addr.getOffset()) & mask;
+            int hashindex = (int)(((int)addr.getOffset()) & mask);
             ParserContext res = hashtable[hashindex];
             if (res.getAddr() == addr)
                 return res;

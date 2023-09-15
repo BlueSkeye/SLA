@@ -64,19 +64,19 @@ namespace Sla.DECCORE
         public static Datatype propagateAddIn2Out(Datatype alttype, TypeFactory typegrp,
             PcodeOp op, int inslot)
         {
-            TypePointer pointer = (TypePointer)alttype;
+            TypePointer? pointer = (TypePointer)alttype;
             ulong uoffset;
-            int command = propagateAddPointer(uoffset, op, inslot, pointer.getPtrTo().getSize());
+            int command = propagateAddPointer(out uoffset, op, inslot, pointer.getPtrTo().getSize());
             // Doesn't look like a good pointer add
             if (command == 2)
                 return op.getOut().getTempType();
-            TypePointer parent = (TypePointer)null;
-            ulong parentOff;
+            TypePointer? parent = (TypePointer)null;
+            ulong parentOff = 0;
             if (command != 3) {
                 uoffset = AddrSpace.addressToByte(uoffset, pointer.getWordSize());
                 bool allowWrap = (op.code() != OpCode.CPUI_PTRSUB);
                 do {
-                    pointer = pointer.downChain(uoffset, parent, parentOff, allowWrap, typegrp);
+                    pointer = pointer.downChain(uoffset, out parent, out parentOff, allowWrap, typegrp);
                     if (pointer == (TypePointer)null)
                         break;
                 } while (uoffset != 0);
@@ -89,7 +89,7 @@ namespace Sla.DECCORE
                     ? typegrp.getBase(1, type_metatype.TYPE_UNKNOWN)
                     // The sub-type being directly pointed at
                     : pointer.getPtrTo();
-                pointer = typegrp.getTypePointerRel(parent, pt, parentOff);
+                pointer = typegrp.getTypePointerRel(parent, pt, (int)parentOff);
             }
             if (pointer == (TypePointer)null) {
                 if (command == 0)
@@ -117,7 +117,7 @@ namespace Sla.DECCORE
         /// \param slot is the input edge being propagated
         /// \param sz is the size of the data-type being pointed to
         /// \return a command indicating how the op should be treated
-        public static int propagateAddPointer(ulong off, PcodeOp op, int slot, int sz)
+        public static int propagateAddPointer(out ulong off, PcodeOp op, int slot, int sz)
         {
             if (op.code() == OpCode.CPUI_PTRADD) {
                 if (slot != 0) return 2;

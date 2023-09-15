@@ -13,8 +13,8 @@ namespace Sla.DECCORE
         //typedef NullSubsort subsorttype;	///< The sub-sort object for a rangemap
         //typedef Scope inittype;		///< Initialization data for a ScopeMapper
 
-        /// The Scope owning this address range
-        private Scope scope;
+        // The Scope owning this address range
+        internal Scope scope;
         /// The first address of the range
         private Address first;
         /// The last address of the range

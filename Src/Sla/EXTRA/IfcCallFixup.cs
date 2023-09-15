@@ -16,11 +16,11 @@ namespace Sla.EXTRA
         /// \param outname passes back the formal output parameter name, or is empty
         /// \param inname passes back an array of the formal input parameter names
         /// \param pcodestring passes back the snippet body
-        public static void readPcodeSnippet(TextReader s, string name, out string outname,
-            List<string> inname, string pcodestring)
+        public static void readPcodeSnippet(TextReader s, out string name, out string outname,
+            List<string> inname, out string pcodestring)
         {
             outname = s.ReadString();
-            parse_toseparator(s, name);
+            Grammar.parse_toseparator(s, out name);
             char bracket = s.ReadMandatoryCharacter();
             if (outname == "void") {
                 outname = string.Empty;
@@ -30,7 +30,7 @@ namespace Sla.EXTRA
             }
             while (bracket != ')') {
                 string param;
-                parse_toseparator(s, param);
+                Grammar.parse_toseparator(s, out param);
                 bracket = s.ReadMandatoryCharacter();
                 if (param.Length != 0) {
                     inname.Add(param);
@@ -41,7 +41,7 @@ namespace Sla.EXTRA
             if (bracket != '{') {
                 throw new IfaceParseError("Missing '{'");
             }
-            getline(s, pcodestring, '}');
+            Globals.getline(s, out pcodestring, '}');
         }
 
         /// \class IfcCallFixup
@@ -60,7 +60,7 @@ namespace Sla.EXTRA
 
             string outname;
             List<string> inname = new List<string>();
-            readPcodeSnippet(s, name, out outname, inname, pcodestring);
+            readPcodeSnippet(s, out name, out outname, inname, out pcodestring);
             int id = -1;
             try {
                 id = dcp.conf.pcodeinjectlib.manualCallFixup(name, pcodestring);

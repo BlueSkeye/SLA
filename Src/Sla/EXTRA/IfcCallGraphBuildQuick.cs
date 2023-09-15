@@ -21,7 +21,7 @@ namespace Sla.EXTRA
             dcp.cgraph.buildAllNodes();   // Build a node in the graph for existing symbols
             quick = true;
             iterateFunctionsAddrOrder();
-            *status.optr << "Successfully built callgraph" << endl;
+            status.optr.WriteLine("Successfully built callgraph");
         }
     }
 }

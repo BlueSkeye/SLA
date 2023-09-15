@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.DECCORE;
 
 namespace Sla.EXTRA
 {
@@ -27,13 +23,12 @@ namespace Sla.EXTRA
             if (s.EofReached())
                 throw new IfaceParseError("No input");
 
-            try
-            {               // Try to parse the line
-                parse_C(dcp.conf, s);
+            try {
+                // Try to parse the line
+                Grammar.parse_C(dcp.conf, s);
             }
-            catch (ParseError err)
-            {
-                *status.optr << "Error in C syntax: " << err.ToString() << endl;
+            catch (ParseError err) {
+                status.optr.WriteLine($"Error in C syntax: {err.ToString()}");
                 throw new IfaceExecutionError("Bad C syntax");
             }
         }

@@ -187,11 +187,11 @@ namespace Sla.DECCORE
             }
 
             // 15 bits unused
-            hash = attachedop ? 0 : 1;
+            hash = attachedop ? 0UL : 1;
             hash <<= 4;
             hash |= method;     // 4-bits
             hash <<= 7;
-            hash |= (ulong)transtable[op.code()];  // 7-bits
+            hash |= (ulong)transtable[(int)op.code()];  // 7-bits
             hash <<= 5;
             hash |= (ulong)(slot & 0x1f);   // 5-bits
 
@@ -599,12 +599,13 @@ namespace Sla.DECCORE
             uint opcVal = getOpCodeFromHash(h);
             int slot = getSlotFromHash(h);
             bool isnotattached = getIsNotAttached(h);
-            PcodeOpTree::const_iterator iter = fd.beginOp(addr);
-            PcodeOpTree::const_iterator enditer = fd.endOp(addr);
+            SortedDictionary<SeqNum, PcodeOp>.Enumerator iter = fd.beginOp(addr);
+            SortedDictionary<SeqNum, PcodeOp>.Enumerator enditer = fd.endOp(addr);
+            bool iterationCompleted = false;
 
-            while (iter != enditer) {
-                PcodeOp? op = (*iter).second;
-                ++iter;
+            while (!iterationCompleted && (iter != enditer)) {
+                PcodeOp? op = iter.Current.Value;
+                iterationCompleted = !iter.MoveNext();
                 if (op.isDead()) continue;
                 if (transtable[(int)op.code()] != opcVal) continue;
                 if (slot < 0) {
@@ -644,10 +645,10 @@ namespace Sla.DECCORE
         /// \param addr is the given address
         public static void gatherOpsAtAddress(List<PcodeOp> opList, Funcdata fd, Address addr)
         {
-            PcodeOpTree::const_iterator iter, enditer;
-            enditer = fd.endOp(addr);
-            for (iter = fd.beginOp(addr); iter != enditer; ++iter) {
-                PcodeOp op = (*iter).second;
+            SortedDictionary<SeqNum, PcodeOp>.Enumerator iter = fd.beginOp(addr);
+            SortedDictionary<SeqNum, PcodeOp>.Enumerator enditer = fd.endOp(addr);
+            while (iter.MoveNext() && iter != enditer) {
+                PcodeOp op = iter.Current.Value;
                 if (op.isDead()) continue;
                 opList.Add(op);
             }

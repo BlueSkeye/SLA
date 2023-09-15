@@ -20,8 +20,8 @@ namespace Sla.EXTRA
         
         ~InjectContextSleigh()
         {
-            if (pos != (ParserContext)null)
-                delete pos;
+            //if (pos != (ParserContext)null)
+            //    delete pos;
         }
 
         // We don't need this functionality for sleigh

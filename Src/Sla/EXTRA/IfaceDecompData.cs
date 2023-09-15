@@ -183,8 +183,8 @@ namespace Sla.EXTRA
         /// \param res will hold any matching symbols
         public void readSymbol(string name, List<Symbol> res)
         {
-            Scope scope = (fd == (Funcdata)null) ? conf.symboltab.getGlobalScope() : fd.getScopeLocal();
-            string basename;
+            Scope? scope = (fd == (Funcdata)null) ? conf.symboltab.getGlobalScope() : fd.getScopeLocal();
+            string? basename;
             scope = conf.symboltab.resolveScopeFromSymbolName(name, "::", out basename, scope);
             if (scope == (Scope)null)
                 throw new IfaceParseError("Bad namespace for symbol: " + name);

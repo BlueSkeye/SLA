@@ -99,6 +99,15 @@ namespace Sla
             throw new NotImplementedException();
         }
 
+        internal static void swap<T>(this List<T> firstList, List<T> secondList)
+        {
+            List<T> temp = new List<T>(firstList);
+            firstList.Clear();
+            firstList.AddRange(secondList);
+            secondList.Clear();
+            secondList.AddRange(temp);
+        }
+
         private class ReverseEnumerator<T> : IEnumerator<T>
         {
             private bool _disposed = false;

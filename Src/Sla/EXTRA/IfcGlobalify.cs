@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.DECCORE;
 
 namespace Sla.EXTRA
 {
@@ -19,7 +14,7 @@ namespace Sla.EXTRA
             if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("No load image present");
             dcp.conf.globalify();
-            *status.optr << "Successfully made all registers/memory locations global" << endl;
+            status.optr.WriteLine("Successfully made all registers/memory locations global");
         }
     }
 }

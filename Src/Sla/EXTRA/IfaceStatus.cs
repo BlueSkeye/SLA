@@ -365,11 +365,13 @@ namespace Sla.EXTRA
         /// to go back through the list of successful command lines.
         /// \param line will hold the selected command line from history
         /// \param i is the number of steps back to go
-        public void getHistory(string line, int i)
+        public void getHistory(out string line, int i)
         {
-            if (i >= history.size())
-                return; // No change to line if history too far back
-
+            if (i >= history.size()) {
+                line = string.Empty;
+                // No change to line if history too far back
+                return;
+            }
             i = curhistory - 1 - i;
             if (i < 0) i += maxhistory;
             line = history[i];

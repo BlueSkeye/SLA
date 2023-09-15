@@ -363,12 +363,16 @@ namespace Sla.DECCORE
                         {
                             int bytePos = (int)op.getIn(1).getOffset();
                             int outLanes, outSkip;
-                            if (!description.restriction(numLanes, skipLanes, bytePos, outvn.getSize(), outLanes, outSkip)) {
+                            if (!description.restriction(numLanes, skipLanes, bytePos, outvn.getSize(),
+                                out outLanes, out outSkip))
+                            {
                                 if (allowSubpieceTerminator) {
                                     int laneIndex = description.getBoundary(bytePos);
-                                    if (laneIndex < 0 || laneIndex >= description.getNumLanes())    // Does piece start on lane boundary?
+                                    if (laneIndex < 0 || laneIndex >= description.getNumLanes())
+                                        // Does piece start on lane boundary?
                                         return false;
-                                    if (description.getSize(laneIndex) <= outvn.getSize())     // Is the piece smaller than a lane?
+                                    if (description.getSize(laneIndex) <= outvn.getSize())
+                                        // Is the piece smaller than a lane?
                                         return false;
                                     // Treat SUBPIECE as terminating
                                     TransformOp rop = newPreexistingOp(2, OpCode.CPUI_SUBPIECE, op);
@@ -393,10 +397,14 @@ namespace Sla.DECCORE
                         {
                             int outLanes, outSkip;
                             int bytePos = (op.getIn(0) == origvn) ? op.getIn(1).getSize() : 0;
-                            if (!description.extension(numLanes, skipLanes, bytePos, outvn.getSize(), outLanes, outSkip))
+                            if (!description.extension(numLanes, skipLanes, bytePos, outvn.getSize(),
+                                out outLanes, out outSkip))
+                            {
                                 return false;
-                            TransformVar outRvn = setReplacement(outvn, outLanes, outSkip);
-                            if (outRvn == (TransformVar)null) return false;
+                            }
+                            TransformVar? outRvn = setReplacement(outvn, outLanes, outSkip);
+                            if (outRvn == (TransformVar)null)
+                                return false;
                             // Don't create the placeholder ops, let traceBackward make them
                             break;
                         }
@@ -477,8 +485,11 @@ namespace Sla.DECCORE
                         Varnode inVn = op.getIn(0);
                         int bytePos = (int)op.getIn(1).getOffset();
                         int inLanes, inSkip;
-                        if (!description.extension(numLanes, skipLanes, bytePos, inVn.getSize(), inLanes, inSkip))
+                        if (!description.extension(numLanes, skipLanes, bytePos, inVn.getSize(),
+                            out inLanes, out inSkip))
+                        {
                             return false;
+                        }
                         TransformVar[]? inVars = setReplacement(inVn, inLanes, inSkip);
                         if (inVars == (TransformVar)null)
                             return false;

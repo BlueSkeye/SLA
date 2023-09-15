@@ -45,7 +45,8 @@ namespace Sla.SLEIGH
 
         ~MacroSymbol()
         {
-            if (construct != (ConstructTpl)null) delete construct;
+            //if (construct != (ConstructTpl)null)
+            //    delete construct;
         }
 
         public override symbol_type getType() => SleighSymbol.symbol_type.macro_symbol;

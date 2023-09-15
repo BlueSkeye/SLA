@@ -16,13 +16,10 @@ namespace Sla.EXTRA
         /// The stream is pushed onto the stack for the console.
         public override void execute(TextReader s)
         {
-            string filename;
-
             s.ReadSpaces();
             if (s.EofReached())
                 throw new IfaceParseError("filename parameter required for source");
-
-            s >> filename;
+            string filename = s.ReadString();
             status.pushScript(filename, filename + "> ");
         }
     }

@@ -491,9 +491,9 @@ namespace Sla.DECCORE
         /// \param res is the parameter storage to pass back
         /// \return the extension operator (INT_ZEXT INT_SEXT) or INT_COPY if there is no extension.
         /// INT_PIECE indicates the extension is determined by the specific prototype.
-        public OpCode assumedInputExtension(Address addr, int size, out VarnodeData res)
+        public OpCode assumedInputExtension(Address addr, int size, VarnodeData res)
         {
-            return input.assumedExtension(addr, size, out res);
+            return input.assumedExtension(addr, size, res);
         }
 
         /// \brief Get the type of extension and containing return value location for the given storage
@@ -506,9 +506,9 @@ namespace Sla.DECCORE
         /// \param res is the parameter storage to pass back
         /// \return the extension operator (INT_ZEXT INT_SEXT) or INT_COPY if there is no extension.
         /// INT_PIECE indicates the extension is determined by the specific prototype.
-        public OpCode assumedOutputExtension(Address addr, int size, out VarnodeData res)
+        public OpCode assumedOutputExtension(Address addr, int size, VarnodeData res)
         {
-            return output.assumedExtension(addr, size, out res);
+            return output.assumedExtension(addr, size, res);
         }
 
         /// \brief Pass-back the biggest input parameter contained within the given range

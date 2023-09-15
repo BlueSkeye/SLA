@@ -26,7 +26,7 @@ namespace Sla.EXTRA
 
         public override void iterationCallback(Funcdata fd)
         {
-            *status.optr << fd.getName() << endl;
+            status.optr.WriteLine(fd.getName());
         }
     }
 }

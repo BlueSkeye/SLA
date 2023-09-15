@@ -27,8 +27,9 @@ namespace Sla.EXTRA
             if (injectid < 0)
                 throw new IfaceExecutionError("Unknown fixup: " + fixupName);
 
-            string basename;
-            Scope funcscope = dcp.conf.symboltab.resolveScopeFromSymbolName(funcName, "::", basename, (Scope)null);
+            string? basename;
+            Scope? funcscope = dcp.conf.symboltab.resolveScopeFromSymbolName(funcName, "::",
+                out basename, (Scope)null);
             if (funcscope == (Scope)null)
                 throw new IfaceExecutionError("Bad namespace: " + funcName);
             Funcdata fd = funcscope.queryFunction(basename); // Is function already in database

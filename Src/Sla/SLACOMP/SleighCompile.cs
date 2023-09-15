@@ -239,7 +239,8 @@ namespace Sla.SLACOMP
                 return;
             }
             TextWriter msg = new StringWriter();
-            root.buildPattern(msg);    // This should recursively hit everything
+            // This should recursively hit everything
+            root.buildPattern(msg);
             if (root.isError()) {
                 reportError(getLocation(root), msg.ToString());
                 errors += 1;
@@ -1525,7 +1526,7 @@ namespace Sla.SLACOMP
         /// \param sym is the given operand
         public void selfDefine(OperandSymbol sym)
         {
-            TripleSymbol? glob = dynamic_cast<TripleSymbol*>(symtab.findSymbol(sym.getName(), 1));
+            TripleSymbol? glob = symtab.findSymbol(sym.getName(), 1) as TripleSymbol;
             if (glob == (TripleSymbol)null) {
                 reportError(getCurrentLocation(), "No matching global symbol '" + sym.getName() + "'");
                 return;
@@ -1627,16 +1628,19 @@ namespace Sla.SLACOMP
         /// \param name is the name of the macro
         /// \param params is the list of parameter names for the macro
         /// \return the new macro symbol
-        public MacroSymbol createMacro(string name, List<string> param)
+        public MacroSymbol createMacro(string name, List<string> @params)
         {
-            curct = (Constructor)null;    // Not currently defining a Constructor
+            // Not currently defining a Constructor
+            curct = (Constructor)null;
             curmacro = new MacroSymbol(name, macrotable.size());
             // delete name;
             addSymbol(curmacro);
-            symtab.addScope();      // New scope for the body of the macro definition
-            pcode.resetLabelCount();    // Macros have their own labels
+            // New scope for the body of the macro definition
+            symtab.addScope();
+            // Macros have their own labels
+            pcode.resetLabelCount();
             for (int i = 0; i < @params.size(); ++i) {
-                OperandSymbol oper = new OperandSymbol(@params[i], i,(Constructor)null);
+                OperandSymbol oper = new OperandSymbol(@params[i], i, (Constructor)null);
                 addSymbol(oper);
                 curmacro.addOperand(oper);
             }
@@ -1653,7 +1657,7 @@ namespace Sla.SLACOMP
         public void compareMacroParams(MacroSymbol sym, List<ExprTree> param)
         {
             for (int i = 0; i < param.size(); ++i) {
-                VarnodeTpl outvn = param[i].getOut();
+                VarnodeTpl? outvn = param[i].getOut();
                 if (outvn == (VarnodeTpl)null) continue;
                 // Check if an OperandSymbol was passed into this macro
                 if (outvn.getOffset().getType() != ConstTpl.const_type.handle) continue;
@@ -1998,7 +2002,8 @@ namespace Sla.SLACOMP
                     Console.Error.WriteLine("No output produced");
                     return 2;
                 }
-                sleighlex_destroy(); // Make sure lexer is reset so we can parse multiple files
+                // Make sure lexer is reset so we can parse multiple files
+                sleighlex_destroy();
             }
             catch (LowlevelError err) {
                 Console.Error.WriteLine($"Unrecoverable error: {err.ToString()}");

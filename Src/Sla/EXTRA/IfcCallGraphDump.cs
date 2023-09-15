@@ -14,9 +14,9 @@ namespace Sla.EXTRA
             if (dcp.cgraph == (CallGraph)null)
                 throw new IfaceExecutionError("No callgraph has been built");
 
-            string name;
-            s.ReadSpaces() >> name;
-            if (name.size() == 0)
+            s.ReadSpaces();
+            string name = s.ReadString();
+            if (name.Length == 0)
                 throw new IfaceParseError("Need file name to write callgraph to");
 
             TextWriter os;

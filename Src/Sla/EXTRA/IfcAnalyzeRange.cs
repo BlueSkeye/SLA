@@ -22,8 +22,8 @@ namespace Sla.EXTRA
                 throw new IfaceExecutionError("No function selected");
 
             bool useFullWidener;
-            string token;
-            s.ReadSpaces() >> token;
+            s.ReadSpaces();
+            string token = s.ReadString();
             if (token == "full")
                 useFullWidener = true;
             else if (token == "partial") {

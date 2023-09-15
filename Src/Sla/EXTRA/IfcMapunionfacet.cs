@@ -1,5 +1,6 @@
 ﻿using Sla.CORE;
 using Sla.DECCORE;
+using System.Globalization;
 
 namespace Sla.EXTRA
 {
@@ -33,7 +34,7 @@ namespace Sla.EXTRA
             Address addr = Grammar.parse_machaddr(s, out size, dcp.conf.types);
 
             // Parse the hash value
-            s >> hex >> hash;
+            hash = ulong.Parse(s.ReadString(), NumberStyles.HexNumber | NumberStyles.AllowHexSpecifier);
             Symbol sym = dcp.fd.getScopeLocal().addUnionFacetSymbol(
                 $"unionfacet{(fieldNum + 1)}_{addr.getOffset():X}", ct, fieldNum, addr, hash);
             dcp.fd.getScopeLocal().setAttribute(sym,

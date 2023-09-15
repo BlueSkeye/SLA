@@ -19,9 +19,9 @@ namespace Sla.EXTRA
             ulong adjust = 0uL;
             if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("No load image present");
-            s.unsetf(ios::dec | ios::hex | ios::oct); // Let user specify base
-            s.ReadSpaces() >> adjust;
-            if (adjust == 0uL)
+            // s.unsetf(ios::dec | ios::hex | ios::oct); // Let user specify base
+            s.ReadSpaces();
+            if (!ulong.TryParse(s.ReadString(), out adjust))
                 throw new IfaceParseError("No adjustment parameter");
             dcp.conf.loader.adjustVma(adjust);
         }

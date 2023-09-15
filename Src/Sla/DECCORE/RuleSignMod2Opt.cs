@@ -34,20 +34,25 @@ namespace Sla.DECCORE
             PcodeOp addOp = addOut.getDef() ?? throw new ApplicationException();
             if (addOp.code() != OpCode.CPUI_INT_ADD) return 0;
             int multSlot;
-            PcodeOp multOp;
+            PcodeOp? multOp = null;
             bool trunc = false;
             for (multSlot = 0; multSlot < 2; ++multSlot) {
                 Varnode vn = addOp.getIn(multSlot) ?? throw new ApplicationException();
-                if (!vn.isWritten()) continue;
+                if (!vn.isWritten()) 
+                    continue;
                 multOp = vn.getDef() ?? throw new ApplicationException();
-                if (multOp.code() != OpCode.CPUI_INT_MULT) continue;
+                if (multOp.code() != OpCode.CPUI_INT_MULT)
+                    continue;
                 constVn = multOp.getIn(1) ?? throw new ApplicationException();
-                if (!constVn.isConstant()) continue;
+                if (!constVn.isConstant())
+                    continue;
                 // Check for INT_MULT by -1
-                if (constVn.getOffset() == Globals.calc_mask((uint)constVn.getSize())) break;
+                if (constVn.getOffset() == Globals.calc_mask((uint)constVn.getSize()))
+                    break;
             }
             if (multSlot > 1) return 0;
-            Varnode? @base = RuleSignMod2nOpt.checkSignExtraction(multOp.getIn(0));
+            Varnode? @base = RuleSignMod2nOpt.checkSignExtraction(
+                (multOp ?? throw new ApplicationException()).getIn(0));
             if (@base == (Varnode)null) return 0;
             Varnode otherBase = addOp.getIn(1 - multSlot) ?? throw new ApplicationException();
             if (@base != otherBase) {

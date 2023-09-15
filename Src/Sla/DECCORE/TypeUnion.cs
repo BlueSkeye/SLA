@@ -64,7 +64,7 @@ namespace Sla.DECCORE
         public TypeUnion()
             : base(0, type_metatype.TYPE_UNION)
         {
-            flags |= (type_incomplete | needs_resolution);
+            flags |= (Properties.type_incomplete | Properties.needs_resolution);
         }  ///< Construct incomplete TypeUnion
 
         /// Get the i-th field of the union
@@ -82,6 +82,7 @@ namespace Sla.DECCORE
             // No new scoring is done, but if a cached result is available, return it.
             Funcdata fd = op.getParent().getFuncdata();
             ResolvedUnion? res = fd.getUnionField(this, op, slot);
+            newoff = 0;
             if (res != (ResolvedUnion)null && res.getFieldNum() >= 0) {
                 TypeField field = getField(res.getFieldNum());
                 newoff = offset - field.offset;
@@ -218,6 +219,7 @@ namespace Sla.DECCORE
         {
             Funcdata fd = op.getParent().getFuncdata();
             ResolvedUnion? res = fd.getUnionField(this, op, slot);
+            newoff = 0;
             if (res != (ResolvedUnion)null) {
                 if (res.getFieldNum() >= 0) {
                     TypeField field = getField(res.getFieldNum());

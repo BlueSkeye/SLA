@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -13,7 +9,7 @@ namespace Sla.DECCORE
             : base(t, OpCode.CPUI_INT_NEGATE,"~", type_metatype.TYPE_UINT, type_metatype.TYPE_UINT)
         {
             opflags = PcodeOp.Flags.unary;
-            addlflags = logical_op | inherits_sign;
+            addlflags = OperationType.logical_op | OperationType.inherits_sign;
             behave = new OpBehaviorIntNegate();
         }
 

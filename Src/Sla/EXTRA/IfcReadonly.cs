@@ -29,7 +29,7 @@ namespace Sla.EXTRA
             CORE.Range range = new CORE.Range(addr.getSpace(), addr.getOffset(), addr.getOffset() +(size - 1));
             dcp.conf.symboltab.setPropertyRange(Varnode.varnode_flags.@readonly, range);
 
-            *status.optr << "Successfully marked range as readonly" << endl;
+            status.optr.WriteLine("Successfully marked range as readonly");
         }
     }
 }

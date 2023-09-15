@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.EXTRA;
 
 namespace Sla.DECCORE
 {
@@ -20,11 +16,9 @@ namespace Sla.DECCORE
         public override string apply(Architecture glb, string p1, string p2, string p3)
         {
             int val = -1;
-            istringstream s = new istringstream(p1);
-            s >> dec >> val;
-            if (val == -1)
-                throw ParseError("Missing alignment value");
-
+            TextReader s = new StringReader(p1);
+            if (!int.TryParse(s.ReadString(), out val))
+                throw new ParseError("Missing alignment value");
             glb.types.setStructAlign(val);
             return "Structure alignment set";
         }

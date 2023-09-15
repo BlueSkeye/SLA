@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.DECCORE;
 
 namespace Sla.EXTRA
 {
@@ -20,27 +15,27 @@ namespace Sla.EXTRA
             if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("No load image present");
 
-            string filename;
-            ifstream fs;
-
-            s.ReadSpaces() >> filename;
+            s.ReadSpaces();
+            string filename = s.ReadString();
             if (filename.empty())
                 throw new IfaceParseError("Missing filename");
 
-            fs.open(filename.c_str());
-            if (!fs)
-                throw new IfaceExecutionError("Unable to open file: " + filename);
+            FileStream fs;
 
-            try
-            {               // Try to parse the file
-                parse_C(dcp.conf, fs);
+            try { fs = File.OpenRead(filename); }
+            catch {
+                throw new IfaceExecutionError("Unable to open file: " + filename);
             }
-            catch (ParseError err)
-            {
-                *status.optr << "Error in C syntax: " << err.ToString() << endl;
+
+            try {
+                // Try to parse the file
+                Grammar.parse_C(dcp.conf, fs);
+            }
+            catch (ParseError err) {
+                status.optr.WriteLine($"Error in C syntax: {err.ToString()}");
                 throw new IfaceExecutionError("Bad C syntax");
             }
-            fs.close();
+            finally { if (fs != null) fs.Close(); }
         }
     }
 }

@@ -17,13 +17,11 @@ namespace Sla.EXTRA
         /// in its current state of transform, is written to the indicated file.
         public override void execute(TextReader s)
         {
-            string filename;
-
             if (dcp.fd == (Funcdata)null)
                 throw new IfaceExecutionError("No function selected");
 
-            s >> filename;
-            if (filename.size() == 0)
+            string filename = s.ReadString();
+            if (filename.Length == 0)
                 throw new IfaceParseError("Missing output file");
             if (!dcp.fd.isProcStarted())
                 throw new IfaceExecutionError("Basic block structure not calculated");
@@ -32,7 +30,7 @@ namespace Sla.EXTRA
             catch {
                 throw new IfaceExecutionError("Unable to open output file: " + filename);
             }
-            dump_dom_graph(dcp.fd.getName(), dcp.fd.getBasicBlocks(), thefile);
+            Graph.dump_dom_graph(dcp.fd.getName(), dcp.fd.getBasicBlocks(), thefile);
             thefile.Close();
         }
     }

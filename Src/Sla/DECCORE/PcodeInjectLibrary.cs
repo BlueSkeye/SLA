@@ -198,7 +198,7 @@ namespace Sla.DECCORE
         /// \param tp is the type of the payload (CALLFIXUP_TYPE, InjectPayload.InjectionType.EXECUTABLEPCODE_TYPE, etc.)
         /// \param decoder is the stream decoder
         /// \return the id of the newly registered payload
-        public int decodeInject(string src, string suffix, InjectPayload.InjectionType tp,
+        public int decodeInject(string src, string nm, InjectPayload.InjectionType tp,
             Sla.CORE.Decoder decoder)
         {
             int injectid = allocateInject(src, nm, tp);

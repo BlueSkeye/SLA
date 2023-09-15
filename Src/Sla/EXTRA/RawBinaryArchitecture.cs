@@ -59,9 +59,9 @@ namespace Sla.EXTRA
                 throw new CORE.LowlevelError("Could not find raw_savefile tag");
 
             restoreXmlHeader(el); {
-                istringstream s = new istringstream(el.getAttributeValue("adjustvma"));
-                s.unsetf(ios::dec | ios::hex | ios::oct);
-                s >> adjustvma;
+                TextReader s = new StringReader(el.getAttributeValue("adjustvma"));
+                // s.unsetf(ios::dec | ios::hex | ios::oct);
+                adjustvma = long.Parse(s.ReadString());
             }
             IEnumerator<Element> iter = el.getChildren().GetEnumerator();
             bool eolReached = false;

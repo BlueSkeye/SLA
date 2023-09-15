@@ -18,9 +18,8 @@ namespace Sla.EXTRA
             if (dcp.cgraph != (CallGraph)null)
                 throw new IfaceExecutionError("Callgraph already loaded");
 
-            string name;
-
-            s.ReadSpaces() >> name;
+            s.ReadSpaces();
+            string name = s.ReadString();
             if (name.Length == 0)
                 throw new IfaceExecutionError("Need name of file to read callgraph from");
 
@@ -50,7 +49,7 @@ namespace Sla.EXTRA
                 node.setFuncdata(fd);
             }
 
-            *status.optr << "Successfully associated functions with callgraph nodes" << endl;
+            status.optr .WriteLine("Successfully associated functions with callgraph nodes");
         }
     }
 }

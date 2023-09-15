@@ -2,6 +2,9 @@
 using Sla.DECCORE;
 using Sla.SLACOMP;
 using Sla.SLEIGH;
+using System;
+using System.Numerics;
+using System.Text;
 
 namespace Sla
 {
@@ -36,6 +39,50 @@ namespace Sla
         };
 #endif
 
+        internal static long getInstructionBytes(ParserWalker walker, int bytestart, int byteend,
+            bool bigendian)
+        {
+            // Build a intb from the instruction bytes
+            long res = 0;
+            uint tmp;
+
+            int size = byteend - bytestart + 1;
+            int tmpsize = size;
+            while (tmpsize >= sizeof(uint)) {
+                tmp = walker.getInstructionBytes(bytestart, sizeof(uint));
+                res <<= 8 * sizeof(uint);
+                res |= tmp;
+                bytestart += sizeof(uint);
+                tmpsize -= sizeof(uint);
+            }
+            if (tmpsize > 0) {
+                tmp = walker.getInstructionBytes(bytestart, tmpsize);
+                res <<= 8 * tmpsize;
+                res |= tmp;
+            }
+            if (!bigendian) {
+                byte_swap(ref res, size);
+            }
+            return res;
+        }
+
+        internal static void getline(TextReader s, out string result, char delimiter)
+        {
+            StringBuilder builder = new StringBuilder();
+
+            while (true) {
+                char? candidate = s.ReadCharacter();
+                if (null == candidate) {
+                    break;
+                }
+                if (('\n' == candidate) || (delimiter == candidate)) {
+                    break;
+                }
+                builder.Append(candidate);
+            }
+            result = builder.ToString();
+        }
+
         public static ulong GetUInt64(byte[] from)
         {
             if (from.Length < sizeof(ulong)) throw new ArgumentException();
@@ -63,11 +110,21 @@ namespace Sla
             return uintbmasks[(8 > size) ? size : 8];
         }
 
-        /// Perform a OpCode.CPUI_INT_RIGHT on the given val
-        /// \param val is the value to shift
-        /// \param sa is the number of bits to shift
-        /// \return the shifted value
-        public static ulong pcode_right(ulong val, int sa)
+        internal static TokenPattern buildPattern(PatternValue lhs, long lhsval,
+            List<PatternValue> semval, List<long> val)
+        {
+            TokenPattern respattern = lhs.genPattern(lhsval);
+
+            for (int i = 0; i < semval.size(); ++i)
+                respattern = respattern.doAnd(semval[i].genPattern(val[i]));
+            return respattern;
+        }
+
+    /// Perform a OpCode.CPUI_INT_RIGHT on the given val
+    /// \param val is the value to shift
+    /// \param sa is the number of bits to shift
+    /// \return the shifted value
+    public static ulong pcode_right(ulong val, int sa)
         {
             return (sa >= 8 * sizeof(ulong)) ? 0 : val >> sa;
         }
