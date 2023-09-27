@@ -15,17 +15,17 @@ namespace Sla.DECCORE
         [Flags()]
         public enum OperationType
         {
-            /// Operator token inherits signedness from its inputs
+            // Operator token inherits signedness from its inputs
             inherits_sign = 1,
-            /// Only inherits sign from first operand, not the second
+            // Only inherits sign from first operand, not the second
             inherits_sign_zero = 2,
-            /// Shift operation
+            // Shift operation
             shift_op = 4,
-            /// Operation involving addition, multiplication, or division
+            // Operation involving addition, multiplication, or division
             arithmetic_op = 8,
-            /// Logical operation
+            // Logical operation
             logical_op = 0x10,
-            /// Floating-point operation
+            // Floating-point operation
             floatingpoint_op = 0x20
         }
 
@@ -58,9 +58,9 @@ namespace Sla.DECCORE
             name = nm;
         }
 
-        /// \param t is the TypeFactory used to construct data-types
-        /// \param opc is the op-code value the new object will represent
-        /// \param n is the display name that will represent the op-code
+        // \param t is the TypeFactory used to construct data-types
+        // \param opc is the op-code value the new object will represent
+        // \param n is the display name that will represent the op-code
         public TypeOp(TypeFactory t, OpCode opc, string n)
         {
             tlst = t;

@@ -6,6 +6,7 @@ namespace Sla.DECCORE
     internal class TypeOpCall : TypeOp
     {
         public TypeOpCall(TypeFactory t)
+            : base(t, OpCode.CPUI_CALL,"call")
         {
             opflags = (PcodeOp.Flags.special | PcodeOp.Flags.call | PcodeOp.Flags.has_callspec |
                 PcodeOp.Flags.coderef | PcodeOp.Flags.nocollapse);

@@ -44,7 +44,8 @@ namespace Sla.DECCORE
         internal void attachScope(Scope child)
         {
             child.parent = this;
-            children[child.uniqueId] = child;  // uniqueId is guaranteed to be unique by Database
+            // uniqueId is guaranteed to be unique by Database
+            children[child.uniqueId] = child;
         }
 
         // WARNING : Modified prototype
@@ -57,13 +58,16 @@ namespace Sla.DECCORE
             children.Remove(scopeId);
             // delete child;
         }
-
-        /// \brief Create a Scope id based on the scope's name and its parent's id
-        /// Create a globally unique id for a scope simply from its name.
-        /// \param baseId is the scope id of the parent scope
-        /// \param nm is the name of scope
-        /// \return the hash of the parent id and name
-        internal static ulong hashScopeName(ulong baseId, string nm)
+        internal void detachScope(Scope scope)
+        {
+            detachScope(scope.uniqueId);
+        }
+            /// \brief Create a Scope id based on the scope's name and its parent's id
+            /// Create a globally unique id for a scope simply from its name.
+            /// \param baseId is the scope id of the parent scope
+            /// \param nm is the name of scope
+            /// \return the hash of the parent id and name
+            internal static ulong hashScopeName(ulong baseId, string nm)
         {
             uint reg1 = (uint)(baseId >> 32);
             uint reg2 = (uint)baseId;

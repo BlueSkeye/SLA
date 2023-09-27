@@ -1,12 +1,4 @@
 ﻿using Sla.CORE;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Sla.DECCORE
 {
@@ -1218,7 +1210,7 @@ namespace Sla.DECCORE
         /// \param addr is the given \e fspec address
         /// \return the FuncCallSpecs object
         public static FuncCallSpecs getFspecFromConst(Address addr)
-            => (FuncCallSpecs)(ulong)addr.getOffset();
+            => (FuncCallSpecs)addr.getOffset();
 
         /// \brief Compare FuncCallSpecs by function entry address
         ///

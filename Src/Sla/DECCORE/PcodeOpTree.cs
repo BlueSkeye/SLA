@@ -2,7 +2,7 @@
 
 namespace Sla.DECCORE
 {
-    internal class PcodeOpTree : SortedDictionary<SeqNum, PcodeOp>
+    internal class PcodeOpTree : SortedList<SeqNum, PcodeOp>
     {
     }
 }

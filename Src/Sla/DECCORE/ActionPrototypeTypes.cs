@@ -27,7 +27,7 @@ namespace Sla.DECCORE
         public void extendInput(Funcdata data, Varnode invn, ProtoParameter param, BlockBasic topbl)
         {
             VarnodeData vdata;
-            OpCode res = data.getFuncProto().assumedInputExtension(invn.getAddr(), invn.getSize(), out vdata);
+            OpCode res = data.getFuncProto().assumedInputExtension(invn.getAddr(), invn.getSize(), vdata);
             if (res == OpCode.CPUI_COPY) return;       // no extension
             if (res == OpCode.CPUI_PIECE)
             {   // Do an extension based on type of parameter

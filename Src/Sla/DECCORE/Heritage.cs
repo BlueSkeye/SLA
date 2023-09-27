@@ -2200,21 +2200,22 @@ namespace Sla.DECCORE
         /// Assume \b disjoint is filled with all the free Varnodes to be heritaged
         private void placeMultiequals()
         {
-            LocationMap::iterator iter;
             List<Varnode> readvars = new List<Varnode>();
             List<Varnode> writevars = new List<Varnode>();
             List<Varnode> inputvars = new List<Varnode>();
             List<Varnode> removevars = new List<Varnode>();
 
-            for (iter = disjoint.begin(); iter != disjoint.end(); ++iter) {
+            Dictionary<Address, SizePass>.Enumerator iter = disjoint.begin();
+            while (iter.MoveNext()) {
                 Address addr = iter.Current.Key;
-                int size = (*iter).second.size;
-                bool guardPerformed = (*iter).second.pass < pass;
+                int size = iter.Current.Value.size;
+                bool guardPerformed = iter.Current.Value.pass < pass;
                 readvars.Clear();
                 writevars.Clear();
                 inputvars.Clear();
                 removevars.Clear();
-                int max = collect(addr, size, readvars, writevars, inputvars, removevars); // Collect reads/writes
+                // Collect reads/writes
+                int max = collect(addr, size, readvars, writevars, inputvars, removevars);
                 if ((size > 4) && (max < size)) {
                     if (refinement(addr, size, readvars, writevars, inputvars)) {
                         iter = disjoint.find(addr);
@@ -2230,11 +2231,13 @@ namespace Sla.DECCORE
                     if (writevars.empty() && inputvars.empty()) {
                         continue;
                     }
-                    if (addr.getSpace().getType() == spacetype.IPTR_INTERNAL || guardPerformed)
+                    if (addr.getSpace().getType() == spacetype.IPTR_INTERNAL || guardPerformed) {
                         continue;
+                    }
                 }
-                if (!removevars.empty())
+                if (!removevars.empty()) {
                     removeRevisitedMarkers(removevars, addr, size);
+                }
                 guardInput(addr, size, inputvars);
                 guard(addr, size, guardPerformed, readvars, writevars, inputvars);
                 calcMultiequals(writevars); // Calculate where MULTIEQUALs go

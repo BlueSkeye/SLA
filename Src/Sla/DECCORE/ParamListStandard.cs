@@ -471,7 +471,7 @@ namespace Sla.DECCORE
                 resolver = new ParamEntryResolver();
                 resolverMap[spc.getIndex()] = resolver;
             }
-            ParamEntryResolver.inittype initData = ParamEntryResolver.inittype(position, paramEntry);
+            ParamEntryResolver.inittype initData = new ParamEntryResolver.inittype(position, paramEntry);
             resolver.insert(initData, first, last);
         }
 

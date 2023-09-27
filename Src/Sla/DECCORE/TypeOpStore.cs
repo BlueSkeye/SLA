@@ -6,6 +6,7 @@ namespace Sla.DECCORE
     internal class TypeOpStore : TypeOp
     {
         public TypeOpStore(TypeFactory t)
+            : base(t, OpCode.CPUI_STORE, "store")
         {
             opflags = PcodeOp.Flags.special | PcodeOp.Flags.nocollapse;
             behave = new OpBehavior(OpCode.CPUI_STORE, false, true); // Dummy behavior

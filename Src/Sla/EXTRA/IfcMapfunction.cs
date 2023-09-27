@@ -33,7 +33,7 @@ namespace Sla.EXTRA
                 // Pick default name if necessary
                 dcp.conf.nameFunction(addr, out name);
             string basename;
-            Scope scope = dcp.conf.symboltab.findCreateScopeFromSymbolName(name, "::"
+            Scope scope = dcp.conf.symboltab.findCreateScopeFromSymbolName(name, "::",
                 out basename, (Scope)null);
             dcp.fd = scope.addFunction(addr, name).getFunction();
 

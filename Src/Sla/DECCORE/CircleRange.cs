@@ -1,12 +1,4 @@
 ﻿using Sla.CORE;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Net.WebRequestMethods;
 
 namespace Sla.DECCORE
 {
@@ -35,24 +27,34 @@ namespace Sla.DECCORE
     ///     do {
     ///     } while(range.getNext(val));
     ///   \endcode
-    internal class CircleRange
+    internal sealed class CircleRange
     {
-        /// Left boundary of the open range [left,right)
+        // Left boundary of the open range [left,right)
         private ulong left;
-        /// Right boundary of the open range [left,right)
+        // Right boundary of the open range [left,right)
         private ulong right;
-        /// Bit mask defining the size (modulus) and stop of the range
+        // Bit mask defining the size (modulus) and stop of the range
         private ulong mask;
-        /// \b true if set is empty
+        // \b true if set is empty
         private bool isempty;
-        /// Explicit step size
+        // Explicit step size
         private int step;
-        /// Map from raw overlaps to normalized overlap code
+        // Map from raw overlaps to normalized overlap code
         private const string arrange = "gcgbegdagggggggeggggcgbggggggggcdfgggggggegdggggbgggfggggcgbegda";
 
-        /// Normalize the representation of full sets
-        /// All the instantiations where left == right represent the same set. We
-        /// normalize the representation so we can compare sets easily.
+        // ADDED : Handle *this = other.
+        private void CopyFrom(CircleRange other)
+        {
+            this.left = other.left;
+            this.right = other.right;
+            this.mask = other.mask;
+            this.isempty = other.isempty;
+            this.step = other.step;
+        }
+
+        // Normalize the representation of full sets
+        // All the instantiations where left == right represent the same set. We
+        // normalize the representation so we can compare sets easily.
         private void normalize()
         {
             if (left == right) {
@@ -65,15 +67,13 @@ namespace Sla.DECCORE
         /// This method \b only works if \b step is 1
         private void complement()
         {
-            if (isempty)
-            {
+            if (isempty) {
                 left = 0;
                 right = 0;
                 isempty = false;
                 return;
             }
-            if (left == right)
-            {
+            if (left == right) {
                 isempty = true;
                 return;
             }
@@ -82,14 +82,13 @@ namespace Sla.DECCORE
             right = tmp;
         }
 
-        /// Convert \b this to boolean.
-        /// If the original range contained
-        ///   - 0 and 1   => the new range is [0,2)
-        ///   - 0 only    => the new range is [0,1)
-        ///   - 1 only    => the new range is [1,2)
-        ///   - neither 0 or 1  =>  the new range is empty
-        ///
-        /// \return \b true if the range contains both 0 and 1
+        // Convert \b this to boolean.
+        // If the original range contained
+        //   - 0 and 1   => the new range is [0,2)
+        //   - 0 only    => the new range is [0,1)
+        //   - 1 only    => the new range is [1,2)
+        //   - neither 0 or 1  =>  the new range is empty
+        // \return \b true if the range contains both 0 and 1
         private bool convertToBoolean()
         {
             if (isempty) return false;
@@ -97,27 +96,25 @@ namespace Sla.DECCORE
             bool contains_one = contains(1);
             mask = 0xff;
             step = 1;
-            if (contains_zero && contains_one)
-            {
+            if (contains_zero && contains_one) {
                 left = 0;
                 right = 2;
                 isempty = false;
                 return true;
             }
-            else if (contains_zero)
-            {
+            else if (contains_zero) {
                 left = 0;
                 right = 1;
                 isempty = false;
             }
-            else if (contains_one)
-            {
+            else if (contains_one) {
                 left = 1;
                 right = 2;
                 isempty = false;
             }
-            else
+            else {
                 isempty = true;
+            }
             return false;
         }
 
@@ -635,12 +632,13 @@ namespace Sla.DECCORE
         {
             if (op2.isempty) return 0;
             if (isempty) {
-                *this = op2;
+                this.CopyFrom(op2);
                 return 0;
             }
-            if (mask != op2.mask)
+            if (mask != op2.mask) {
                 // Cannot do proper union with different domains
                 return 2;
+            }
             ulong aRight = right;
             ulong bRight = op2.right;
             int newStep = step;
@@ -1228,7 +1226,7 @@ namespace Sla.DECCORE
             switch (opc) {
                 case OpCode.CPUI_CAST:
                 case OpCode.CPUI_COPY:
-                    *this = in1;
+                    this.CopyFrom(in1);
                     break;
                 case OpCode.CPUI_INT_ZEXT:
                     isempty = false;

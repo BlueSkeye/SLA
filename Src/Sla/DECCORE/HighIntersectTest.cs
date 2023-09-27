@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Sla.DECCORE
 {
     /// \brief A cache of Cover intersection tests for HighVariables
@@ -19,8 +12,8 @@ namespace Sla.DECCORE
     /// to be merged, the cached tests can be updated by calling moveIntersectTest() before merging.
     internal class HighIntersectTest
     {
-        /// A cache of intersection tests, sorted by HighVariable pair
-        private Dictionary<HighEdge, bool> highedgemap;
+        // A cache of intersection tests, sorted by HighVariable pair
+        private SortedList<HighEdge, bool> highedgemap = new SortedList<HighEdge, bool>();
 
         /// \brief Gather Varnode instances of the given HighVariable that intersect a cover on a specific block
         ///
@@ -30,11 +23,11 @@ namespace Sla.DECCORE
         /// \param res will hold the resulting intersecting Varnodes
         private static void gatherBlockVarnodes(HighVariable a, int blk, Cover cover, List<Varnode> res)
         {
-            for (int i = 0; i < a.numInstances(); ++i)
-            {
+            for (int i = 0; i < a.numInstances(); ++i) {
                 Varnode vn = a.getInstance(i);
-                if (1 < vn.getCover().intersectByBlock(blk, cover))
+                if (1 < vn.getCover().intersectByBlock(blk, cover)) {
                     res.Add(vn);
+                }
             }
         }
 
@@ -52,22 +45,17 @@ namespace Sla.DECCORE
         private static bool testBlockIntersection(HighVariable a, int blk, Cover cover,int relOff,
             List<Varnode> blist)
         {
-            for (int i = 0; i < a.numInstances(); ++i)
-            {
+            for (int i = 0; i < a.numInstances(); ++i) {
                 Varnode vn = a.getInstance(i);
                 if (2 > vn.getCover().intersectByBlock(blk, cover)) continue;
-                for (int j = 0; j < blist.size(); ++j)
-                {
+                for (int j = 0; j < blist.size(); ++j) {
                     Varnode vn2 = blist[j];
-                    if (1 < vn2.getCover().intersectByBlock(blk, *vn.getCover()))
-                    {
-                        if (vn.getSize() == vn2.getSize())
-                        {
+                    if (1 < vn2.getCover().intersectByBlock(blk, vn.getCover())) {
+                        if (vn.getSize() == vn2.getSize()) {
                             if (!vn.copyShadow(vn2))
                                 return true;
                         }
-                        else
-                        {
+                        else {
                             if (!vn.partialCopyShadow(vn2, relOff))
                                 return true;
                         }
@@ -129,27 +117,33 @@ namespace Sla.DECCORE
             return false;
         }
 
-        /// Remove cached intersection tests for a given HighVariable
-        /// All tests for pairs where either the first or second HighVariable matches the given one
-        /// are removed.
-        /// \param high is the given HighVariable to purge
+        // Remove cached intersection tests for a given HighVariable
+        // All tests for pairs where either the first or second HighVariable matches the given one
+        // are removed.
+        // \param high is the given HighVariable to purge
         private void purgeHigh(HighVariable high)
         {
-            IEnumerator<KeyValuePair<HighEdge, bool>> iterfirst = highedgemap.lower_bound(
+            int /*IEnumerator<KeyValuePair<HighEdge, bool>>*/ iterfirst = highedgemap.lower_bound(
                 new HighEdge(high, (HighVariable)null));
-            IEnumerator<KeyValuePair<HighEdge, bool>> iterlast =
+            int /*IEnumerator<KeyValuePair<HighEdge, bool>>*/ iterlast =
                 highedgemap.lower_bound(new HighEdge(high, (HighVariable)ulong.MaxValue));
 
             if (iterfirst == iterlast) return;
-            // Move back 1 to prevent deleting under the iterator
-            --iterlast;
-            IEnumerator<KeyValuePair<HighEdge, bool>> iter;
-            for (iter = iterfirst; iter != iterlast; ++iter)
-                highedgemap.Remove(iter.Current.Key.b);
-            highedgemap.Remove(iter.Current.Key.b);
+            // MOFIDIED Iteration mechanism
+            //// Move back 1 to prevent deleting under the iterator
+            //--iterlast;
+            int /*IEnumerator<KeyValuePair<HighEdge, bool>>*/ iter;
+            // Modified loop incrementation
+            for (iter = iterfirst; iter < iterlast--; ) {
+                HighEdge scannedEdge = highedgemap.ElementAt(iter).Key;
+                highedgemap.Remove(scannedEdge);
+            }
+            // REMOVED due to modification above
+            // highedgemap.Remove(highedgemap.ElementAt(iterlast).Key);
             // Restore original range (with possibly new open endpoint)
             ++iterlast;
-            highedgemap.Remove(iterfirst, out iterlast);
+            // TODO removed because it seems to be useless.
+            // highedgemap.Remove(iterfirst, out iterlast);
         }
 
         /// \brief Translate any intersection tests for \e high2 into tests for \e high1
@@ -164,16 +158,20 @@ namespace Sla.DECCORE
             List<HighVariable> yesinter = new List<HighVariable>();
             // Highs that high2 does not intersect
             List<HighVariable> nointer = new List<HighVariable>();
-            Dictionary<HighEdge, bool>.Enumerator iterfirst =
+            int /*Dictionary<HighEdge, bool>.Enumerator*/ iterfirst =
                 highedgemap.lower_bound(new HighEdge(high2, (HighVariable)null));
-            Dictionary<HighEdge, bool>.Enumerator iterlast =
+            int /*Dictionary<HighEdge, bool>.Enumerator*/ iterlast =
                 highedgemap.lower_bound(new HighEdge(high2, (HighVariable)ulong.MaxValue));
-            Dictionary<HighEdge, bool>.Enumerator iter = iterfirst;
+            // int /*Dictionary<HighEdge, bool>.Enumerator*/ iter = iterfirst;
+            int iter;
 
-            while (iter.MoveNext()) {
-                HighVariable b = iter.Current.Key.b;
-                if (b == high1) continue;
-                if (iter.Current.Value) {
+            for (iter = iterfirst; iter < iterlast; iter++) {
+                KeyValuePair<HighEdge, bool> scannedItem = highedgemap.ElementAt(iter);
+                HighVariable b = scannedItem.Key.b;
+                if (b == high1) {
+                    continue;
+                }
+                if (scannedItem.Value) {
                     // Save all high2's intersections
                     // as they are still valid for the merge
                     yesinter.Add(b);
@@ -188,33 +186,42 @@ namespace Sla.DECCORE
             if (iterfirst != iterlast) {
                 // Delete all the high2 tests
                 // Move back 1 to prevent deleting under the iterator
-                --iterlast;
-                for (iter = iterfirst; iter != iterlast; ++iter)
-                    highedgemap.Remove(new HighEdge(iter.Current.Key.b, iter.Current.Key.a));
-                highedgemap.Remove(new HighEdge(iter.Current.Key.b, iter.Current.Key.a));
+                // MODIFIED
+                // --iterlast;
+                for (int iter = iterfirst; iter != iterlast; ++iter) {
+                    KeyValuePair<HighEdge, bool> scannedItem = highedgemap.ElementAt(iter);
+                    highedgemap.Remove(new HighEdge(scannedItem.Key.b, scannedItem.Key.a));
+                }
+                // MODIFIED Incorporated in the loop
+                // highedgemap.Remove(new HighEdge(iter.Current.Key.b, iter.Current.Key.a));
                 // Restore original range (with possibly new open endpoint)
                 ++iterlast;
-
                 highedgemap.Remove(iterfirst, iterlast);
             }
 
             iter = highedgemap.lower_bound(new HighEdge(high1, (HighVariable)null));
-            while ((iter != highedgemap.end()) && (iter.Current.Key.a == high1)) {
-                if (!iter.Current.Value) {
+            while (iter < highedgemap.Count) {
+                KeyValuePair<HighEdge, bool> currentItem = highedgemap.ElementAt(iter);
+                if (currentItem.Key.a == high1) break;
+                if (!currentItem.Value) {
                     // If test is intersection==false
-                    if (!iter.Current.Key.b.isMark())
+                    if (!currentItem.Key.b.isMark()) {
                         // and there was no test with high2
                         // Delete the test
-                        highedgemap.Remove(iter++);
-                    else
+                        highedgemap.RemoveAt(iter++);
+                    }
+                    else {
                         ++iter;
+                    }
                 }
-                else
+                else {
                     // Keep any intersection==true tests
                     ++iter;
+                }
             }
-            foreach (HighVariable variable in nointer)
+            foreach (HighVariable variable in nointer) {
                 variable.clearMark();
+            }
 
             // Reinsert high2's intersection==true tests for high1 now
             foreach (HighVariable variable in yesinter) {

@@ -137,9 +137,7 @@ namespace Sla.SLEIGH
         public static bool isDirectory(string path)
 #if _WINDOWS
         {
-          DWORD attribs = GetFileAttributes(path.c_str());
-          if (attribs == INVALID_FILE_ATTRIBUTES) return false;
-          return ((attribs & FILE_ATTRIBUTE_DIRECTORY)!=0);
+            return (0 != (new DirectoryInfo(path).Attributes & FileAttributes.Directory));
         }
 #else
         {
@@ -151,39 +149,42 @@ namespace Sla.SLEIGH
         }
 #endif
 
-        public static void matchListDir(List<string> res, string match, bool isSuffix, string dir, bool allowdot)
+        public static void matchListDir(List<string> res, string match, bool isSuffix, string dirname,
+            bool allowdot)
 #if _WINDOWS
         {
-          WIN32_FIND_DATAA FindFileData;
-                HANDLE hFind;
-                string dirfinal;
-
-                dirfinal = dirname;
-          if (dirfinal[dirfinal.Length - 1] != separator)
-            dirfinal += separator;
-          string regex = dirfinal + '*';
-
-                hFind = FindFirstFileA(regex.c_str(),&FindFileData);
-          if (hFind == INVALID_HANDLE_VALUE) return;
-          do {
-            string fullname = FindFileData.cFileName;
-            if (match.Length <= fullname.Length) {
-              if (allowdot||(fullname[0] != '.')) {
-	        if (isSuffix) {
-	          if (0==fullname.compare(fullname.Length - match.Length,match.Length,match))
-	            res.Add(dirfinal + fullname);
-	        }
-	        else {
-	          if (0==fullname.compare(0,match.Length,match))
-	            res.Add(dirfinal + fullname);
-	        }
-              }
+            string dirfinal = dirname;
+            if (dirfinal[dirfinal.Length - 1] != separator) {
+                dirfinal += separator;
             }
-          } while (0 != FindNextFileA(hFind, &FindFileData)) ;
-        FindClose(hFind);
+            string regex = dirfinal + '*';
+
+            DirectoryInfo rootDirectory = new DirectoryInfo(dirname);
+            if (!rootDirectory.Exists) {
+                return;
+            }
+            foreach(FileInfo candidate in rootDirectory.GetFiles()) {
+                string fullname = candidate.Name;
+                if (match.Length > fullname.Length) {
+                    continue;
+                }
+                if (allowdot || (fullname[0] != '.')) {
+                    if (isSuffix) {
+                        if (0 == string.Compare(fullname.Substring(fullname.Length - match.Length), match, true)) {
+                            res.Add(candidate.FullName);
+                        }
+                    }
+                    else {
+                        if (0 == string.Compare(fullname, match, true)) {
+                            res.Add(candidate.FullName);
+                        }
+                    }
+                }
+            }
         }
 #else
-        {               // Look through files in a directory for those matching -match-
+        {
+        // Look through files in a directory for those matching -match-
             DIR* dir;
             dirent* entry;
             string dirfinal = dirname;
@@ -220,25 +221,20 @@ namespace Sla.SLEIGH
         public static void directoryList(List<string> res, string dirname, bool allowdot = false)
 #if _WINDOWS
         {
-          WIN32_FIND_DATAA FindFileData;
-                HANDLE hFind;
-                string dirfinal = dirname;
-          if (dirfinal[dirfinal.Length - 1] != separator)
-            dirfinal += separator;
-          string regex = dirfinal + "*";
-                char* s = regex.c_str();
-
-
-                hFind = FindFirstFileA(s,&FindFileData);
-          if (hFind == INVALID_HANDLE_VALUE) return;
-          do {
-            if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY ) {
-              string fullname = FindFileData.cFileName;
-              if (allowdot || (fullname[0] != '.'))
-	        res.Add(dirfinal + fullname);
+            string dirfinal = dirname;
+            if (dirfinal[dirfinal.Length - 1] != separator) {
+                dirfinal += separator;
             }
-        } while (0 != FindNextFileA(hFind, &FindFileData)) ;
-        FindClose(hFind);
+            string regex = dirfinal + '*';
+
+            DirectoryInfo rootDirectory = new DirectoryInfo(dirname);
+            if (!rootDirectory.Exists) {
+                return;
+            }
+            foreach (DirectoryInfo candidate in rootDirectory.GetDirectories()) {
+                if (allowdot || (candidate.Name[0] != '.'))
+                    res.Add(candidate.FullName);
+            }
         }
 #else
         { // List full pathnames of all directories under the directory -dir-
@@ -294,9 +290,10 @@ namespace Sla.SLEIGH
             // If there is no path, i.e. only a basename in full, then -path- will return as an empty string
             // otherwise -path- will be non-empty and end in a separator character
             int end = full.Length - 1;
-            if (full[full.Length - 1] == separator) // Take into account terminating separator
+            if (full[full.Length - 1] == separator)
+                // Take into account terminating separator
                 end = full.Length - 2;
-            int pos = full.rfind(separator, end);
+            int pos = full.LastIndexOf(separator);
             if (-1 == pos) {
                 // Didn't find any separator
                 @base = full;

@@ -51,14 +51,14 @@ namespace Sla.DECCORE
                 endalign += wordsize;
 
             bool bswap = ((Globals.HOST_ENDIAN == 1) != space.isBigEndian());
-            byte* ptr;
+            byte ptr;
             uint resOffset = 0;
             do {
                 ulong curval = find(startalign);
                 if (bswap) {
                     curval = Globals.byte_swap(curval, wordsize);
                 }
-                ptr = (byte*)&curval;
+                ptr = (byte)&curval;
                 uint sz = wordsize;
                 if (startalign < addr) {
                     ptr += (addr - startalign);
@@ -112,7 +112,7 @@ namespace Sla.DECCORE
                     memcpy(ptr, val, sz);    // Rest is taken from -val-
                 }
                 else
-                    curval = *((ulong*)val); // -val- supplies entire word
+                    curval = ((ulong)val); // -val- supplies entire word
                 if (bswap)
                     curval = Globals.byte_swap(curval, wordsize);
                 insert(startalign, curval);

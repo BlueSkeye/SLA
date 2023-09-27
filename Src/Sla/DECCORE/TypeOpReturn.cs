@@ -6,6 +6,7 @@ namespace Sla.DECCORE
     internal class TypeOpReturn : TypeOp
     {
         public TypeOpReturn(TypeFactory t)
+            : base(t, OpCode.CPUI_RETURN,"return")
         {
             opflags = PcodeOp.Flags.special | PcodeOp.Flags.returns | PcodeOp.Flags.nocollapse
                 | PcodeOp.Flags.no_copy_propagation;

@@ -15,7 +15,7 @@ namespace Sla.DECCORE
         /// Iterator into the main map
         // typedef Dictionary<Address, SizePass>::iterator iterator;
         /// Heritaged addresses mapped to range size and pass number
-        private Dictionary<Address, SizePass> themap;
+        private Dictionary<Address, SizePass> themap = new Dictionary<Address, SizePass>();
 
         /// Mark new address as \b heritaged
         /// Update disjoint cover making sure (addr,size) is contained in a single element and return
@@ -31,33 +31,43 @@ namespace Sla.DECCORE
         /// \return the iterator to the map element containing the added range
         public SizePass add(Address addr, int size, int pass, out int intersect)
         {
-            IEnumerator iter = themap.lower_bound(addr);
+            Dictionary<Address, SizePass>.Enumerator iter = themap.lower_bound(addr);
             if (iter != themap.begin())
                 --iter;
-            if ((iter != themap.end()) && (-1 == addr.overlap(0, iter.Current.Key, (*iter).second.size)))
+            if (   (iter != themap.end())
+                && (-1 == addr.overlap(0, iter.Current.Key, iter.Current.Value.size)))
+            {
                 ++iter;
+            }
 
             int where = 0;
             intersect = 0;
-            if ((iter != themap.end()) && (-1 != (where = addr.overlap(0, iter.Current.Key, (*iter).second.size)))) {
-                if (where + size <= (*iter).second.size) {
-                    intersect = ((*iter).second.pass < pass) ? 2 : 0; // Completely contained in previous element
+            if (   (iter != themap.end())
+                && (-1 != (where = addr.overlap(0, iter.Current.Key, iter.Current.Value.size))))
+            {
+                if (where + size <= iter.Current.Value.size) {
+                    // Completely contained in previous element
+                    intersect = (iter.Current.Value.pass < pass) ? 2 : 0;
                     return iter.Current;
                 }
                 addr = iter.Current.Key;
                 size = where + size;
-                if ((*iter).second.pass < pass) {
-                    intersect = 1;          // Partial overlap with old element
-                    pass = (*iter).second.pass;
+                if (iter.Current.Value.pass < pass) {
+                    // Partial overlap with old element
+                    intersect = 1;
+                    pass = iter.Current.Value.pass;
                 }
                 themap.erase(iter++);
             }
-            while ((iter != themap.end()) && (-1 != (where = iter.Current.Key.overlap(0, addr, size)))) {
-                if (where + (*iter).second.size > size)
-                    size = where + (*iter).second.size;
-                if ((*iter).second.pass < pass) {
+            while (   (iter != themap.end())
+                   && (-1 != (where = iter.Current.Key.overlap(0, addr, size))))
+            {
+                if (where + iter.Current.Value.size > size) {
+                    size = where + iter.Current.Value.size;
+                }
+                if (iter.Current.Value.pass < pass) {
                     intersect = 1;
-                    pass = (*iter).second.pass;
+                    pass = iter.Current.Value.pass;
                 }
                 themap.erase(iter++);
             }
@@ -77,14 +87,15 @@ namespace Sla.DECCORE
         public IEnumerator find(Address addr)
         {
             // First range after address
-            IEnumerator iter = themap.upper_bound(addr);
-            if (iter == themap.begin())
+            Dictionary<Address, SizePass>.Enumerator iter = themap.upper_bound(addr);
+            if (iter == themap.begin()) {
                 return themap.end();
+            }
             // First range before or equal to address
             --iter;
-            if (-1 != addr.overlap(0, iter.Current.Key, (*iter).second.size))
-                return iter;
-            return themap.end();
+            return (-1 != addr.overlap(0, iter.Current.Key, iter.Current.Value.size))
+                ? iter
+                : themap.end();
         }
 
         /// Look up if/how given address was heritaged
@@ -98,7 +109,9 @@ namespace Sla.DECCORE
             if (iter == themap.begin()) return -1;
             // First range before or equal to address
             --iter;
-            return (-1 != addr.overlap(0, iter.Current.Key, iter.Current.Value.size)) ? iter.Current.Value.pass : -1;
+            return (-1 != addr.overlap(0, iter.Current.Key, iter.Current.Value.size))
+                ? iter.Current.Value.pass
+                : -1;
         }
 
         /// Remove a particular entry from the map
@@ -107,16 +120,16 @@ namespace Sla.DECCORE
             themap.Remove(removed);
         }
 
-        /// Get starting iterator over heritaged ranges
-        public IEnumerator begin() => themap.begin();
+        // Get starting iterator over heritaged ranges
+        public Dictionary<Address, SizePass>.Enumerator begin() => themap.GetEnumerator();
 
-        /// Get ending iterator over heritaged ranges
-        public IEnumerator end() => themap.end();
+        //// Get ending iterator over heritaged ranges
+        //public IEnumerator end() => themap.end();
 
         /// Clear the map of heritaged ranges
         public void clear()
         {
-            themap.clear();
+            themap.Clear();
         }
     }
 }

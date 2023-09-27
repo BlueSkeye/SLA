@@ -2,13 +2,15 @@
 
 namespace Sla.DECCORE
 {
-    /// \brief Information about the CALLOTHER op-code (user defined p-code operations)
+    // \brief Information about the CALLOTHER op-code (user defined p-code operations)
     internal class TypeOpCallother : TypeOp
     {
         public TypeOpCallother(TypeFactory t)
+            : base(t, OpCode.CPUI_CALLOTHER,"syscall")
         {
             opflags = PcodeOp.Flags.special | PcodeOp.Flags.call | PcodeOp.Flags.nocollapse;
-            behave = new OpBehavior(OpCode.CPUI_CALLOTHER, false, true); // Dummy behavior
+            // Dummy behavior
+            behave = new OpBehavior(OpCode.CPUI_CALLOTHER, false, true);
         }
 
         public override void push(PrintLanguage lng, PcodeOp op, PcodeOp readOp)

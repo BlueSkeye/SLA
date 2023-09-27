@@ -5,6 +5,7 @@ namespace Sla.DECCORE
     internal class TypeOpCbranch : TypeOp
     {
         public TypeOpCbranch(TypeFactory t)
+            : base(t, OpCode.CPUI_CBRANCH,"goto")
         {
             opflags = (PcodeOp.Flags.special | PcodeOp.Flags.branch | PcodeOp.Flags.coderef |
                 PcodeOp.Flags.nocollapse);

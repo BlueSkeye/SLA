@@ -52,7 +52,7 @@ namespace Sla.DECCORE
                 ustop = (uint)CoverBlock.getUIndex(op);
                 if ((ustop != uint.MaxValue) && (ustop >= ustart))
                     // Fill in to the bottom
-                    block.setEnd((PcodeOp)1);
+                    block.setEnd(PcodeOp.ONE);
 
                 if ((ustop == (uint)0) && (block.getStart() == (PcodeOp)null)) {
                     if ((op != (PcodeOp)null)&& (op.code() == OpCode.CPUI_MULTIEQUAL)) {
@@ -250,7 +250,7 @@ namespace Sla.DECCORE
             int blk;
 
             if (op == null) {
-                op = (PcodeOp)2;
+                op = PcodeOp.TWO;
                 blk = 0;
             }
             else {
@@ -307,8 +307,8 @@ namespace Sla.DECCORE
             else if (vn.isInput()) {
                 CoverBlock block = cover[0];
                 // Special mark for input
-                block.setBegin((PcodeOp)2);
-                block.setEnd((PcodeOp)2);
+                block.setBegin(PcodeOp.TWO);
+                block.setEnd(PcodeOp.TWO);
             }
         }
 
@@ -342,7 +342,7 @@ namespace Sla.DECCORE
                     ustop = (uint)CoverBlock.getUIndex(block.getStop());
                     if (ustop >= CoverBlock.getUIndex(startop)) {
                         if (   (op != (PcodeOp)null)
-                            && (op != (PcodeOp)2)
+                            && (op != PcodeOp.TWO)
                             && (op.code() == OpCode.CPUI_MULTIEQUAL)
                             && (startop == (PcodeOp)null))
                         {

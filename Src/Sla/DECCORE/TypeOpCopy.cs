@@ -6,6 +6,7 @@ namespace Sla.DECCORE
     internal class TypeOpCopy : TypeOp
     {
         public TypeOpCopy(TypeFactory t)
+            : base(t, OpCode.CPUI_COPY,"copy")
         {
             opflags = PcodeOp.Flags.unary | PcodeOp.Flags.nocollapse;
             behave = new OpBehaviorCopy();

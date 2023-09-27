@@ -124,10 +124,12 @@ namespace Sla.DECCORE
                     s.Write($"\\ux{onechar:X08}");
                 return;
             }
-            StringManager.writeUtf8(s, onechar);       // Emit normally
+            // Emit normally
+            StringManager.writeUtf8(s, onechar);
         }
 
         public PrintJava(Architecture g, string nm="java-language")
+            : base(g, nm)
         {
             resetDefaultsPrintJava();
             nullToken = "null";         // Java standard lower-case 'null'
@@ -179,9 +181,9 @@ namespace Sla.DECCORE
             OpToken tok = (noident) ? type_expr_nospace : type_expr_space;
 
             pushOp(tok, (PcodeOp)null);
-            for (int i = 0; i < arrayCount; ++i)
+            for (int i = 0; i < arrayCount; ++i) {
                 pushOp(subscript, (PcodeOp)null);
-
+            }
             if (ct.getName().Length == 0) {
                 // Check for anonymous type
                 // We could support a struct or enum declaration here
@@ -189,10 +191,14 @@ namespace Sla.DECCORE
                 pushAtom(new Atom(nm, tagtype.typetoken, EmitMarkup.syntax_highlight.type_color, ct));
             }
             else {
-                pushAtom(new Atom(ct.getDisplayName(), tagtype.typetoken, EmitMarkup.syntax_highlight.type_color, ct));
+                pushAtom(new Atom(ct.getDisplayName(), tagtype.typetoken,
+                    EmitMarkup.syntax_highlight.type_color, ct));
             }
-            for (int i = 0; i < arrayCount; ++i)
-                pushAtom(new Atom(EMPTY_STRING, tagtype.blanktoken, EmitMarkup.syntax_highlight.no_color));     // Fill in the blank array index
+            for (int i = 0; i < arrayCount; ++i) {
+                // Fill in the blank array index
+                pushAtom(new Atom(EMPTY_STRING, tagtype.blanktoken,
+                    EmitMarkup.syntax_highlight.no_color));
+            }
         }
 
         protected override void pushTypeEnd(Datatype ct)
@@ -206,7 +212,7 @@ namespace Sla.DECCORE
         {
             scope.print1 = ".";
             shift_right.print1 = ">>>";
-            TypeOp::selectJavaOperators(glb.inst, true);
+            TypeOp.selectJavaOperators(glb.inst, true);
         }
 
         public override void opLoad(PcodeOp op)
@@ -222,7 +228,8 @@ namespace Sla.DECCORE
 
         public override void opStore(PcodeOp op)
         {
-            modifiers m = mods | modifiers.print_store_value; // Inform sub-tree that we are storing
+            // Inform sub-tree that we are storing
+            modifiers m = mods | modifiers.print_store_value;
             pushOp(assignment, op);    // This is an assignment
             if (needZeroArray(op.getIn(1))) {
                 pushOp(subscript, op);
@@ -243,16 +250,18 @@ namespace Sla.DECCORE
             pushOp(function_call, op);
             Funcdata fd = op.getParent().getFuncdata();
             FuncCallSpecs fc = fd.getCallSpecs(op);
-            if (fc == (FuncCallSpecs)null)
+            if (fc == (FuncCallSpecs)null) {
                 throw new LowlevelError("Missing indirect function callspec");
+            }
             int skip = getHiddenThisSlot(op, fc);
             int count = op.numInput() - 1;
             count -= (skip < 0) ? 0 : 1;
             if (count > 1) {
                 // Multiple parameters
                 pushVn(op.getIn(0), op, mods);
-                for (int i = 0; i < count - 1; ++i)
+                for (int i = 0; i < count - 1; ++i) {
                     pushOp(comma, op);
+                }
                 // implied vn's pushed on in reverse order for efficiency
                 // see PrintLanguage::pushVnImplied
                 for (int i = op.numInput() - 1; i >= 1; --i) {

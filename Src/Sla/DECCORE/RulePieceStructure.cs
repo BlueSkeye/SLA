@@ -1,32 +1,25 @@
 ﻿using Sla.CORE;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Sla.DECCORE
 {
     internal class RulePieceStructure : Rule
     {
-        /// \brief Markup for Varnodes pieced together into structure/array
-        /// \brief Find the base structure or array data-type that the given Varnode is part of
-        ///
-        /// If the Varnode's data-type is already a structure or array, return that data-type.
-        /// If the Varnode is part of a known symbol, use that data-type.
-        /// The starting byte offset of the given Varnode within the structure or array is passed back.
-        /// \param vn is the given Varnode
-        /// \param baseOffset is used to pass back the starting offset
-        /// \return the structure or array data-type, or null otherwise
+        // \brief Markup for Varnodes pieced together into structure/array
+        // \brief Find the base structure or array data-type that the given Varnode is part of
+        //
+        // If the Varnode's data-type is already a structure or array, return that data-type.
+        // If the Varnode is part of a known symbol, use that data-type.
+        // The starting byte offset of the given Varnode within the structure or array is passed back.
+        // \param vn is the given Varnode
+        // \param baseOffset is used to pass back the starting offset
+        // \return the structure or array data-type, or null otherwise
         private static Datatype? determineDatatype(Varnode vn, out int baseOffset)
         {
             Datatype? ct = vn.getStructuredType();
-            if (ct == (Datatype)null)
-                return ct;
+            if (ct == (Datatype)null) {
+                baseOffset = 0;
+                return null;
+            }
 
             if (ct.getSize() != vn.getSize()) {
                 // vn is a partial

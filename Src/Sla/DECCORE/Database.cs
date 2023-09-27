@@ -171,10 +171,11 @@ namespace Sla.DECCORE
                 // delete scope;
             }
             else {
-                Scope foundScope;
+                Scope? foundScope;
                 if (!scope.parent.children.TryGetValue(scope.uniqueId, out foundScope))
                     throw new CORE.LowlevelError(
                         $"Could not remove parent reference to: {scope.name}");
+                if (foundScope == null) throw new ApplicationException();
                 scope.parent.detachScope(foundScope);
             }
         }

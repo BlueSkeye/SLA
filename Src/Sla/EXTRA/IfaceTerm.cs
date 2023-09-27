@@ -118,8 +118,8 @@ namespace Sla.EXTRA
             do {
                 onecharecho = false;
                 lastlen = line.Length;
-                val = sptr.get();
-                if (sptr.eof())
+                val = sptr.ReadCharacter();
+                if (sptr.EofReached())
                     val = '\n';
                 switch ((int)val) {
                     case 0x01:          // C-a
@@ -180,22 +180,27 @@ namespace Sla.EXTRA
                             cursor = line.Length;
                         }
                         break;
-                    case 0x12:          // C-r
+                    case 0x12:
+                        // C-r
                         break;
-                    case 0x15:          // C-u
+                    case 0x15:
+                        // C-u
                         line.erase(0, cursor);  // Erase up to cursor
                         cursor = 0;
                         break;
-                    case 0x1b:          // Escape character
-                        escval = sptr.get();
+                    case 0x1b:
+                        // Escape character
+                        escval = sptr.Read();
                         escval <<= 8;
-                        escval += sptr.get();
+                        escval += sptr.Read();
                         switch (escval) {
-                            case 0x4f44:        // left arrow
+                            case 0x4f44:
+                                // left arrow
                                 if (cursor > 0)
                                     cursor -= 1;
                                 break;
-                            case 0x4f43:        // right arrow
+                            case 0x4f43:
+                                // right arrow
                                 if (cursor < line.Length)
                                     cursor += 1;
                                 break;
@@ -216,7 +221,7 @@ namespace Sla.EXTRA
                 }
                 if (onecharecho) {
                     // Echo most characters
-                    optr.put(val);
+                    optr.Write(val);
                 }
                 else {
                     // Ontop of old line

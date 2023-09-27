@@ -233,6 +233,49 @@ namespace Sla
             }
         }
 
+        /// Display an array of bytes as a hex dump at a given address.
+        /// Each line displays an address and 16 bytes in hexadecimal
+        /// \param s is the stream to write to
+        /// \param buffer is a pointer to the bytes
+        /// \param size is the number of bytes
+        /// \param baseaddr is the address of the first byte in the buffer
+        internal static void print_data(TextWriter s, byte[] buffer, int size, Address baseaddr)
+        {
+            if (buffer == (byte[])null) {
+                s.WriteLine("Address not present in binary image");
+                return;
+            }
+
+            ulong addr = baseaddr.getOffset();
+            ulong endaddr = addr + (uint)size;
+            ulong start = addr & ~((ulong)0x0F);
+
+            while(start<endaddr) {
+                s.Write($"{start:X08}: ");
+                for(uint i = 0; i < 16; ++i) {
+                    if ((start + i< addr)||(start + i >= endaddr))
+	                    s.Write("   ");
+                    else
+	                    s.Write($"{(uint)buffer[start + i - addr]:X02} ");
+
+                }
+                s.Write("  ");
+                for (uint i = 0; i < 16; ++i) {
+                    if ((start + i < addr) || (start + i >= endaddr))
+                        s.Write(' ');
+                    else {
+                        char scannedCharacter = (char)buffer[start + i - addr];
+                        if (char.IsAscii(scannedCharacter) && !char.IsControl(scannedCharacter))
+                            s.Write(buffer[start + i - addr]);
+                        else
+                            s.Write('.');
+                    }
+                }
+                s.WriteLine();
+                start += 16;
+            }
+        }
+
         /// Given a string description of a type \b meta-type. Return the meta-type.
         /// \param metastring is the description of the meta-type
         /// \return the encoded type meta-type

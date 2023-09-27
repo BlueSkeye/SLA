@@ -119,6 +119,7 @@ namespace Sla.DECCORE
         /// \return a command indicating how the op should be treated
         public static int propagateAddPointer(out ulong off, PcodeOp op, int slot, int sz)
         {
+            off = 0;
             if (op.code() == OpCode.CPUI_PTRADD) {
                 if (slot != 0) return 2;
                 Varnode constvn = op.getIn(1) ?? throw new ApplicationException();

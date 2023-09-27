@@ -6,10 +6,12 @@ namespace Sla.DECCORE
     internal class TypeOpCallind : TypeOp
     {
         public TypeOpCallind(TypeFactory t)
+            : base(t, OpCode.CPUI_CALLIND,"callind")
         {
             opflags = PcodeOp.Flags.special | PcodeOp.Flags.call | PcodeOp.Flags.has_callspec |
                 PcodeOp.Flags.nocollapse;
-            behave = new OpBehavior(OpCode.CPUI_CALLIND, false, true); // Dummy behavior
+            // Dummy behavior
+            behave = new OpBehavior(OpCode.CPUI_CALLIND, false, true);
         }
 
         public override void push(PrintLanguage lng, PcodeOp op, PcodeOp readOp)

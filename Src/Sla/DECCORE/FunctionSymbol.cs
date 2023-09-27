@@ -23,7 +23,7 @@ namespace Sla.DECCORE
         /// Build the data-type associated with \b this Symbol
         private void buildType()
         {
-            TypeFactory* types = scope.getArch().types;
+            TypeFactory types = scope.getArch().types ?? throw new ApplicationException();
             type = types.getTypeCode();
             flags |= Varnode.varnode_flags.namelock | Varnode.varnode_flags.typelock;
         }
@@ -64,7 +64,7 @@ namespace Sla.DECCORE
         public Funcdata getFunction()
         {
             if (fd != (Funcdata)null) return fd;
-            SymbolEntry* entry = getFirstWholeMap();
+            SymbolEntry entry = getFirstWholeMap();
             fd = new Funcdata(name, displayName, scope, entry.getAddr(), this);
             return fd;
         }

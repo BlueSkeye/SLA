@@ -27,7 +27,7 @@ namespace Sla.DECCORE
         }
 
         /// \brief The sorting key for placing a Comment within a specific basic block
-        private class Subsort
+        private class Subsort : IComparable<Subsort>
         {
             // Either the basic block index or -1 for a function header
             internal int index;
@@ -77,6 +77,18 @@ namespace Sla.DECCORE
                 order = ord;
             }
 
+            public int CompareTo(Subsort? other)
+            {
+                if (other == null) throw new ArgumentNullException();
+                if (this > other) {
+                    return 1;
+                }
+                if (this < other) {
+                    return -1;
+                }
+                return 0;
+            }
+
             internal class Comparer : IComparer<Subsort>
             {
                 internal static Comparer Instance = new Comparer();
@@ -101,17 +113,17 @@ namespace Sla.DECCORE
         }
 
         /// Comments for the current function, sorted by block
-        private SortedDictionary<Subsort, Comment> commmap =
-            new SortedDictionary<Subsort, Comment>(Subsort.Comparer.Instance);
+        private SortedList<Subsort, Comment> commmap =
+            new SortedList<Subsort, Comment>(Subsort.Comparer.Instance);
 
         // Iterator to current comment being walked
-        private /*mutable*/ Dictionary<Subsort, Comment >.Enumerator start;
+        private /*mutable*/ int /*Dictionary<Subsort, Comment >.Enumerator*/ start;
 
         // Last comment in current set being walked
-        private Dictionary<Subsort, Comment>.Enumerator stop;
+        private int /*Dictionary<Subsort, Comment>.Enumerator*/ stop;
 
         // Statement landmark within current set of comments
-        private Dictionary<Subsort, Comment>.Enumerator opstop;
+        private int /*Dictionary<Subsort, Comment>.Enumerator*/ opstop;
 
         // True if unplaced comments should be displayed (in the header)
         private bool displayUnplacedComments;
@@ -287,14 +299,14 @@ namespace Sla.DECCORE
         /// Return \b true if there are more comments to emit in the current set
         public bool hasNext()
         {
-            return (start != opstop);
+            return (start < opstop);
         }
 
         /// Advance to the next comment
         public Comment getNext()
         {
-            Comment res = start.Current.Value;
-            start.MoveNext();
+            if (start >= commmap.Count) throw new InvalidOperationException();
+            Comment res = commmap.ElementAt(start++).Value;
             return res;
         }
     }

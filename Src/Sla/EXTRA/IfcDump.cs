@@ -21,7 +21,7 @@ namespace Sla.EXTRA
             Address offset = Grammar.parse_machaddr(s, out size, dcp.conf.types);
 
             byte[] buffer = dcp.conf.loader.load(size, offset);
-            print_data(status.fileoptr, buffer, size, offset);
+            Globals.print_data(status.fileoptr, buffer, size, offset);
             // delete[] buffer;
         }
     }

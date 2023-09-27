@@ -413,13 +413,13 @@ namespace Sla.SLEIGH
             lookahead1 = 0;
             lookahead2 = 0;
             // Buffer the first two characters
-            lookahead1 = s.ReadByte();
+            lookahead1 = s.Read();
             if (-1 == lookahead1) {
                 endofstream = true;
                 lookahead1 = 0;
                 return;
             }
-            lookahead2 = s.ReadByte();
+            lookahead2 = s.Read();
             if (-1 == lookahead2) {
                 endofstream = true;
                 lookahead2 = 0;
@@ -438,7 +438,7 @@ namespace Sla.SLEIGH
                 if (endofstream)
                     lookahead2 = '\0';
                 else {
-                    lookahead2 = s.ReadByte();
+                    lookahead2 = s.Read();
                     if (-1 == lookahead2) {
                         endofstream = true;
                         lookahead2 = '\0';
@@ -447,7 +447,8 @@ namespace Sla.SLEIGH
                 tok = moveState();
             } while (tok == State.start);
             if (tok == State.identifier) {
-                //curtoken[tokpos] = '\0';    // Append null terminator
+                // Append null terminator
+                //curtoken[tokpos] = '\0';
                 curidentifier = curtoken.ToString();
                 int num = findIdentifier(curidentifier);
                 if (num < 0)
@@ -457,10 +458,9 @@ namespace Sla.SLEIGH
             }
             else if ((tok == State.hexstring) || (tok == State.decstring)) {
                 // curtoken[tokpos] = '\0';
-                curnum = ulong.Parse(curtoken.ToString());
-                if (!s1)
-                    return (int)sleightokentype.BADINTEGER;
-                return (int)sleightokentype.INTEGER;
+                return (!ulong.TryParse(curtoken.ToString(), out curnum))
+                    ? (int)sleightokentype.BADINTEGER
+                    : (int)sleightokentype.INTEGER;
             }
             else if (tok == State.endstream) {
                 if (!endofstreamsent) {

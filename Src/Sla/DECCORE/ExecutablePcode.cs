@@ -74,6 +74,7 @@ namespace Sla.DECCORE
         /// \param src is a string describing the \e source of the snippet
         /// \param nm is the formal name of the snippet
         public ExecutablePcode(Architecture g, string src, string nm)
+            : base(nm, InjectionType.EXECUTABLEPCODE_TYPE)
         {
             glb = g;
             emitter = (PcodeEmit)null;

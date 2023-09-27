@@ -28,18 +28,18 @@ namespace Sla.DECCORE
 
             int i = 0;
             int j = 0;
-            while ((i < effectlist.size()) && (j < efflist.size())) {
-                EffectRecord eff1 = effectlist[i];
+            LinkedListNode<EffectRecord>? scannedNode = effectlist.First;
+            while ((scannedNode != null) && (j < efflist.size())) {
                 EffectRecord eff2 = efflist[j];
 
-                if (EffectRecord.compareByAddress(eff1, eff2))
-                    i += 1;
-                else if (EffectRecord.compareByAddress(eff2, eff1))
+                if (EffectRecord.compareByAddress(scannedNode.Value, eff2))
+                   scannedNode = scannedNode.Next;
+                else if (EffectRecord.compareByAddress(eff2, scannedNode.Value))
                     j += 1;
                 else {
-                    if (eff1 == eff2)
-                        newlist.Add(eff1);
-                    i += 1;
+                    if (scannedNode.Value == eff2)
+                        newlist.Add(scannedNode.Value);
+                    scannedNode = scannedNode.Next;
                     j += 1;
                 }
             }
@@ -93,9 +93,11 @@ namespace Sla.DECCORE
         public void foldIn(ProtoModel model)
         {
             if (model.glb != glb) throw new LowlevelError("Mismatched architecture");
-            if ((model.input.getType() != ParamList.Model.p_standard) &&
-                (model.input.getType() != ParamList.Model.p_register))
+            if (   (model.input.getType() != ParamList.Model.p_standard)
+                && (model.input.getType() != ParamList.Model.p_register))
+            {
                 throw new LowlevelError("Can only resolve between standard prototype models");
+            }
             if (input == (ParamList)null) {
                 // First fold in
                 input = new ParamListMerged();
@@ -109,8 +111,7 @@ namespace Sla.DECCORE
                 localrange = model.localrange;
                 paramrange = model.paramrange;
             }
-            else
-            {
+            else {
                 ((ParamListMerged)input).foldIn((ParamListStandard)model.input);
                 // We assume here that the output models are the same, but we don't check
                 if (extrapop != model.extrapop)
@@ -138,24 +139,22 @@ namespace Sla.DECCORE
         {
             int bestscore = 500;
             int bestindex = -1;
-            for (int i = 0; i < modellist.size(); ++i)
-            {
+            for (int i = 0; i < modellist.size(); ++i) {
                 int numtrials = active.getNumTrials();
                 ScoreProtoModel scoremodel = new ScoreProtoModel(true, modellist[i], numtrials);
-                for (int j = 0; j < numtrials; ++j)
-                {
+                for (int j = 0; j < numtrials; ++j) {
                     ParamTrial trial = new ParamTrial(active.getTrial(j));
                     if (trial.isActive())
                         scoremodel.addParameter(trial.getAddress(), trial.getSize());
                 }
                 scoremodel.doScore();
                 int score = scoremodel.getScore();
-                if (score < bestscore)
-                {
+                if (score < bestscore) {
                     bestscore = score;
                     bestindex = i;
                     if (bestscore == 0)
-                        break;          // Can't get any lower
+                        // Can't get any lower
+                        break;
                 }
             }
             if (bestindex >= 0)

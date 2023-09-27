@@ -39,17 +39,17 @@ namespace Sla.DECCORE
         /// \return a value for comparison
         public static ulong getUIndex(PcodeOp op)
         {
-            ulong switchval = (ulong)op;
-            switch (switchval) {
-                case 0:
-                    // Special marker for very beginning of block
-                    return (uint)0;
-                case 1:
-                    // Special marker for very end of block
-                    return uint.MaxValue;
-                case 2:
-                    // Special marker for input
-                    return (uint)0;
+            if (object.ReferenceEquals(op, null)) {
+                // Special marker for very beginning of block
+                return (uint)0;
+            }
+            if (object.ReferenceEquals(op, PcodeOp.ONE)) {
+                // Special marker for very end of block
+                return uint.MaxValue;
+            }
+            if (object.ReferenceEquals(op, PcodeOp.TWO)) {
+                // Special marker for input
+                return (uint)0;
             }
             if (op.isMarker()) {
                 if (op.code() == OpCode.CPUI_MULTIEQUAL)
@@ -78,7 +78,8 @@ namespace Sla.DECCORE
         /// Mark whole block as covered
         public void setAll()
         {
-            start = null; stop = (PcodeOp)1;
+            start = null;
+            stop = PcodeOp.ONE;
         }
 
         /// Reset start of range
@@ -86,7 +87,7 @@ namespace Sla.DECCORE
         {
             start = begin;
             if (stop == null) {
-                stop = (PcodeOp)1;
+                stop = PcodeOp.ONE;
             }
         }
 
@@ -220,10 +221,10 @@ namespace Sla.DECCORE
             ustart = (uint)getUIndex(start);
             u2start = (uint)getUIndex(op2.start);
             // Is start contained in op2
-            internal4 = ((ustart == (uint)0) && (op2.stop == (PcodeOp)1));
+            internal4 = ((ustart == (uint)0) && (op2.stop == PcodeOp.ONE));
             internal1 = internal4 || op2.contain(start);
             // Is op2.start contained in this
-            internal3 = ((u2start == 0) && (stop == (PcodeOp)1));
+            internal3 = ((u2start == 0) && (stop == PcodeOp.ONE));
             internal2 = internal3 || contain(op2.start);
 
             if (internal1 && internal2)

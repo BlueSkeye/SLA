@@ -100,7 +100,7 @@ namespace Sla.DECCORE
         /// List of p-code ops that need injection
         private List<PcodeOp> injectlist = new List<PcodeOp>();
         /// Map of machine instructions that have been visited so far
-        private SortedDictionary<Address, VisitStat> visited; // Initialized in constructors
+        private SortedList<Address, VisitStat> visited; // Initialized in constructors
         /// Source p-code op (Edges between basic blocks)
         private List<PcodeOp> block_edge1 = new List<PcodeOp>();
         /// Destination p-code op (Edges between basic blocks)
@@ -166,13 +166,13 @@ namespace Sla.DECCORE
                     return retop;       // Then this is the fall thru
             }
             // Find address of instruction containing this op
-            Dictionary<Address, VisitStat>.Enumerator miter;
-            miter = visited.upper_bound(op.getAddr());
-            if (miter == visited.begin()) return (PcodeOp)null;
+            int /*Dictionary<Address, VisitStat>.Enumerator*/ miter = visited.upper_bound(op.getAddr());
+            if (miter == 0) return (PcodeOp)null;
             --miter;
-            if (miter.Current.Key + miter.Current.Value.size <= op.getAddr())
+            KeyValuePair<Address, VisitStat> currentlyVisited = visited.ElementAt(miter);
+            if (currentlyVisited.Key + currentlyVisited.Value.size <= op.getAddr())
                 return (PcodeOp)null;
-            return target(miter.Current.Key + miter.Current.Value.size);
+            return target(currentlyVisited.Key + currentlyVisited.Value.size);
         }
 
         /// Register a new (non fall-thru) flow target
@@ -231,7 +231,8 @@ namespace Sla.DECCORE
             uint maxtime = 0;  // Deepest internal relative branch
             bool loopCompleted = false;
             while (!loopCompleted && (oiter != obank.endDead())) {
-                op = *oiter++;
+                op = oiter.Current;
+                loopCompleted = !oiter.MoveNext();
                 if (startbasic) {
                     data.opMarkStartBasic(op);
                     startbasic = false;
@@ -298,11 +299,13 @@ namespace Sla.DECCORE
                         break;
                     case OpCode.CPUI_CALL:
                         if (setupCallSpecs(op, fc))
-                            --oiter;        // Backup one op, to pickup halt
+                            // Backup one op, to pickup halt
+                            --oiter;
                         break;
                     case OpCode.CPUI_CALLIND:
                         if (setupCallindSpecs(op, fc))
-                            --oiter;        // Backup one op, to pickup halt
+                            // Backup one op, to pickup halt
+                            --oiter;
                         break;
                     case OpCode.CPUI_CALLOTHER:
                         {
@@ -519,11 +522,11 @@ namespace Sla.DECCORE
             retop = obank.findOp(seqnum1); // We go back one sequence number
             if (retop != (PcodeOp)null) {
                 // If the PcodeOp exists here then branch was indeed to next instruction
-                Dictionary<Address, VisitStat>.Enumerator miter;
-                miter = visited.upper_bound(retop.getAddr());
-                if (miter != visited.begin()) {
+                int /*Dictionary<Address, VisitStat>.Enumerator*/ miter = visited.upper_bound(retop.getAddr());
+                if (miter != 0) {
                     --miter;
-                    res = miter.Current.first + miter.Current.Value.size;
+                    KeyValuePair<Address, VisitStat> currentlyVisited = visited.ElementAt(miter);
+                    res = currentlyVisited.Key + currentlyVisited.Value.size;
                     if (op.getAddr() < res) {
                         // Indicate that res has the fallthru address
                         return (PcodeOp)null;
@@ -555,25 +558,28 @@ namespace Sla.DECCORE
         /// The list is also sorted
         private void dedupUnprocessed()
         {
-            if (0 == unprocessed.Count) return;
+            if (0 == unprocessed.Count) {
+                return;
+            }
             unprocessed.Sort();
-            IEnumerator<Address> iter2;
-
-            IEnumerator<Address> iter1 = unprocessed.GetEnumerator();
-            Address lastaddr = iter1.Current;
-            iter1.MoveNext();
-            iter2 = iter1;
-            while (iter1 != unprocessed.end()) {
-                if (iter1.Current == lastaddr)
-                    iter1.MoveNext();
+            int scanIndex = 0;
+            int replaceIndex = 0;
+            Address lastaddr = unprocessed[0];
+            while (scanIndex < unprocessed.Count) {
+                Address scannedAddress = unprocessed[scanIndex];
+                if (scannedAddress == lastaddr) {
+                    scanIndex++;
+                }
                 else {
-                    lastaddr = iter1.Current;
-                    iter1.MoveNext();
-                    iter2.Current = lastaddr;
-                    iter2.MoveNext();
+                    lastaddr = scannedAddress;
+                    scanIndex++;
+                    unprocessed[replaceIndex] = lastaddr;
+                    replaceIndex++;
                 }
             }
-            unprocessed.erase(iter2, unprocessed.end());
+            while(replaceIndex < unprocessed.Count) {
+                unprocessed.RemoveAt(replaceIndex);
+            }
         }
 
         /// Fill-in artificial HALT p-code for \b unprocessed addresses
@@ -736,27 +742,30 @@ namespace Sla.DECCORE
         /// \return \b false if the address has already been visited
         private bool setFallthruBound(Address bound)
         {
-            IEnumerator<KeyValuePair<Address, VisitStat>> iter;
             Address addr = addrlist.GetLastItem();
 
-            iter = visited.upper_bound(addr); // First range greater than addr
-            if (iter != visited.begin()) {
-                --iter;         // Last range less than or equal to us
-                if (addr == iter.Current.Key) {
+            // First range greater than addr
+            int iter = visited.upper_bound(addr);
+            if (iter != 0) {
+                // Last range less than or equal to us
+                --iter;
+                KeyValuePair<Address, VisitStat> visitedItem = visited.ElementAt(iter);
+                if (addr == visitedItem.Key) {
                     // If we have already visited this address
                     PcodeOp op = target(addr); // But make sure the address
                     data.opMarkStartBasic(op); // starts a basic block
                     addrlist.RemoveLastItem();    // Throw it away
                     return false;
                 }
-                if (addr < iter.Current.Key + iter.Current.Value.size)
+                if (addr < visitedItem.Key + visitedItem.Value.size) {
                     reinterpreted(addr);
-                iter.MoveNext();
+                }
+                iter++;
             }
-            if (iter != visited.end())  // Whats the maximum distance we can go
-                bound = iter.Current.Key;
-            else
-                bound = eaddr;
+            bound = (iter < visited.Count)
+                // Whats the maximum distance we can go
+                ? visited.ElementAt(iter).Key
+                : eaddr;
             return true;
         }
 
@@ -812,12 +821,12 @@ namespace Sla.DECCORE
         /// \param addr is the address of a byte previously interpreted as (the interior of) an instruction
         private void reinterpreted(Address addr)
         {
-            IEnumerator<KeyValuePair<Address, VisitStat>> iter;
-
-            iter = visited.upper_bound(addr);
-            if (iter == visited.begin()) return; // Should never happen
+            int /*IEnumerator<KeyValuePair<Address, VisitStat>>*/ iter = visited.upper_bound(addr);
+            if (iter == 0)
+                // Should never happen
+                return;
             --iter;
-            Address addr2 = iter.Current.Key;
+            Address addr2 = visited.ElementAt(iter).Key;
             StringWriter s = new StringWriter();
 
             s.Write($"Instruction at ({addr.getSpace().getName()},");
@@ -825,9 +834,9 @@ namespace Sla.DECCORE
             s.Write($") overlaps instruction at ({addr2.getSpace().getName()},");
             addr2.printRaw(s);
             s.WriteLine(')');
-            if ((flags & FlowFlag.error_reinterpreted) != 0)
+            if ((flags & FlowFlag.error_reinterpreted) != 0) {
                 throw new LowlevelError(s.ToString());
-
+            }
             if ((flags & FlowFlag.reinterpreted_present) == 0) {
                 flags |= FlowFlag.reinterpreted_present;
                 data.warningHeader(s.ToString());
@@ -1091,13 +1100,15 @@ namespace Sla.DECCORE
                 if (op.code() != OpCode.CPUI_CALL) continue;
 
                 Address addr = fc.getEntryAddress();
-                IEnumerator<KeyValuePair<Address, VisitStat>> miter;
-                miter = visited.upper_bound(addr);
-                if (miter == visited.begin()) continue;
-                --miter;
-                if (miter.Current.Key + miter.Current.Value.size <= addr)
+                int /*IEnumerator<KeyValuePair<Address, VisitStat>>*/ miter = visited.upper_bound(addr);
+                if (miter == 0) {
                     continue;
-                if (miter.Current.Key == addr) {
+                }
+                --miter;
+                KeyValuePair<Address, VisitStat> currentlyVisited = visited.ElementAt(miter);
+                if (currentlyVisited.Key + currentlyVisited.Value.size <= addr)
+                    continue;
+                if (currentlyVisited.Key == addr) {
                     data.warningHeader(
                         "Possible PIC construction at {op.getAddr().printRaw(s)}: Changing call to branch");
                     data.opSetOpcode(op, OpCode.CPUI_BRANCH);
@@ -1243,7 +1254,7 @@ namespace Sla.DECCORE
             insn_count = 0;
             insn_max = uint.MaxValue;
             flowoverride_present = data.getOverride().hasFlowOverride();
-            visited = new SortedDictionary<Address, VisitStat>();
+            visited = new SortedList<Address, VisitStat>();
         }
 
         /// Cloning constructor

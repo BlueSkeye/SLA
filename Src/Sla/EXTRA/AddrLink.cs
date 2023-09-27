@@ -1,13 +1,8 @@
 ﻿using Sla.CORE;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.EXTRA
 {
-    internal struct AddrLink
+    internal struct AddrLink : IComparable<AddrLink>
     {
         internal Address a;
         internal Address b;
@@ -22,6 +17,13 @@ namespace Sla.EXTRA
         {
             a = i;
             b = j;
+        }
+
+        public int CompareTo(AddrLink other)
+        {
+            if (this <  other) return -1;
+            if (this > other) return 1;
+            return 0;
         }
 
         public static bool operator <(AddrLink op1, AddrLink op2)

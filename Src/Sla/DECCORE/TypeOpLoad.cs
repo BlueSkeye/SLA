@@ -6,6 +6,7 @@ namespace Sla.DECCORE
     internal class TypeOpLoad : TypeOp
     {
         public TypeOpLoad(TypeFactory t)
+            : base(t, OpCode.CPUI_LOAD,"load")
         {
             opflags = PcodeOp.Flags.special | PcodeOp.Flags.nocollapse;
             behave = new OpBehavior(OpCode.CPUI_LOAD, false, true); // Dummy behavior

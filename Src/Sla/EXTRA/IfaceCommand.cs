@@ -39,7 +39,7 @@ namespace Sla.EXTRA
         ///
         /// This method is only called once per module
         /// \return the newly created data object for the module
-        public abstract IfaceData createData();
+        public abstract IfaceData? createData();
 
         /// \brief Add a token to the command line string associated with this command
         ///

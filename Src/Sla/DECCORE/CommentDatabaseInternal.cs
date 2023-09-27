@@ -41,15 +41,19 @@ namespace Sla.DECCORE
 
             IEnumerator<Comment> iterbegin = commentset.lower_bound(testcommbeg);
             IEnumerator<Comment> iterend = commentset.lower_bound(testcommend);
+            Comment? firstNonScannedComment = iterend.MoveNext() ? iterend.Current : null;
             IEnumerator<Comment> iter;
-            while (iterbegin != iterend) {
-                iter = iterbegin;
-                ++iter;
+            List<Comment> removableComments = new List<Comment>();
+            while (   iterbegin.MoveNext()
+                   && !object.ReferenceEquals(iterbegin.Current, firstNonScannedComment))
+            {
                 if ((iterbegin.Current.getType() & tp) != 0) {
                     // delete(iterbegin.Current);
-                    commentset.Remove(iterbegin.Current);
+                    removableComments.Add(iterbegin.Current);
                 }
-                iterbegin = iter;
+            }
+            foreach(Comment removedComment in removableComments) {
+                commentset.Remove(removedComment);
             }
         }
 

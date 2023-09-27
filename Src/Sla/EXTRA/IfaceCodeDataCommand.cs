@@ -10,8 +10,8 @@ namespace Sla.EXTRA
         public override void setData(IfaceStatus root, IfaceData data)
         {
             status = root;
-            codedata = (CodeDataAnalysis*)data;
-            dcp = (IfaceDecompData*)status.getData("decompile");
+            codedata = (CodeDataAnalysis)data;
+            dcp = (IfaceDecompData)status.getData("decompile");
         }
 
         public override string getModule() => "codedata";

@@ -144,8 +144,47 @@ namespace Sla.DECCORE
         // The one possible output Varnode of this op
         internal Varnode? output;
         // The ordered list of input Varnodes for this op
-        private List<Varnode?> inrefs = new List<Varnode?>();
+        private List<Varnode?> inrefs;
+        private bool _isSpecial;
+        internal static readonly PcodeOp ONE;
+        internal static readonly PcodeOp TWO;
 
+        static PcodeOp()
+        {
+            ONE = new PcodeOp() { _isSpecial = true };
+            TWO = new PcodeOp() { _isSpecial = true };
+        }
+
+        // For special PcodeOps
+        private PcodeOp()
+        {
+            // Start out life as dead
+            flags = 0;
+            addlflags = 0;
+            // No parent yet
+            parent = (BlockBasic)null;
+            output = (Varnode)null;
+            opcode = (TypeOp)null;
+        }
+
+        /// Construct an unattached PcodeOp
+        /// Construct a completely unattached PcodeOp.  Space is reserved for input and output Varnodes
+        /// but all are set initially to null.
+        /// \param s indicates the number of input slots reserved
+        /// \param sq is the sequence number to associate with the new PcodeOp
+        public PcodeOp(int s, SeqNum sq)
+            : base()
+        {
+            inrefs = new List<Varnode?>(s);
+            for (int i = 0; i < inrefs.size(); ++i) {
+                inrefs[i] = (Varnode)null;
+            }
+        }
+
+        ~PcodeOp()
+        {
+        }
+        
         internal void AssertIsIndirectBranching()
         {
             if (OpCode.CPUI_BRANCHIND != this.code()) throw new BugException();
@@ -273,27 +312,6 @@ namespace Sla.DECCORE
         //    basiciter = iter;
         //}
 
-        /// Construct an unattached PcodeOp
-        /// Construct a completely unattached PcodeOp.  Space is reserved for input and output Varnodes
-        /// but all are set initially to null.
-        /// \param s indicates the number of input slots reserved
-        /// \param sq is the sequence number to associate with the new PcodeOp
-        public PcodeOp(int s, SeqNum sq)
-        {
-            flags = 0;          // Start out life as dead
-            addlflags = 0;
-            parent = (BlockBasic)null; // No parent yet
-
-            output = (Varnode)null;
-            opcode = (TypeOp)null;
-            for (int i = 0; i < inrefs.size(); ++i)
-                inrefs[i] = (Varnode)null;
-        }
-
-        ~PcodeOp()
-        {
-        }
-
         /// Get the number of inputs to this op
         public int numInput() => inrefs.size();
 
@@ -323,16 +341,19 @@ namespace Sla.DECCORE
         public LinkedListNode<PcodeOp> getInsertIter() => _deadAliveNode;
 
         // Get position within basic block
-        public LinkedListNode<PcodeOp> getBasicIter() => _basicBlockNode ?? throw new InvalidOperationException();
+        public LinkedListNode<PcodeOp> getBasicIter()
+            => _basicBlockNode ?? throw new InvalidOperationException();
 
         /// \brief Get the slot number of the indicated input varnode
         public int getSlot(Varnode vn)
         {
-            int i, n;
-            n = inrefs.size();
-            for (i = 0; i < n; ++i)
-                if (inrefs[i] == vn)
+            int i;
+            int n = inrefs.size();
+            for (i = 0; i < n; ++i) {
+                if (inrefs[i] == vn) {
                     break;
+                }
+            }
             return i;
         }
 
@@ -350,16 +371,18 @@ namespace Sla.DECCORE
             int count = 1;
             IEnumerator<PcodeOp> oiter = vn.beginDescend();
             while (oiter.MoveNext()) {
-                if ((oiter.Current) == this)
+                if ((oiter.Current) == this) {
                     count += 1;
+                }
             }
             if (count == 1) return firstSlot;
             int recount = 1;
             for (int i = firstSlot + 1; i < inrefs.Count; ++i) {
                 if (inrefs[i] == vn) {
                     recount += 1;
-                    if (recount == count)
+                    if (recount == count) {
                         return i;
+                    }
                 }
             }
             return -1;

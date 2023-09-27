@@ -6,6 +6,7 @@ namespace Sla.DECCORE
     internal class TypeOpBranchind : TypeOp
     {
         public TypeOpBranchind(TypeFactory t)
+            : base(t, OpCode.CPUI_BRANCHIND,"switch")
         {
             opflags = PcodeOp.Flags.special | PcodeOp.Flags.branch | PcodeOp.Flags.nocollapse;
             behave = new OpBehavior(OpCode.CPUI_BRANCHIND, false, true); // Dummy behavior

@@ -20,10 +20,9 @@ namespace Sla.DECCORE
     /// the covers of member Varnode objects should not intersect, as that represents the variable holding
     /// two or more different values at the same place in the code. The HighVariable inherits a cover
     /// which is the union of the covers of its Varnodes.
-    internal class HighVariable
+    internal class HighVariable : IComparable<HighVariable>
     {
         /// \brief Dirtiness flags for a HighVariable
-        ///
         /// The HighVariable inherits its Cover, its data-type, and other boolean properties from its Varnodes.
         /// The object holds these explicitly, but the values may become stale as the data-flow transforms.
         /// So we keep track of when these inherited values are \e dirty
@@ -78,6 +77,8 @@ namespace Sla.DECCORE
         private /*mutable*/ Symbol? symbol;
         /// -1=perfect symbol match >=0, offset
         private /*mutable*/ int symboloffset;
+        private static ulong NextId = 1;
+        private ulong _currentId = Interlocked.Increment(ref NextId);
 
         /// Find the index of a specific Varnode member
         /// Find the index, for use with getInstance(), that will retrieve the given Varnode member
@@ -85,22 +86,29 @@ namespace Sla.DECCORE
         /// \return the index of the member or -1 if it is not a member
         private int instanceIndex(Varnode vn)
         {
-            for (int i = 0; i < inst.size(); ++i)
-                if (inst[i] == vn) return i;
+            for (int i = 0; i < inst.size(); ++i) {
+                if (inst[i] == vn) {
+                    return i;
+                }
+            }
             return -1;
         }
 
-        /// (Re)derive boolean properties of \b this from the member Varnodes
-        /// Only update if flags are marked as \e dirty.
-        /// Generally if any member Varnode possesses the property, \b this HighVariable should
-        /// inherit it.  The Varnode.varnode_flags.typelock field is not set here, but in updateType().
+        // (Re)derive boolean properties of \b this from the member Varnodes
+        // Only update if flags are marked as \e dirty.
+        // Generally if any member Varnode possesses the property, \b this HighVariable should
+        // inherit it.  The Varnode.varnode_flags.typelock field is not set here, but in updateType().
         private void updateFlags()
         {
-            if ((highflags & HighVariable.DirtinessFlags.flagsdirty) == 0) return; // flags are up to date
+            if ((highflags & DirtinessFlags.flagsdirty) == 0) {
+                // flags are up to date
+                return;
+            }
             Varnode.varnode_flags fl = 0;
 
-            foreach (Varnode node in inst)
+            foreach (Varnode node in inst) {
                 fl |= node.getFlags();
+            }
 
             // Keep these flags
             flags &= (Varnode.varnode_flags.mark | Varnode.varnode_flags.typelock);
@@ -109,16 +117,17 @@ namespace Sla.DECCORE
             highflags &= ~DirtinessFlags.flagsdirty; // Clear the dirty flag
         }
 
-        /// (Re)derive the internal cover of \b this from the member Varnodes
-        /// Only update if the cover is marked as \e dirty.
-        /// Merge the covers of all Varnode instances.
+        // (Re)derive the internal cover of \b this from the member Varnodes
+        // Only update if the cover is marked as \e dirty.
+        // Merge the covers of all Varnode instances.
         internal void updateInternalCover()
         {
             if ((highflags & DirtinessFlags.coverdirty) != 0) {
                 internalCover.clear();
                 if (inst[0].hasCover()) {
-                    for (int i = 0; i < inst.size(); ++i)
+                    for (int i = 0; i < inst.size(); ++i) {
                         internalCover.merge(inst[i].getCover());
+                    }
                 }
                 highflags &= ~DirtinessFlags.coverdirty;
             }
@@ -128,8 +137,9 @@ namespace Sla.DECCORE
         /// This is \b only called by the Merge class which knows when to call it properly.
         internal void updateCover()
         {
-            if (piece == (VariablePiece)null)
+            if (piece == (VariablePiece)null) {
                 updateInternalCover();
+            }
             else {
                 piece.updateIntersections();
                 piece.updateCover();
@@ -143,9 +153,16 @@ namespace Sla.DECCORE
         {
             Varnode vn;
 
-            if ((highflags & DirtinessFlags.typedirty) == 0) return; // Type is up to date
-            highflags &= ~DirtinessFlags.typedirty; // Mark type as clean
-            if ((highflags & DirtinessFlags.type_finalized) != 0) return;  // Type has been finalized
+            if ((highflags & DirtinessFlags.typedirty) == 0) {
+                // Type is up to date
+                return;
+            }
+            // Mark type as clean
+            highflags &= ~DirtinessFlags.typedirty;
+            if ((highflags & DirtinessFlags.type_finalized) != 0) {
+                // Type has been finalized
+                return;
+            }
             vn = getTypeRepresentative();
 
             type = vn.getType();
@@ -153,17 +170,22 @@ namespace Sla.DECCORE
                 if (type.getMetatype() == type_metatype.TYPE_PARTIALUNION) {
                     if (symbol != (Symbol)null && symboloffset != -1) {
                         type_metatype meta = symbol.getType().getMetatype();
-                        if (meta != type_metatype.TYPE_STRUCT && meta != type_metatype.TYPE_UNION)  // If partial union does not have a bigger backing symbol
-                            type = type.getStripped();         // strip the partial union
+                        if (meta != type_metatype.TYPE_STRUCT && meta != type_metatype.TYPE_UNION) {
+                            // If partial union does not have a bigger backing symbol
+                            // strip the partial union
+                            type = type.getStripped();
+                        }
                     }
                 }
-                else
+                else {
                     type = type.getStripped();
+                }
             }
             // Update lock flags
             flags &= ~Varnode.varnode_flags.typelock;
-            if (vn.isTypeLock())
+            if (vn.isTypeLock()) {
                 flags |= Varnode.varnode_flags.typelock;
+            }
         }
 
         /// (Re)derive the Symbol and offset for \b this from member Varnodes
@@ -260,19 +282,32 @@ namespace Sla.DECCORE
                     vn.setHigh(this, vn.getMergeGroup());
                 }
             }
-            List<Varnode> instcopy = new List<Varnode>(inst);
-            inst.resize(inst.size() + tv2.inst.size(), (Varnode)null);
+            // Required because the std::merge function behavior is undefined if target (inst)
+            // overlaps one of the merged items.
+            List<Varnode> resultList = new List<Varnode>(inst.size() + tv2.inst.size());
+            // TODO Search for a more efficient algorithm.
+            // ADDED unclear wether the two list are sorted previously to merge.
+            // MUST use OrderBy for stable sort. Sort() is not stable.
+            IEnumerator<Varnode> enumerator1 =
+                this.inst.OrderBy(x => x, CompareJustLocComparer.Instance).GetEnumerator();
+            IEnumerator<Varnode> enumerator2 =
+                tv2.inst.OrderBy(x => x, CompareJustLocComparer.Instance).GetEnumerator();
+            Varnode vn1;
+            Varnode vn2;
+            while (true) {
+            }
             std::merge(instcopy.GetEnumerator(), instcopy.end(), tv2.inst.GetEnumerator(), tv2.inst.end(),
                 inst.GetEnumerator(), compareJustLoc);
             tv2.inst.Clear();
 
-            if (   ((highflags & HighVariable.DirtinessFlags.coverdirty) == 0)
-                && ((tv2.highflags & HighVariable.DirtinessFlags.coverdirty) == 0))
+            if (   ((highflags & DirtinessFlags.coverdirty) == 0)
+                && ((tv2.highflags & DirtinessFlags.coverdirty) == 0))
             {
                 internalCover.merge(tv2.internalCover);
             }
-            else
-                highflags |= HighVariable.DirtinessFlags.coverdirty;
+            else {
+                highflags |= DirtinessFlags.coverdirty;
+            }
             // delete tv2;
         }
 
@@ -949,7 +984,27 @@ namespace Sla.DECCORE
         /// \param a is the first Varnode to compare
         /// \param b is the second Varnode
         /// \return \b true if the first Varnode should be ordered before the second
-        public static bool compareJustLoc(Varnode a, Varnode b) =>(a.getAddr() < b.getAddr());
+        public static bool compareJustLoc(Varnode a, Varnode b)
+            => (0 > compareJustLocFull(a, b));
+
+        public static int compareJustLocFull(Varnode a, Varnode b)
+            => (a.getAddr().CompareTo(b.getAddr()));
+
+        public class CompareJustLocComparer : IComparer<Varnode>
+        {
+            public static readonly CompareJustLocComparer Instance = new CompareJustLocComparer();
+
+            private CompareJustLocComparer()
+            {
+            }
+
+            int IComparer<Varnode>.Compare(Varnode? x, Varnode? y)
+            {
+                if (null == x) throw new ArgumentNullException();
+                if (null == y) throw new ArgumentNullException();
+                return compareJustLocFull(x, y);
+            }
+        }
 
         /// Mark and collect variables in expression
         /// Given a Varnode at the root of an expression, we collect all the \e explicit HighVariables
@@ -1005,6 +1060,12 @@ namespace Sla.DECCORE
                 path.Add(new PcodeOpNode(curVn.getDef(), 0));
             }
             return retVal;
+        }
+
+        public int CompareTo(HighVariable? other)
+        {
+            if (other == null) throw new ArgumentNullException();
+            return this._currentId.CompareTo(other._currentId);
         }
     }
 }

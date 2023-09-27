@@ -287,9 +287,8 @@ namespace Sla.SLEIGH
         public void addOperand(OperandSymbol sym)
         {
             // Indicater character for operand
-            string operstring = "\n ";
             // Encode index of operand
-            operstring[1] = ('A' + operands.size());
+            string operstring = "\n" + ('A' + operands.size());
             operands.Add(sym);
             // Placeholder for operand's string
             printpiece.Add(operstring);

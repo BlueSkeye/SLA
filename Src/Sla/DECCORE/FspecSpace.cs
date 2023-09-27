@@ -35,7 +35,7 @@ namespace Sla.DECCORE
 
         public override void encodeAttributes(Encoder encoder, ulong offset)
         {
-            FuncCallSpecs fc = (FuncCallSpecs)(ulong)offset;
+            FuncCallSpecs fc = (FuncCallSpecs)offset;
 
             if (fc.getEntryAddress().isInvalid())
                 encoder.writeString(AttributeId.ATTRIB_SPACE, "fspec");
@@ -48,10 +48,11 @@ namespace Sla.DECCORE
 
         public override void encodeAttributes(Encoder encoder, ulong offset, int size)
         {
-            FuncCallSpecs fc = (FuncCallSpecs)(ulong)offset;
+            FuncCallSpecs fc = (FuncCallSpecs)offset;
 
-            if (fc.getEntryAddress().isInvalid())
+            if (fc.getEntryAddress().isInvalid()) {
                 encoder.writeString(AttributeId.ATTRIB_SPACE, "fspec");
+            }
             else {
                 AddrSpace id = fc.getEntryAddress().getSpace();
                 encoder.writeSpace(AttributeId.ATTRIB_SPACE, id);
@@ -62,7 +63,7 @@ namespace Sla.DECCORE
 
         public override void printRaw(TextWriter s, ulong offset)
         {
-            FuncCallSpecs fc = (FuncCallSpecs)(ulong)offset;
+            FuncCallSpecs fc = (FuncCallSpecs)offset;
 
             if (fc.getName().Length != 0)
                 s.Write(fc.getName());

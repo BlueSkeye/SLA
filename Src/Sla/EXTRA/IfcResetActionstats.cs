@@ -12,7 +12,7 @@ namespace Sla.EXTRA
         {
             if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("Image not loaded");
-            if (dcp.conf.allacts.getCurrent() == (Action*)0)
+            if (dcp.conf.allacts.getCurrent() == (Sla.DECCORE.Action)null)
                 throw new IfaceExecutionError("No action set");
 
             dcp.conf.allacts.getCurrent().resetStats();

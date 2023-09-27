@@ -4643,10 +4643,10 @@ namespace Sla.DECCORE
         /// \brief End of PcodeOp objects in the \e dead list
         public IEnumerator<PcodeOp> endOpDead() => obank.endDead();
 
-        /// \brief Start of all (alive) PcodeOp objects sorted by sequence number
+        // \brief Start of all (alive) PcodeOp objects sorted by sequence number
         public PcodeOpTree.Enumerator beginOpAll() => obank.beginAll();
 
-        /// \brief End of all (alive) PcodeOp objects sorted by sequence number
+        // \brief End of all (alive) PcodeOp objects sorted by sequence number
         public PcodeOpTree.Enumerator endOpAll() => obank.endAll();
 
         /// \brief Start of all (alive) PcodeOp objects attached to a specific Address

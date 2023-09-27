@@ -209,8 +209,8 @@ namespace Sla.SLACOMP
                 string identMsg = "Constructor has identical pattern to constructor at ";
                 for (int i = 0; i < ierrors.size(); ++i) {
                     errors += 1;
-                    Location locA = getLocation(ierrors[i].first);
-                    Location locB = getLocation(ierrors[i].second);
+                    Location locA = getLocation(ierrors[i].Item1);
+                    Location locB = getLocation(ierrors[i].Item2);
                     reportError(locA, identMsg + locB.format());
                     reportError(locB, identMsg + locA.format());
                 }
@@ -234,7 +234,7 @@ namespace Sla.SLACOMP
         /// the parsed constraints (PatternEquation).  Accumulated error messages are reported.
         private void buildPatterns()
         {
-            if (root == 0) {
+            if (root == null) {
                 reportError((Location)null, "No patterns to match.");
                 return;
             }
@@ -856,14 +856,14 @@ namespace Sla.SLACOMP
             curct = (Constructor)null;
         }
 
-        ///< Get the source location of the given Constructor's definition
-        /// \param ctor is the given Constructor
-        /// \return the filename and line number
+        // Get the source location of the given Constructor's definition
+        // \param ctor is the given Constructor
+        // \return the filename and line number
         public Location getLocation(Constructor ctor) => ctorLocationMap.at(ctor);
 
-        ///< Get the source location of the given symbol's definition
-        /// \param sym is the given symbol
-        /// \return the filename and line number or null if location not found
+        // Get the source location of the given symbol's definition
+        // \param sym is the given symbol
+        // \return the filename and line number or null if location not found
         public Location? getLocation(SleighSymbol sym)
         {
             try {
@@ -874,11 +874,11 @@ namespace Sla.SLACOMP
             }
         }
 
-        ///< Issue a fatal error message
-        /// The message is formatted and displayed for the user and a count is incremented.
-        /// If there are too many fatal errors, the entire compilation process is terminated.
-        /// Otherwise, parsing can continue, but the compiler will not produce an output file.
-        /// \param msg is the error message
+        // Issue a fatal error message
+        // The message is formatted and displayed for the user and a count is incremented.
+        // If there are too many fatal errors, the entire compilation process is terminated.
+        // Otherwise, parsing can continue, but the compiler will not produce an output file.
+        // \param msg is the error message
         public void reportError(string msg)
         {
             Console.Error.WriteLine($"{filename.GetLastItem()}:{lineno.GetLastItem()} - ERROR {msg}");
@@ -1008,7 +1008,7 @@ namespace Sla.SLACOMP
 
             int context_offset = 0;
             int begin, sz;
-            stable_sort(contexttable.begin(), contexttable.end());
+            contexttable.stable_sort();
             begin = 0;
             while (begin < contexttable.size()) {
                 // Define the context variables
@@ -1269,7 +1269,7 @@ namespace Sla.SLACOMP
             ulong myoff = off;
             for (int i = 0; i < names.Count; ++i) {
                 if (names[i] != "_")
-                    addSymbol(new VarnodeSymbol(names[i], spc, myoff, size));
+                    addSymbol(new VarnodeSymbol(names[i], spc, myoff, (int)size));
                 myoff += size;
             }
             //delete names;
@@ -1411,7 +1411,7 @@ namespace Sla.SLACOMP
                         }
                     }
                 }
-                symtab.replaceSymbol(sym, new VarnodeListSymbol(sym.getName(), patval, *varlist));
+                symtab.replaceSymbol(sym, new VarnodeListSymbol(sym.getName(), patval, varlist));
             }
             //delete varlist;
             //delete symlist;

@@ -1,4 +1,7 @@
 ﻿
+using System.Numerics;
+using System;
+
 namespace Sla.SLEIGH
 {
     // operandOrder returns a List of the self-defining OperandSymbols as the appear
@@ -18,8 +21,22 @@ namespace Sla.SLEIGH
         {
             refcount = 0;
         }
-        
-        public TokenPattern getTokenPattern() => resultpattern;
+        internal static bool advance_combo(List<long> val, List<long> min, List<long> max)
+        {
+            int i = 0;
+
+            while (i < val.size()) {
+                val[i] += 1;
+                if (val[i] <= max[i])
+                    // maximum is inclusive
+                    return true;
+                val[i] = min[i];
+                i += 1;
+            }
+            return false;
+        }
+
+public TokenPattern getTokenPattern() => resultpattern;
 
         public abstract void genPattern(List<TokenPattern> ops);
 

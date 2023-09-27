@@ -3,10 +3,10 @@ using Sla.DECCORE;
 
 namespace Sla.EXTRA
 {
-    /// \brief Extension for building an XML format capable Architecture
+    // \brief Extension for building an XML format capable Architecture
     internal class XmlArchitectureCapability : ArchitectureCapability
     {
-        /// The singleton instance
+        // The singleton instance
         private static XmlArchitectureCapability xmlArchitectureCapability =
             new XmlArchitectureCapability();
         
@@ -31,13 +31,13 @@ namespace Sla.EXTRA
             TextReader s;
             try { s = new StreamReader(File.OpenRead(filename)); }
             catch { return false; }
-            int val1, val2, val3;
             s.ReadSpaces();
-            val1 = s.get();
-            val2 = s.get();
-            val3 = s.get();
+            int val1 = s.Read();
+            int val2 = s.Read();
+            int val3 = s.Read();
             s.Close();
-            if ((val1 == '<') && (val2 == 'b') && (val3 == 'i')) // Probably <binaryimage> tag
+            // Probably <binaryimage> tag
+            if ((val1 == '<') && (val2 == 'b') && (val3 == 'i'))
                 return true;
             return false;
         }

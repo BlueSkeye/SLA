@@ -173,13 +173,18 @@ namespace Sla.EXTRA
         public Tuple<PartIterator, PartIterator> find(linetype point)
         {
             AddrRange addrrange = new AddrRange(point, subsortTypeInstatiator);
-            /*typename*/ IEnumerator<AddrRange> iter1;
-            /*typename*/ IEnumerator<AddrRange> iter2;
+            int /*typename IEnumerator<AddrRange>*/ iter1 = tree.lower_bound(addrrange);
+            /*typename*/
+            IEnumerator<AddrRange> iter2;
 
-            iter1 = tree.lower_bound(addrrange);
             // Check for no intersection
-            if ((iter1 == tree.end()) || (0 > linetypeComparer.Compare(point, iter1.Current.first)))
-                return new Tuple<PartIterator, PartIterator>(new PartIterator(iter1), new PartIterator(iter1));
+            if (   (iter1 >= tree.Count)
+                || (0 > linetypeComparer.Compare(point, tree.ElementAt(iter1).Key.first)))
+            {
+                AddrRange scannedRange = tree.ElementAt(iter1).Key;
+                return new Tuple<PartIterator, PartIterator>(new PartIterator(scannedRange),
+                    new PartIterator(scannedRange));
+            }
 
             AddrRange addrend = new AddrRange(iter1.Current.last,
                 subsortTypeInstatiator.Create(true), subsortTypeInstatiator);
@@ -199,10 +204,14 @@ namespace Sla.EXTRA
             AddrRange addrrange = new AddrRange(point, subsort1, subsortTypeInstatiator);
             /*typename*/ IEnumerator<AddrRange> iter2;
 
-            /*typename*/ IEnumerator<AddrRange> iter1 = tree.lower_bound(addrrange);
-            if ((iter1 == tree.end()) || (0 > linetypeComparer.Compare(point, iter1.Current.first)))
-                return new Tuple<PartIterator, PartIterator>(new PartIterator(iter1),
-                    new PartIterator(iter1));
+            int /*typename IEnumerator<AddrRange>*/ iter1 = tree.lower_bound(addrrange);
+            if (   (iter1 == tree.Count)
+                || (0 > linetypeComparer.Compare(point, tree.ElementAt(iter1).Key.first)))
+            {
+                AddrRange scannedRange = tree.ElementAt(iter1).Key;
+                return new Tuple<PartIterator, PartIterator>(new PartIterator(scannedRange),
+                    new PartIterator(scannedRange));
+            }
 
             AddrRange addrend = new AddrRange(iter1.last, subsort2, subsortTypeInstatiator);
             iter2 = tree.upper_bound(addrend);
@@ -214,12 +223,10 @@ namespace Sla.EXTRA
         /// \brief Find beginning of sub-ranges that contain the given boundary point
         /// \param point is the given boundary point
         /// \return iterator to first sub-range of intersects the boundary point
-        public IEnumerator<AddrRange> find_begin(linetype point)
+        public int /*IEnumerator<AddrRange>*/ find_begin(linetype point)
         {
             AddrRange addrrange = new AddrRange(point, subsortTypeInstatiator);
-            /*typename*/ IEnumerator<AddrRange> iter;
-
-            iter = tree.lower_bound(addrrange);
+            int /*typename IEnumerator<AddrRange>*/ iter = tree.lower_bound(addrrange);
             return iter;
         }
 
@@ -248,14 +255,16 @@ namespace Sla.EXTRA
         // \param point is the start of interval to test
         // \param end is the end of the interval to test
         // \return iterator to first sub-range of an intersecting record (or \b end)
-        // MODIFIED returns the range itself or a null reference.
-        public PartIterator find_overlap(linetype point, linetype end)
+        // MODIFIED returns the range index to be tested against the tree size.
+        public int /*PartIterator*/ find_overlap(linetype point, linetype end)
         {
             AddrRange addrrange = new AddrRange(point, subsortTypeInstatiator);
 
             // First range where right boundary is equal to or past point
-            /*typename*/ PartIterator iter = tree.lower_bound(addrrange);
-            if (iter == tree.end()) return iter;
+            int /*typename PartIterator*/ iter = tree.lower_bound(addrrange);
+            if (iter >= tree.Count) {
+                return iter;
+            }
             return (0 < linetypeComparer.Compare(iter.Current.first, end))
                 ? iter.Current
                 : tree.end();
@@ -270,14 +279,16 @@ namespace Sla.EXTRA
         {
             linetype f = a;
             /*typename*/ IEnumerator<_recordtype> liter;
-            /*typename*/ IEnumerator<AddrRange> low = tree.lower_bound(
-                             new AddrRange(f, subsortTypeInstatiator));
+            int /*typename IEnumerator<AddrRange>*/ low = tree.lower_bound(
+                new AddrRange(f, subsortTypeInstatiator));
 
-            if (low != tree.end()) {
-                if (0 > linetypeComparer.Compare(low.Current.first, f))
+            if (low != tree.Count) {
+                AddrRange scannedRange = tree.ElementAt(low).Key;
+                if (0 > linetypeComparer.Compare(scannedRange.first, f)) {
                     // Check if left boundary refines existing partition
                     // If so do the refinement
                     unzip(f = linetypeAdder.DecrementBy(f, 1), low);
+                }
             }
             
             _recordtype newItem = CreateRecord(data, a, b);
@@ -288,33 +299,37 @@ namespace Sla.EXTRA
             addrrange.a = a;
             addrrange.b = b;
             addrrange.value = liter;
-            /*typename*/ IEnumerator<AddrRange> spot = tree.lower_bound(addrrange);
+            int /*typename IEnumerator<AddrRange>*/ spot = tree.lower_bound(addrrange);
             // Where does the new record go in full list, insert it
-            record.splice((spot == tree.end())
+            record.splice((spot >= tree.Count)
                 ? record.end()
-                : spot.Current.value, record, liter);
+                : tree.ElementAt(spot).Value.value, record, liter);
 
-            while ((low != tree.end()) && (0 < linetypeComparer.Compare(low.Current.first, b))) {
-                if (0 < linetypeComparer.Compare(f, low.Current.last)) {
+            while (low < tree.Count) {
+                AddrRange scannedRange = tree.ElementAt(low).Key;
+                if (0 >= linetypeComparer.Compare(scannedRange.first, b)) {
+                    break;
+                }
+                if (0 < linetypeComparer.Compare(f, scannedRange.last)) {
                     // Do we overlap at all
-                    if (0 > linetypeComparer.Compare(f, low.Current.first)) {
+                    if (0 > linetypeComparer.Compare(f, scannedRange.first)) {
                         // Assume the hint makes this insert an O(1) op
                         addrrange.first = f;
-                        addrrange.last = linetypeAdder.DecrementBy(low.Current.first, 1);
+                        addrrange.last = linetypeAdder.DecrementBy(scannedRange.first, 1);
                         tree.insert(low, addrrange);
-                        f = low.Current.first;
+                        f = scannedRange.first;
                     }
-                    if (0 < linetypeComparer.Compare(low.Current.last, b)) {
+                    if (0 < linetypeComparer.Compare(scannedRange.last, b)) {
                         // Insert as much of interval as we can
                         addrrange.first = f;
-                        addrrange.last = low.Current.last;
+                        addrrange.last = scannedRange.last;
                         tree.insert(low, addrrange);
-                        if (0 == linetypeComparer.Compare(low.Current.last, b))
+                        if (0 == linetypeComparer.Compare(scannedRange.last, b))
                             // Did we manage to insert it all
                             break;
-                        f = linetypeAdder.IncrementBy(low.Current.last, 1);
+                        f = linetypeAdder.IncrementBy(scannedRange.last, 1);
                     }
-                    else if (0 > linetypeComparer.Compare(b, low.Current.last)) {
+                    else if (0 > linetypeComparer.Compare(b, scannedRange.last)) {
                         // We can insert everything left, but must refine
                         unzip(b, low);
                         break;
@@ -340,38 +355,44 @@ namespace Sla.EXTRA
             bool rightsew = true;
             bool rightoverlap = false;
             bool leftoverlap = false;
-            IEnumerator<AddrRange> low = tree.lower_bound(
+            int /*IEnumerator<AddrRange>*/ low = tree.lower_bound(
                 new AddrRange(a, subsortTypeInstatiator));
-            IEnumerator<AddrRange> uplow = low;
+            int /*IEnumerator<AddrRange>*/ uplow = low;
 
             linetype aminus1 = linetypeAdder.DecrementBy(a, 1);
-            while (uplow != tree.begin()) {
+            while (uplow > 0 /*!= tree.begin()*/) {
                 --uplow;
-                if (0 != linetypeComparer.Compare(uplow.Current.last, aminus1)) break;
-                if (0 == linetypeComparer.Compare(uplow.Current.b, aminus1)) {
+                AddrRange scannedRange = tree.ElementAt(uplow).Key;
+                if (0 != linetypeComparer.Compare(scannedRange.last, aminus1)) {
+                    break;
+                }
+                if (0 == linetypeComparer.Compare(scannedRange.b, aminus1)) {
                     // Still a split between a-1 and a
                     leftsew = false;
                     break;
                 }
             }
             do {
-                if (low.Current.value == v) {
-                    tree.erase(low.Current);
+                AddrRange scannedRange = tree.ElementAt(low).Key;
+                if (scannedRange.value == v) {
+                    tree.erase(scannedRange);
                 }
                 else {
-                    if (0 > linetypeComparer.Compare(low.Current.a, a))
+                    if (0 > linetypeComparer.Compare(scannedRange.a, a))
                         leftoverlap = true; // a splits somebody else
-                    else if (0 == linetypeComparer.Compare(low.Current.a, a))
+                    else if (0 == linetypeComparer.Compare(scannedRange.a, a))
                         leftsew = false;    // Somebody else splits at a (in addition to v)
-                    if (0 > linetypeComparer.Compare(b, low.Current.b))
+                    if (0 > linetypeComparer.Compare(b, scannedRange.b))
                         rightoverlap = true;    // b splits somebody else
-                    else if (0 == linetypeComparer.Compare(low.Current.b, b))
+                    else if (0 == linetypeComparer.Compare(scannedRange.b, b))
                         rightsew = false;   // Somebody else splits at b (in addition to v)
                 }
-            } while (low.MoveNext() && (0 < linetypeComparer.Compare(low.Current.first, b)));
-            if (low != tree.end()) {
-                if (linetypeAdder.DecrementBy(low.Current.a, 1).Equals(b))
+            } while (   (++low < tree.Count)
+                     && (0 < linetypeComparer.Compare(tree.ElementAt(low).Key.first, b)));
+            if (low < tree.Count) {
+                if (linetypeAdder.DecrementBy(tree.ElementAt(low).Key.a, 1).Equals(b)) {
                     rightsew = false;
+                }
             }
             if (leftsew && leftoverlap)
                 zip(linetypeAdder.DecrementBy(a, 1), tree.lower_bound(

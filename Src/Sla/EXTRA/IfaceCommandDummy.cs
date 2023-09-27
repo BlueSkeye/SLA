@@ -20,6 +20,6 @@ namespace Sla.EXTRA
 
         public override string getModule() => "dummy";
 
-        public override IfaceData createData() => (IfaceData*)0;
+        public override IfaceData? createData() => (IfaceData)null;
     }
 }

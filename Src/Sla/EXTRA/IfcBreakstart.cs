@@ -24,7 +24,8 @@ namespace Sla.EXTRA
             if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("Decompile action not loaded");
 
-            bool res = dcp.conf.allacts.getCurrent().setBreakPoint(Action::break_start, specify);
+            bool res = dcp.conf.allacts.getCurrent().setBreakPoint(
+                Sla.DECCORE.Action.breakflags.break_start, specify);
             if (!res)
                 throw new IfaceExecutionError("Bad action/rule specifier: " + specify);
         }

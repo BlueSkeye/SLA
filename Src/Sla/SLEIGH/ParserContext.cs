@@ -190,22 +190,22 @@ namespace Sla.SLEIGH
 
         public AddrSpace getConstSpace() => const_space;
 
-        public uint getInstructionBytes(int byteoff, int numbytes, uint off)
+        public uint getInstructionBytes(int bytestart, int size, uint off)
         {
             // Get bytes from the instruction stream into a intm (assuming big endian format)
-            off += bytestart;
+            off += (uint)bytestart;
             if (off >= 16)
                 throw new BadDataError("Instruction is using more than 16 bytes");
-            byte* ptr = buf + off;
+            // byte* ptr = buf + off;
             uint res = 0;
             for (int i = 0; i < size; ++i) {
                 res <<= 8;
-                res |= ptr[i];
+                res |= buf[off + i];
             }
             return res;
         }
 
-        public uint getContextBytes(int byteoff, int numbytes)
+        public uint getContextBytes(int bytestart, int size)
         {
             // Get bytes from context into a uint
             int intstart = bytestart / sizeof(uint);
@@ -230,16 +230,17 @@ namespace Sla.SLEIGH
             off += (startbit / 8);
             if (off >= 16)
                 throw new BadDataError("Instruction is using more than 16 bytes");
-            byte* ptr = buf + off;
             startbit = startbit % 8;
             int bytesize = (startbit + size - 1) / 8 + 1;
             uint res = 0;
             for (int i = 0; i < bytesize; ++i) {
                 res <<= 8;
-                res |= ptr[i];
+                res |= buf[off + i];
             }
-            res <<= 8 * (sizeof(uint) - bytesize) + startbit; // Move starting bit to highest position
-            res >>= 8 * sizeof(uint) - size;   // Shift to bottom of intm
+            // Move starting bit to highest position
+            res <<= 8 * (sizeof(uint) - bytesize) + startbit;
+            // Shift to bottom of intm
+            res >>= 8 * sizeof(uint) - size;
             return res;
         }
 
